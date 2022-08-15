@@ -1,5 +1,6 @@
 #include <windows.h>
 #include <gl/GL.h>
+#include <gl/GLU.h>
 #include <iostream>
 // below needs shortened
 #include "../../../Programming/GameLib/GameErrors.h"
@@ -9,6 +10,11 @@
 #pragma comment(lib, "gdi32.lib")
 #pragma comment(lib, "opengl32.lib")
 #endif
+
+// Added for opengl stuff
+#include <vector>
+#include <dwmapi.h>
+#pragma comment(lib, "Dwmapi.lib")
 
 bool close = false;
 
@@ -22,6 +28,7 @@ namespace game
 		bool SetWindowInfo(std::string name, const int width, const int height, const bool fullScreen, const bool borderless);
 		bool CreateTheWindow();
 		void DoMessagePump();
+		HWND GetHandle();
 	private:
 		std::string _windowTitle;
 		uint32_t _windowWidth;
@@ -131,12 +138,77 @@ namespace game
 			DispatchMessage(&msg);
 		}
 	}
+
+	HWND GameWindow::GetHandle()
+	{
+		return _windowHandle;
+	}
+
+
+	// OpenGL stuff
+	class Renderer
+	{
+	public:
+		typedef HDC glDeviceContext_t;
+		typedef HGLRC glRenderContext_t;
+		glDeviceContext_t glDeviceContext;
+		glRenderContext_t glRenderContext;
+
+		GameError LastError()
+		{
+			return _lastError;
+		}
+
+
+		bool CreateDevice(std::vector<void*> params, bool bFullScreen, bool bVSYNC)
+		{
+			// Create Device Context
+			glDeviceContext = GetDC((HWND)(params[0]));
+			PIXELFORMATDESCRIPTOR pfd =
+			{
+				sizeof(PIXELFORMATDESCRIPTOR), 1,
+				PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER,
+				PFD_TYPE_RGBA, 32, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+				PFD_MAIN_PLANE, 0, 0, 0, 0
+			};
+
+			int pf = 0;
+			if (!(pf = ChoosePixelFormat(glDeviceContext, &pfd)))
+			{
+				_lastError = { GameErrors::GameWindowsSpecific, "ChoosePixelFormat Failed." };
+				return false;
+			}
+			SetPixelFormat(glDeviceContext, pf, &pfd);
+
+			if (!(glRenderContext = wglCreateContext(glDeviceContext))) return false;
+			wglMakeCurrent(glDeviceContext, glRenderContext);
+
+			// Set Vertical Sync
+			//locSwapInterval = OGL_LOAD(locSwapInterval_t, "wglSwapIntervalEXT");
+			//if (locSwapInterval && !bVSYNC) locSwapInterval(0);
+			//bSync = bVSYNC;
+			return true;
+		}
+		void DestroyDevice()
+		{
+			wglDeleteContext(glRenderContext);
+		}
+		void Swap()
+		{
+			SwapBuffers(glDeviceContext);
+			/*if (bSync)*/ DwmFlush();
+		}
+	private:
+		GameError _lastError;
+	};
+
 }
 
 int main()
 {
 	game::GameWindow window;
 	game::GameError error;
+	game::Renderer renderer;
 
 	if (!window.SetWindowInfo("Test Name", 1280, 720, false, false))
 	{
@@ -148,11 +220,20 @@ int main()
 		std::cout << window.LastError();
 	}
 
+	if (!renderer.CreateDevice({ window.GetHandle() }, false, true))
+	{
+		std::cout << renderer.LastError();
+	}
+
 	// "Game Loop"
+	glClearColor(0.0f, 0.0f, 0.5f, 1.0f);
+	glClear(GL_COLOR_BUFFER_BIT);
 	do
 	{
 		window.DoMessagePump();
+		renderer.Swap();
 	} while (!close);
 
+	renderer.DestroyDevice();
 	return 0;
 }
