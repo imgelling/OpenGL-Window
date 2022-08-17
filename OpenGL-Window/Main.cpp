@@ -25,8 +25,9 @@ namespace game
 	public:
 		GameWindow();
 		GameError LastError();
-		bool SetWindowInfo(std::string name, const int width, const int height, const bool fullScreen, const bool borderless);
+		bool SetWindowInfo(std::string title, const int width, const int height, const bool fullScreen, const bool borderless);
 		bool CreateTheWindow();
+		bool SetWindowTitle(std::string title);
 		void DoMessagePump();
 		HWND GetHandle();
 	private:
@@ -106,9 +107,9 @@ namespace game
 		return DefWindowProc(hWnd, uMsg, wParam, lParam);
 	}
 
-	bool GameWindow::SetWindowInfo(std::string name, const int width, const int height, const bool fullScreen, const bool borderless)
+	bool GameWindow::SetWindowInfo(std::string title, const int width, const int height, const bool fullScreen, const bool borderless)
 	{
-		_windowTitle = name;
+		_windowTitle = title;
 		_windowWidth = width;
 		_windowHeight = height;
 		_isFullScreen = fullScreen;
@@ -120,6 +121,9 @@ namespace game
 	bool GameWindow::CreateTheWindow()
 	{
 		WNDCLASS wc{};
+
+		_lastError.Clear();
+
 		wc.hIcon = LoadIcon(NULL, IDI_APPLICATION);
 		wc.hCursor = LoadCursor(NULL, IDC_ARROW);
 		wc.style = CS_HREDRAW | CS_VREDRAW | CS_OWNDC;
@@ -143,13 +147,18 @@ namespace game
 			return false;
 		}
 
+		SetWindowTitle(_windowTitle);
+
+		return true;
+	}
+
+	bool GameWindow::SetWindowTitle(std::string title)
+	{
 #ifdef UNICODE
 		SetWindowText(_windowHandle, ConvertS2W(_windowTitle).c_str());
 #else
 		SetWindowText(olc_hWnd, s.c_str());
 #endif
-		//SetWindowText(_windowHandle, (LPWSTR)_windowTitle.c_str());
-
 		return true;
 	}
 
@@ -174,8 +183,8 @@ namespace game
 	static wglSwapInterval_t* wglSwapInterval = nullptr;
 	class Renderer
 	{
-#define CALLSTYLE __stdcall
-#define OGL_LOAD(t, n) (t*)wglGetProcAddress(#n)
+//#define CALLSTYLE __stdcall
+//#define OGL_LOAD(t, n) (t*)wglGetProcAddress(#n)
 	public:
 		typedef HDC glDeviceContext_t;
 		typedef HGLRC glRenderContext_t;
@@ -187,11 +196,13 @@ namespace game
 			return _lastError;
 		}
 
-
-		bool CreateDevice(std::vector<void*> params, bool bFullScreen, bool bVSYNC)
+		// need attribute struct for window
+		// make window shared pointer
+		bool CreateDevice(GameWindow window, bool bVSYNC) 
 		{
+			_lastError.Clear();
 			// Create Device Context
-			glDeviceContext = GetDC((HWND)(params[0]));
+			glDeviceContext = GetDC(window.GetHandle());// (HWND)(params[0]));
 			PIXELFORMATDESCRIPTOR pfd =
 			{
 				sizeof(PIXELFORMATDESCRIPTOR), 1,
@@ -231,13 +242,14 @@ namespace game
 		}
 		void DestroyDevice()
 		{
+			wglMakeCurrent(NULL, NULL);
 			wglDeleteContext(glRenderContext);
 
 		}
 		void Swap()
 		{
 			SwapBuffers(glDeviceContext);
-			/*if (bSync)*/ DwmFlush(); // blocks till next present
+			if (_vSync) DwmFlush(); // blocks till next present
 		}
 	private:
 		GameError _lastError;
@@ -263,7 +275,7 @@ int main()
 	}
 
 	// Create rendering device
-	if (!renderer.CreateDevice({ window.GetHandle() }, false, false))
+	if (!renderer.CreateDevice(window, true))
 	{
 		std::cout << renderer.LastError();
 		renderer.DestroyDevice();
@@ -271,12 +283,24 @@ int main()
 	}
 
 	// "Game Loop"
-	glClearColor(0.0f, 0.0f, 1.0f, 1.0f);
+	glClearColor(0.25f, 0.25f, 0.25f, 1.0f);
 
 	do
 	{
 		window.DoMessagePump();
+
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+		glRotatef(1,1.0, 1.0f, 1.0f);
+		glBegin(GL_TRIANGLES);
+		glColor3f(1.0f, 0.0f, 0.0f);
+		glVertex2f(-0.5, 0); // Pass first vertex
+		glColor3f(0.0f, 1.0f, 0.0f);
+		glVertex2f(0.5, 0); // Pass second vertex
+		glColor3f(0.0f, 0.0f, 1.0f);
+		glVertex2f(0, 0.5); // Pass third vertex
+		glEnd();
+
 		renderer.Swap();
 	} while (!close);
 
