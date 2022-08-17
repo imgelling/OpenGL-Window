@@ -146,13 +146,17 @@ namespace game
 
 
 	// OpenGL stuff
+	typedef BOOL(WINAPI wglSwapInterval_t) (int interval);
+	static wglSwapInterval_t* wglSwapInterval = nullptr;
 	class Renderer
 	{
+#define CALLSTYLE __stdcall
+#define OGL_LOAD(t, n) (t*)wglGetProcAddress(#n)
 	public:
 		typedef HDC glDeviceContext_t;
 		typedef HGLRC glRenderContext_t;
-		glDeviceContext_t glDeviceContext;
-		glRenderContext_t glRenderContext;
+		glDeviceContext_t glDeviceContext = NULL;
+		glRenderContext_t glRenderContext = NULL;
 
 		GameError LastError()
 		{
@@ -173,33 +177,47 @@ namespace game
 			};
 
 			int pf = 0;
-			if (!(pf = ChoosePixelFormat(glDeviceContext, &pfd)))
+			pf = ChoosePixelFormat(glDeviceContext, &pfd);
+			if (!pf)
 			{
 				_lastError = { GameErrors::GameWindowsSpecific, "ChoosePixelFormat Failed." };
 				return false;
 			}
 			SetPixelFormat(glDeviceContext, pf, &pfd);
 
-			if (!(glRenderContext = wglCreateContext(glDeviceContext))) return false;
+			glRenderContext = wglCreateContext(glDeviceContext);
+			if (!glRenderContext)
+			{
+				_lastError = { GameErrors::GameOpenGLSpecific, "wglCreateContext Failed." };
+				return false;
+			}
 			wglMakeCurrent(glDeviceContext, glRenderContext);
 
 			// Set Vertical Sync
-			//locSwapInterval = OGL_LOAD(locSwapInterval_t, "wglSwapIntervalEXT");
-			//if (locSwapInterval && !bVSYNC) locSwapInterval(0);
-			//bSync = bVSYNC;
+			wglSwapInterval = (wglSwapInterval_t*)wglGetProcAddress("wglSwapIntervalEXT"); //OGL_LOAD(wglSwapInterval_t, "wglSwapIntervalEXT");
+			if (wglSwapInterval == NULL)
+			{
+				_lastError = { GameErrors::GameOpenGLSpecific, "Loading SwapInterval Failed" };
+				return false;
+			}
+			if (wglSwapInterval && !bVSYNC) wglSwapInterval(0);
+			else wglSwapInterval(1); // need to make sure swapinteral worked
+			_vSync = bVSYNC;
 			return true;
 		}
 		void DestroyDevice()
 		{
 			wglDeleteContext(glRenderContext);
+
 		}
 		void Swap()
 		{
 			SwapBuffers(glDeviceContext);
-			/*if (bSync)*/ DwmFlush();
+			/*if (bSync)*/ DwmFlush(); // blocks till next present
 		}
 	private:
 		GameError _lastError;
+		bool _vSync = false;
 	};
 
 }
@@ -210,24 +228,28 @@ int main()
 	game::GameError error;
 	game::Renderer renderer;
 
+	// Create the window
 	if (!window.SetWindowInfo("Test Name", 1280, 720, false, false))
 	{
 		std::cout << window.LastError();
 	}
-	//error = window.CreateTheWindow();
 	if (!window.CreateTheWindow())
 	{
 		std::cout << window.LastError();
 	}
 
-	if (!renderer.CreateDevice({ window.GetHandle() }, false, true))
+	// Create rendering device
+	if (!renderer.CreateDevice({ window.GetHandle() }, false, false))
 	{
 		std::cout << renderer.LastError();
+		renderer.DestroyDevice();
+		return -1;
 	}
 
 	// "Game Loop"
-	glClearColor(0.0f, 0.0f, 0.5f, 1.0f);
-	glClear(GL_COLOR_BUFFER_BIT);
+	glClearColor(0.0f, 0.0f, 1.5f, 1.0f);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
 	do
 	{
 		window.DoMessagePump();
