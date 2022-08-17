@@ -37,6 +37,23 @@ namespace game
 		bool _isBorderless;
 		GameError _lastError;
 
+		std::wstring ConvertS2W(std::string s)
+		{
+			int count = MultiByteToWideChar(CP_UTF8, 0, s.c_str(), -1, NULL, 0);
+			wchar_t* buffer = new wchar_t[count];
+			MultiByteToWideChar(CP_UTF8, 0, s.c_str(), -1, buffer, count);
+			std::wstring w(buffer);
+			delete[] buffer;
+			return w;
+		}
+
+		// macro below needs renamed
+#if defined(UNICODE) || defined(_UNICODE)
+#define olcT(s) L##s
+#else
+#define olcT(s) s
+#endif
+
 		// Windows only stuff
 		HWND _windowHandle;
 		static LRESULT CALLBACK WindowEventProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
@@ -112,19 +129,26 @@ namespace game
 		wc.cbWndExtra = 0;
 		wc.lpszMenuName = nullptr;
 		wc.hbrBackground = nullptr;
-		wc.lpszClassName = (LPWSTR)_windowTitle.c_str();
+		wc.lpszClassName = olcT("GAME_ENGINE"); // needs new macro
 		RegisterClass(&wc);
 
 		DWORD dwExStyle = WS_EX_APPWINDOW | WS_EX_WINDOWEDGE;
 		DWORD dwStyle = WS_CAPTION | WS_SYSMENU | WS_VISIBLE | WS_THICKFRAME;
 
-		_windowHandle = CreateWindowEx(dwExStyle, (LPWSTR)_windowTitle.c_str(), L"", dwStyle,
+		_windowHandle = CreateWindowEx(dwExStyle, olcT("GAME_ENGINE"), olcT(""), dwStyle,
 			0, 0, _windowWidth, _windowHeight, NULL, NULL, GetModuleHandle(nullptr), this);
 		if (!_windowHandle)
 		{
 			_lastError = { GameErrors::GameWindowsSpecific, "Windows Error Number : "+std::to_string(GetLastError())};
 			return false;
 		}
+
+#ifdef UNICODE
+		SetWindowText(_windowHandle, ConvertS2W(_windowTitle).c_str());
+#else
+		SetWindowText(olc_hWnd, s.c_str());
+#endif
+		//SetWindowText(_windowHandle, (LPWSTR)_windowTitle.c_str());
 
 		return true;
 	}
@@ -247,12 +271,12 @@ int main()
 	}
 
 	// "Game Loop"
-	glClearColor(0.0f, 0.0f, 1.5f, 1.0f);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glClearColor(0.0f, 0.0f, 1.0f, 1.0f);
 
 	do
 	{
 		window.DoMessagePump();
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		renderer.Swap();
 	} while (!close);
 
