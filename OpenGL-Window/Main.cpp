@@ -181,7 +181,7 @@ namespace game
 	// OpenGL stuff
 	typedef BOOL(WINAPI wglSwapInterval_t) (int interval);
 	static wglSwapInterval_t* wglSwapInterval = nullptr;
-	class Renderer
+	class GameRendererGL
 	{
 //#define CALLSTYLE __stdcall
 //#define OGL_LOAD(t, n) (t*)wglGetProcAddress(#n)
@@ -262,7 +262,7 @@ int main()
 {
 	game::GameWindow window;
 	game::GameError error;
-	game::Renderer renderer;
+	game::GameRendererGL renderer;
 
 	// Create the window
 	if (!window.SetWindowInfo("Test Name", 1280, 720, false, false))
@@ -281,6 +281,10 @@ int main()
 		renderer.DestroyDevice();
 		return -1;
 	}
+	
+	//int p = glGetIntegerv();
+	// Find out how to get gl version
+	std::cout << glGetString(GL_VERSION) << "\n";
 
 	// "Game Loop"
 	glClearColor(0.25f, 0.25f, 0.25f, 1.0f);
