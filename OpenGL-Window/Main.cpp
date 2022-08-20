@@ -65,7 +65,7 @@ namespace game
 #define gameW(s) s
 #endif
 
-	enum class Renderer
+	enum class RenderAPI
 	{
 		OpenGL = 0,
 		Vulkan
