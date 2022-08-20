@@ -13,18 +13,31 @@
 
 // Added for opengl stuff
 #include <vector>
+
+// below is for flush (block till vsync)
 #include <dwmapi.h>
 #pragma comment(lib, "Dwmapi.lib")
 
-bool close = false;
+
 
 namespace game
 {
-	class GameWindow
+	// --- Window Attrib Start
+	// window width
+	// window height
+	// bool fullscreen
+	// bool borderless
+	// --- Window Attrib Stop
+
+	GameError lastError;
+
+	// --- GameWindow header Start
+	bool isRunning = false;
+
+	class Window
 	{
 	public:
-		GameWindow();
-		GameError LastError();
+		Window();
 		bool SetWindowInfo(std::string title, const int width, const int height, const bool fullScreen, const bool borderless);
 		bool CreateTheWindow();
 		bool SetWindowTitle(std::string title);
@@ -36,7 +49,6 @@ namespace game
 		uint32_t _windowHeight;
 		bool _isFullScreen;
 		bool _isBorderless;
-		GameError _lastError;
 
 		std::wstring ConvertS2W(std::string s)
 		{
@@ -48,19 +60,22 @@ namespace game
 			return w;
 		}
 
+
 		// macro below needs renamed
 #if defined(UNICODE) || defined(_UNICODE)
-#define olcT(s) L##s
+#define gameW(s) L##s
 #else
-#define olcT(s) s
+#define gameW(s) s
 #endif
 
 		// Windows only stuff
 		HWND _windowHandle;
 		static LRESULT CALLBACK WindowEventProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 	};
+	// --- GameWindow header Stop
 
-	GameWindow::GameWindow()
+	// -- GameWindow cpp Start
+	Window::Window()
 	{
 		_windowWidth = 0;
 		_windowHeight = 0;
@@ -69,12 +84,9 @@ namespace game
 		_windowHandle = NULL;
 	}
 
-	GameError GameWindow::LastError()
-	{
-		return _lastError;
-	}
 	
-	LRESULT CALLBACK GameWindow::WindowEventProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+	
+	LRESULT CALLBACK Window::WindowEventProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	{
 		switch (uMsg)
 		{
@@ -101,13 +113,13 @@ namespace game
 			//case WM_RBUTTONUP:	ptrPGE->olc_UpdateMouseState(1, false);                                 return 0;
 			//case WM_MBUTTONDOWN:ptrPGE->olc_UpdateMouseState(2, true);                                  return 0;
 			//case WM_MBUTTONUP:	ptrPGE->olc_UpdateMouseState(2, false);                                 return 0;
-		case WM_CLOSE:		close = true;// ptrPGE->olc_Terminate();                                                return 0;
-		case WM_DESTROY:	PostQuitMessage(0); DestroyWindow(hWnd);								return 0;
+		case WM_CLOSE:		isRunning = false; return 0;
+		case WM_DESTROY:	PostQuitMessage(0); DestroyWindow(hWnd); return 0;
 		}
 		return DefWindowProc(hWnd, uMsg, wParam, lParam);
 	}
 
-	bool GameWindow::SetWindowInfo(std::string title, const int width, const int height, const bool fullScreen, const bool borderless)
+	bool Window::SetWindowInfo(std::string title, const int width, const int height, const bool fullScreen, const bool borderless)
 	{
 		_windowTitle = title;
 		_windowWidth = width;
@@ -118,11 +130,9 @@ namespace game
 		return true;
 	}
 
-	bool GameWindow::CreateTheWindow()
+	bool Window::CreateTheWindow()
 	{
 		WNDCLASS wc{};
-
-		_lastError.Clear();
 
 		wc.hIcon = LoadIcon(NULL, IDI_APPLICATION);
 		wc.hCursor = LoadCursor(NULL, IDC_ARROW);
@@ -133,17 +143,18 @@ namespace game
 		wc.cbWndExtra = 0;
 		wc.lpszMenuName = nullptr;
 		wc.hbrBackground = nullptr;
-		wc.lpszClassName = olcT("GAME_ENGINE"); // needs new macro
+		wc.lpszClassName = gameW("GAME_ENGINE"); // needs new macro
 		RegisterClass(&wc);
 
 		DWORD dwExStyle = WS_EX_APPWINDOW | WS_EX_WINDOWEDGE;
-		DWORD dwStyle = WS_CAPTION | WS_SYSMENU | WS_VISIBLE | WS_THICKFRAME;
+		DWORD dwStyle = WS_CAPTION | WS_SYSMENU | WS_VISIBLE | WS_THICKFRAME | WS_MAXIMIZEBOX | WS_MINIMIZEBOX;
 
-		_windowHandle = CreateWindowEx(dwExStyle, olcT("GAME_ENGINE"), olcT(""), dwStyle,
+		_windowHandle = CreateWindowEx(dwExStyle, gameW("GAME_ENGINE"), gameW(""), dwStyle,
 			0, 0, _windowWidth, _windowHeight, NULL, NULL, GetModuleHandle(nullptr), this);
 		if (!_windowHandle)
 		{
-			_lastError = { GameErrors::GameWindowsSpecific, "Windows Error Number : "+std::to_string(GetLastError())};
+			
+			lastError = { GameErrors::GameWindowsSpecific, "Windows Error Number : "+std::to_string(GetLastError())};
 			return false;
 		}
 
@@ -152,7 +163,7 @@ namespace game
 		return true;
 	}
 
-	bool GameWindow::SetWindowTitle(std::string title)
+	bool Window::SetWindowTitle(std::string title)
 	{
 #ifdef UNICODE
 		SetWindowText(_windowHandle, ConvertS2W(_windowTitle).c_str());
@@ -162,7 +173,7 @@ namespace game
 		return true;
 	}
 
-	void GameWindow::DoMessagePump(void)
+	void Window::DoMessagePump(void)
 	{
 		MSG msg;
 		while (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE) > 0)
@@ -172,16 +183,18 @@ namespace game
 		}
 	}
 
-	HWND GameWindow::GetHandle()
+	HWND Window::GetHandle()
 	{
 		return _windowHandle;
 	}
-
+	// -- GameWindow cpp Stop
 
 	// OpenGL stuff
+	
 	typedef BOOL(WINAPI wglSwapInterval_t) (int interval);
 	static wglSwapInterval_t* wglSwapInterval = nullptr;
-	class GameRendererGL
+	// needs abstracted
+	class RendererGL
 	{
 //#define CALLSTYLE __stdcall
 //#define OGL_LOAD(t, n) (t*)wglGetProcAddress(#n)
@@ -191,16 +204,10 @@ namespace game
 		glDeviceContext_t glDeviceContext = NULL;
 		glRenderContext_t glRenderContext = NULL;
 
-		GameError LastError()
-		{
-			return _lastError;
-		}
-
 		// need attribute struct for window
 		// make window shared pointer
-		bool CreateDevice(GameWindow window, bool bVSYNC) 
+		bool CreateDevice(Window window, bool bVSYNC) 
 		{
-			_lastError.Clear();
 			// Create Device Context
 			glDeviceContext = GetDC(window.GetHandle());// (HWND)(params[0]));
 			PIXELFORMATDESCRIPTOR pfd =
@@ -215,7 +222,7 @@ namespace game
 			pf = ChoosePixelFormat(glDeviceContext, &pfd);
 			if (!pf)
 			{
-				_lastError = { GameErrors::GameWindowsSpecific, "ChoosePixelFormat Failed." };
+				lastError = { GameErrors::GameWindowsSpecific, "ChoosePixelFormat Failed." };
 				return false;
 			}
 			SetPixelFormat(glDeviceContext, pf, &pfd);
@@ -223,7 +230,7 @@ namespace game
 			glRenderContext = wglCreateContext(glDeviceContext);
 			if (!glRenderContext)
 			{
-				_lastError = { GameErrors::GameOpenGLSpecific, "wglCreateContext Failed." };
+				lastError = { GameErrors::GameOpenGLSpecific, "wglCreateContext Failed." };
 				return false;
 			}
 			wglMakeCurrent(glDeviceContext, glRenderContext);
@@ -232,12 +239,15 @@ namespace game
 			wglSwapInterval = (wglSwapInterval_t*)wglGetProcAddress("wglSwapIntervalEXT"); //OGL_LOAD(wglSwapInterval_t, "wglSwapIntervalEXT");
 			if (wglSwapInterval == NULL)
 			{
-				_lastError = { GameErrors::GameOpenGLSpecific, "Loading SwapInterval Failed" };
+				lastError = { GameErrors::GameOpenGLSpecific, "Loading SwapInterval Failed" };
 				return false;
 			}
 			if (wglSwapInterval && !bVSYNC) wglSwapInterval(0);
 			else wglSwapInterval(1); // need to make sure swapinteral worked
 			_vSync = bVSYNC;
+
+			isRunning = true;
+
 			return true;
 		}
 		void DestroyDevice()
@@ -252,7 +262,6 @@ namespace game
 			if (_vSync) DwmFlush(); // blocks till next present
 		}
 	private:
-		GameError _lastError;
 		bool _vSync = false;
 	};
 
@@ -260,30 +269,28 @@ namespace game
 
 int main()
 {
-	game::GameWindow window;
-	game::GameError error;
-	game::GameRendererGL renderer;
+	game::Window window;
+	game::RendererGL renderer;
 
 	// Create the window
 	if (!window.SetWindowInfo("Test Name", 1280, 720, false, false))
 	{
-		std::cout << window.LastError();
+		std::cout << game::lastError;
 	}
+
 	if (!window.CreateTheWindow())
 	{
-		std::cout << window.LastError();
+		std::cout << game::lastError;
 	}
 
 	// Create rendering device
-	if (!renderer.CreateDevice(window, true))
+	if (!renderer.CreateDevice(window, false))
 	{
-		std::cout << renderer.LastError();
+		std::cout << game::lastError;
 		renderer.DestroyDevice();
 		return -1;
 	}
 	
-	//int p = glGetIntegerv();
-	// Find out how to get gl version
 	std::cout << glGetString(GL_VERSION) << "\n";
 
 	// "Game Loop"
@@ -306,7 +313,7 @@ int main()
 		glEnd();
 
 		renderer.Swap();
-	} while (!close);
+	} while (game::isRunning);
 
 	renderer.DestroyDevice();
 	return 0;
