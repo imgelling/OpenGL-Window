@@ -3,7 +3,7 @@
 #include <gl/GLU.h>
 #include <iostream>
 // below needs shortened
-#include "../../../Programming/GameLib/GameErrors.h"
+#include "../../../Programming/GameLib2/GameErrors.h"
 
 #if defined(_WIN32) && !defined(__MINGW32__)
 #pragma comment(lib, "user32.lib")
@@ -11,8 +11,6 @@
 #pragma comment(lib, "opengl32.lib")
 #endif
 
-// Added for opengl stuff
-#include <vector>
 
 // below is for flush (block till vsync)
 #include <dwmapi.h>
@@ -23,15 +21,59 @@
 namespace game
 {
 	// --- Window Attrib Start
-	// window width
-	// window height
-	// bool fullscreen
-	// bool borderless
+	//struct GameAttributes
+	//{
+	//	uint8_t GL_ContextMajor;
+	//	uint8_t GL_ContextMinor;
+	//	uint8_t GL_RedSize;
+	//	uint8_t GL_BlueSize;
+	//	uint8_t GL_GreenSize;
+	//	uint8_t GL_AlphaSize;
+	//	uint8_t GL_DoubleBuffer;
+	//	uint8_t GL_DepthSize;
+	//	uint8_t GL_MultiSamples;
+	//	bool GL_Debug;
+	//	double Framelock;
+	//	unsigned int Framework;
+
+	//	GameAttributes()
+	//	{
+	//		GL_ContextMajor = 0;
+	//		GL_ContextMinor = 0;
+	//		GL_RedSize = 0;
+	//		GL_BlueSize = 0;
+	//		GL_GreenSize = 0;
+	//		GL_AlphaSize = 0;
+	//		GL_DoubleBuffer = -1;
+	//		GL_DepthSize = 0;
+	//		GL_MultiSamples = 0;
+	//		GL_Debug = false;
+	//		Framelock = 0;
+	//		Framework = SDL_WINDOW_OPENGL; // Defaults to OpenGL
+	//	}
+	//};
+	// 
 	// --- Window Attrib Stop
 
-	GameError lastError;
+	// !!!  Need an engine class
 
-	// --- GameWindow header Start
+
+// macro below needs renamed
+#if defined(UNICODE) || defined(_UNICODE)
+#define gameW(s) L##s
+#else
+#define gameW(s) s
+#endif
+
+	enum class Renderer
+	{
+		OpenGL = 0,
+		Vulkan
+	};
+
+	GameError lastError;  // Game Engine global error tracking
+
+	// --- Window header Start
 	bool isRunning = false;
 
 	class Window
@@ -50,7 +92,7 @@ namespace game
 		bool _isFullScreen;
 		bool _isBorderless;
 
-		std::wstring ConvertS2W(std::string s)
+		std::wstring ConvertToWide(std::string s)
 		{
 			int count = MultiByteToWideChar(CP_UTF8, 0, s.c_str(), -1, NULL, 0);
 			wchar_t* buffer = new wchar_t[count];
@@ -61,20 +103,15 @@ namespace game
 		}
 
 
-		// macro below needs renamed
-#if defined(UNICODE) || defined(_UNICODE)
-#define gameW(s) L##s
-#else
-#define gameW(s) s
-#endif
+
 
 		// Windows only stuff
 		HWND _windowHandle;
 		static LRESULT CALLBACK WindowEventProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 	};
-	// --- GameWindow header Stop
+	// --- Window header Stop
 
-	// -- GameWindow cpp Start
+	// --- Window cpp Start
 	Window::Window()
 	{
 		_windowWidth = 0;
@@ -166,7 +203,7 @@ namespace game
 	bool Window::SetWindowTitle(std::string title)
 	{
 #ifdef UNICODE
-		SetWindowText(_windowHandle, ConvertS2W(_windowTitle).c_str());
+		SetWindowText(_windowHandle, ConvertToWide(_windowTitle).c_str());
 #else
 		SetWindowText(olc_hWnd, s.c_str());
 #endif
@@ -187,17 +224,19 @@ namespace game
 	{
 		return _windowHandle;
 	}
-	// -- GameWindow cpp Stop
+	// --- Window cpp Stop
 
-	// OpenGL stuff
+
+
+
+
+	// --- OpenGL Start
 	
 	typedef BOOL(WINAPI wglSwapInterval_t) (int interval);
 	static wglSwapInterval_t* wglSwapInterval = nullptr;
 	// needs abstracted
 	class RendererGL
 	{
-//#define CALLSTYLE __stdcall
-//#define OGL_LOAD(t, n) (t*)wglGetProcAddress(#n)
 	public:
 		typedef HDC glDeviceContext_t;
 		typedef HGLRC glRenderContext_t;
@@ -205,11 +244,12 @@ namespace game
 		glRenderContext_t glRenderContext = NULL;
 
 		// need attribute struct for window
-		// make window shared pointer
-		bool CreateDevice(Window window, bool bVSYNC) 
+		// make window shared pointer, maybe could just be in game namespace
+
+		bool CreateDevice(Window window, bool vsync) 
 		{
 			// Create Device Context
-			glDeviceContext = GetDC(window.GetHandle());// (HWND)(params[0]));
+			glDeviceContext = GetDC(window.GetHandle());
 			PIXELFORMATDESCRIPTOR pfd =
 			{
 				sizeof(PIXELFORMATDESCRIPTOR), 1,
@@ -227,6 +267,7 @@ namespace game
 			}
 			SetPixelFormat(glDeviceContext, pf, &pfd);
 
+			// Create the OpenGL rendering context
 			glRenderContext = wglCreateContext(glDeviceContext);
 			if (!glRenderContext)
 			{
@@ -236,16 +277,19 @@ namespace game
 			wglMakeCurrent(glDeviceContext, glRenderContext);
 
 			// Set Vertical Sync
-			wglSwapInterval = (wglSwapInterval_t*)wglGetProcAddress("wglSwapIntervalEXT"); //OGL_LOAD(wglSwapInterval_t, "wglSwapIntervalEXT");
+			wglSwapInterval = (wglSwapInterval_t*)wglGetProcAddress("wglSwapIntervalEXT");
 			if (wglSwapInterval == NULL)
 			{
 				lastError = { GameErrors::GameOpenGLSpecific, "Loading SwapInterval Failed" };
 				return false;
 			}
-			if (wglSwapInterval && !bVSYNC) wglSwapInterval(0);
-			else wglSwapInterval(1); // need to make sure swapinteral worked
-			_vSync = bVSYNC;
+			if (vsync)
+				wglSwapInterval(0);
+			else 
+				wglSwapInterval(1); 
+			_vSync = vsync;
 
+			// Engine is now running
 			isRunning = true;
 
 			return true;
@@ -264,7 +308,10 @@ namespace game
 	private:
 		bool _vSync = false;
 	};
+	// --- OpenGL Stop
 
+	// --- Vulkan Start
+	// --- Vulkan End
 }
 
 int main()
@@ -273,7 +320,7 @@ int main()
 	game::RendererGL renderer;
 
 	// Create the window
-	if (!window.SetWindowInfo("Test Name", 1280, 720, false, false))
+	if (!window.SetWindowInfo("Spinning Triangle", 1280, 720, false, false))
 	{
 		std::cout << game::lastError;
 	}
@@ -284,7 +331,7 @@ int main()
 	}
 
 	// Create rendering device
-	if (!renderer.CreateDevice(window, false))
+	if (!renderer.CreateDevice(window, true))
 	{
 		std::cout << game::lastError;
 		renderer.DestroyDevice();
@@ -293,9 +340,9 @@ int main()
 	
 	std::cout << glGetString(GL_VERSION) << "\n";
 
-	// "Game Loop"
-	glClearColor(0.25f, 0.25f, 0.25f, 1.0f);
 
+	glClearColor(0.25f, 0.25f, 0.25f, 1.0f);
+	// "Game Loop"
 	do
 	{
 		window.DoMessagePump();
@@ -304,12 +351,16 @@ int main()
 
 		glRotatef(1,1.0, 1.0f, 1.0f);
 		glBegin(GL_TRIANGLES);
+		
 		glColor3f(1.0f, 0.0f, 0.0f);
 		glVertex2f(-0.5, 0); // Pass first vertex
+		
 		glColor3f(0.0f, 1.0f, 0.0f);
 		glVertex2f(0.5, 0); // Pass second vertex
+		
 		glColor3f(0.0f, 0.0f, 1.0f);
 		glVertex2f(0, 0.5); // Pass third vertex
+		
 		glEnd();
 
 		renderer.Swap();
