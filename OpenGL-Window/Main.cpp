@@ -1,9 +1,15 @@
 #include <windows.h>
+#include <iostream>
+
+// for opengl
 #include <gl/GL.h>
 #include <gl/GLU.h>
-#include <iostream>
-// below needs shortened
+
+// below needs shortened in final
 #include "../../../Programming/GameLib2/GameErrors.h"
+
+// for vulkan
+#include <vulkan/vulkan.h>
 
 #if defined(_WIN32) && !defined(__MINGW32__)
 #pragma comment(lib, "user32.lib")
@@ -20,40 +26,48 @@
 
 namespace game
 {
-	// --- Window Attrib Start
-	//struct GameAttributes
-	//{
-	//	uint8_t GL_ContextMajor;
-	//	uint8_t GL_ContextMinor;
-	//	uint8_t GL_RedSize;
-	//	uint8_t GL_BlueSize;
-	//	uint8_t GL_GreenSize;
-	//	uint8_t GL_AlphaSize;
-	//	uint8_t GL_DoubleBuffer;
-	//	uint8_t GL_DepthSize;
-	//	uint8_t GL_MultiSamples;
-	//	bool GL_Debug;
-	//	double Framelock;
-	//	unsigned int Framework;
+	enum class RenderAPI
+	{
+		OpenGL = 0,
+		Vulkan
+	};
 
-	//	GameAttributes()
-	//	{
-	//		GL_ContextMajor = 0;
-	//		GL_ContextMinor = 0;
-	//		GL_RedSize = 0;
-	//		GL_BlueSize = 0;
-	//		GL_GreenSize = 0;
-	//		GL_AlphaSize = 0;
-	//		GL_DoubleBuffer = -1;
-	//		GL_DepthSize = 0;
-	//		GL_MultiSamples = 0;
-	//		GL_Debug = false;
-	//		Framelock = 0;
-	//		Framework = SDL_WINDOW_OPENGL; // Defaults to OpenGL
-	//	}
-	//};
-	// 
-	// --- Window Attrib Stop
+	 //--- Window Attrib header Start
+	struct GameAttributes
+	{
+		uint8_t ContextMajor;	// OpenGL only
+		uint8_t ContextMinor;	// OpenGL only
+		uint8_t RedSize;
+		uint8_t BlueSize;
+		uint8_t GreenSize;
+		uint8_t AlphaSize;
+		uint8_t DoubleBuffer;
+		uint8_t DepthSize;
+		uint8_t MultiSamples;
+		bool DebugMode;
+		uint8_t Framelock;
+		RenderAPI RenderingAPI;
+		GameAttributes();
+	};
+	// --- GameAttribute header stop
+	
+	// --- GameAttrivute cpp start
+	GameAttributes::GameAttributes()
+	{
+		ContextMajor = 0;
+		ContextMinor = 0;
+		RedSize = 8;
+		BlueSize = 8;
+		GreenSize = 8;
+		AlphaSize = 8;
+		DoubleBuffer = 0; // may need to be -1 as was set in GameLib1
+		DepthSize = 0;
+		MultiSamples = 0;
+		DebugMode = false;
+		Framelock = 0;
+		RenderingAPI = RenderAPI::OpenGL;// SDL_WINDOW_OPENGL; // Defaults to OpenGL
+	}
+	// --- GameAttribute cpp stop
 
 	// !!!  Need an engine class
 
@@ -65,11 +79,7 @@ namespace game
 #define gameW(s) s
 #endif
 
-	enum class RenderAPI
-	{
-		OpenGL = 0,
-		Vulkan
-	};
+
 
 	GameError lastError;  // Game Engine global error tracking
 
