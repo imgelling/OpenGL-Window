@@ -1,21 +1,35 @@
 #include <windows.h>
 #include <iostream>
 
-// for opengl
+
+
+// For main header
+#define GAME_RENDERAPI_ALL
+
+// OpenGL
+#if defined (GAME_RENDERAPI_OPENGL) || defined (GAME_RENDERAPI_ALL)
 #include <gl/GL.h>
 #include <gl/GLU.h>
-
-// below needs shortened in final
-#include "../../../Programming/GameLib2/GameErrors.h"
-
-// for vulkan
-#include <vulkan/vulkan.h>
-
-#if defined(_WIN32) && !defined(__MINGW32__)
+// Windows
+#if defined(_WIN32)
 #pragma comment(lib, "user32.lib")
 #pragma comment(lib, "gdi32.lib")
 #pragma comment(lib, "opengl32.lib")
 #endif
+#endif
+
+// Vulkan 
+#if defined (GAME_RENDERAPI_VULKAN) || defined (GAME_RENDERAPI_ALL)
+#include <vulkan/vulkan.h>
+#endif
+
+
+// below needs shortened in final
+#include "../../../Programming/GameLib2/GameErrors.h"
+
+
+
+
 
 
 // below is for flush (block till vsync)
