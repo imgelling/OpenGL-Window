@@ -2,8 +2,6 @@
 #include <iostream>
 
 
-
-
 // OpenGL
 #include <gl/GL.h>
 #include <gl/GLU.h>
@@ -21,7 +19,7 @@
 
 
 
-// below is for flush (block till vsync)
+// below is for flush (block till vsync), Windows only..maybe
 #include <dwmapi.h>
 #pragma comment(lib, "Dwmapi.lib")
 
@@ -29,13 +27,17 @@
 
 namespace game
 {
-	// --- Tests for window msg calls
+	// --- Tests for window msg calls Start
+
 	class Engine;
-	static Engine* enginePointer;
+
+	static Engine* enginePointer;	// Do not use, maybe a struct or class that hides this
 
 	// --- Actual engine class
+
 	class Window;
 	class Renderer;
+	class GameAttribute;
 	class Engine
 	{
 	public:
@@ -43,31 +45,43 @@ namespace game
 		Engine() { enginePointer = this; }
 	private:
 	};
+	// --- Tests for window msg calls Stop
 
-
-
+	// --- Helpers Start
 	enum class RenderAPI
 	{
-		OpenGL = 0,
-		Vulkan
+		OpenGL = 0,		// OpenGL, any context
+		Vulkan,			// Vulkan, ??? about version
+		DirectX			// DirectX 10, 11, or 12
 	};
+
+	std::wstring ConvertToWide(const std::string s)
+	{
+		uint32_t count = MultiByteToWideChar(CP_UTF8, 0, s.c_str(), -1, NULL, 0);
+		wchar_t* buffer = new wchar_t[count];
+		MultiByteToWideChar(CP_UTF8, 0, s.c_str(), -1, buffer, count);
+		std::wstring wideString(buffer);
+		delete[] buffer;
+		return wideString;
+	}
+	// --- Helpers Stop
 
 	 //--- Window Attrib header Start
 	struct GameAttributes
-	{
-		uint8_t ContextMajor;	// OpenGL only
-		uint8_t ContextMinor;	// OpenGL only
-		uint8_t RedSize;
-		uint8_t BlueSize;
-		uint8_t GreenSize;
-		uint8_t AlphaSize;
-		uint8_t DoubleBuffer;
-		uint8_t DepthSize;
-		uint8_t MultiSamples;
-		bool DebugMode;
-		uint8_t Framelock;
-		RenderAPI RenderingAPI;
-		GameAttributes();
+	{		
+		uint8_t ContextMajor;	// Major version number (OpenGL only for now, may use for dx10,11,12)
+		uint8_t ContextMinor;	// Minor version number (OpenGL)
+		uint8_t RedSize;		// Size, in bits of red component of color depth
+		uint8_t BlueSize;		// Size, in bits of blue component of color depth
+		uint8_t GreenSize;		// Size, in bits of green component of color depth
+		uint8_t AlphaSize;		// Size, in bits of alpha component of color depth
+		uint8_t DoubleBuffer;	// Double buffer (Maybe triple... unsure), may need to be a bool
+		uint8_t DepthSize;		// Size, in bits of depth buffer
+		uint8_t MultiSamples;	// Multisampling, 0 is none, >0 enables multisampling
+		bool DebugMode;			// Enable debug mode with the renderer (may just be OpenGL only)
+		uint8_t Framelock;		// A software lock on max frames per second
+		RenderAPI RenderingAPI;	// Which rendering API are we using
+		GameAttributes();		// Loads some defaults intro structure
 	};
 	// --- GameAttribute header stop
 	
@@ -85,26 +99,23 @@ namespace game
 		MultiSamples = 0;
 		DebugMode = false;
 		Framelock = 0;
-		RenderingAPI = RenderAPI::OpenGL;// SDL_WINDOW_OPENGL; // Defaults to OpenGL
+		RenderingAPI = RenderAPI::OpenGL; // Defaults to OpenGL
 	}
 	// --- GameAttribute cpp stop
 
-	// !!!  Need an engine class
 
-
-// macro below needs renamed
+// Macro to state a literal string is a wide string
 #if defined(UNICODE) || defined(_UNICODE)
-#define gameW(s) L##s
+#define Wide(s) L##s
 #else
-#define gameW(s) s
+#define Wide(s) s
 #endif
 
 
-
-	GameError lastError;  // Game Engine global error tracking
+	// GameEngine global error tracking
+	GameError lastError;  
 
 	// --- Window header Start
-	bool isRunning = false;
 
 	class Window
 	{
@@ -122,19 +133,6 @@ namespace game
 		bool _isFullScreen;
 		bool _isBorderless;
 
-		std::wstring ConvertToWide(std::string s)
-		{
-			int count = MultiByteToWideChar(CP_UTF8, 0, s.c_str(), -1, NULL, 0);
-			wchar_t* buffer = new wchar_t[count];
-			MultiByteToWideChar(CP_UTF8, 0, s.c_str(), -1, buffer, count);
-			std::wstring w(buffer);
-			delete[] buffer;
-			return w;
-		}
-
-
-
-
 		// Windows only stuff
 		HWND _windowHandle;
 		static LRESULT CALLBACK WindowEventProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
@@ -150,8 +148,7 @@ namespace game
 		_isBorderless = false;
 		_windowHandle = NULL;
 	}
-
-	
+		
 	
 	LRESULT CALLBACK Window::WindowEventProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	{
@@ -210,13 +207,13 @@ namespace game
 		wc.cbWndExtra = 0;
 		wc.lpszMenuName = nullptr;
 		wc.hbrBackground = nullptr;
-		wc.lpszClassName = gameW("GAME_ENGINE"); // needs new macro
+		wc.lpszClassName = Wide("GAME_ENGINE"); // needs new macro
 		RegisterClass(&wc);
 
 		DWORD dwExStyle = WS_EX_APPWINDOW | WS_EX_WINDOWEDGE;
 		DWORD dwStyle = WS_CAPTION | WS_SYSMENU | WS_VISIBLE | WS_THICKFRAME | WS_MAXIMIZEBOX | WS_MINIMIZEBOX;
 
-		_windowHandle = CreateWindowEx(dwExStyle, gameW("GAME_ENGINE"), gameW(""), dwStyle,
+		_windowHandle = CreateWindowEx(dwExStyle, Wide("GAME_ENGINE"), Wide(""), dwStyle,
 			0, 0, _windowWidth, _windowHeight, NULL, NULL, GetModuleHandle(nullptr), this);
 		if (!_windowHandle)
 		{
@@ -255,9 +252,6 @@ namespace game
 		return _windowHandle;
 	}
 	// --- Window cpp Stop
-
-
-
 
 
 	// --- OpenGL Start
