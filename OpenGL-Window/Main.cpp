@@ -3,32 +3,21 @@
 
 
 
-// For main header
-#define GAME_RENDERAPI_ALL
 
 // OpenGL
-#if defined (GAME_RENDERAPI_OPENGL) || defined (GAME_RENDERAPI_ALL)
 #include <gl/GL.h>
 #include <gl/GLU.h>
 // Windows
-#if defined(_WIN32)
 #pragma comment(lib, "user32.lib")
 #pragma comment(lib, "gdi32.lib")
 #pragma comment(lib, "opengl32.lib")
-#endif
-#endif
+
 
 // Vulkan 
-#if defined (GAME_RENDERAPI_VULKAN) || defined (GAME_RENDERAPI_ALL)
 #include <vulkan/vulkan.h>
-#endif
-
 
 // below needs shortened in final
 #include "../../../Programming/GameLib2/GameErrors.h"
-
-
-
 
 
 
@@ -40,6 +29,23 @@
 
 namespace game
 {
+	// --- Tests for window msg calls
+	class Engine;
+	static Engine* enginePointer;
+
+	// --- Actual engine class
+	class Window;
+	class Renderer;
+	class Engine
+	{
+	public:
+		bool isrunning = false;
+		Engine() { enginePointer = this; }
+	private:
+	};
+
+
+
 	enum class RenderAPI
 	{
 		OpenGL = 0,
@@ -104,9 +110,9 @@ namespace game
 	{
 	public:
 		Window();
-		bool SetWindowInfo(std::string title, const int width, const int height, const bool fullScreen, const bool borderless);
+		bool SetWindowInfo(const std::string title, const uint32_t width, const uint32_t height, const bool fullScreen, const bool borderless);
 		bool CreateTheWindow();
-		bool SetWindowTitle(std::string title);
+		bool SetWindowTitle(const std::string title);
 		void DoMessagePump();
 		HWND GetHandle();
 	private:
@@ -174,13 +180,13 @@ namespace game
 			//case WM_RBUTTONUP:	ptrPGE->olc_UpdateMouseState(1, false);                                 return 0;
 			//case WM_MBUTTONDOWN:ptrPGE->olc_UpdateMouseState(2, true);                                  return 0;
 			//case WM_MBUTTONUP:	ptrPGE->olc_UpdateMouseState(2, false);                                 return 0;
-		case WM_CLOSE:		isRunning = false; return 0;
+		case WM_CLOSE:		enginePointer->isrunning = false; return 0;
 		case WM_DESTROY:	PostQuitMessage(0); DestroyWindow(hWnd); return 0;
 		}
 		return DefWindowProc(hWnd, uMsg, wParam, lParam);
 	}
 
-	bool Window::SetWindowInfo(std::string title, const int width, const int height, const bool fullScreen, const bool borderless)
+	bool Window::SetWindowInfo(const std::string title, const uint32_t width, const uint32_t height, const bool fullScreen, const bool borderless)
 	{
 		_windowTitle = title;
 		_windowWidth = width;
@@ -224,7 +230,7 @@ namespace game
 		return true;
 	}
 
-	bool Window::SetWindowTitle(std::string title)
+	bool Window::SetWindowTitle(const std::string title)
 	{
 #ifdef UNICODE
 		SetWindowText(_windowHandle, ConvertToWide(_windowTitle).c_str());
@@ -314,7 +320,7 @@ namespace game
 			_vSync = vsync;
 
 			// Engine is now running
-			isRunning = true;
+			enginePointer->isrunning = true;
 
 			return true;
 		}
@@ -340,6 +346,7 @@ namespace game
 
 int main()
 {
+	game::Engine eng;
 	game::Window window;
 	game::RendererGL renderer;
 
@@ -388,7 +395,7 @@ int main()
 		glEnd();
 
 		renderer.Swap();
-	} while (game::isRunning);
+	} while (eng.isrunning);
 
 	renderer.DestroyDevice();
 	return 0;
