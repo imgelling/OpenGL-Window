@@ -33,21 +33,30 @@ namespace game
 
 	static Engine* enginePointer;	// Do not use, maybe a struct or class that hides this
 
-	// --- Actual engine class
 
-	class Window;
-	class Renderer;
-	class GameAttribute;
-	class Engine
+	class Window
 	{
 	public:
-		bool isrunning = false;
-		Engine() { enginePointer = this; }
+		Window();
+		bool SetWindowInfo(const std::string title, const uint32_t width, const uint32_t height, const bool fullScreen, const bool borderless);
+		bool CreateTheWindow();
+		bool SetWindowTitle(const std::string title);
+		void DoMessagePump();
+		HWND GetHandle();
 	private:
-	};
-	// --- Tests for window msg calls Stop
+		std::string _windowTitle;
+		uint32_t _windowWidth;
+		uint32_t _windowHeight;
+		bool _isFullScreen;
+		bool _isBorderless;
 
-	// --- Helpers Start
+		// Windows only stuff
+		HWND _windowHandle;
+		static LRESULT CALLBACK WindowEventProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+	};
+	// --- Window header Stop
+
+		// --- Helpers Start
 	enum class RenderAPI
 	{
 		OpenGL = 0,		// OpenGL, any context
@@ -66,9 +75,9 @@ namespace game
 	}
 	// --- Helpers Stop
 
-	 //--- Window Attrib header Start
+	//--- Window Attrib header Start
 	struct GameAttributes
-	{		
+	{
 		uint8_t ContextMajor;	// Major version number (OpenGL only for now, may use for dx10,11,12)
 		uint8_t ContextMinor;	// Minor version number (OpenGL)
 		uint8_t RedSize;		// Size, in bits of red component of color depth
@@ -84,7 +93,34 @@ namespace game
 		GameAttributes();		// Loads some defaults intro structure
 	};
 	// --- GameAttribute header stop
-	
+
+	// --- Base renderer class Start
+	class RendererBase
+	{
+	public:
+		virtual bool CreateDevice(Window, bool vsync) { return false; };
+		virtual void DestroyDevice(void) {};
+		virtual void Swap(void) {};
+	protected:
+		bool _vSync = false;
+		GameAttributes _attributes;
+	};
+	// --- Base renderer class Stop
+
+	class GameAttribute;
+	class Engine
+	{
+	public:
+		bool isRunning = false;
+		Engine() { enginePointer = this; }
+		Window window;
+		RendererBase r;
+	private:
+	};
+	// --- Actual engine class Stop
+
+
+
 	// --- GameAttrivute cpp start
 	GameAttributes::GameAttributes()
 	{
@@ -114,30 +150,6 @@ namespace game
 
 	// GameEngine global error tracking
 	GameError lastError;  
-
-	// --- Window header Start
-
-	class Window
-	{
-	public:
-		Window();
-		bool SetWindowInfo(const std::string title, const uint32_t width, const uint32_t height, const bool fullScreen, const bool borderless);
-		bool CreateTheWindow();
-		bool SetWindowTitle(const std::string title);
-		void DoMessagePump();
-		HWND GetHandle();
-	private:
-		std::string _windowTitle;
-		uint32_t _windowWidth;
-		uint32_t _windowHeight;
-		bool _isFullScreen;
-		bool _isBorderless;
-
-		// Windows only stuff
-		HWND _windowHandle;
-		static LRESULT CALLBACK WindowEventProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
-	};
-	// --- Window header Stop
 
 	// --- Window cpp Start
 	Window::Window()
@@ -177,7 +189,7 @@ namespace game
 			//case WM_RBUTTONUP:	ptrPGE->olc_UpdateMouseState(1, false);                                 return 0;
 			//case WM_MBUTTONDOWN:ptrPGE->olc_UpdateMouseState(2, true);                                  return 0;
 			//case WM_MBUTTONUP:	ptrPGE->olc_UpdateMouseState(2, false);                                 return 0;
-		case WM_CLOSE:		enginePointer->isrunning = false; return 0;
+		case WM_CLOSE:		enginePointer->isRunning = false; return 0;
 		case WM_DESTROY:	PostQuitMessage(0); DestroyWindow(hWnd); return 0;
 		}
 		return DefWindowProc(hWnd, uMsg, wParam, lParam);
@@ -254,12 +266,13 @@ namespace game
 	// --- Window cpp Stop
 
 
+
 	// --- OpenGL Start
 	
 	typedef BOOL(WINAPI wglSwapInterval_t) (int interval);
 	static wglSwapInterval_t* wglSwapInterval = nullptr;
-	// needs abstracted
-	class RendererGL
+
+	class RendererGL : public RendererBase
 	{
 	public:
 		typedef HDC glDeviceContext_t;
@@ -269,8 +282,9 @@ namespace game
 
 		// need attribute struct for window
 		// make window shared pointer, maybe could just be in game namespace
+		// NEW - thinking this will be in engine class
 
-		bool CreateDevice(Window window, bool vsync) 
+		bool CreateDevice(Window window, const bool vsync) override 
 		{
 			// Create Device Context
 			glDeviceContext = GetDC(window.GetHandle());
@@ -314,24 +328,23 @@ namespace game
 			_vSync = vsync;
 
 			// Engine is now running
-			enginePointer->isrunning = true;
+			enginePointer->isRunning = true;
 
 			return true;
 		}
-		void DestroyDevice()
+		void DestroyDevice() override
 		{
 			wglMakeCurrent(NULL, NULL);
 			wglDeleteContext(glRenderContext);
 
 		}
-		void Swap()
+		void Swap() override
 		{
 			SwapBuffers(glDeviceContext);
 			if (_vSync) DwmFlush(); // blocks till next present
-		}
+		};
 	private:
-		bool _vSync = false;
-	};
+		};
 	// --- OpenGL Stop
 
 	// --- Vulkan Start
@@ -341,25 +354,25 @@ namespace game
 int main()
 {
 	game::Engine eng;
-	game::Window window;
-	game::RendererGL renderer;
+	//game::Window window;
+	//game::RendererGL renderer;
 
 	// Create the window
-	if (!window.SetWindowInfo("Spinning Triangle", 1280, 720, false, false))
+	if (!eng.window.SetWindowInfo("Spinning Triangle", 1280, 720, false, false))
 	{
 		std::cout << game::lastError;
 	}
 
-	if (!window.CreateTheWindow())
+	if (!eng.window.CreateTheWindow())
 	{
 		std::cout << game::lastError;
 	}
 
 	// Create rendering device
-	if (!renderer.CreateDevice(window, true))
+	if (!eng.r.CreateDevice(eng.window, true))
 	{
 		std::cout << game::lastError;
-		renderer.DestroyDevice();
+		eng.r.DestroyDevice();
 		return -1;
 	}
 	
@@ -370,7 +383,7 @@ int main()
 	// "Game Loop"
 	do
 	{
-		window.DoMessagePump();
+		eng.window.DoMessagePump();
 
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -388,9 +401,9 @@ int main()
 		
 		glEnd();
 
-		renderer.Swap();
-	} while (eng.isrunning);
+		eng.r.Swap();
+	} while (eng.isRunning);
 
-	renderer.DestroyDevice();
+	eng.r.DestroyDevice();
 	return 0;
 }
