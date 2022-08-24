@@ -114,7 +114,7 @@ namespace game
 		bool isRunning = false;
 		Engine() { enginePointer = this; }
 		Window window;
-		RendererBase r;
+		RendererBase* r;
 	private:
 	};
 	// --- Actual engine class Stop
@@ -368,11 +368,13 @@ int main()
 		std::cout << game::lastError;
 	}
 
+	eng.r = new game::RendererGL();
+
 	// Create rendering device
-	if (!eng.r.CreateDevice(eng.window, true))
+	if (!eng.r->CreateDevice(eng.window, true))
 	{
 		std::cout << game::lastError;
-		eng.r.DestroyDevice();
+		eng.r->DestroyDevice();
 		return -1;
 	}
 	
@@ -401,9 +403,10 @@ int main()
 		
 		glEnd();
 
-		eng.r.Swap();
+		eng.r->Swap();
 	} while (eng.isRunning);
 
-	eng.r.DestroyDevice();
+	eng.r->DestroyDevice();
+	delete eng.r;
 	return 0;
 }
