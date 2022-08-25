@@ -7,7 +7,7 @@
 namespace game
 {
 	extern GameError lastError;
-	// --- Window cpp Start
+
 	Window::Window()
 	{
 		_windowWidth = 0;
@@ -16,7 +16,6 @@ namespace game
 		_isBorderless = false;
 		_windowHandle = NULL;
 	}
-
 
 	LRESULT CALLBACK Window::WindowEventProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	{
@@ -119,5 +118,4 @@ namespace game
 	{
 		return _windowHandle;
 	}
-	// --- Window cpp Stop
 }

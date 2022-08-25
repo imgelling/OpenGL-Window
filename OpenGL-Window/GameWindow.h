@@ -6,7 +6,6 @@
 
 namespace game
 {
-	// --- Window Header Start
 	class Window
 	{
 	public:
@@ -27,7 +26,4 @@ namespace game
 		HWND _windowHandle;
 		static LRESULT CALLBACK WindowEventProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 	};
-	// --- Window header Stop
-
-
 }

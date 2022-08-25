@@ -3,7 +3,6 @@
 
 namespace game
 {
-	//--- GameAttributes Attrib header Start
 	struct GameAttributes
 	{
 		uint8_t ContextMajor;	// Major version number (OpenGL only for now, may use for dx10,11,12)
@@ -20,5 +19,4 @@ namespace game
 		RenderAPI RenderingAPI;	// Which rendering API are we using
 		GameAttributes();		// Loads some defaults intro structure
 	};
-	// --- GameAttribute header stop
 }

@@ -4,16 +4,18 @@
 
 namespace game
 {
-	// --- Base renderer header Start
+	extern GameError lastError;
 	class RendererBase
 	{
 	public:
-		virtual bool CreateDevice(Window, bool vsync) = 0;
-		virtual void DestroyDevice(void) = 0;
-		virtual void Swap(void) = 0;
+		virtual bool CreateDevice(Window, bool vsync) 
+		{ 
+			return false;
+		};
+		virtual void DestroyDevice(void) {};
+		virtual void Swap(void) {};
 	protected:
 		bool _vSync = false;
 		GameAttributes _attributes;
 	};
-	// --- Base renderer header Stop
 }
