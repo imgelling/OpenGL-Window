@@ -1,9 +1,11 @@
 #pragma once
 
+#include "GameRendererBase.h"
+
 namespace game
 {
 	class Engine;
-	Engine* enginePointer;
+	extern Engine* enginePointer;
 	// Engine class Start
 	class Engine
 	{
@@ -12,10 +14,10 @@ namespace game
 		Engine()
 		{
 			enginePointer = this;
-			//r = nullptr;
+			renderer = nullptr;
 		}
 		Window window;
-		//RendererBase* r;
+		RendererBase* renderer;
 	private:
 	};
 	// --- Engine class Stop

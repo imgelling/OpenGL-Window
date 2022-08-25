@@ -1,6 +1,7 @@
 #include "GameWindow.h"
 
 #include "../../../Programming/GameLib2/GameErrors.h"
+#include "GameEngine.h"
 
 namespace game
 {
@@ -42,7 +43,7 @@ namespace game
 			//case WM_RBUTTONUP:	ptrPGE->olc_UpdateMouseState(1, false);                                 return 0;
 			//case WM_MBUTTONDOWN:ptrPGE->olc_UpdateMouseState(2, true);                                  return 0;
 			//case WM_MBUTTONUP:	ptrPGE->olc_UpdateMouseState(2, false);                                 return 0;
-		case WM_CLOSE:		/*enginePointer->isRunning = false;*/ return 0;
+		case WM_CLOSE:		if (enginePointer) enginePointer->isRunning = false; return 0;
 		case WM_DESTROY:	PostQuitMessage(0); DestroyWindow(hWnd); return 0;
 		}
 		return DefWindowProc(hWnd, uMsg, wParam, lParam);

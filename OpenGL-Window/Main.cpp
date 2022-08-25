@@ -3,10 +3,8 @@
 
 
 // Temp header
-#include "GameWindow.h"
-#include "GameAttributes.h"
-#include "GameEngine.h"
-#include "GameRendererBase.h"
+#include "Game.h"
+
 
 // OpenGL
 #include <gl/GL.h>
@@ -160,15 +158,15 @@ int main()
 		std::cout << game::lastError;
 	}
 
-	//eng.r = new game::RendererGL();
+	eng.renderer = new game::RendererGL();
 
-	//// Create rendering device
-	//if (!eng.r->CreateDevice(eng.window, true))
-	//{
-	//	std::cout << game::lastError;
-	//	eng.r->DestroyDevice();
-	//	return -1;
-	//}
+	// Create rendering device
+	if (!eng.renderer->CreateDevice(eng.window, true))
+	{
+		std::cout << game::lastError;
+		eng.renderer->DestroyDevice();
+		return -1;
+	}
 	
 	std::cout << glGetString(GL_VERSION) << "\n";
 
@@ -195,10 +193,10 @@ int main()
 		
 		glEnd();
 
-		//eng.r->Swap();
+		eng.renderer->Swap();
 	} while (eng.isRunning);
 
-	//eng.r->DestroyDevice();
-	//delete eng.r;
+	eng.renderer->DestroyDevice();
+	delete eng.renderer;
 	return 0;
 }
