@@ -2,6 +2,10 @@
 #include <iostream>
 
 
+// Temp header
+#include "GameWindow.h"
+#include "GameAttributes.h"
+
 // OpenGL
 #include <gl/GL.h>
 #include <gl/GLU.h>
@@ -33,124 +37,49 @@ namespace game
 
 	static Engine* enginePointer;	// Do not use, maybe a struct or class that hides this
 
+	// GameEngine global error tracking
+	GameError lastError;
 
-	class Window
-	{
-	public:
-		Window();
-		bool SetWindowInfo(const std::string title, const uint32_t width, const uint32_t height, const bool fullScreen, const bool borderless);
-		bool CreateTheWindow();
-		bool SetWindowTitle(const std::string title);
-		void DoMessagePump();
-		HWND GetHandle();
-	private:
-		std::string _windowTitle;
-		uint32_t _windowWidth;
-		uint32_t _windowHeight;
-		bool _isFullScreen;
-		bool _isBorderless;
 
-		// Windows only stuff
-		HWND _windowHandle;
-		static LRESULT CALLBACK WindowEventProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
-	};
-	// --- Window header Stop
 
-		// --- Helpers Start
-	enum class RenderAPI
-	{
-		OpenGL = 0,		// OpenGL, any context
-		Vulkan,			// Vulkan, ??? about version
-		DirectX			// DirectX 10, 11, or 12
-	};
-
-	std::wstring ConvertToWide(const std::string s)
-	{
-		uint32_t count = MultiByteToWideChar(CP_UTF8, 0, s.c_str(), -1, NULL, 0);
-		wchar_t* buffer = new wchar_t[count];
-		MultiByteToWideChar(CP_UTF8, 0, s.c_str(), -1, buffer, count);
-		std::wstring wideString(buffer);
-		delete[] buffer;
-		return wideString;
-	}
-	// --- Helpers Stop
-
-	//--- Window Attrib header Start
-	struct GameAttributes
-	{
-		uint8_t ContextMajor;	// Major version number (OpenGL only for now, may use for dx10,11,12)
-		uint8_t ContextMinor;	// Minor version number (OpenGL)
-		uint8_t RedSize;		// Size, in bits of red component of color depth
-		uint8_t BlueSize;		// Size, in bits of blue component of color depth
-		uint8_t GreenSize;		// Size, in bits of green component of color depth
-		uint8_t AlphaSize;		// Size, in bits of alpha component of color depth
-		uint8_t DoubleBuffer;	// Double buffer (Maybe triple... unsure), may need to be a bool
-		uint8_t DepthSize;		// Size, in bits of depth buffer
-		uint8_t MultiSamples;	// Multisampling, 0 is none, >0 enables multisampling
-		bool DebugMode;			// Enable debug mode with the renderer (may just be OpenGL only)
-		uint8_t Framelock;		// A software lock on max frames per second
-		RenderAPI RenderingAPI;	// Which rendering API are we using
-		GameAttributes();		// Loads some defaults intro structure
-	};
-	// --- GameAttribute header stop
-
-	// --- Base renderer class Start
+	// --- Base renderer header Start
 	class RendererBase
 	{
 	public:
-		virtual bool CreateDevice(Window, bool vsync) { return false; };
-		virtual void DestroyDevice(void) {};
-		virtual void Swap(void) {};
+		virtual bool CreateDevice(Window, bool vsync) = 0;
+		virtual void DestroyDevice(void) = 0;
+		virtual void Swap(void) = 0;
 	protected:
 		bool _vSync = false;
 		GameAttributes _attributes;
 	};
-	// --- Base renderer class Stop
+	// --- Base renderer header Stop
 
-	class GameAttribute;
+	// Engine class Start
 	class Engine
 	{
 	public:
 		bool isRunning = false;
-		Engine() { enginePointer = this; }
+		Engine() 
+		{ 
+			enginePointer = this; 
+			r = nullptr;
+		}
 		Window window;
 		RendererBase* r;
 	private:
 	};
-	// --- Actual engine class Stop
+	// --- Engine class Stop
 
 
 
-	// --- GameAttrivute cpp start
-	GameAttributes::GameAttributes()
-	{
-		ContextMajor = 0;
-		ContextMinor = 0;
-		RedSize = 8;
-		BlueSize = 8;
-		GreenSize = 8;
-		AlphaSize = 8;
-		DoubleBuffer = 0; // may need to be -1 as was set in GameLib1
-		DepthSize = 0;
-		MultiSamples = 0;
-		DebugMode = false;
-		Framelock = 0;
-		RenderingAPI = RenderAPI::OpenGL; // Defaults to OpenGL
-	}
-	// --- GameAttribute cpp stop
 
 
-// Macro to state a literal string is a wide string
-#if defined(UNICODE) || defined(_UNICODE)
-#define Wide(s) L##s
-#else
-#define Wide(s) s
-#endif
 
 
-	// GameEngine global error tracking
-	GameError lastError;  
 
+
+	
 	// --- Window cpp Start
 	Window::Window()
 	{
