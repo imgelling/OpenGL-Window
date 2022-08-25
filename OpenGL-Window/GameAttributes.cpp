@@ -7,8 +7,8 @@ namespace game
 		WindowTitle = "";
 		WindowWidth = 1280;
 		WindowHeight = 720;
-		WindowFullscreen = false;
-		WindowBorderless = false;
+		isWindowFullscreen = false;
+		isWindowBorderless = false;
 		ContextMajor = 0;
 		ContextMinor = 0;
 		RedSize = 8;
@@ -18,7 +18,7 @@ namespace game
 		DoubleBuffer = 0; // may need to be -1 as was set in GameLib1
 		DepthSize = 0;
 		MultiSamples = 0;
-		DebugMode = false;
+		isDebugMode = false;
 		Framelock = 0;
 		RenderingAPI = RenderAPI::OpenGL; // Defaults to OpenGL
 	}

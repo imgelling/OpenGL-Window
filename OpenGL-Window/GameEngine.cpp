@@ -7,18 +7,32 @@ namespace game
 	{
 		isRunning = false;
 		enginePointer = this;
-		renderer = nullptr;
+		_renderer = nullptr;
+
+		Initialize();
 	}
 
 	Engine::~Engine()
 	{
-		renderer->DestroyDevice();
-		delete renderer;
+		Shutdown();
+		_renderer->DestroyDevice();
+		delete _renderer;
+	}
+
+	void Engine::Start()
+	{
+		do
+		{
+			ProcessMessages();
+			Update();
+			Render();
+			Swap();
+		} while (isRunning);
 	}
 
 	void Engine::ProcessMessages(void)
 	{
-		window.DoMessagePump();
+		_window.DoMessagePump();
 	}
 
 	void Engine::SetAttributes(const GameAttributes &attrib)
@@ -26,21 +40,21 @@ namespace game
 		_attributes = attrib;
 	}
 
-	bool Engine::Start()
+	bool Engine::Create()
 	{
 		// Set window info
-		if (!window.SetWindowInfo(_attributes.WindowTitle,
+		if (!_window.SetWindowInfo(_attributes.WindowTitle,
 			_attributes.WindowWidth,
 			_attributes.WindowHeight,
-			_attributes.WindowFullscreen,
-			_attributes.WindowBorderless))
+			_attributes.isWindowFullscreen,
+			_attributes.isWindowBorderless))
 		{
 			std::cout << game::lastError;
 			return false;
 		}
 
 		// Create the window
-		if (!window.CreateTheWindow())
+		if (!_window.CreateTheWindow())
 		{
 			std::cout << game::lastError;
 			return false;
@@ -49,7 +63,7 @@ namespace game
 		// Set the renderer
 		if (_attributes.RenderingAPI == RenderAPI::OpenGL)
 		{
-			renderer = new game::RendererGL();
+			_renderer = new game::RendererGL();
 		}
 		else
 		{
@@ -59,10 +73,10 @@ namespace game
 		
 
 		// Create rendering device
-		if (!renderer->CreateDevice(window, true))
+		if (!_renderer->CreateDevice(_window, true))
 		{
 			std::cout << game::lastError;
-			renderer->DestroyDevice();
+			_renderer->DestroyDevice();
 			return false;
 		}
 
@@ -71,6 +85,6 @@ namespace game
 
 	void Engine::Swap()
 	{
-		renderer->Swap();
+		_renderer->Swap();
 	}
 }

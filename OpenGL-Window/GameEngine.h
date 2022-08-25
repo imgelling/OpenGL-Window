@@ -12,20 +12,23 @@ namespace game
 	{
 	public:
 		bool isRunning;
-		RendererBase* renderer;
-		Window window;
 
 		Engine();
 		~Engine();
-
 		void ProcessMessages();
 		void SetAttributes(const GameAttributes &attrib);
-		bool Start();
-		void Swap();
-
+		bool Create();
+		void Start();
+	private:
+#pragma region NeedsToBeCreatedByUser
+		void Update();
+		void Render();
 		void Initialize();
 		void Shutdown();
-	private:
+		void Swap();
+#pragma endregion
 		GameAttributes _attributes;
+		RendererBase* _renderer;
+		Window _window;
 	};
 }
