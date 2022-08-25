@@ -2,6 +2,7 @@
 
 #include <string>
 #include <Windows.h>
+#include "../../../Programming/GameLib2/GameErrors.h"
 
 namespace game
 {
@@ -31,4 +32,6 @@ namespace game
 #endif
 
 	// --- Helpers Stop
+	// GameEngine global error tracking
+	static GameError lastError;
 }

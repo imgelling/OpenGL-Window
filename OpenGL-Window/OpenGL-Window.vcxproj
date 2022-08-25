@@ -141,11 +141,13 @@
   <ItemGroup>
     <ClCompile Include="..\..\..\Programming\GameLib2\GameErrors.cpp" />
     <ClCompile Include="GameAttributes.cpp" />
+    <ClCompile Include="GameWindow.cpp" />
     <ClCompile Include="Main.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\Programming\GameLib2\GameErrors.h" />
     <ClInclude Include="GameAttributes.h" />
+    <ClInclude Include="GameEngine.h" />
     <ClInclude Include="GameHelpers.h" />
     <ClInclude Include="GameWindow.h" />
   </ItemGroup>
