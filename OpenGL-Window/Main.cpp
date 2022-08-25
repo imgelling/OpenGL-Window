@@ -19,7 +19,7 @@
 #include <vulkan/vulkan.h>
 
 // below needs shortened in final
-#include "../../../Programming/GameLib2/GameErrors.h"
+
 
 
 
@@ -31,36 +31,10 @@
 
 namespace game
 {
-	// --- Tests for window msg calls Start
-
-	//class Engine;
-
-	//static Engine* enginePointer;	// Do not use, maybe a struct or class that hides this
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-	
-
-
-
 	// --- OpenGL Start
 	
 	typedef BOOL(WINAPI wglSwapInterval_t) (int interval);
-	static wglSwapInterval_t* wglSwapInterval = nullptr;
+	wglSwapInterval_t* wglSwapInterval = nullptr;
 
 	class RendererGL : public RendererBase
 	{

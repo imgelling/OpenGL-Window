@@ -3,8 +3,10 @@
 #include "../../../Programming/GameLib2/GameErrors.h"
 #include "GameEngine.h"
 
+
 namespace game
 {
+	extern GameError lastError;
 	// --- Window cpp Start
 	Window::Window()
 	{

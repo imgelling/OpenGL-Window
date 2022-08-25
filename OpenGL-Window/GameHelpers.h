@@ -32,6 +32,4 @@ namespace game
 #endif
 
 	// --- Helpers Stop
-	// GameEngine global error tracking
-	static GameError lastError;
 }
