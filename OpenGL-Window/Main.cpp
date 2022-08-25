@@ -9,27 +9,13 @@
 
 void game::Engine::Initialize()
 {
-	// Set window info
-	if (!window.SetWindowInfo("Spinning Triangle", 1280, 720, false, false))
-	{
-		std::cout << game::lastError;
-	}
+	GameAttributes attrib;
+	attrib.WindowTitle = "Spinning Triangle";
+	SetAttributes(attrib);
+}
 
-	// Create the window
-	if (!window.CreateTheWindow())
-	{
-		std::cout << game::lastError;
-	}
-
-	// Set the renderer
-	renderer = new game::RendererGL();
-
-	// Create rendering device
-	if (!renderer->CreateDevice(window, true))
-	{
-		std::cout << game::lastError;
-		renderer->DestroyDevice();
-	}
+void game::Engine::Shutdown(void)
+{
 }
 
 int main()
@@ -37,6 +23,12 @@ int main()
 	game::Engine eng;
 
 	eng.Initialize();
+
+	if (!eng.Start())
+	{
+		std::cout << game::lastError;
+		return -1;
+	}
 	
 	// Just to see version number
 	std::cout << glGetString(GL_VERSION) << "\n";
@@ -48,7 +40,7 @@ int main()
 	do
 	{
 		// Catch messages from Windows
-		eng.window.DoMessagePump();
+		eng.ProcessMessages();
 		
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -66,9 +58,10 @@ int main()
 		
 		glEnd();
 
-		eng.renderer->Swap();
+		eng.Swap();
 	} while (eng.isRunning);
 
-	eng.renderer->DestroyDevice();
+	eng.Shutdown();
+
 	return 0;
 }

@@ -2,9 +2,13 @@
 
 namespace game
 {
-	// --- GameAttrivute cpp start
 	GameAttributes::GameAttributes()
 	{
+		WindowTitle = "";
+		WindowWidth = 1280;
+		WindowHeight = 720;
+		WindowFullscreen = false;
+		WindowBorderless = false;
 		ContextMajor = 0;
 		ContextMinor = 0;
 		RedSize = 8;
@@ -18,5 +22,4 @@ namespace game
 		Framelock = 0;
 		RenderingAPI = RenderAPI::OpenGL; // Defaults to OpenGL
 	}
-	// --- GameAttribute cpp stop
 }

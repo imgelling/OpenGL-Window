@@ -1,6 +1,7 @@
 #pragma once
 
 #include "GameRendererBase.h"
+#include "GameAttributes.h"
 
 namespace game
 {
@@ -17,8 +18,14 @@ namespace game
 		Engine();
 		~Engine();
 
+		void ProcessMessages();
+		void SetAttributes(const GameAttributes &attrib);
+		bool Start();
+		void Swap();
+
 		void Initialize();
 		void Shutdown();
 	private:
+		GameAttributes _attributes;
 	};
 }

@@ -5,6 +5,11 @@ namespace game
 {
 	struct GameAttributes
 	{
+		std::string WindowTitle;
+		uint32_t WindowWidth;
+		uint32_t WindowHeight;
+		bool WindowFullscreen;
+		bool WindowBorderless;
 		uint8_t ContextMajor;	// Major version number (OpenGL only for now, may use for dx10,11,12)
 		uint8_t ContextMinor;	// Minor version number (OpenGL)
 		uint8_t RedSize;		// Size, in bits of red component of color depth

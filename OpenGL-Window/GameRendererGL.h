@@ -18,7 +18,7 @@
 namespace game
 {
 	typedef BOOL(WINAPI wglSwapInterval_t) (int interval);
-	wglSwapInterval_t* wglSwapInterval = nullptr;
+	static wglSwapInterval_t* wglSwapInterval = nullptr;
 
 	class RendererGL : public RendererBase
 	{
