@@ -7,40 +7,49 @@
 // Vulkan 
 #include <vulkan/vulkan.h>
 
+void game::Engine::Initialize()
+{
+	// Set window info
+	if (!window.SetWindowInfo("Spinning Triangle", 1280, 720, false, false))
+	{
+		std::cout << game::lastError;
+	}
+
+	// Create the window
+	if (!window.CreateTheWindow())
+	{
+		std::cout << game::lastError;
+	}
+
+	// Set the renderer
+	renderer = new game::RendererGL();
+
+	// Create rendering device
+	if (!renderer->CreateDevice(window, true))
+	{
+		std::cout << game::lastError;
+		renderer->DestroyDevice();
+	}
+}
+
 int main()
 {
 	game::Engine eng;
 
-	// Create the window
-	if (!eng.window.SetWindowInfo("Spinning Triangle", 1280, 720, false, false))
-	{
-		std::cout << game::lastError;
-	}
-
-	if (!eng.window.CreateTheWindow())
-	{
-		std::cout << game::lastError;
-	}
-
-	eng.renderer = new game::RendererGL();
-
-	// Create rendering device
-	if (!eng.renderer->CreateDevice(eng.window, true))
-	{
-		std::cout << game::lastError;
-		eng.renderer->DestroyDevice();
-		return -1;
-	}
+	eng.Initialize();
 	
+	// Just to see version number
 	std::cout << glGetString(GL_VERSION) << "\n";
 
-
+	// Get rid of boring black background color
 	glClearColor(0.25f, 0.25f, 0.25f, 1.0f);
-	// "Game Loop"
+	
+	// Game Loop
 	do
 	{
+		// Catch messages from Windows
 		eng.window.DoMessagePump();
-
+		
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		glRotatef(1,1.0, 1.0f, 1.0f);
@@ -61,6 +70,5 @@ int main()
 	} while (eng.isRunning);
 
 	eng.renderer->DestroyDevice();
-	delete eng.renderer;
 	return 0;
 }

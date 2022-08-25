@@ -32,7 +32,7 @@ namespace game
 		// make window shared pointer, maybe could just be in game namespace
 		// NEW - thinking this will be in engine class
 
-		bool CreateDevice(Window window, const bool vsync)
+		bool CreateDevice(Window window, const bool vsync) override
 		{
 			// Create Device Context
 			glDeviceContext = GetDC(window.GetHandle());

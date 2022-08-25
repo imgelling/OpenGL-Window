@@ -141,6 +141,7 @@
   <ItemGroup>
     <ClCompile Include="..\..\..\Programming\GameLib2\GameErrors.cpp" />
     <ClCompile Include="GameAttributes.cpp" />
+    <ClCompile Include="GameEngine.cpp" />
     <ClCompile Include="GameWindow.cpp" />
     <ClCompile Include="Main.cpp" />
   </ItemGroup>
