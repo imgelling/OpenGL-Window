@@ -8,6 +8,7 @@ namespace game
 		isRunning = false;
 		enginePointer = this;
 		_renderer = nullptr;
+		_frameTime = 0.0f;
 
 		Initialize();
 	}
@@ -21,16 +22,24 @@ namespace game
 
 	void Engine::Start()
 	{
+		static double frameTimeAccum = 0.0f;
+		double msElapsed = 0.0f;
+
 		_timer.Reset();
-		float timeNow = 0.0f;
+		_frameLockTimer.Reset();
+		
 		do
 		{
 			ProcessMessages();
-			timeNow = _timer.Elapsed();
-			Render(timeNow);
-			Update(timeNow);
-			_timer.Reset();
-			Swap();
+			
+			if (_frameLockTimer.Elapsed() >= _frameTime)
+			{
+				_frameLockTimer.Reset();
+				Update(_timer.Elapsed());
+				Render(_timer.Elapsed());
+				_timer.Reset();
+				Swap();
+			}
 		} while (isRunning);
 	}
 
@@ -42,6 +51,14 @@ namespace game
 	void Engine::SetAttributes(const GameAttributes &attrib)
 	{
 		_attributes = attrib;
+		if (_attributes.Framelock > 0)
+		{
+			_frameTime = 1000.0 / (double)_attributes.Framelock;
+		}
+		else
+		{
+			_frameTime = 0;
+		}
 	}
 	
 	void Engine::SetWindowTitle(const std::string title)

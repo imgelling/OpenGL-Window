@@ -19,7 +19,7 @@ namespace game
 		DepthSize = 0;
 		MultiSamples = 0;
 		isDebugMode = false;
-		Framelock = 0;
+		Framelock = 0.0f;
 		RenderingAPI = RenderAPI::OpenGL; // Defaults to OpenGL
 		isVsync = true;
 	}

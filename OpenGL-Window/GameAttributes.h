@@ -20,7 +20,7 @@ namespace game
 		uint8_t DepthSize;		// Size, in bits of depth buffer
 		uint8_t MultiSamples;	// Multisampling, 0 is none, >0 enables multisampling
 		bool isDebugMode;		// Enable debug mode with the renderer (may just be OpenGL only)
-		uint8_t Framelock;		// A software lock on max frames per second
+		float Framelock;		// A software lock on max frames per second
 		RenderAPI RenderingAPI;	// Which rendering API are we using
 		bool isVsync;			// Is vsync on
 		GameAttributes();		// Loads some defaults intro structure

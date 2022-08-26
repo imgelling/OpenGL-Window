@@ -9,12 +9,15 @@
 
 // TODO ------
 // add a cpp file for GamePerformanceTimer
+// add a software framecap
 
 
 void game::Engine::Initialize()
 {
 	GameAttributes attrib;
 	attrib.WindowTitle = "Spinning Triangle";
+	attrib.Framelock = 10;
+	attrib.isVsync = false;
 	SetAttributes(attrib);
 }
 
@@ -22,24 +25,22 @@ void game::Engine::Shutdown()
 {
 }
 
-void game::Engine::Update(const float msElapsed)
+void game::Engine::Update(const double msElapsed)
 {
 	glClearColor(0.25f, 0.25f, 0.25f, 1.0f);
 }
 
-void game::Engine::Render(const float msElapsed)
+void game::Engine::Render(const double msElapsed)
 {
-	PerformanceTimer time;
-	time.Start("Render");
-	static float fpscount = 0.0f;
-	static float t = 0.0f;
-	fpscount += msElapsed;
-	t++;
-	if (fpscount >= 1000.0f)
+	static double fpsTime = 0.0f;
+	static float framesCounted = 0.0f;
+	fpsTime += msElapsed;
+	framesCounted++;
+	if (fpsTime >= 1000.0f)
 	{
-		SetWindowTitle("Spinning Triangle - " + std::to_string(t) + " fps.");
-		t = 0.0f;
-		fpscount = fpscount - 1000.0f;
+		SetWindowTitle("Spinning Triangle - " + std::to_string(framesCounted) + " fps.");
+		framesCounted = 0.0f;
+		fpsTime = fpsTime - 1000.0f;
 	}
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -57,9 +58,6 @@ void game::Engine::Render(const float msElapsed)
 	glVertex2f(0, 0.5); // Pass third vertex
 
 	glEnd();
-	time.Stop("Render");
-	std::cout << time.LastRun("Render") / 1000.0f / 1000.0f << "\n";
-
 }
 
 int main()
