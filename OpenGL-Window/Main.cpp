@@ -64,7 +64,6 @@ void game::Engine::Render(const float msElapsed)
 	glEnd();
 
 	perf.Stop("Render");
-	//std::cout << perf.LastRun("Render") << "\n";
 }
 
 int main()

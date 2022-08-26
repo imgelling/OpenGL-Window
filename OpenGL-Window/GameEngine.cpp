@@ -22,20 +22,22 @@ namespace game
 
 	void Engine::Start()
 	{
+		float msElapsed = 0.0f;
 		_timer.Reset();
 		_frameLockTimer.Reset();
 		
 		do
 		{
 			ProcessMessages();
-			
+
 			if (_frameLockTimer.Elapsed() >= _frameTime)
 			{
-				_frameLockTimer.Reset();
-				Update(_timer.Elapsed());
-				Render(_timer.Elapsed());
-				_timer.Reset();
+				msElapsed = _timer.Elapsed();
+				Update(msElapsed);
+				Render(msElapsed);
 				Swap();
+				_frameLockTimer.Reset();
+				_timer.Reset();
 			}
 		} while (isRunning);
 	}
