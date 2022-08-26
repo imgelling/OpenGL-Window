@@ -52,12 +52,26 @@ namespace game
 		_attributes = attrib;
 		if (_attributes.Framelock > 0)
 		{
-			_frameTime = 1000.0f / (float)_attributes.Framelock;
+			_frameTime = 1000.0f / _attributes.Framelock;
 		}
 		else
 		{
-			_frameTime = 0;
+			_frameTime = 0.0f;
 		}
+	}
+
+	void Engine::SetFrameLock(const uint32_t limit)
+	{
+		_attributes.Framelock = (float)limit;
+		if (_attributes.Framelock > 0)
+		{
+			_frameTime = 1000.0f / _attributes.Framelock;
+		}
+		else
+		{
+			_frameTime = 0.0f;
+		}
+
 	}
 	
 	void Engine::SetWindowTitle(const std::string title)

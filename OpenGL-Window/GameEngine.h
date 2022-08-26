@@ -22,14 +22,15 @@ namespace game
 		void Start();
 
 		void SetWindowTitle(const std::string title);
+		void SetFrameLock(const uint32_t limit);
 	private:
 #pragma region NeedsToBeCreatedByUser
 		void Update(const float msElapsed);
 		void Render(const float msElapsed);
 		void Initialize();
 		void Shutdown();
-		void Swap();
 #pragma endregion
+		void Swap();
 		float _frameTime;
 		GameAttributes _attributes;
 		RendererBase* _renderer;

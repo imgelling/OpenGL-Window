@@ -19,6 +19,7 @@ void game::Engine::Initialize()
 	attrib.Framelock = 60;
 	attrib.isVsync = false;
 	SetAttributes(attrib);
+	SetFrameLock(30);
 }
 
 void game::Engine::Shutdown()
