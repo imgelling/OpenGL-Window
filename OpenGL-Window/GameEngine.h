@@ -24,13 +24,13 @@ namespace game
 		void SetWindowTitle(const std::string title);
 	private:
 #pragma region NeedsToBeCreatedByUser
-		void Update(const double msElapsed);
-		void Render(const double msElapsed);
+		void Update(const float msElapsed);
+		void Render(const float msElapsed);
 		void Initialize();
 		void Shutdown();
 		void Swap();
 #pragma endregion
-		double _frameTime;
+		float _frameTime;
 		GameAttributes _attributes;
 		RendererBase* _renderer;
 		Window _window;

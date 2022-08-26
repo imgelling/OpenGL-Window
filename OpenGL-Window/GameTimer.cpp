@@ -12,10 +12,10 @@ namespace game
 		_startTime = std::chrono::high_resolution_clock::now();
 	}
 
-	double GameTimer::Elapsed()
+	float GameTimer::Elapsed()
 	{
 		std::chrono::microseconds ticks = std::chrono::duration_cast<std::chrono::microseconds>((std::chrono::high_resolution_clock::now() - _startTime));
-		double diff = (double)(ticks.count()) / 1000.0;
+		float diff = (float)(ticks.count()) / 1000.0f;
 		return diff;
 	}
 

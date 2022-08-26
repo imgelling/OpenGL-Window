@@ -22,9 +22,6 @@ namespace game
 
 	void Engine::Start()
 	{
-		static double frameTimeAccum = 0.0f;
-		double msElapsed = 0.0f;
-
 		_timer.Reset();
 		_frameLockTimer.Reset();
 		
@@ -53,7 +50,7 @@ namespace game
 		_attributes = attrib;
 		if (_attributes.Framelock > 0)
 		{
-			_frameTime = 1000.0 / (double)_attributes.Framelock;
+			_frameTime = 1000.0f / (float)_attributes.Framelock;
 		}
 		else
 		{

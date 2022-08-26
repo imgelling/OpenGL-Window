@@ -16,7 +16,7 @@ void game::Engine::Initialize()
 {
 	GameAttributes attrib;
 	attrib.WindowTitle = "Spinning Triangle";
-	attrib.Framelock = 10;
+	attrib.Framelock = 60;
 	attrib.isVsync = false;
 	SetAttributes(attrib);
 }
@@ -25,14 +25,14 @@ void game::Engine::Shutdown()
 {
 }
 
-void game::Engine::Update(const double msElapsed)
+void game::Engine::Update(const float msElapsed)
 {
 	glClearColor(0.25f, 0.25f, 0.25f, 1.0f);
 }
 
-void game::Engine::Render(const double msElapsed)
+void game::Engine::Render(const float msElapsed)
 {
-	static double fpsTime = 0.0f;
+	static float fpsTime = 0.0f;
 	static float framesCounted = 0.0f;
 	fpsTime += msElapsed;
 	framesCounted++;
