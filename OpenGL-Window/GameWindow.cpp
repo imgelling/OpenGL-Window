@@ -94,14 +94,13 @@ namespace game
 		return true;
 	}
 
-	bool Window::SetWindowTitle(const std::string title)
+	void Window::SetWindowTitle(const std::string title)
 	{
 #ifdef UNICODE
-		SetWindowText(_windowHandle, ConvertToWide(_windowTitle).c_str());
+		SetWindowText(_windowHandle, ConvertToWide(title).c_str());
 #else
 		SetWindowText(olc_hWnd, s.c_str());
 #endif
-		return true;
 	}
 
 	void Window::DoMessagePump(void)

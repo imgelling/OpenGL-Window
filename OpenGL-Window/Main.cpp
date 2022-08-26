@@ -29,11 +29,10 @@ void game::Engine::Render(const float msElapsed)
 	static float t = 0.0f;
 	fpscount += msElapsed;
 	t++;
-	if (fpscount > 1000.0)
+	if (fpscount >= 1000.0f)
 	{
-
-		std::cout << (t) << " fps.\n";
-		t = 0;
+		SetWindowTitle("Spinning Triangle - " + std::to_string(t) + " fps.");
+		t = 0.0f;
 		fpscount = fpscount - 1000.0f;
 	}
 

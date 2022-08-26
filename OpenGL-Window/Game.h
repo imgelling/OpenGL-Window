@@ -1,6 +1,17 @@
 #pragma once
 
-
+#pragma region Opengl
+#include <gl/GL.h>
+#include <gl/GLU.h>
+#pragma region WindowsOnly
+#pragma comment(lib, "user32.lib")
+#pragma comment(lib, "gdi32.lib")
+#pragma comment(lib, "opengl32.lib")
+// below is for flush (block till vsync), Windows only..maybe
+//#include <dwmapi.h>
+//#pragma comment(lib, "Dwmapi.lib")
+#pragma endregion
+#pragma endregion
 
 #pragma region Engine
 #include "GameAttributes.h"

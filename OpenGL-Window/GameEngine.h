@@ -20,6 +20,8 @@ namespace game
 		void SetAttributes(const GameAttributes &attrib);
 		bool Create();
 		void Start();
+
+		void SetWindowTitle(const std::string title);
 	private:
 #pragma region NeedsToBeCreatedByUser
 		void Update(const float msElapsed);

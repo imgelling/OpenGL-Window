@@ -43,7 +43,11 @@ namespace game
 	{
 		_attributes = attrib;
 	}
-
+	
+	void Engine::SetWindowTitle(const std::string title)
+	{
+		_window.SetWindowTitle(title);
+	}
 	bool Engine::Create()
 	{
 		// Set window info
