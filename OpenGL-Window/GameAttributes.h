@@ -22,6 +22,7 @@ namespace game
 		bool isDebugMode;		// Enable debug mode with the renderer (may just be OpenGL only)
 		uint8_t Framelock;		// A software lock on max frames per second
 		RenderAPI RenderingAPI;	// Which rendering API are we using
+		bool isVsync;			// Is vsync on
 		GameAttributes();		// Loads some defaults intro structure
 	};
 }

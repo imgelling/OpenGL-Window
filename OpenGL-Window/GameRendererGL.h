@@ -8,8 +8,8 @@
 #pragma comment(lib, "gdi32.lib")
 #pragma comment(lib, "opengl32.lib")
 // below is for flush (block till vsync), Windows only..maybe
-#include <dwmapi.h>
-#pragma comment(lib, "Dwmapi.lib")
+//#include <dwmapi.h>
+//#pragma comment(lib, "Dwmapi.lib")
 #pragma endregion
 #pragma endregion
 
@@ -70,9 +70,9 @@ namespace game
 				return false;
 			}
 			if (vsync)
-				wglSwapInterval(0);
-			else
 				wglSwapInterval(1);
+			else
+				wglSwapInterval(0);
 			_vSync = vsync;
 
 			// Engine is now running
@@ -88,8 +88,8 @@ namespace game
 		}
 		void Swap() override
 		{
+
 			SwapBuffers(glDeviceContext);
-			if (_vSync) DwmFlush(); // blocks till next present
 		};
 	private:
 	};

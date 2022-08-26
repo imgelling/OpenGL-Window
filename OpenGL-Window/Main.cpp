@@ -18,13 +18,25 @@ void game::Engine::Shutdown(void)
 {
 }
 
-void game::Engine::Update()
+void game::Engine::Update(const float msElapsed)
 {
 	glClearColor(0.25f, 0.25f, 0.25f, 1.0f);
 }
 
-void game::Engine::Render()
+void game::Engine::Render(const float msElapsed)
 {
+	static float fpscount = 0.0f;
+	static float t = 0.0f;
+	fpscount += msElapsed;
+	t++;
+	if (fpscount > 1000.0)
+	{
+
+		std::cout << (t) << " fps.\n";
+		t = 0;
+		fpscount = fpscount - 1000.0f;
+	}
+
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	glRotatef(1, 1.0, 1.0f, 1.0f);

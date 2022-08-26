@@ -21,11 +21,15 @@ namespace game
 
 	void Engine::Start()
 	{
+		_timer.Reset();
+		float timeNow = 0.0f;
 		do
 		{
 			ProcessMessages();
-			Update();
-			Render();
+			timeNow = _timer.Elapsed();
+			Render(timeNow);
+			Update(timeNow);
+			_timer.Reset();
 			Swap();
 		} while (isRunning);
 	}
@@ -73,7 +77,7 @@ namespace game
 		
 
 		// Create rendering device
-		if (!_renderer->CreateDevice(_window, true))
+		if (!_renderer->CreateDevice(_window, _attributes.isVsync))
 		{
 			std::cout << game::lastError;
 			_renderer->DestroyDevice();

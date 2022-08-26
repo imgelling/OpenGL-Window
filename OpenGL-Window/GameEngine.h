@@ -2,6 +2,7 @@
 
 #include "GameRendererBase.h"
 #include "GameAttributes.h"
+#include "GameTimer.h"
 
 namespace game
 {
@@ -21,8 +22,8 @@ namespace game
 		void Start();
 	private:
 #pragma region NeedsToBeCreatedByUser
-		void Update();
-		void Render();
+		void Update(const float msElapsed);
+		void Render(const float msElapsed);
 		void Initialize();
 		void Shutdown();
 		void Swap();
@@ -30,5 +31,6 @@ namespace game
 		GameAttributes _attributes;
 		RendererBase* _renderer;
 		Window _window;
+		GameTimer _timer;
 	};
 }

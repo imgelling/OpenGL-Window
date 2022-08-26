@@ -9,6 +9,7 @@
 #include "GameHelpers.h"
 #include "GameRendererBase.h"
 #include "GameRendererGL.h"
+#include "GameTimer.h"
 #include "GameWindow.h"
 #pragma endregion
 
