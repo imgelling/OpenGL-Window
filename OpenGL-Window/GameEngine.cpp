@@ -1,5 +1,6 @@
 #include "GameEngine.h"
 #include "GameRendererGL.h"
+#include "GameRendererVK.h"
 
 namespace game
 {
@@ -16,7 +17,7 @@ namespace game
 	Engine::~Engine()
 	{
 		Shutdown();
-		_renderer->DestroyDevice();
+		if (_renderer) _renderer->DestroyDevice();
 		delete _renderer;
 	}
 
@@ -102,6 +103,10 @@ namespace game
 		if (_attributes.RenderingAPI == RenderAPI::OpenGL)
 		{
 			_renderer = new game::RendererGL();
+		}
+		else if (_attributes.RenderingAPI == RenderAPI::Vulkan)
+		{
+			_renderer = new game::RendererVK();
 		}
 		else
 		{

@@ -74,7 +74,7 @@ namespace game
 		wc.cbWndExtra = 0;
 		wc.lpszMenuName = nullptr;
 		wc.hbrBackground = nullptr;
-		wc.lpszClassName = Wide("GAME_ENGINE"); // needs new macro
+		wc.lpszClassName = Wide("GAME_ENGINE"); 
 		RegisterClass(&wc);
 
 		DWORD dwExStyle = WS_EX_APPWINDOW | WS_EX_WINDOWEDGE;
@@ -117,4 +117,5 @@ namespace game
 	{
 		return _windowHandle;
 	}
+	
 }

@@ -4,13 +4,6 @@
 // Engine header
 #include "Game.h"
 
-// Vulkan 
-#include <vulkan/vulkan.h>
-
-// TODO ------
-// add a cpp file for GamePerformanceTimer
-// add a software framecap
-
 
 void game::Engine::Initialize()
 {
@@ -18,8 +11,8 @@ void game::Engine::Initialize()
 	attrib.WindowTitle = "Spinning Triangle";
 	attrib.Framelock = 60;
 	attrib.isVsync = false;
+	//attrib.RenderingAPI = RenderAPI::Vulkan;
 	SetAttributes(attrib);
-	SetFrameLock(30);
 }
 
 void game::Engine::Shutdown()
@@ -71,7 +64,7 @@ int main()
 {
 	game::Engine eng;
 
-
+	// Create the needed bits for the engine
 	if (!eng.Create())
 	{
 		std::cout << game::lastError;
@@ -79,8 +72,9 @@ int main()
 	}
 	
 	// Just to see version number
-	std::cout << glGetString(GL_VERSION) << "\n";
+	//std::cout << glGetString(GL_VERSION) << "\n";
 
+	// Start the engine
 	eng.Start();
 
 	return 0;

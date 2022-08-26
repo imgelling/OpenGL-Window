@@ -13,6 +13,10 @@
 #pragma endregion
 #pragma endregion
 
+#pragma region Vulkan
+#include "vulkan/vulkan.h"
+#pragma endregion
+
 #pragma region Engine
 #include "GameAttributes.h"
 #include "GameEngine.h"
@@ -21,6 +25,7 @@
 #include "GamePerformanceTimer.h"
 #include "GameRendererBase.h"
 #include "GameRendererGL.h"
+#include "GameRendererVK.h"
 #include "GameTimer.h"
 #include "GameWindow.h"
 #pragma endregion

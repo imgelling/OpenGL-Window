@@ -3,6 +3,7 @@
 #include <string>
 
 #include "GameHelpers.h"
+#include "GameAttributes.h"
 
 namespace game
 {

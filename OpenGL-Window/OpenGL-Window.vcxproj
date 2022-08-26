@@ -155,6 +155,7 @@
     <ClInclude Include="GamePerformanceTimer.h" />
     <ClInclude Include="GameRendererBase.h" />
     <ClInclude Include="GameRendererGL.h" />
+    <ClInclude Include="GameRendererVK.h" />
     <ClInclude Include="GameTimer.h" />
     <ClInclude Include="GameWindow.h" />
   </ItemGroup>
