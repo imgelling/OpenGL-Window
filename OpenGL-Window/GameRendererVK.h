@@ -4,7 +4,7 @@
 #include <vector>
 #include "GameRendererBase.h"
 
-#pragma comment(lib, "vulkan-1.lib")
+
 
 namespace game
 {

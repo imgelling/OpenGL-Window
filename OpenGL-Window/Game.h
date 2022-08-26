@@ -15,6 +15,9 @@
 
 #pragma region Vulkan
 #include "vulkan/vulkan.hpp"
+#pragma region WindowsOnly
+#pragma comment(lib, "vulkan-1.lib")
+#pragma endregion
 #pragma endregion
 
 #pragma region Engine
