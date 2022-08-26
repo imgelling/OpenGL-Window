@@ -7,6 +7,10 @@
 // Vulkan 
 #include <vulkan/vulkan.h>
 
+// TODO ------
+// add a cpp file for GamePerformanceTimer
+
+
 void game::Engine::Initialize()
 {
 	GameAttributes attrib;
@@ -25,6 +29,8 @@ void game::Engine::Update(const float msElapsed)
 
 void game::Engine::Render(const float msElapsed)
 {
+	PerformanceTimer time;
+	time.Start("Render");
 	static float fpscount = 0.0f;
 	static float t = 0.0f;
 	fpscount += msElapsed;
@@ -51,6 +57,9 @@ void game::Engine::Render(const float msElapsed)
 	glVertex2f(0, 0.5); // Pass third vertex
 
 	glEnd();
+	time.Stop("Render");
+	std::cout << time.LastRun("Render") / 1000.0f / 1000.0f << "\n";
+
 }
 
 int main()

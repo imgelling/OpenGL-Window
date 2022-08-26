@@ -18,6 +18,7 @@
 #include "GameEngine.h"
 #include "../../../Programming/GameLib2/GameErrors.h"
 #include "GameHelpers.h"
+#include "GamePerformanceTimer.h"
 #include "GameRendererBase.h"
 #include "GameRendererGL.h"
 #include "GameTimer.h"

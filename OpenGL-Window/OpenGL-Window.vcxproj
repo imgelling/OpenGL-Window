@@ -152,6 +152,7 @@
     <ClInclude Include="GameAttributes.h" />
     <ClInclude Include="GameEngine.h" />
     <ClInclude Include="GameHelpers.h" />
+    <ClInclude Include="GamePerformanceTimer.h" />
     <ClInclude Include="GameRendererBase.h" />
     <ClInclude Include="GameRendererGL.h" />
     <ClInclude Include="GameTimer.h" />
