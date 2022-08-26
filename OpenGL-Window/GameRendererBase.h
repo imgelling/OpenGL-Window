@@ -12,8 +12,8 @@ namespace game
 		{ 
 			return false;
 		};
-		virtual void DestroyDevice(void) {};
-		virtual void Swap(void) {};
+		virtual void DestroyDevice() {};
+		virtual void Swap() {};
 	protected:
 		bool _vSync = false;
 		GameAttributes _attributes;

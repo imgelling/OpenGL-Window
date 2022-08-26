@@ -14,7 +14,7 @@ void game::Engine::Initialize()
 	SetAttributes(attrib);
 }
 
-void game::Engine::Shutdown(void)
+void game::Engine::Shutdown()
 {
 }
 

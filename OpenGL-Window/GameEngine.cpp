@@ -34,7 +34,7 @@ namespace game
 		} while (isRunning);
 	}
 
-	void Engine::ProcessMessages(void)
+	void Engine::ProcessMessages()
 	{
 		_window.DoMessagePump();
 	}

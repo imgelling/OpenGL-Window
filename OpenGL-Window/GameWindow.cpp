@@ -103,7 +103,7 @@ namespace game
 #endif
 	}
 
-	void Window::DoMessagePump(void)
+	void Window::DoMessagePump()
 	{
 		MSG msg;
 		while (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE) > 0)
