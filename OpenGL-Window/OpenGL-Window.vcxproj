@@ -142,6 +142,7 @@
     <ClCompile Include="..\..\..\Programming\GameLib2\GameErrors.cpp" />
     <ClCompile Include="GameAttributes.cpp" />
     <ClCompile Include="GameEngine.cpp" />
+    <ClCompile Include="GameTimer.cpp" />
     <ClCompile Include="GameWindow.cpp" />
     <ClCompile Include="Main.cpp" />
   </ItemGroup>
@@ -153,6 +154,7 @@
     <ClInclude Include="GameHelpers.h" />
     <ClInclude Include="GameRendererBase.h" />
     <ClInclude Include="GameRendererGL.h" />
+    <ClInclude Include="GameTimer.h" />
     <ClInclude Include="GameWindow.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
