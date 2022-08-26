@@ -34,6 +34,10 @@ void game::Engine::Render(const float msElapsed)
 {
 	static float fpsTime = 0.0f;
 	static float framesCounted = 0.0f;
+	PerformanceTimer perf;
+
+	perf.Start("Render");
+
 	fpsTime += msElapsed;
 	framesCounted++;
 	if (fpsTime >= 1000.0f)
@@ -58,6 +62,9 @@ void game::Engine::Render(const float msElapsed)
 	glVertex2f(0, 0.5); // Pass third vertex
 
 	glEnd();
+
+	perf.Stop("Render");
+	//std::cout << perf.LastRun("Render") << "\n";
 }
 
 int main()
