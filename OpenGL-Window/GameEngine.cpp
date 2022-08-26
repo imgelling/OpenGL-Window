@@ -79,6 +79,7 @@ namespace game
 	{
 		_window.SetWindowTitle(title);
 	}
+	
 	bool Engine::Create()
 	{
 		// Set window info

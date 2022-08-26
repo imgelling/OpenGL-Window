@@ -1,8 +1,10 @@
 #pragma once
 
 #include <vulkan/vulkan.h>
+#include <vector>
 #include "GameRendererBase.h"
 
+#pragma comment(lib, "vulkan-1.lib")
 
 namespace game
 {
@@ -17,9 +19,9 @@ namespace game
 		{
 			VkApplicationInfo appInfo{};
 			appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
-			appInfo.pApplicationName = "Hello Triangle";
+			appInfo.pApplicationName = "Spinning Triangle";
 			appInfo.applicationVersion = VK_MAKE_VERSION(1, 0, 0);
-			appInfo.pEngineName = "No Engine";
+			appInfo.pEngineName = "Game Engine";
 			appInfo.engineVersion = VK_MAKE_VERSION(1, 0, 0);
 			appInfo.apiVersion = VK_API_VERSION_1_0;
 
@@ -30,30 +32,40 @@ namespace game
 			createInfo.ppEnabledExtensionNames = NULL;
 			createInfo.enabledLayerCount = 0;
 
+			// Create an instance
+			VkResult res = vkCreateInstance(&createInfo, nullptr, &_vkInstance);
+			if (res != VK_SUCCESS)
+			{
+				lastError = { GameErrors::GameVulkanSpecific, "vkCreateInstance failed." };
+				return false;
+			}
 
-
+			// Check extensions
+			uint32_t extensionCount = 0;
+			vkEnumerateInstanceExtensionProperties(nullptr, &extensionCount, nullptr);
 			
+			// Enumerate extensions
+			std::vector<VkExtensionProperties> extensions(extensionCount);
+			vkEnumerateInstanceExtensionProperties(nullptr, &extensionCount, extensions.data());
 
+			// Print them out
+			std::cout << "available extensions:\n";
 
-
-			//VkResult result = vkCreateInstance(&createInfo, nullptr, &_vkInstance);
-			//if (result != VK_SUCCESS)
-			//{
-			//	lastError = { GameErrors::GameRenderer, "vkCreateInstance failed" };
-			//	return false;
-			//}
-
+			for (const auto& extension : extensions) {
+				std::cout << '\t' << extension.extensionName << '\n';
+			}
 
 			// Engine is now running
 			enginePointer->isRunning = true;
 
 			return true;
 		}
+
 		void DestroyDevice() override
 		{
-
-
+			vkDestroyInstance(_vkInstance, nullptr);
 		}
+
 		void Swap() override
 		{
 
