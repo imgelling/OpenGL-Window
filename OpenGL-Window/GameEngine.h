@@ -14,6 +14,7 @@ namespace game
 	{
 	public:
 		bool isRunning;
+		GameLogger* logger;
 
 		Engine(GameLogger* logger);
 		~Engine();
@@ -38,6 +39,7 @@ namespace game
 		Window _window;
 		GameTimer _timer;
 		GameTimer _frameLockTimer;
-		GameLogger* _logger;
+
+
 	};
 }

@@ -11,18 +11,13 @@ namespace game
 	{
 	public:
 		Window();
-		bool SetWindowInfo(const std::string title, const uint32_t width, const uint32_t height, const bool fullScreen, const bool borderless);
 		bool CreateTheWindow();
+		void SetAttributes(const GameAttributes attrib);
 		void SetWindowTitle(const std::string title);
-		std::string GetWindowTitle();
 		void DoMessagePump();
 		HWND GetHandle();
 	private:
-		std::string _windowTitle;
-		uint32_t _windowWidth;
-		uint32_t _windowHeight;
-		bool _isFullScreen;
-		bool _isBorderless;
+		GameAttributes _attributes;
 
 		// Windows only stuff
 		HWND _windowHandle;

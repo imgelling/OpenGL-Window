@@ -11,11 +11,11 @@ namespace game
 
 	Window::Window()
 	{
-		_windowWidth = 0;
-		_windowHeight = 0;
-		_isFullScreen = false;
-		_isBorderless = false;
-		_windowHandle = NULL;
+		//_windowWidth = 0;
+		//_windowHeight = 0;
+		//_isFullScreen = false;
+		//_isBorderless = false;
+		//_windowHandle = NULL;
 	}
 
 	LRESULT CALLBACK Window::WindowEventProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
@@ -51,17 +51,6 @@ namespace game
 		return DefWindowProc(hWnd, uMsg, wParam, lParam);
 	}
 
-	bool Window::SetWindowInfo(const std::string title, const uint32_t width, const uint32_t height, const bool fullScreen, const bool borderless)
-	{
-		_windowTitle = title;
-		_windowWidth = width;
-		_windowHeight = height;
-		_isFullScreen = fullScreen;
-		_isBorderless = borderless;
-
-		return true;
-	}
-
 	bool Window::CreateTheWindow()
 	{
 		WNDCLASS wc{};
@@ -82,17 +71,21 @@ namespace game
 		DWORD dwStyle = WS_CAPTION | WS_SYSMENU | WS_VISIBLE | WS_THICKFRAME | WS_MAXIMIZEBOX | WS_MINIMIZEBOX;
 
 		_windowHandle = CreateWindowEx(dwExStyle, Wide("GAME_ENGINE"), Wide(""), dwStyle,
-			0, 0, _windowWidth, _windowHeight, NULL, NULL, GetModuleHandle(nullptr), this);
+			0, 0, _attributes.WindowWidth, _attributes.WindowHeight, NULL, NULL, GetModuleHandle(nullptr), this);
 		if (!_windowHandle)
 		{
-
 			lastError = { GameErrors::GameWindowsSpecific, "Windows Error Number : " + std::to_string(GetLastError()) };
 			return false;
 		}
 
-		SetWindowTitle(_windowTitle);
+		SetWindowTitle(_attributes.WindowTitle);
 
 		return true;
+	}
+
+	void Window::SetAttributes(const GameAttributes attrib)
+	{
+		_attributes = attrib;
 	}
 
 	void Window::SetWindowTitle(const std::string title)
@@ -102,11 +95,6 @@ namespace game
 #else
 		SetWindowText(olc_hWnd, s.c_str());
 #endif
-	}
-
-	std::string Window::GetWindowTitle()
-	{
-		return _windowTitle;
 	}
 
 	void Window::DoMessagePump()

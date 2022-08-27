@@ -19,7 +19,7 @@ namespace game
 		// make window shared pointer, maybe could just be in game namespace
 		// NEW - thinking this will be in engine class
 
-		bool CreateDevice(Window window, const bool vsync) override
+		bool CreateDevice(Window window) override
 		{
 			// Create Device Context
 			glDeviceContext = GetDC(window.GetHandle());
@@ -56,11 +56,10 @@ namespace game
 				lastError = { GameErrors::GameOpenGLSpecific, "Loading SwapInterval Failed" };
 				return false;
 			}
-			if (vsync)
+			if (_attributes.isVsync)
 				wglSwapInterval(1);
 			else
 				wglSwapInterval(0);
-			_vSync = vsync;
 
 			// Engine is now running
 			enginePointer->isRunning = true;

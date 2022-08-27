@@ -10,7 +10,7 @@ namespace game
 		enginePointer = this;
 		_renderer = nullptr;
 		_frameTime = 0.0f;
-		_logger = logger;
+		this->logger = logger;
 		Initialize();
 	}
 
@@ -24,8 +24,6 @@ namespace game
 	void Engine::Start()
 	{
 		float msElapsed = 0.0f;
-
-		_logger->Header(_attributes.WindowTitle, _attributes.GameVersion);
 
 		_timer.Reset();
 		_frameLockTimer.Reset();
@@ -86,18 +84,10 @@ namespace game
 	
 	bool Engine::Create()
 	{
-		// Set window info
-		if (!_window.SetWindowInfo(_attributes.WindowTitle,
-			_attributes.WindowWidth,
-			_attributes.WindowHeight,
-			_attributes.isWindowFullscreen,
-			_attributes.isWindowBorderless))
-		{
-			std::cout << game::lastError;
-			return false;
-		}
+		logger->Header(_attributes.WindowTitle, _attributes.GameVersion);
 
 		// Create the window
+		_window.SetAttributes(_attributes);
 		if (!_window.CreateTheWindow())
 		{
 			std::cout << game::lastError;
@@ -118,10 +108,10 @@ namespace game
 			lastError = { GameErrors::GameInvalidParameter, "Only OpenGL is implemented." };
 			return false;
 		}
-		
+		_renderer->SetAttributes(_attributes);
 
 		// Create rendering device
-		if (!_renderer->CreateDevice(_window, _attributes.isVsync))
+		if (!_renderer->CreateDevice(_window))
 		{
 			std::cout << game::lastError;
 			_renderer->DestroyDevice();

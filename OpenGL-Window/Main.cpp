@@ -8,11 +8,12 @@
 void game::Engine::Initialize()
 {
 	GameAttributes attrib;
+
 	attrib.WindowTitle = "Spinning Triangle";
 	attrib.GameVersion = "0.01";
-	//attrib.Framelock = 60;
-	attrib.isVsync = true;
-	//attrib.RenderingAPI = RenderAPI::Vulkan;
+	attrib.Framelock = 60;
+	//attrib.isVsync = true;
+	attrib.RenderingAPI = RenderAPI::Vulkan;
 	SetAttributes(attrib);
 }
 
@@ -42,21 +43,21 @@ void game::Engine::Render(const float msElapsed)
 		fpsTime = fpsTime - 1000.0f;
 	}
 
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	glRotatef(1, 1.0, 1.0f, 1.0f);
-	glBegin(GL_TRIANGLES);
+	//glRotatef(1, 1.0, 1.0f, 1.0f);
+	//glBegin(GL_TRIANGLES);
 
-	glColor3f(1.0f, 0.0f, 0.0f);
-	glVertex2f(-0.5, 0); // Pass first vertex
+	//glColor3f(1.0f, 0.0f, 0.0f);
+	//glVertex2f(-0.5, 0); // Pass first vertex
 
-	glColor3f(0.0f, 1.0f, 0.0f);
-	glVertex2f(0.5, 0); // Pass second vertex
+	//glColor3f(0.0f, 1.0f, 0.0f);
+	//glVertex2f(0.5, 0); // Pass second vertex
 
-	glColor3f(0.0f, 0.0f, 1.0f);
-	glVertex2f(0, 0.5); // Pass third vertex
+	//glColor3f(0.0f, 0.0f, 1.0f);
+	//glVertex2f(0, 0.5); // Pass third vertex
 
-	glEnd();
+	//glEnd();
 
 	perf.Stop("Render");
 }
@@ -74,7 +75,7 @@ int main()
 	}
 	
 	// Just to see version number
-	std::cout << glGetString(GL_VERSION) << "\n";
+	//std::cout << glGetString(GL_VERSION) << "\n";
 
 	// Start the engine
 	eng.Start();

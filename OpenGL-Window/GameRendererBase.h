@@ -8,14 +8,17 @@ namespace game
 	class RendererBase
 	{
 	public:
-		virtual bool CreateDevice(Window, bool vsync) 
+		void SetAttributes(const GameAttributes attrib)
+		{
+			_attributes = attrib;
+		}
+		virtual bool CreateDevice(Window window) 
 		{ 
 			return false;
 		};
 		virtual void DestroyDevice() {};
 		virtual void Swap() {};
 	protected:
-		bool _vSync = false;
 		GameAttributes _attributes;
 	};
 }
