@@ -4,13 +4,13 @@
 
 namespace game
 {
-	Engine::Engine()
+	Engine::Engine(GameLogger* logger)
 	{
 		isRunning = false;
 		enginePointer = this;
 		_renderer = nullptr;
 		_frameTime = 0.0f;
-
+		_logger = logger;
 		Initialize();
 	}
 
@@ -24,6 +24,10 @@ namespace game
 	void Engine::Start()
 	{
 		float msElapsed = 0.0f;
+
+		_logger->Header(_attributes.WindowTitle, "0.01");
+		_logger->Line();
+
 		_timer.Reset();
 		_frameLockTimer.Reset();
 		
@@ -78,6 +82,7 @@ namespace game
 	void Engine::SetWindowTitle(const std::string title)
 	{
 		_window.SetWindowTitle(title);
+		_attributes.WindowTitle = title;
 	}
 	
 	bool Engine::Create()

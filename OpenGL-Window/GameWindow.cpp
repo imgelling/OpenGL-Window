@@ -1,3 +1,4 @@
+#include <string>
 #include "GameWindow.h"
 
 #include "../../../Programming/GameLib2/GameErrors.h"
@@ -101,6 +102,11 @@ namespace game
 #else
 		SetWindowText(olc_hWnd, s.c_str());
 #endif
+	}
+
+	std::string Window::GetWindowTitle()
+	{
+		return _windowTitle;
 	}
 
 	void Window::DoMessagePump()

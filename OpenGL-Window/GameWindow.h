@@ -14,6 +14,7 @@ namespace game
 		bool SetWindowInfo(const std::string title, const uint32_t width, const uint32_t height, const bool fullScreen, const bool borderless);
 		bool CreateTheWindow();
 		void SetWindowTitle(const std::string title);
+		std::string GetWindowTitle();
 		void DoMessagePump();
 		HWND GetHandle();
 	private:

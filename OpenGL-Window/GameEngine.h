@@ -3,6 +3,7 @@
 #include "GameRendererBase.h"
 #include "GameAttributes.h"
 #include "GameTimer.h"
+#include "GameLogger.h"
 
 namespace game
 {
@@ -14,7 +15,7 @@ namespace game
 	public:
 		bool isRunning;
 
-		Engine();
+		Engine(GameLogger* logger);
 		~Engine();
 		void ProcessMessages();
 		void SetAttributes(const GameAttributes &attrib);
@@ -37,5 +38,6 @@ namespace game
 		Window _window;
 		GameTimer _timer;
 		GameTimer _frameLockTimer;
+		GameLogger* _logger;
 	};
 }
