@@ -28,22 +28,6 @@ namespace game
 			enginePointer->logger->Write("Create Vulkan instance successful!");
 
 
-
-			//// Check extensions
-			//uint32_t extensionCount = 0;
-			//vkEnumerateInstanceExtensionProperties(nullptr, &extensionCount, nullptr);
-			//
-			//// Enumerate extensions
-			//std::vector<VkExtensionProperties> extensions(extensionCount);
-			//vkEnumerateInstanceExtensionProperties(nullptr, &extensionCount, extensions.data());
-
-			//// Print them out
-			//std::cout << "available extensions:\n";
-
-			//for (const auto& extension : extensions) {
-			//	std::cout << '\t' << extension.extensionName << '\n';
-			//}
-
 			// Engine is now running
 			enginePointer->isRunning = true;
 
@@ -68,7 +52,7 @@ namespace game
 			appInfo.applicationVersion = VK_MAKE_VERSION(1, 0, 0);
 			appInfo.pEngineName = "Game Engine";
 			appInfo.engineVersion = VK_MAKE_VERSION(1, 0, 0);
-			appInfo.apiVersion = VK_API_VERSION_1_0;
+			appInfo.apiVersion = VK_API_VERSION_1_3;
 
 			// Check extensions
 			uint32_t extensionCount = 0;

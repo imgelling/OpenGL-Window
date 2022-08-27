@@ -61,6 +61,8 @@ namespace game
 			else
 				wglSwapInterval(0);
 
+			enginePointer->logger->Write("OpenGL Device created!");
+
 			// Engine is now running
 			enginePointer->isRunning = true;
 
