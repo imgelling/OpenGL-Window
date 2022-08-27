@@ -23,6 +23,7 @@ namespace game
 		float Framelock;		// A software lock on max frames per second
 		RenderAPI RenderingAPI;	// Which rendering API are we using
 		bool isVsync;			// Is vsync on
+		std::string GameVersion;// What version the game is
 		GameAttributes();		// Loads some defaults intro structure
 	};
 }

@@ -25,8 +25,7 @@ namespace game
 	{
 		float msElapsed = 0.0f;
 
-		_logger->Header(_attributes.WindowTitle, "0.01");
-		_logger->Line();
+		_logger->Header(_attributes.WindowTitle, _attributes.GameVersion);
 
 		_timer.Reset();
 		_frameLockTimer.Reset();

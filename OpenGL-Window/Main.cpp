@@ -9,6 +9,7 @@ void game::Engine::Initialize()
 {
 	GameAttributes attrib;
 	attrib.WindowTitle = "Spinning Triangle";
+	attrib.GameVersion = "0.01";
 	//attrib.Framelock = 60;
 	attrib.isVsync = true;
 	//attrib.RenderingAPI = RenderAPI::Vulkan;
