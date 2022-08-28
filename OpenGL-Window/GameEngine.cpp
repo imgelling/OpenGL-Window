@@ -113,7 +113,6 @@ namespace game
 		// Create rendering device
 		if (!_renderer->CreateDevice(_window))
 		{
-			std::cout << game::lastError;
 			_renderer->DestroyDevice();
 			return false;
 		}

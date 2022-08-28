@@ -71,8 +71,9 @@ namespace game
 		void DestroyDevice() override
 		{
 			wglMakeCurrent(NULL, NULL);
-			wglDeleteContext(glRenderContext);
-
+			if (glRenderContext) wglDeleteContext(glRenderContext);
+			glRenderContext = NULL;
+			glDeviceContext = NULL;
 		}
 		void Swap() override
 		{

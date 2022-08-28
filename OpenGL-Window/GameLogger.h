@@ -1,6 +1,7 @@
 #pragma once
 #include <fstream>
 #include <mutex>
+#include "../../../Programming/GameLib2/GameErrors.h"
 
 
 namespace game
@@ -12,6 +13,7 @@ namespace game
         void Header(const std::string name, const std::string version);
         void Write(const std::string logline);
         void Error(const std::string logline);
+        void Error(const GameError error);
         void Warning(const std::string logline);
         void Line();
         std::mutex streamlock;

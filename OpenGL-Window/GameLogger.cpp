@@ -1,5 +1,6 @@
 #include "GameLogger.h"
 #include <iostream>
+#include <sstream>
 
 namespace game
 {
@@ -36,6 +37,13 @@ namespace game
 	void GameLogger::Error(const std::string logline)
 	{
 		Write(LogType::ERRORS, logline);
+	}
+
+	void GameLogger::Error(const GameError error)
+	{
+		std::stringstream str;
+		str << error;
+		Write(LogType::ERRORS, str.str());
 	}
 
 	void GameLogger::Warning(const std::string logline)

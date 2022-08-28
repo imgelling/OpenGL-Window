@@ -23,6 +23,7 @@ namespace game
 			// Create the instance
 			if (!CreateInstance())
 			{
+				lastError = { GameErrors::GameVulkanSpecific, "Create Instance failed." };
 				return false;
 			};
 			enginePointer->logger->Write("Create Vulkan instance successful!");
@@ -36,7 +37,8 @@ namespace game
 
 		void DestroyDevice() override
 		{
-			vkDestroyInstance(_vkInstance, nullptr);
+			if (_vkInstance) vkDestroyInstance(_vkInstance, nullptr);
+			_vkInstance = nullptr;
 		}
 
 		void Swap() override
