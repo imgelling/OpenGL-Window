@@ -2,8 +2,17 @@
 #include "GameRendererGL.h"
 #include "GameRendererVK.h"
 
+
+
 namespace game
 {
+	// Makes computer choose dedicated over integrated gpus
+	//extern "C"
+	//{
+	//	__declspec(dllexport) DWORD NvOptimusEnablement = 0x00000001;
+	//	__declspec(dllexport) int AmdPowerXpressRequestHighPerformance = 1;
+	//} // can be slower for some reason
+
 	Engine::Engine(GameLogger* logger)
 	{
 		isRunning = false;
@@ -12,6 +21,7 @@ namespace game
 		_frameTime = 0.0f;
 		this->logger = logger;
 		Initialize();
+
 	}
 
 	Engine::~Engine()
@@ -34,12 +44,12 @@ namespace game
 
 			if (_frameLockTimer.Elapsed() >= _frameTime)
 			{
+				_frameLockTimer.Reset();
 				msElapsed = _timer.Elapsed();
+				_timer.Reset();
 				Update(msElapsed);
 				Render(msElapsed);
 				Swap();
-				_frameLockTimer.Reset();
-				_timer.Reset();
 			}
 		} while (isRunning);
 	}
