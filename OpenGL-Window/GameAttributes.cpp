@@ -10,7 +10,7 @@ namespace game
 		isWindowFullscreen = false;
 		isWindowBorderless = false;
 		ContextMajor = 3;
-		ContextMinor = 3;
+		ContextMinor = 2;
 		RedSize = 8;
 		BlueSize = 8;
 		GreenSize = 8;
