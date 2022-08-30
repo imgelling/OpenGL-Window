@@ -12,6 +12,7 @@ namespace game
         ~GameLogger();
         void Header(const std::string name, const std::string version);
         void Write(const std::string logline);
+        void WriteQuiet(const std::string logline);
         void Error(const std::string logline);
         void Error(const GameError error);
         void Warning(const std::string logline);

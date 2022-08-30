@@ -6,12 +6,6 @@
 
 namespace game
 {
-	// Makes computer choose dedicated over integrated gpus
-	//extern "C"
-	//{
-	//	__declspec(dllexport) DWORD NvOptimusEnablement = 0x00000001;
-	//	__declspec(dllexport) int AmdPowerXpressRequestHighPerformance = 1;
-	//} // can be slower for some reason
 
 	Engine::Engine(GameLogger* logger)
 	{

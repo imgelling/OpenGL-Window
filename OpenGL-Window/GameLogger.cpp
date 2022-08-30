@@ -87,6 +87,27 @@ namespace game
 		streamlock.unlock();
 	}
 
+	void GameLogger::WriteQuiet(const std::string logline)
+	{
+		std::string color;
+		std::string temp;
+		std::string pre;
+		std::string time;
+
+		GetTime();
+		time = std::string(buffer);
+		time.pop_back();
+		pre = "[" + time + "] ";
+		color = "FFFFFF";
+
+		temp += "<FONT style=\"background-color:#" + color + "\">";
+		temp += pre;
+		temp += logline + "</FONT><BR>";
+		streamlock.lock();
+		stream << temp << std::endl;
+		streamlock.unlock();
+	}
+
 	inline void GameLogger::GetTime()
 	{
 #ifdef __linux__

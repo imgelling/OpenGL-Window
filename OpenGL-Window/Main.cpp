@@ -2,6 +2,7 @@
 #include <iostream>
 
 // Engine header
+#define GAME_USE_DEDICATED_GPU
 #include "Game.h"
 
 
@@ -11,9 +12,9 @@ void game::Engine::Initialize()
 
 	attrib.WindowTitle = "Spinning Triangle";
 	attrib.GameVersion = "0.01";
-	attrib.Framelock = 60;
+	attrib.Framelock = 0;
 	attrib.isVsync = false;
-	attrib.isDebugMode = true;
+	attrib.isDebugMode = false;
 	//attrib.RenderingAPI = RenderAPI::Vulkan;
 	SetAttributes(attrib);
 }

@@ -7,6 +7,15 @@
 
 namespace game
 {
+	// Makes computer choose dedicated over integrated gpus
+#ifdef GAME_USE_DEDICATED_GPU
+	extern "C"
+	{
+		__declspec(dllexport) DWORD NvOptimusEnablement = 0x00000001;
+		__declspec(dllexport) int AmdPowerXpressRequestHighPerformance = 1;
+	} // can be slower for some reason
+#endif
+
 	class Engine;
 	extern Engine* enginePointer;
 	
