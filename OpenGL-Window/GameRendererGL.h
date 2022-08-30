@@ -6,7 +6,7 @@
 
 namespace game
 {
-constexpr auto WGL_CONTEXT_DEBUG_BIT_ARB = 0x0001;
+#define WGL_CONTEXT_DEBUG_BIT_ARB  0x0001
 #define WGL_CONTEXT_FORWARD_COMPATIBLE_BIT_ARB 0x0002
 #define WGL_CONTEXT_MAJOR_VERSION_ARB 0x2091
 #define WGL_CONTEXT_MINOR_VERSION_ARB 0x2092
@@ -178,24 +178,23 @@ constexpr auto WGL_CONTEXT_DEBUG_BIT_ARB = 0x0001;
 #define GL_QUERY_BY_REGION_WAIT 0x8E15
 #define GL_QUERY_BY_REGION_NO_WAIT 0x8E16
 
-	//typedef BOOL(WINAPI wglSwapInterval_t) (int interval);
-	//static wglSwapInterval_t* wglSwapInterval = nullptr;
-	
-	typedef BOOL(WINAPI* PFNWGLCHOOSEPIXELFORMATARBPROC) (HDC hdc, const int* piAttribIList, const FLOAT* pfAttribFList, UINT nMaxFormats, int* piFormats, UINT* nNumFormats);
-	static PFNWGLCHOOSEPIXELFORMATARBPROC wglChoosePixelFormatARB = nullptr;
-	
-	typedef HGLRC(WINAPI* PFNWGLCREATECONTEXTATTRIBSARBPROC) (HDC hDC, HGLRC hshareContext, const int* attribList);
-	static PFNWGLCREATECONTEXTATTRIBSARBPROC wglCreateContextAttribsARB = nullptr;
+	namespace GL
+	{
+		typedef BOOL(WINAPI* PFNWGLCHOOSEPIXELFORMATARBPROC) (HDC hdc, const int* piAttribIList, const FLOAT* pfAttribFList, UINT nMaxFormats, int* piFormats, UINT* nNumFormats);
+		extern PFNWGLCHOOSEPIXELFORMATARBPROC wglChoosePixelFormatARB;
 
-	typedef const GLubyte* (WINAPI* PFNGLGETSTRINGIPROC) (GLenum name, GLuint index);
-	static PFNGLGETSTRINGIPROC glGetStringi = nullptr;
+		typedef HGLRC(WINAPI* PFNWGLCREATECONTEXTATTRIBSARBPROC) (HDC hDC, HGLRC hshareContext, const int* attribList);
+		extern PFNWGLCREATECONTEXTATTRIBSARBPROC wglCreateContextAttribsARB;
 
-	typedef int (WINAPI* PFNWGLGETSWAPINTERVALEXTPROC) (void);
-	static PFNWGLGETSWAPINTERVALEXTPROC wglGetSwapInterval = nullptr;
+		typedef const GLubyte* (WINAPI* PFNGLGETSTRINGIPROC) (GLenum name, GLuint index);
+		extern PFNGLGETSTRINGIPROC glGetStringi;
 
-	typedef BOOL(WINAPI* PFNWGLSWAPINTERVALEXTPROC) (int interval);
-	static PFNWGLSWAPINTERVALEXTPROC wglSwapInterval = nullptr;
+		typedef int (WINAPI* PFNWGLGETSWAPINTERVALEXTPROC) (void);
+		extern PFNWGLGETSWAPINTERVALEXTPROC wglGetSwapInterval;
 
+		typedef BOOL(WINAPI* PFNWGLSWAPINTERVALEXTPROC) (int interval);
+		extern PFNWGLSWAPINTERVALEXTPROC wglSwapInterval;
+	}
 	
 	class RendererGL : public RendererBase
 	{
@@ -203,227 +202,15 @@ constexpr auto WGL_CONTEXT_DEBUG_BIT_ARB = 0x0001;
 		typedef HDC glDeviceContext_t;
 		typedef HGLRC glRenderContext_t;
 
-
 		glDeviceContext_t glDeviceContext = NULL;
 		glRenderContext_t glRenderContext = NULL;
 
-		RendererGL()
-		{
-			glDeviceContext_t glTempDevice = NULL;
-			glRenderContext_t glTempRender = NULL;
-			game::Window tempWindow;
-			GameAttributes tempAttrib;
-			PIXELFORMATDESCRIPTOR pixelFormatDescriptor =
-			{
-				sizeof(PIXELFORMATDESCRIPTOR), 1,
-				PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER,
-				PFD_TYPE_RGBA, 32, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-				PFD_MAIN_PLANE, 0, 0, 0, 0
-			};
+		RendererGL();
 
-			// Create a temporary invisible window
-			tempAttrib.WindowHeight = 0;
-			tempAttrib.WindowWidth = 0;
-			tempWindow.SetAttributes(tempAttrib);
-			if (!tempWindow.CreateTheWindow())
-			{
-				std::cout << "Temporary window creation failed.\n";
-				return;
-			}
+		bool CreateDevice(Window window) override;
+		void DestroyDevice() override;
+		void Swap() override;
 
-			// Get the device context
-			glTempDevice = GetDC(tempWindow.GetHandle());
-
-			// Choose a generic pixel format
-			uint32_t tempPixelFormat = 0;
-			tempPixelFormat = ChoosePixelFormat(glTempDevice, &pixelFormatDescriptor);
-			if (!tempPixelFormat)
-			{
-				std::cout << "Temporary Window ChoosePixelFormat Failed.\n";
-				return;
-			}
-
-			// Set the generic pixel format
-			if (!SetPixelFormat(glTempDevice, tempPixelFormat, &pixelFormatDescriptor))
-			{
-				std::cout << "Temporary Window SetPixelFormat Failed.\n";
-			}
-
-			// Create the OpenGL rendering context
-			glTempRender = wglCreateContext(glTempDevice);
-			if (!glTempRender)
-			{
-				std::cout << "Temporary Window wglCreateContext Failed.\n";
-				return;
-			}
-
-			// Use new rendering context
-			wglMakeCurrent(glTempDevice, glTempRender);
-
-			
-			// Load necessary extensions for actual OpenGl render context
-			wglChoosePixelFormatARB = (PFNWGLCHOOSEPIXELFORMATARBPROC)(wglGetProcAddress("wglChoosePixelFormatARB"));
-			if (wglChoosePixelFormatARB == nullptr)
-			{
-				std::cout << "wglChoosePixelFormatARM failed to load.\n";
-				return;
-			}
-
-			wglCreateContextAttribsARB = (PFNWGLCREATECONTEXTATTRIBSARBPROC)wglGetProcAddress("wglCreateContextAttribsARB");
-			if (wglCreateContextAttribsARB == nullptr)
-			{
-				std::cout << "wglCreateContextAttribsARB failed to load.\n";
-				return;
-			}
-
-			// Clean up OpenGL stuff
-			wglMakeCurrent(NULL, NULL);
-			if (glTempRender) wglDeleteContext(glTempRender);
-
-			// Clean up temporary window stuff
-			PostMessage(tempWindow.GetHandle(), WM_DESTROY, 0, 0);
-			tempWindow.DoMessagePump();
-		}
-
-		bool CreateDevice(Window window) override
-		{
-
-			const int glContextAttributes[] = {
-				WGL_CONTEXT_MAJOR_VERSION_ARB,  _attributes.ContextMajor,
-				WGL_CONTEXT_MINOR_VERSION_ARB,  _attributes.ContextMinor,
-				WGL_CONTEXT_FLAGS_ARB,
-				_attributes.isDebugMode ? WGL_CONTEXT_DEBUG_BIT_ARB : 0,              
-				WGL_CONTEXT_PROFILE_MASK_ARB,   
-				_attributes.glBackwardsCompatible ? WGL_CONTEXT_COMPATIBILITY_PROFILE_BIT_ARB : WGL_CONTEXT_CORE_PROFILE_BIT_ARB,
-				0
-			};
-			int32_t pixelFormatsChosen[1] = { 0 };
-			uint32_t numberOfPixelFormatsChosen = 0;
-
-			int pixelAttributeList[] =
-			{
-				WGL_SUPPORT_OPENGL_ARB, 1,
-				WGL_DRAW_TO_WINDOW_ARB, 1,
-				WGL_COLOR_BITS_ARB, 32,
-				WGL_RED_BITS_ARB, 8,
-				WGL_GREEN_BITS_ARB, 8,
-				WGL_BLUE_BITS_ARB, 8,
-				WGL_ALPHA_BITS_ARB, 8,
-				WGL_DEPTH_BITS_ARB, 24,
-				WGL_STENCIL_BITS_ARB, 0,
-				WGL_DOUBLE_BUFFER_ARB, 1,
-				WGL_STEREO_ARB, 0,
-				WGL_PIXEL_TYPE_ARB, WGL_TYPE_RGBA_ARB,
-				0
-			}; // Nvidia does not like WGL_ACCELERATED_ARB or whatever
-
-			float pixelAttribFloatList[] = { 0, 0 };
-			PIXELFORMATDESCRIPTOR pixelFormatDescriptor = { 0 };
-
-			// Get the window handle as the device we are using
-			glDeviceContext = GetDC(window.GetHandle());
-
-
-			// Choose a suitable pixel format for what attributes we want for real window
-			wglChoosePixelFormatARB(glDeviceContext, pixelAttributeList, pixelAttribFloatList, 1, &pixelFormatsChosen[0], &numberOfPixelFormatsChosen);
-			if (!numberOfPixelFormatsChosen)
-			{
-				lastError = { GameErrors::GameOpenGLSpecific, "No compatible pixel formats found." };
-				return false;
-			}
-
-			// Fills out some of the pixelformatedescriptor
-			if (!DescribePixelFormat(glDeviceContext, pixelFormatsChosen[0], sizeof(PIXELFORMATDESCRIPTOR), &pixelFormatDescriptor))
-			{
-				lastError = { GameErrors::GameWindowsSpecific, "DescribePixelFormat failed. Window Error " + std::to_string(GetLastError())};
-				return false;
-			}
-
-			// Set our pixel format that we got from the temporary window
-			if (!SetPixelFormat(glDeviceContext, pixelFormatsChosen[0], &pixelFormatDescriptor))
-			{
-				lastError = { GameErrors::GameWindowsSpecific, "SetPixelFormat failed. Windows Error " + std::to_string(GetLastError())};
-				return false;
-			}
-
-			// Create the rendering context
-			glRenderContext = wglCreateContextAttribsARB(glDeviceContext, 0, glContextAttributes);
-			if (glRenderContext == nullptr)
-			{
-				lastError = { GameErrors::GameOpenGLSpecific, "wglCreateContextAttribsARB failed" };
-				return false;
-			}
-
-			// Use the rendering context we just created
-			wglMakeCurrent(glDeviceContext, glRenderContext);
-	
-
-			// Load wglSwapInterval
-			wglSwapInterval = (PFNWGLSWAPINTERVALEXTPROC)wglGetProcAddress("wglSwapIntervalEXT");
-			if (wglSwapInterval == NULL)
-			{
-				lastError = { GameErrors::GameOpenGLSpecific, "Loading SwapInterval Failed" };
-				return false;
-			}
-
-			// Load wglGetSwapInterval
-			wglGetSwapInterval = (PFNWGLGETSWAPINTERVALEXTPROC)wglGetProcAddress("wglGetSwapIntervalEXT");
-			if (wglGetSwapInterval == nullptr)
-			{
-				lastError = { GameErrors::GameOpenGLSpecific, "Loading GetSwapInterval Failed" };
-				return false;
-			}
-
-			// Set vertical sync
-			if (_attributes.isVsync)
-				wglSwapInterval(1);
-			else
-				wglSwapInterval(0);
-
-			// Renderer is good to go
-			enginePointer->logger->Write("OpenGL Device created!");
-
-			// Engine is now running
-			enginePointer->isRunning = true;
-
-			// temp to write out extensions
-		
-			// Load glGetStringi
-			glGetStringi = (PFNGLGETSTRINGIPROC)wglGetProcAddress("glGetStringi");
-			if (glGetStringi == nullptr)
-			{
-				lastError = { GameErrors::GameOpenGLSpecific, "Extension glGetStringi not available." };
-				return false;
-			}
-
-			// Get the number of OpenGL extensions available
-			GLint numberOfExtensions = 0;
-			glGetIntegerv(GL_NUM_EXTENSIONS, &numberOfExtensions);
-			enginePointer->logger->WriteQuiet("Listing " + std::to_string(numberOfExtensions) + " OpenGL Extensions Available.");
-
-			// Write all extensions out to the log file, not stdout
-			std::string extensionName;
-			for (GLint extensionNumber = 0; extensionNumber < numberOfExtensions; extensionNumber++)
-			{
-				extensionName = (char*)glGetStringi(GL_EXTENSIONS, extensionNumber);
-				enginePointer->logger->WriteQuiet(extensionName);
-			}
-
-			return true;
-		}
-
-		void DestroyDevice() override
-		{
-			// Clean up OpenGL stuff
-			wglMakeCurrent(NULL, NULL);
-			if (glRenderContext) wglDeleteContext(glRenderContext);
-			glRenderContext = NULL;
-		}
-
-		void Swap() override
-		{
-			SwapBuffers(glDeviceContext);
-		};
 	private:
 	};
 }

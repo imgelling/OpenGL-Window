@@ -25,6 +25,14 @@ void game::Engine::Shutdown()
 
 void game::Engine::Update(const float msElapsed)
 {
+	static bool first = true;
+
+	if (first)
+	{
+		//game::GL::wglSwapInterval(1);
+				
+		first = false;
+	}
 	glClearColor(0.25f, 0.25f, 0.25f, 1.0f);
 }
 

@@ -144,6 +144,7 @@
     <ClCompile Include="GameEngine.cpp" />
     <ClCompile Include="GameLogger.cpp" />
     <ClCompile Include="GamePerformanceTimer.cpp" />
+    <ClCompile Include="GameRendererGL.cpp" />
     <ClCompile Include="GameTimer.cpp" />
     <ClCompile Include="GameWindow.cpp" />
     <ClCompile Include="Main.cpp" />
