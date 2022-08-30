@@ -13,6 +13,7 @@ void game::Engine::Initialize()
 	attrib.GameVersion = "0.01";
 	attrib.Framelock = 60;
 	attrib.isVsync = false;
+	attrib.isDebugMode = true;
 	//attrib.RenderingAPI = RenderAPI::Vulkan;
 	SetAttributes(attrib);
 }

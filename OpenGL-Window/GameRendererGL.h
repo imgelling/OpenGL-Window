@@ -5,7 +5,7 @@
 
 namespace game
 {
-#define WGL_CONTEXT_DEBUG_BIT_ARB 0x0001
+constexpr auto WGL_CONTEXT_DEBUG_BIT_ARB = 0x0001;
 #define WGL_CONTEXT_FORWARD_COMPATIBLE_BIT_ARB 0x0002
 #define WGL_CONTEXT_MAJOR_VERSION_ARB 0x2091
 #define WGL_CONTEXT_MINOR_VERSION_ARB 0x2092
@@ -85,19 +85,23 @@ namespace game
 		typedef HDC glDeviceContext_t;
 		typedef HGLRC glRenderContext_t;
 
-		int pixelform = 0;
+
 		glDeviceContext_t glDeviceContext = NULL;
 		glRenderContext_t glRenderContext = NULL;
 
 		RendererGL()
 		{
 			glDeviceContext_t glTempDevice = NULL;
-
 			glRenderContext_t glTempRender = NULL;
 			game::Window tempWindow;
+			GameAttributes tempAttrib;
+			tempAttrib.WindowHeight = 0;
+			tempAttrib.WindowWidth = 0;
+			tempWindow.SetAttributes(tempAttrib);
 			if (!tempWindow.CreateTheWindow())
 			{
-				std::cout << "Temp window not created.\n";
+				std::cout << "Temporary window creation failed.\n";
+				return;
 			}
 
 			// Create Device Context
@@ -110,46 +114,46 @@ namespace game
 				PFD_MAIN_PLANE, 0, 0, 0, 0
 			};
 
-			uint32_t pixelFormat = 0;
-			pixelFormat = ChoosePixelFormat(glTempDevice, &pixelFormatDescriptor);
-			if (!pixelFormat)
+			uint32_t tempPixelFormat = 0;
+			tempPixelFormat = ChoosePixelFormat(glTempDevice, &pixelFormatDescriptor);
+			if (!tempPixelFormat)
 			{
-				lastError = { GameErrors::GameWindowsSpecific, "Temp ChoosePixelFormat Failed." };
+				std::cout << "Temporary Window ChoosePixelFormat Failed.\n";
 				return;
 			}
-			SetPixelFormat(glTempDevice, pixelFormat, &pixelFormatDescriptor);
+
+			if (!SetPixelFormat(glTempDevice, tempPixelFormat, &pixelFormatDescriptor))
+			{
+				std::cout << "Temporary Window SetPixelFormat Failed.\n";
+			}
 
 			// Create the OpenGL rendering context
 			glTempRender = wglCreateContext(glTempDevice);
 			if (!glTempRender)
 			{
-				lastError = { GameErrors::GameOpenGLSpecific, "Temporary wglCreateContext Failed." };
+				std::cout << "Temporary Window wglCreateContext Failed.\n";
 				return;
 			}
 			wglMakeCurrent(glTempDevice, glTempRender);
 
-			// load some extensions
+			// Load necessary extensions for actual render
 
 			PFNWGLCHOOSEPIXELFORMATARBPROC wglChoosePixelFormatARB = (PFNWGLCHOOSEPIXELFORMATARBPROC)(wglGetProcAddress("wglChoosePixelFormatARB"));
 			if (wglChoosePixelFormatARB == nullptr)
 			{
-				lastError = { GameErrors::GameOpenGLSpecific, "wglChoosePixelFormatARM failed to load." };
+				std::cout << "wglChoosePixelFormatARM failed to load.\n";
 				return;
 			}
 
 			wglCreateContextAttribsARB = (PFNWGLCREATECONTEXTATTRIBSARBPROC)wglGetProcAddress("wglCreateContextAttribsARB");
 			if (wglCreateContextAttribsARB == nullptr)
 			{
-				lastError = { GameErrors::GameOpenGLSpecific, "wglCreateContextAttribsARB failed to load." };
+				std::cout << "wglCreateContextAttribsARB failed to load.\n";
 				return;
 			}
 
-			//uint32_t pixelFormat[1];
 
-
-
-
-			int pixfmt[32] = { 0 };
+			int pixfmt[1] = { 0 };
 			unsigned int numpf;
 
 			int piAttribIList[] =
@@ -163,9 +167,9 @@ namespace game
 				WGL_BLUE_BITS_ARB, 8,
 				WGL_ALPHA_BITS_ARB, 8,
 				WGL_DEPTH_BITS_ARB, 24,
-				//WGL_STENCIL_BITS_ARB, 8,
+				WGL_STENCIL_BITS_ARB, 8,
 				WGL_DOUBLE_BUFFER_ARB, 1,
-				//WGL_STEREO_ARB, 0,
+				WGL_STEREO_ARB, 0,
 				WGL_PIXEL_TYPE_ARB, WGL_TYPE_RGBA_ARB,
 				0
 			};
@@ -180,10 +184,13 @@ namespace game
 				return;
 			}
 
-			pixelform = pixfmt[0];
+			// Save the pixelformat for actual window
+			_pixelform = pixfmt[0];
+
+			// Clean up OpenGL stuff
 			wglMakeCurrent(NULL, NULL);
 			if (glTempRender) wglDeleteContext(glTempRender);
-			// need to close temp window
+			// Clean up temporary window stuff
 			PostMessage(tempWindow.GetHandle(), WM_DESTROY, 0, 0);
 			tempWindow.DoMessagePump();
 		}
@@ -200,20 +207,21 @@ namespace game
 				_attributes.glBackwardsCompatible ? WGL_CONTEXT_COMPATIBILITY_PROFILE_BIT_ARB : WGL_CONTEXT_CORE_PROFILE_BIT_ARB,
 				0
 			};
-			PIXELFORMATDESCRIPTOR pd;
-			pd = { 0 };
+			PIXELFORMATDESCRIPTOR pd = { 0 };
+
+
 			glDeviceContext = GetDC(window.GetHandle());
 
 
 
-			int attributeListInt[19] = { 0 };
 
-			if (!DescribePixelFormat(glDeviceContext, pixelform, sizeof(PIXELFORMATDESCRIPTOR), &pd))
+			if (!DescribePixelFormat(glDeviceContext, _pixelform, sizeof(PIXELFORMATDESCRIPTOR), &pd))
 			{
 				lastError = { GameErrors::GameWindowsSpecific, "DescribePixelFormat failed." };
+				return false;
 			}
 
-			if (!SetPixelFormat(glDeviceContext, pixelform, &pd))
+			if (!SetPixelFormat(glDeviceContext, _pixelform, &pd))
 			{
 				lastError = { GameErrors::GameWindowsSpecific, "SetPixelFormat failed. Windows Error " + std::to_string(GetLastError())};
 				return false;
@@ -249,16 +257,19 @@ namespace game
 
 			return true;
 		}
+
 		void DestroyDevice() override
 		{
 			wglMakeCurrent(NULL, NULL);
 			if (glRenderContext) wglDeleteContext(glRenderContext);
 			glRenderContext = NULL;
 		}
+
 		void Swap() override
 		{
 			SwapBuffers(glDeviceContext);
 		};
 	private:
+		uint32_t _pixelform = 0;
 	};
 }
