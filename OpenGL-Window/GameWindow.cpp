@@ -15,7 +15,7 @@ namespace game
 		//_windowHeight = 0;
 		//_isFullScreen = false;
 		//_isBorderless = false;
-		//_windowHandle = NULL;
+		_windowHandle = NULL;
 	}
 
 	LRESULT CALLBACK Window::WindowEventProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
@@ -68,7 +68,7 @@ namespace game
 		RegisterClass(&wc);
 
 		DWORD dwExStyle = WS_EX_APPWINDOW | WS_EX_WINDOWEDGE;
-		DWORD dwStyle = WS_CAPTION | WS_SYSMENU | WS_VISIBLE | WS_THICKFRAME | WS_MAXIMIZEBOX | WS_MINIMIZEBOX;
+		DWORD dwStyle = WS_CAPTION | WS_SYSMENU | WS_VISIBLE | WS_THICKFRAME | WS_MAXIMIZEBOX | WS_MINIMIZEBOX | WS_CLIPCHILDREN | WS_CLIPSIBLINGS;
 
 		_windowHandle = CreateWindowEx(dwExStyle, Wide("GAME_ENGINE"), Wide(""), dwStyle,
 			0, 0, _attributes.WindowWidth, _attributes.WindowHeight, NULL, NULL, GetModuleHandle(nullptr), this);

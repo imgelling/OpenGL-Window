@@ -9,13 +9,14 @@ namespace game
 		WindowHeight = 720;
 		isWindowFullscreen = false;
 		isWindowBorderless = false;
-		ContextMajor = 0;
-		ContextMinor = 0;
+		ContextMajor = 3;
+		ContextMinor = 3;
 		RedSize = 8;
 		BlueSize = 8;
 		GreenSize = 8;
 		AlphaSize = 8;
-		DoubleBuffer = 0; // may need to be -1 as was set in GameLib1
+		DoubleBuffer = 1; // may need to be -1 as was set in GameLib1
+		glBackwardsCompatible = true;
 		DepthSize = 0;
 		MultiSamples = 0;
 		isDebugMode = false;

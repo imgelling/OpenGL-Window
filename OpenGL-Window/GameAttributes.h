@@ -24,6 +24,7 @@ namespace game
 		RenderAPI RenderingAPI;	// Which rendering API are we using
 		bool isVsync;			// Is vsync on
 		std::string GameVersion;// What version the game is
+		bool glBackwardsCompatible;
 		GameAttributes();		// Loads some defaults intro structure
 	};
 }

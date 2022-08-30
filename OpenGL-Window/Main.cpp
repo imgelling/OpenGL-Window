@@ -10,9 +10,12 @@ void game::Engine::Initialize()
 	GameAttributes attrib;
 
 	attrib.WindowTitle = "Spinning Triangle";
+	attrib.ContextMajor = 3;
+	attrib.ContextMinor = 0;
 	attrib.GameVersion = "0.01";
 	attrib.Framelock = 60;
 	attrib.isVsync = false;
+	attrib.isDebugMode = true;
 	//attrib.RenderingAPI = RenderAPI::Vulkan;
 	SetAttributes(attrib);
 }
@@ -69,8 +72,8 @@ int main()
 		return EXIT_FAILURE;
 	}
 	
-	//// Just to see version number
-	//std::cout << glGetString(GL_VERSION) << "\n";
+	// Just to see version number
+	std::cout << glGetString(GL_VERSION) << "\n";
 
 	// Start the engine
 	engine.Start();
