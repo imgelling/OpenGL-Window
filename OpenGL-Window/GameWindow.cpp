@@ -11,10 +11,6 @@ namespace game
 
 	Window::Window()
 	{
-		//_windowWidth = 0;
-		//_windowHeight = 0;
-		//_isFullScreen = false;
-		//_isBorderless = false;
 		_windowHandle = NULL;
 	}
 
@@ -70,8 +66,34 @@ namespace game
 		DWORD dwExStyle = WS_EX_APPWINDOW | WS_EX_WINDOWEDGE;
 		DWORD dwStyle = WS_CAPTION | WS_SYSMENU | WS_VISIBLE | WS_THICKFRAME | WS_MAXIMIZEBOX | WS_MINIMIZEBOX | WS_CLIPCHILDREN | WS_CLIPSIBLINGS;
 
+		// fullscreen start
+		int32_t windowWidth = _attributes.WindowWidth;
+		int32_t windowHeight = _attributes.WindowHeight;
+
+		if (_attributes.isWindowFullscreen)
+		{
+			dwExStyle = 0;
+			dwStyle = WS_VISIBLE | WS_POPUP;
+			HMONITOR monitorHandle = MonitorFromWindow(_windowHandle, MONITOR_DEFAULTTONEAREST);
+			MONITORINFO monitorInfo = { sizeof(monitorInfo) };
+			if (!GetMonitorInfo(monitorHandle, &monitorInfo))
+			{
+				lastError = { GameErrors::GameWindowsSpecific, "GetMonitorInfo failed." };
+				return false;
+			}
+			windowWidth = monitorInfo.rcMonitor.right;
+			windowHeight = monitorInfo.rcMonitor.bottom;
+		}
+
+		// Adjust window size to account for title bar and edges
+		RECT rWndRect = { 0, 0, windowWidth, windowHeight };
+		AdjustWindowRectEx(&rWndRect, dwStyle, FALSE, dwExStyle);
+		int32_t adjustedWidth = rWndRect.right - rWndRect.left;
+		int32_t adjustedHeight = rWndRect.bottom - rWndRect.top;
+
+		// Create the actual window
 		_windowHandle = CreateWindowEx(dwExStyle, Wide("GAME_ENGINE"), Wide(""), dwStyle,
-			0, 0, _attributes.WindowWidth, _attributes.WindowHeight, NULL, NULL, GetModuleHandle(nullptr), this);
+			0, 0, adjustedWidth, adjustedHeight, NULL, NULL, GetModuleHandle(nullptr), this);
 		if (!_windowHandle)
 		{
 			lastError = { GameErrors::GameWindowsSpecific, "Windows Error Number : " + std::to_string(GetLastError()) };

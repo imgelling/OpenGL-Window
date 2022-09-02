@@ -30,22 +30,34 @@ namespace game
 		// Ensure we pass the same time delta to Update and Render
 		float msElapsed = 0.0f;
 
-		_timer.Reset();
+		_renderTimer.Reset();
 		_frameLockTimer.Reset();
+		_updateTimer.Reset();
 	
 		do
 		{
+			// Do window messages
 			ProcessMessages();
 
+			msElapsed = _updateTimer.Elapsed();
+			if (msElapsed > 0.0f)
+			{
+				Update(msElapsed);
+				_updateTimer.Reset();
+			}
+			//else
+			//{
+			//	//std::cout << "Something weird going on." << msElapsed << "\n";
+			//}
 			if (_frameLockTimer.Elapsed() >= _frameTime)
 			{
 				_frameLockTimer.Reset();
-				msElapsed = _timer.Elapsed();
-				_timer.Reset();
-				Update(msElapsed);
+				msElapsed = _renderTimer.Elapsed();
+				_renderTimer.Reset();
 				Render(msElapsed);
 				Swap();
 			}
+
 		} while (isRunning);
 	}
 

@@ -12,9 +12,10 @@ void game::Engine::Initialize()
 
 	attrib.WindowTitle = "Spinning Triangle";
 	attrib.GameVersion = "0.01";
-	attrib.Framelock = 30;
+	attrib.Framelock = 60;
 	attrib.isVsyncOn = false;
 	attrib.isDebugMode = false;
+	attrib.isWindowFullscreen = false;
 	//attrib.RenderingAPI = RenderAPI::Vulkan;
 	SetAttributes(attrib);
 }
@@ -26,17 +27,18 @@ void game::Engine::Shutdown()
 void game::Engine::Update(const float msElapsed)
 {
 	static bool first = true;
-	static double fpsTime = 0.0f;
-	static uint32_t framesCounted = 0;
+	static double upsTime = 0.0f;
+	static uint32_t updatesCounted = 0;
 
-	fpsTime += msElapsed;
-	std::cout << msElapsed << "\n";
-	framesCounted++;
-	if (fpsTime >= 1000.0f)
+	upsTime += msElapsed;
+	//std::cout << updatesCounted << "\n";
+	updatesCounted++;
+	if (upsTime >= 1000.0f)
 	{
-		std::cout << "Updates per second :" << framesCounted << "\n";
-		framesCounted = 0;
-		fpsTime = fpsTime - 1000.0f;
+		//std::cout << "Updates per second :" << updatesCounted << "\n";
+		//SetWindowTitle("Spinning Triangle - " + std::to_string(updatesCounted) + " ups.");
+		updatesCounted = 0;
+		upsTime = upsTime - 1000.0f;
 	}
 
 	if (first)

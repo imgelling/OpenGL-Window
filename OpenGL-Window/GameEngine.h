@@ -21,6 +21,7 @@ namespace game
 	
 	class Engine
 	{
+		friend Window;
 	public:
 		bool isRunning;
 		GameLogger* logger;
@@ -46,7 +47,8 @@ namespace game
 		GameAttributes _attributes;
 		RendererBase* _renderer;
 		Window _window;
-		GameTimer _timer;
+		GameTimer _renderTimer;
+		GameTimer _updateTimer;
 		GameTimer _frameLockTimer;
 
 
