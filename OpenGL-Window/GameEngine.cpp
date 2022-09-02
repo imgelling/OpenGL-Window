@@ -32,7 +32,7 @@ namespace game
 
 		_timer.Reset();
 		_frameLockTimer.Reset();
-		
+	
 		do
 		{
 			ProcessMessages();
