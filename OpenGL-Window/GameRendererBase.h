@@ -2,6 +2,9 @@
 #include "GameWindow.h"
 #include "GameAttributes.h"
 
+#include <string>
+#include <vector>
+
 namespace game
 {
 	extern GameError lastError;
@@ -20,5 +23,7 @@ namespace game
 		virtual void Swap() {};
 	protected:
 		GameAttributes _attributes;
+		std::vector<std::string> _extensionsAvailable;
+		virtual void _ReadExtensions() {};
 	};
 }

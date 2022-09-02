@@ -204,12 +204,15 @@ namespace game
 		bool CreateDevice(Window window) override;
 		void DestroyDevice() override;
 		void Swap() override;
+	protected:
+		void _ReadExtensions() override;
 
 	private:
 		typedef HDC glDeviceContext_t;
 		typedef HGLRC glRenderContext_t;
 
-		glDeviceContext_t glDeviceContext = NULL;
-		glRenderContext_t glRenderContext = NULL;
+		glDeviceContext_t _glDeviceContext = NULL;
+		glRenderContext_t _glRenderContext = NULL;
+
 	};
 }

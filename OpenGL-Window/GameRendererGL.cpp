@@ -122,18 +122,21 @@ namespace game
 			WGL_DOUBLE_BUFFER_ARB, 1,
 			WGL_STEREO_ARB, 0,
 			WGL_PIXEL_TYPE_ARB, WGL_TYPE_RGBA_ARB,
+			WGL_ACCELERATION_ARB, WGL_FULL_ACCELERATION_ARB,
+			WGL_SWAP_METHOD_ARB, WGL_SWAP_EXCHANGE_ARB,
 			0
-		}; // Nvidia does not like WGL_ACCELERATED_ARB or whatever
+		}; 
+		// 	WGL_SWAP_EXCHANGE_ARB vs WGL_SWAP_COPY_ARB.
 
 		float pixelAttribFloatList[] = { 0, 0 };
 		PIXELFORMATDESCRIPTOR pixelFormatDescriptor = { 0 };
 
 		// Get the window handle as the device we are using
-		glDeviceContext = GetDC(window.GetHandle());
+		_glDeviceContext = GetDC(window.GetHandle());
 
 
 		// Choose a suitable pixel format for what attributes we want for real window
-		GL::wglChoosePixelFormatARB(glDeviceContext, glPixelAttributeList, pixelAttribFloatList, 1, &pixelFormatsChosen[0], &numberOfPixelFormatsChosen);
+		GL::wglChoosePixelFormatARB(_glDeviceContext, glPixelAttributeList, pixelAttribFloatList, 1, &pixelFormatsChosen[0], &numberOfPixelFormatsChosen);
 		if (!numberOfPixelFormatsChosen)
 		{
 			lastError = { GameErrors::GameOpenGLSpecific, "No compatible pixel formats found." };
@@ -141,29 +144,29 @@ namespace game
 		}
 
 		// Fills out some of the pixelformatedescriptor
-		if (!DescribePixelFormat(glDeviceContext, pixelFormatsChosen[0], sizeof(PIXELFORMATDESCRIPTOR), &pixelFormatDescriptor))
+		if (!DescribePixelFormat(_glDeviceContext, pixelFormatsChosen[0], sizeof(PIXELFORMATDESCRIPTOR), &pixelFormatDescriptor))
 		{
 			lastError = { GameErrors::GameWindowsSpecific, "DescribePixelFormat failed. Window Error " + std::to_string(GetLastError()) };
 			return false;
 		}
 
 		// Set our pixel format that we got from the temporary window
-		if (!SetPixelFormat(glDeviceContext, pixelFormatsChosen[0], &pixelFormatDescriptor))
+		if (!SetPixelFormat(_glDeviceContext, pixelFormatsChosen[0], &pixelFormatDescriptor))
 		{
 			lastError = { GameErrors::GameWindowsSpecific, "SetPixelFormat failed. Windows Error " + std::to_string(GetLastError()) };
 			return false;
 		}
 
 		// Create the rendering context
-		glRenderContext = GL::wglCreateContextAttribsARB(glDeviceContext, 0, glContextAttributes);
-		if (glRenderContext == nullptr)
+		_glRenderContext = GL::wglCreateContextAttribsARB(_glDeviceContext, 0, glContextAttributes);
+		if (_glRenderContext == nullptr)
 		{
 			lastError = { GameErrors::GameOpenGLSpecific, "wglCreateContextAttribsARB failed" };
 			return false;
 		}
 
 		// Use the rendering context we just created
-		wglMakeCurrent(glDeviceContext, glRenderContext);
+		wglMakeCurrent(_glDeviceContext, _glRenderContext);
 
 
 		// Load wglSwapInterval
@@ -182,6 +185,14 @@ namespace game
 			return false;
 		}
 
+		// Load glGetStringi
+		GL::glGetStringi = (GL::PFNGLGETSTRINGIPROC)wglGetProcAddress("glGetStringi");
+		if (GL::glGetStringi == nullptr)
+		{
+			lastError = { GameErrors::GameOpenGLSpecific, "Extension glGetStringi not available." };
+			return false;
+		}
+
 		// Set vertical sync
 		if (_attributes.isVsync)
 			GL::wglSwapInterval(1);
@@ -194,42 +205,42 @@ namespace game
 		// Engine is now running
 		enginePointer->isRunning = true;
 
-		// temp to write out extensions
+		// Read all available extensions
 
-		// Load glGetStringi
-		GL::glGetStringi = (GL::PFNGLGETSTRINGIPROC)wglGetProcAddress("glGetStringi");
-		if (GL::glGetStringi == nullptr)
-		{
-			lastError = { GameErrors::GameOpenGLSpecific, "Extension glGetStringi not available." };
-			return false;
-		}
+
+
+		return true;
+	}
+
+	void RendererGL::_ReadExtensions()
+	{
+		GLint numberOfExtensions = 0;
+		std::string extensionName;
 
 		// Get the number of OpenGL extensions available
-		GLint numberOfExtensions = 0;
 		glGetIntegerv(GL_NUM_EXTENSIONS, &numberOfExtensions);
 		enginePointer->logger->WriteQuiet("Listing " + std::to_string(numberOfExtensions) + " OpenGL Extensions Available.");
-
-		// Write all extensions out to the log file, not stdout
-		std::string extensionName;
+		
+		// Write all extensions out to the log file, not stdout 
+		// and store in a vector
 		for (GLint extensionNumber = 0; extensionNumber < numberOfExtensions; extensionNumber++)
 		{
 			extensionName = (char*)GL::glGetStringi(GL_EXTENSIONS, extensionNumber);
+			_extensionsAvailable.emplace_back(extensionName);
 			enginePointer->logger->WriteQuiet(extensionName);
 		}
-
-		return true;
 	}
 
 	void RendererGL::DestroyDevice() 
 	{
 		// Clean up OpenGL stuff
 		wglMakeCurrent(NULL, NULL);
-		if (glRenderContext) wglDeleteContext(glRenderContext);
-		glRenderContext = NULL;
+		if (_glRenderContext) wglDeleteContext(_glRenderContext);
+		_glRenderContext = NULL;
 	}
 
 	void RendererGL::Swap() 
 	{
-		SwapBuffers(glDeviceContext);
+		SwapBuffers(_glDeviceContext);
 	};
 }

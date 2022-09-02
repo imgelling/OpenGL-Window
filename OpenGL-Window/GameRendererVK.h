@@ -64,10 +64,14 @@ namespace game
 			std::vector<VkExtensionProperties> extensions(extensionCount);
 			vkEnumerateInstanceExtensionProperties(nullptr, &extensionCount, extensions.data());
 
+			enginePointer->logger->WriteQuiet("Listing " + std::to_string(extensionCount) + " Vulkan Extensions Available.");
+
 			// Convert extension names to char*
 			std::vector<const char*> extenChar;
 			for (const auto& extension : extensions) {
 				extenChar.push_back(extension.extensionName);
+				_extensionsAvailable.emplace_back(extension.extensionName);
+				enginePointer->logger->WriteQuiet(extension.extensionName);
 			}
 
 			VkInstanceCreateInfo createInfo{};
@@ -89,6 +93,12 @@ namespace game
 
 			return true;
 		}
+
+	protected:
+		void _ReadExtensions() override
+		{
+			// do read extensions
+		};
 
 	private:
 		VkInstance _vkInstance = nullptr;
