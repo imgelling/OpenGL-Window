@@ -6,6 +6,7 @@
 
 namespace game
 {
+// OpenGL context stuff
 #define WGL_CONTEXT_DEBUG_BIT_ARB  0x0001
 #define WGL_CONTEXT_FORWARD_COMPATIBLE_BIT_ARB 0x0002
 #define WGL_CONTEXT_MAJOR_VERSION_ARB 0x2091
@@ -199,18 +200,16 @@ namespace game
 	class RendererGL : public RendererBase
 	{
 	public:
-		typedef HDC glDeviceContext_t;
-		typedef HGLRC glRenderContext_t;
-
-		glDeviceContext_t glDeviceContext = NULL;
-		glRenderContext_t glRenderContext = NULL;
-
 		RendererGL();
-
 		bool CreateDevice(Window window) override;
 		void DestroyDevice() override;
 		void Swap() override;
 
 	private:
+		typedef HDC glDeviceContext_t;
+		typedef HGLRC glRenderContext_t;
+
+		glDeviceContext_t glDeviceContext = NULL;
+		glRenderContext_t glRenderContext = NULL;
 	};
 }

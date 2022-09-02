@@ -27,6 +27,7 @@ namespace game
 
 	void Engine::Start()
 	{
+		// Ensure we pass the same time delta to Update and Render
 		float msElapsed = 0.0f;
 
 		_timer.Reset();

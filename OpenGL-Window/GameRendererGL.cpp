@@ -108,7 +108,7 @@ namespace game
 		int32_t pixelFormatsChosen[1] = { 0 };
 		uint32_t numberOfPixelFormatsChosen = 0;
 
-		int pixelAttributeList[] =
+		int glPixelAttributeList[] =
 		{
 			WGL_SUPPORT_OPENGL_ARB, 1,
 			WGL_DRAW_TO_WINDOW_ARB, 1,
@@ -133,7 +133,7 @@ namespace game
 
 
 		// Choose a suitable pixel format for what attributes we want for real window
-		GL::wglChoosePixelFormatARB(glDeviceContext, pixelAttributeList, pixelAttribFloatList, 1, &pixelFormatsChosen[0], &numberOfPixelFormatsChosen);
+		GL::wglChoosePixelFormatARB(glDeviceContext, glPixelAttributeList, pixelAttribFloatList, 1, &pixelFormatsChosen[0], &numberOfPixelFormatsChosen);
 		if (!numberOfPixelFormatsChosen)
 		{
 			lastError = { GameErrors::GameOpenGLSpecific, "No compatible pixel formats found." };
