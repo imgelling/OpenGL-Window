@@ -21,7 +21,7 @@ namespace game
 	
 	class Engine
 	{
-		friend Window;
+		//friend Window;
 	public:
 		bool isRunning;
 		GameLogger* logger;

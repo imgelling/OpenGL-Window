@@ -14,6 +14,7 @@ namespace game
 		bool CreateTheWindow();
 		void SetAttributes(const GameAttributes attrib);
 		void SetWindowTitle(const std::string title);
+		void ToggleFullScreen();
 		void DoMessagePump();
 		HWND GetHandle();
 	private:

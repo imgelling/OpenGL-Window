@@ -15,7 +15,7 @@ void game::Engine::Initialize()
 	attrib.Framelock = 60;
 	attrib.isVsyncOn = false;
 	attrib.isDebugMode = false;
-	//attrib.isWindowFullscreen = true;
+	attrib.isWindowFullscreen = false;
 	//attrib.RenderingAPI = RenderAPI::Vulkan;
 	SetAttributes(attrib);
 }
@@ -35,7 +35,7 @@ void game::Engine::Update(const float msElapsed)
 	updatesCounted++;
 	if (upsTime >= 1000.0f)
 	{
-		std::cout << "Updates per second :" << updatesCounted << "\n";
+		//std::cout << "Updates per second :" << updatesCounted << "\n";
 		SetWindowTitle("Spinning Triangle - " + std::to_string(updatesCounted) + " ups.");
 		updatesCounted = 0;
 		upsTime = upsTime - 1000.0f;
@@ -43,7 +43,16 @@ void game::Engine::Update(const float msElapsed)
 
 	if (first)
 	{
+		// Testing swapping windowed to windowfullscreen borderless
+		DWORD dwExStyle = WS_EX_APPWINDOW | WS_EX_WINDOWEDGE;
+		DWORD dwStyle = WS_CAPTION | WS_SYSMENU | WS_VISIBLE | WS_THICKFRAME | WS_MAXIMIZEBOX | WS_MINIMIZEBOX | WS_CLIPCHILDREN | WS_CLIPSIBLINGS;
 		//game::GL::wglSwapInterval(1);
+		dwExStyle = 0;
+		dwStyle = WS_VISIBLE | WS_POPUP;
+		SetWindowLongPtr(enginePointer->_window.GetHandle(), GWL_STYLE, dwStyle);
+		SetWindowLongPtr(enginePointer->_window.GetHandle(), GWL_EXSTYLE, dwExStyle);
+		SetWindowPos(enginePointer->_window.GetHandle(), 0, 0, 0, 1920, 1080, SWP_DRAWFRAME | SWP_FRAMECHANGED);
+		// seems to work
 				
 		first = false;
 	}

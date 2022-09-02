@@ -158,6 +158,11 @@ namespace game
 		}
 	}
 
+	void Window::ToggleFullScreen()
+	{
+
+	}
+
 	HWND Window::GetHandle()
 	{
 		return _windowHandle;
