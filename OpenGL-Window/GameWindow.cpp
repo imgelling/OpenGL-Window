@@ -55,7 +55,7 @@ namespace game
 		int32_t windowWidth = 0;
 		int32_t windowHeight = 0;
 		HMONITOR monitorHandle = 0;
-		MONITORINFO monitorInfo = { 0 };
+		/*MONITORINFO monitorInfo = { 0 };*/
 		RECT rWndRect = { 0 };
 		int32_t adjustedWidth = 0;
 		int32_t adjustedHeight = 0;
@@ -84,7 +84,7 @@ namespace game
 
 		// Get info about the monitor
 		monitorHandle = MonitorFromWindow(_windowHandle, MONITOR_DEFAULTTONEAREST);
-		monitorInfo = { sizeof(monitorInfo) };
+		_monitorInfo = { sizeof(_monitorInfo) };
 
 		// If the window is fullscreen, change the style of the window
 		if (_attributes.isWindowFullscreen)
@@ -93,15 +93,15 @@ namespace game
 			dwStyle = WS_VISIBLE | WS_POPUP;
 
 			// Get info about the monitor
-			if (!GetMonitorInfo(monitorHandle, &monitorInfo))
+			if (!GetMonitorInfo(monitorHandle, &_monitorInfo))
 			{
 				lastError = { GameErrors::GameWindowsSpecific, "GetMonitorInfo failed." };
 				return false;
 			}
 
 			// Save max size of monitor
-			windowWidth = monitorInfo.rcMonitor.right;
-			windowHeight = monitorInfo.rcMonitor.bottom;
+			windowWidth = _monitorInfo.rcMonitor.right;
+			windowHeight = _monitorInfo.rcMonitor.bottom;
 		}
 
 		// Adjust window size to account for title bar and edges
@@ -115,8 +115,8 @@ namespace game
 		// Center the window
 		if (!_attributes.isWindowFullscreen)
 		{
-			windowLeftPosition = (monitorInfo.rcMonitor.right + (adjustedWidth >> 1)) >> 1;
-			windowTopPosition = (monitorInfo.rcMonitor.bottom + (adjustedHeight >> 1)) >> 1;
+			windowLeftPosition = (_monitorInfo.rcMonitor.right + (adjustedWidth >> 1)) >> 1;
+			windowTopPosition = (_monitorInfo.rcMonitor.bottom + (adjustedHeight >> 1)) >> 1;
 		}
 
 		// Create the actual window
