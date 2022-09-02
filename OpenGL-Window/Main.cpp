@@ -2,7 +2,7 @@
 #include <iostream>
 
 // Engine header
-#define GAME_USE_DEDICATED_GPU
+//#define GAME_USE_DEDICATED_GPU
 #include "Game.h"
 
 
@@ -15,7 +15,7 @@ void game::Engine::Initialize()
 	attrib.Framelock = 60;
 	attrib.isVsyncOn = false;
 	attrib.isDebugMode = false;
-	attrib.isWindowFullscreen = false;
+	//attrib.isWindowFullscreen = true;
 	//attrib.RenderingAPI = RenderAPI::Vulkan;
 	SetAttributes(attrib);
 }
@@ -35,8 +35,8 @@ void game::Engine::Update(const float msElapsed)
 	updatesCounted++;
 	if (upsTime >= 1000.0f)
 	{
-		//std::cout << "Updates per second :" << updatesCounted << "\n";
-		//SetWindowTitle("Spinning Triangle - " + std::to_string(updatesCounted) + " ups.");
+		std::cout << "Updates per second :" << updatesCounted << "\n";
+		SetWindowTitle("Spinning Triangle - " + std::to_string(updatesCounted) + " ups.");
 		updatesCounted = 0;
 		upsTime = upsTime - 1000.0f;
 	}

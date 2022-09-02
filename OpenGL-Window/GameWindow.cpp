@@ -50,6 +50,18 @@ namespace game
 	bool Window::CreateTheWindow()
 	{
 		WNDCLASS wc{};
+		DWORD dwExStyle = 0;
+		DWORD dwStyle = 0;
+		int32_t windowWidth = 0;
+		int32_t windowHeight = 0;
+		HMONITOR monitorHandle = 0;
+		MONITORINFO monitorInfo = { 0 };
+		RECT rWndRect = { 0 };
+		int32_t adjustedWidth = 0;
+		int32_t adjustedHeight = 0;
+		int32_t windowLeftPosition = 0;
+		int32_t windowTopPosition = 0;
+
 
 		wc.hIcon = LoadIcon(NULL, IDI_APPLICATION);
 		wc.hCursor = LoadCursor(NULL, IDC_ARROW);
@@ -63,43 +75,60 @@ namespace game
 		wc.lpszClassName = Wide("GAME_ENGINE"); 
 		RegisterClass(&wc);
 
-		DWORD dwExStyle = WS_EX_APPWINDOW | WS_EX_WINDOWEDGE;
-		DWORD dwStyle = WS_CAPTION | WS_SYSMENU | WS_VISIBLE | WS_THICKFRAME | WS_MAXIMIZEBOX | WS_MINIMIZEBOX | WS_CLIPCHILDREN | WS_CLIPSIBLINGS;
+		dwExStyle = WS_EX_APPWINDOW | WS_EX_WINDOWEDGE;
+		dwStyle = WS_CAPTION | WS_SYSMENU | WS_VISIBLE | WS_THICKFRAME | WS_MAXIMIZEBOX | WS_MINIMIZEBOX | WS_CLIPCHILDREN | WS_CLIPSIBLINGS;
 
-		// fullscreen start
-		int32_t windowWidth = _attributes.WindowWidth;
-		int32_t windowHeight = _attributes.WindowHeight;
+		// Dimensions of the window
+		windowWidth = _attributes.WindowWidth;
+		windowHeight = _attributes.WindowHeight;
 
+		// Get info about the monitor
+		monitorHandle = MonitorFromWindow(_windowHandle, MONITOR_DEFAULTTONEAREST);
+		monitorInfo = { sizeof(monitorInfo) };
+
+		// If the window is fullscreen, change the style of the window
 		if (_attributes.isWindowFullscreen)
 		{
 			dwExStyle = 0;
 			dwStyle = WS_VISIBLE | WS_POPUP;
-			HMONITOR monitorHandle = MonitorFromWindow(_windowHandle, MONITOR_DEFAULTTONEAREST);
-			MONITORINFO monitorInfo = { sizeof(monitorInfo) };
+
+			// Get info about the monitor
 			if (!GetMonitorInfo(monitorHandle, &monitorInfo))
 			{
 				lastError = { GameErrors::GameWindowsSpecific, "GetMonitorInfo failed." };
 				return false;
 			}
+
+			// Save max size of monitor
 			windowWidth = monitorInfo.rcMonitor.right;
 			windowHeight = monitorInfo.rcMonitor.bottom;
 		}
 
 		// Adjust window size to account for title bar and edges
-		RECT rWndRect = { 0, 0, windowWidth, windowHeight };
+		rWndRect = { 0, 0, windowWidth, windowHeight };
 		AdjustWindowRectEx(&rWndRect, dwStyle, FALSE, dwExStyle);
-		int32_t adjustedWidth = rWndRect.right - rWndRect.left;
-		int32_t adjustedHeight = rWndRect.bottom - rWndRect.top;
+		adjustedWidth = rWndRect.right - rWndRect.left;
+		adjustedHeight = rWndRect.bottom - rWndRect.top;
+		windowLeftPosition = 0;
+		windowTopPosition = 0;
+
+		// Center the window
+		if (!_attributes.isWindowFullscreen)
+		{
+			windowLeftPosition = (monitorInfo.rcMonitor.right + (adjustedWidth >> 1)) >> 1;
+			windowTopPosition = (monitorInfo.rcMonitor.bottom + (adjustedHeight >> 1)) >> 1;
+		}
 
 		// Create the actual window
 		_windowHandle = CreateWindowEx(dwExStyle, Wide("GAME_ENGINE"), Wide(""), dwStyle,
-			0, 0, adjustedWidth, adjustedHeight, NULL, NULL, GetModuleHandle(nullptr), this);
+			windowLeftPosition, windowTopPosition, adjustedWidth, adjustedHeight, NULL, NULL, GetModuleHandle(nullptr), this);
 		if (!_windowHandle)
 		{
 			lastError = { GameErrors::GameWindowsSpecific, "Windows Error Number : " + std::to_string(GetLastError()) };
 			return false;
 		}
 
+		// Set the window title
 		SetWindowTitle(_attributes.WindowTitle);
 
 		return true;
