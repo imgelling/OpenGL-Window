@@ -5,11 +5,11 @@ namespace game
 	Keyboard::Keyboard()
 	{
 		
-		_keyState = new bool[256];
+		_keyCurrentState = new bool[256];
 		_keyOldState = new bool[256];
 		for (uint16_t key = 0; key < 256; key++)
 		{
-			_keyState[key] = false;
+			_keyCurrentState[key] = false;
 			_keyOldState[key] = false;
 		}
 		
@@ -17,37 +17,37 @@ namespace game
 
 	Keyboard::~Keyboard()
 	{
-		delete[] _keyState;
+		delete[] _keyCurrentState;
 		delete[] _keyOldState;
 	}
 
 	void Keyboard::SetKeyState(const uint8_t key, const bool state)
 	{
-		if (_keyState[key] == state)
+		if (_keyCurrentState[key] == state)
 		{
 			return;
 		}
 
-		_keyOldState[key] = _keyState[key];
-		_keyState[key] = state;
+		_keyOldState[key] = _keyCurrentState[key];
+		_keyCurrentState[key] = state;
 	}
 
 	bool Keyboard::WasKeyReleased(const uint8_t key)
 	{
-		bool currentState = _keyState[key];
+		bool currentState = _keyCurrentState[key];
 		bool oldState = _keyOldState[key];
 
-		_keyOldState[key] = _keyState[key];
+		_keyOldState[key] = _keyCurrentState[key];
 
 		return (oldState && !currentState);
 	}
 
 	bool Keyboard::WasKeyPressed(const uint8_t key)
 	{
-		bool currentState = _keyState[key];
+		bool currentState = _keyCurrentState[key];
 		bool oldState = _keyOldState[key];
 
-		_keyOldState[key] = _keyState[key];
+		_keyOldState[key] = _keyCurrentState[key];
 
 		return (!oldState && currentState);
 	}
@@ -56,10 +56,10 @@ namespace game
 	{
 		static uint32_t temp = 0;
 
-		bool currentState = _keyState[key];
+		bool currentState = _keyCurrentState[key];
 		bool oldState = _keyOldState[key];
 
-		_keyOldState[key] = _keyState[key];
+		_keyOldState[key] = _keyCurrentState[key];
 
 		if (currentState && oldState)
 		{

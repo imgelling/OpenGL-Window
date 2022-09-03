@@ -10,7 +10,7 @@ namespace game
 		uint32_t WindowHeight;	// Height of the window created
 		bool isWindowFullscreen;// Is the window created fullscreen
 		bool isWindowBorderless;// Is the window created borderless
-		bool isWindowVisible;
+		bool isWindowVisible;	// Used to hide a window
 		uint8_t ContextMajor;	// Major version number (OpenGL only for now, may use for dx10,11,12)
 		uint8_t ContextMinor;	// Minor version number (OpenGL)
 		uint8_t RedSize;		// Size, in bits of red component of color depth
@@ -26,7 +26,7 @@ namespace game
 		RenderAPI RenderingAPI;	// Which rendering API are we using
 		bool isVsyncOn;			// Is vsync on
 		std::string GameVersion;// What version the game is
-		bool glBackwardsCompatible;
+		bool isGLBackwardsCompatible;	// Is OpenGL backwards compatible?
 		Attributes();		// Loads some defaults intro structure
 	};
 }

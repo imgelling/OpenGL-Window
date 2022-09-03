@@ -14,7 +14,7 @@ namespace game
 		bool WasKeyPressed(const uint8_t key);
 		bool IsKeyHeld(const uint8_t key);
 	private:
-		bool* _keyState;
+		bool* _keyCurrentState;
 		bool* _keyOldState;
 	};
 }

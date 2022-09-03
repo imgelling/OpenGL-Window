@@ -101,7 +101,7 @@ namespace game
 			WGL_CONTEXT_FLAGS_ARB,
 			_attributes.isDebugMode ? WGL_CONTEXT_DEBUG_BIT_ARB : 0,
 			WGL_CONTEXT_PROFILE_MASK_ARB,
-			_attributes.glBackwardsCompatible ? WGL_CONTEXT_COMPATIBILITY_PROFILE_BIT_ARB : WGL_CONTEXT_CORE_PROFILE_BIT_ARB,
+			_attributes.isGLBackwardsCompatible ? WGL_CONTEXT_COMPATIBILITY_PROFILE_BIT_ARB : WGL_CONTEXT_CORE_PROFILE_BIT_ARB,
 			0
 		};
 		int32_t pixelFormatsChosen[1] = { 0 };
