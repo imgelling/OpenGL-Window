@@ -8,14 +8,14 @@
 
 void game::Engine::Initialize()
 {
-	GameAttributes attrib;
+	Attributes attrib;
 
 	attrib.WindowTitle = "Spinning Triangle";
 	attrib.GameVersion = "0.01";
 	attrib.Framelock = 60;
 	attrib.isVsyncOn = false;
 	attrib.isDebugMode = false;
-	attrib.isWindowFullscreen = true;
+	attrib.isWindowFullscreen = false;
 	//attrib.RenderingAPI = RenderAPI::Vulkan;
 	SetAttributes(attrib);
 }
@@ -45,24 +45,28 @@ void game::Engine::Update(const float msElapsed)
 	{
 		// Testing swapping windowed to windowfullscreen borderless
 		
-		// styles for windowed
-		DWORD dwExStyle = WS_EX_APPWINDOW | WS_EX_WINDOWEDGE;
-		DWORD dwStyle = WS_CAPTION | WS_SYSMENU | WS_VISIBLE | WS_THICKFRAME | WS_MAXIMIZEBOX | WS_MINIMIZEBOX | WS_CLIPCHILDREN | WS_CLIPSIBLINGS;
-		// styles for fullscreen
-		if (!_attributes.isWindowFullscreen)
-		{
-			dwExStyle = 0;
-			dwStyle = WS_VISIBLE | WS_POPUP;
-		}
-		SetWindowLongPtr(enginePointer->_window.GetHandle(), GWL_STYLE, dwStyle);
-		SetWindowLongPtr(enginePointer->_window.GetHandle(), GWL_EXSTYLE, dwExStyle);
-		// Need to save state of window for swapping back and forth
-		// also probably need to re adjust for title bar and border (full to window)
-		SetWindowPos(enginePointer->_window.GetHandle(), 0, 0, 0, 1920, 1080, SWP_DRAWFRAME | SWP_FRAMECHANGED);
-		// seems to work
+		//// styles for windowed
+		//DWORD dwExStyle = WS_EX_APPWINDOW | WS_EX_WINDOWEDGE;
+		//DWORD dwStyle = WS_CAPTION | WS_SYSMENU | WS_VISIBLE | WS_THICKFRAME | WS_MAXIMIZEBOX | WS_MINIMIZEBOX | WS_CLIPCHILDREN | WS_CLIPSIBLINGS;
+		//// styles for fullscreen
+		//if (!_attributes.isWindowFullscreen)
+		//{
+		//	dwExStyle = 0;
+		//	dwStyle = WS_VISIBLE | WS_POPUP;
+		//}
+		//SetWindowLongPtr(enginePointer->_window.GetHandle(), GWL_STYLE, dwStyle);
+		//SetWindowLongPtr(enginePointer->_window.GetHandle(), GWL_EXSTYLE, dwExStyle);
+		//// Need to save state of window for swapping back and forth
+		//// also probably need to re adjust for title bar and border (full to window)
+		//SetWindowPos(enginePointer->_window.GetHandle(), 0, 0, 0, 1920, 1080, SWP_DRAWFRAME | SWP_FRAMECHANGED);
+		//// seems to work
 				
 		//game::GL::wglSwapInterval(1);
 		first = false;
+	}
+	if (keyboard.WasKeyReleased(VK_ESCAPE))
+	{
+		Stop();
 	}
 	glClearColor(0.25f, 0.25f, 0.25f, 1.0f);
 }

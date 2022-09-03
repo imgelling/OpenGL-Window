@@ -25,6 +25,7 @@
 #include "GameEngine.h"
 #include "../../../Programming/GameLib2/GameErrors.h"
 #include "GameHelpers.h"
+#include "GameKeyboard.h"
 #include "GameLogger.h"
 #include "GamePerformanceTimer.h"
 #include "GameRendererBase.h"

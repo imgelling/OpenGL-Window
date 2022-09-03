@@ -2,17 +2,17 @@
 
 namespace game
 {
-	GameTimer::GameTimer()
+	Timer::Timer()
 	{
 		_startTime = std::chrono::high_resolution_clock::now();
 	}
 	
-	void GameTimer::Reset()
+	void Timer::Reset()
 	{
 		_startTime = std::chrono::high_resolution_clock::now();
 	}
 
-	float GameTimer::Elapsed()
+	float Timer::Elapsed()
 	{
 		std::chrono::microseconds _ticks = std::chrono::duration_cast<std::chrono::microseconds>((std::chrono::high_resolution_clock::now() - _startTime));
 		float diff = (float)(_ticks.count()) / 1000.0f;

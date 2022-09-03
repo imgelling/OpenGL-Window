@@ -12,7 +12,7 @@ namespace game
 	{
 	friend Window;
 	public:
-		void SetAttributes(const GameAttributes attrib)
+		void SetAttributes(const Attributes attrib)
 		{
 			_attributes = attrib;
 		}
@@ -20,7 +20,7 @@ namespace game
 		virtual void DestroyDevice() {};
 		virtual void Swap() {};
 	protected:
-		GameAttributes _attributes;
+		Attributes _attributes;
 		std::vector<std::string> _extensionsAvailable;
 		virtual void _ReadExtensions() {};
 	};

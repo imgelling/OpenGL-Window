@@ -2,13 +2,14 @@
 
 namespace game
 {
-	GameAttributes::GameAttributes()
+	Attributes::Attributes()
 	{
 		WindowTitle = "";
 		WindowWidth = 1280;
 		WindowHeight = 720;
 		isWindowFullscreen = false;
 		isWindowBorderless = false;
+		isWindowVisible = true;
 		ContextMajor = 3;
 		ContextMinor = 2;
 		RedSize = 8;

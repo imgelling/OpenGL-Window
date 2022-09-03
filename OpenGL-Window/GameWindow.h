@@ -12,13 +12,13 @@ namespace game
 	public:
 		Window();
 		bool CreateTheWindow();
-		void SetAttributes(const GameAttributes attrib);
+		void SetAttributes(const Attributes attrib);
 		void SetWindowTitle(const std::string title);
 		void ToggleFullScreen();
 		void DoMessagePump();
 		HWND GetHandle();
 	private:
-		GameAttributes _attributes;
+		Attributes _attributes;
 
 		// Windows only stuff
 		HWND _windowHandle;

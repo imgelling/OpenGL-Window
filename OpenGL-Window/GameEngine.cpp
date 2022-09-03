@@ -27,7 +27,7 @@ namespace game
 
 	void Engine::Start()
 	{
-		// Ensure we pass the same time delta to Update and Render
+		// Storage of time
 		float msElapsed = 0.0f;
 
 		_renderTimer.Reset();
@@ -61,12 +61,17 @@ namespace game
 		} while (isRunning);
 	}
 
+	void Engine::Stop()
+	{
+		isRunning = false;
+	}
+
 	void Engine::ProcessMessages()
 	{
 		_window.DoMessagePump();
 	}
 
-	void Engine::SetAttributes(const GameAttributes &attrib)
+	void Engine::SetAttributes(const Attributes &attrib)
 	{
 		_attributes = attrib;
 		if (_attributes.Framelock > 0)

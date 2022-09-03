@@ -3,13 +3,14 @@
 
 namespace game
 {
-	struct GameAttributes
+	struct Attributes
 	{
 		std::string WindowTitle;// Title of the window created
 		uint32_t WindowWidth;	// Width of the window created
 		uint32_t WindowHeight;	// Height of the window created
 		bool isWindowFullscreen;// Is the window created fullscreen
 		bool isWindowBorderless;// Is the window created borderless
+		bool isWindowVisible;
 		uint8_t ContextMajor;	// Major version number (OpenGL only for now, may use for dx10,11,12)
 		uint8_t ContextMinor;	// Minor version number (OpenGL)
 		uint8_t RedSize;		// Size, in bits of red component of color depth
@@ -26,6 +27,6 @@ namespace game
 		bool isVsyncOn;			// Is vsync on
 		std::string GameVersion;// What version the game is
 		bool glBackwardsCompatible;
-		GameAttributes();		// Loads some defaults intro structure
+		Attributes();		// Loads some defaults intro structure
 	};
 }

@@ -20,7 +20,7 @@ namespace game
 		glDeviceContext_t glTempDevice = NULL;
 		glRenderContext_t glTempRender = NULL;
 		game::Window tempWindow;
-		GameAttributes tempAttrib;
+		Attributes tempAttrib;
 		PIXELFORMATDESCRIPTOR pixelFormatDescriptor =
 		{
 			sizeof(PIXELFORMATDESCRIPTOR), 1,
@@ -30,8 +30,9 @@ namespace game
 		};
 
 		// Create a temporary invisible window
-		tempAttrib.WindowHeight = 0;
-		tempAttrib.WindowWidth = 0;
+		//tempAttrib.WindowHeight = 0;
+		//tempAttrib.WindowWidth = 0;
+		tempAttrib.isWindowVisible = false;
 		tempWindow.SetAttributes(tempAttrib);
 		if (!tempWindow.CreateTheWindow())
 		{

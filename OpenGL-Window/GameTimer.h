@@ -3,10 +3,10 @@
 
 namespace game
 {
-	class GameTimer
+	class Timer
 	{
 	public:
-		GameTimer();
+		Timer();
 		float Elapsed();
 		void Reset();
 	private:

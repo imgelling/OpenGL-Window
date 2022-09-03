@@ -4,6 +4,7 @@
 #include "GameAttributes.h"
 #include "GameTimer.h"
 #include "GameLogger.h"
+#include "GameKeyboard.h"
 
 namespace game
 {
@@ -25,13 +26,15 @@ namespace game
 	public:
 		bool isRunning;
 		GameLogger* logger;
+		Keyboard keyboard;
 
 		Engine(GameLogger* logger);
 		~Engine();
 		void ProcessMessages();
-		void SetAttributes(const GameAttributes &attrib);
+		void SetAttributes(const Attributes &attrib);
 		bool Create();
 		void Start();
+		void Stop();
 
 		void SetWindowTitle(const std::string title);
 		void SetFrameLock(const uint32_t limit);
@@ -42,14 +45,14 @@ namespace game
 		void Initialize();
 		void Shutdown();
 #pragma endregion
-		void Swap();
 		float _frameTime;
-		GameAttributes _attributes;
+		Attributes _attributes;
 		RendererBase* _renderer;
 		Window _window;
-		GameTimer _renderTimer;
-		GameTimer _updateTimer;
-		GameTimer _frameLockTimer;
+		Timer _renderTimer;
+		Timer _updateTimer;
+		Timer _frameLockTimer;
+		void Swap();
 
 
 	};

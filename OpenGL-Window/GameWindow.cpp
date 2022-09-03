@@ -31,8 +31,8 @@ namespace game
 			//case WM_MOUSELEAVE: ptrPGE->olc_UpdateMouseFocus(false);                                    return 0;
 			//case WM_SETFOCUS:	ptrPGE->olc_UpdateKeyFocus(true);                                       return 0;
 			//case WM_KILLFOCUS:	ptrPGE->olc_UpdateKeyFocus(false);                                      return 0;
-			//case WM_KEYDOWN:	ptrPGE->olc_UpdateKeyState(mapKeys[wParam], true);                      return 0;
-			//case WM_KEYUP:		ptrPGE->olc_UpdateKeyState(mapKeys[wParam], false);                     return 0;
+		case WM_KEYDOWN: enginePointer->keyboard.SetKeyState((uint8_t)wParam, true); return 0;// ptrPGE->olc_UpdateKeyState(mapKeys[wParam], true);                      return 0;
+		case WM_KEYUP: enginePointer->keyboard.SetKeyState((uint8_t)wParam, false); return 0;//	ptrPGE->olc_UpdateKeyState(mapKeys[wParam], false);                     return 0;
 			//case WM_SYSKEYDOWN: ptrPGE->olc_UpdateKeyState(mapKeys[wParam], true);						return 0;
 			//case WM_SYSKEYUP:	ptrPGE->olc_UpdateKeyState(mapKeys[wParam], false);						return 0;
 			//case WM_LBUTTONDOWN:ptrPGE->olc_UpdateMouseState(0, true);                                  return 0;
@@ -77,7 +77,11 @@ namespace game
 
 		dwExStyle = WS_EX_APPWINDOW | WS_EX_WINDOWEDGE;
 		dwStyle = WS_CAPTION | WS_SYSMENU | WS_VISIBLE | WS_THICKFRAME | WS_MAXIMIZEBOX | WS_MINIMIZEBOX | WS_CLIPCHILDREN | WS_CLIPSIBLINGS;
-
+		if (!_attributes.isWindowVisible)
+		{
+			dwExStyle = 0;
+			dwStyle = 0;
+		}
 		// Dimensions of the window
 		windowWidth = _attributes.WindowWidth;
 		windowHeight = _attributes.WindowHeight;
@@ -134,7 +138,7 @@ namespace game
 		return true;
 	}
 
-	void Window::SetAttributes(const GameAttributes attrib)
+	void Window::SetAttributes(const Attributes attrib)
 	{
 		_attributes = attrib;
 	}
