@@ -30,8 +30,6 @@ namespace game
 		};
 
 		// Create a temporary invisible window
-		//tempAttrib.WindowHeight = 0;
-		//tempAttrib.WindowWidth = 0;
 		tempAttrib.isWindowVisible = false;
 		tempWindow.SetAttributes(tempAttrib);
 		if (!tempWindow.CreateTheWindow())
