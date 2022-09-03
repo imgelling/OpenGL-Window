@@ -21,6 +21,7 @@ namespace game
 		Attributes _attributes;
 
 		// Windows only stuff
+		RECT _windowPositionSave;
 		HWND _windowHandle;
 		MONITORINFO _monitorInfo = { 0 };
 		static LRESULT CALLBACK WindowEventProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);

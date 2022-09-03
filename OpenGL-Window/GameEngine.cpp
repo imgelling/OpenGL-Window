@@ -45,10 +45,7 @@ namespace game
 				Update(msElapsed);
 				_updateTimer.Reset();
 			}
-			//else
-			//{
-			//	//std::cout << "Something weird going on." << msElapsed << "\n";
-			//}
+
 			if (_frameLockTimer.Elapsed() >= _frameTime)
 			{
 				_frameLockTimer.Reset();
@@ -102,6 +99,12 @@ namespace game
 	{
 		_window.SetWindowTitle(title);
 		_attributes.WindowTitle = title;
+	}
+
+	void Engine::ToggleFullscreen()
+	{
+		_window.ToggleFullScreen();
+		_attributes.isWindowFullscreen = !_attributes.isWindowFullscreen;
 	}
 	
 	bool Engine::Create()

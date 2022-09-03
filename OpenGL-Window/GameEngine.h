@@ -38,6 +38,7 @@ namespace game
 
 		void SetWindowTitle(const std::string title);
 		void SetFrameLock(const uint32_t limit);
+		void ToggleFullscreen();
 	private:
 #pragma region NeedsToBeCreatedByUser
 		void Update(const float msElapsed);
