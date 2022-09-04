@@ -15,7 +15,7 @@ void game::Engine::Initialize()
 	attrib.Framelock = 60;
 	attrib.isVsyncOn = false;
 	attrib.isDebugMode = false;
-	attrib.isWindowFullscreen = false;
+	attrib.isWindowFullscreen = true;
 	//attrib.RenderingAPI = RenderAPI::Vulkan;
 	SetAttributes(attrib);
 }
@@ -63,6 +63,10 @@ void game::Engine::Update(const float msElapsed)
 				
 		//game::GL::wglSwapInterval(1);
 		first = false;
+	}
+	if (keyboard.WasKeyReleased(VK_F11))
+	{
+		ToggleFullscreen();
 	}
 	if (keyboard.WasKeyReleased(VK_ESCAPE))
 	{
