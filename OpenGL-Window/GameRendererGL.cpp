@@ -244,4 +244,10 @@ namespace game
 	{
 		SwapBuffers(_glDeviceContext);
 	};
+
+	void RendererGL::HandleWindowResize(const uint32_t width, const uint32_t height)
+	{
+		glViewport(0, 0, width, height);
+
+	}
 }

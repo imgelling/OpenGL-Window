@@ -20,6 +20,7 @@ namespace game
 
 		bool CreateInstance();
 
+		void HandleWindowResize(const uint32_t width, const uint32_t height) override;
 	protected:
 		void _ReadExtensions() override;
 

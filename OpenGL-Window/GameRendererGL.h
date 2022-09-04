@@ -204,6 +204,7 @@ namespace game
 		bool CreateDevice(Window window) override;
 		void DestroyDevice() override;
 		void Swap() override;
+		void HandleWindowResize(const uint32_t width, const uint32_t height) override;
 	protected:
 		void _ReadExtensions() override;
 

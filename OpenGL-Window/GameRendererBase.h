@@ -19,6 +19,7 @@ namespace game
 		virtual bool CreateDevice(Window window) { return false; };
 		virtual void DestroyDevice() {};
 		virtual void Swap() {};
+		virtual void HandleWindowResize(const uint32_t width, const uint32_t height) {};
 	protected:
 		Attributes _attributes;
 		std::vector<std::string> _extensionsAvailable;

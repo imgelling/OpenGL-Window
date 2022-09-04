@@ -90,4 +90,9 @@ namespace game
 
 		return true;
 	}
+
+	void RendererVK::HandleWindowResize(const uint32_t width, const uint32_t height)
+	{
+
+	}
 }
