@@ -22,7 +22,7 @@ namespace game
 	
 	class Engine
 	{
-		friend Window;
+		//friend Window;
 	public:
 		bool isRunning;
 		GameLogger* logger;
@@ -30,7 +30,6 @@ namespace game
 
 		Engine(GameLogger* logger);
 		~Engine();
-		void ProcessMessages();
 		void SetAttributes(const Attributes &attrib);
 		bool Create();
 		void Start();
@@ -53,7 +52,8 @@ namespace game
 		Timer _renderTimer;
 		Timer _updateTimer;
 		Timer _frameLockTimer;
-		void Swap();
+		void _ProcessMessages();
+		void _Swap();
 
 
 	};

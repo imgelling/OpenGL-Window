@@ -37,7 +37,7 @@ namespace game
 		do
 		{
 			// Do window messages
-			ProcessMessages();
+			_ProcessMessages();
 
 			msElapsed = _updateTimer.Elapsed();
 			if (msElapsed > 0.0f)
@@ -52,7 +52,7 @@ namespace game
 				msElapsed = _renderTimer.Elapsed();
 				_renderTimer.Reset();
 				Render(msElapsed);
-				Swap();
+				_Swap();
 			}
 
 		} while (isRunning);
@@ -63,7 +63,7 @@ namespace game
 		isRunning = false;
 	}
 
-	void Engine::ProcessMessages()
+	void Engine::_ProcessMessages()
 	{
 		_window.DoMessagePump();
 	}
@@ -145,7 +145,7 @@ namespace game
 		return true;
 	}
 
-	void Engine::Swap()
+	void Engine::_Swap()
 	{
 		_renderer->Swap();
 	}

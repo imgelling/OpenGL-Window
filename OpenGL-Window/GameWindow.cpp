@@ -15,7 +15,7 @@ namespace game
 		_windowHandle = NULL;
 	}
 
-	LRESULT CALLBACK Window::WindowEventProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+	LRESULT CALLBACK Window::_WindowEventProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	{
 		switch (uMsg)
 		{
@@ -66,7 +66,7 @@ namespace game
 		wc.hCursor = LoadCursor(NULL, IDC_ARROW);
 		wc.style = CS_HREDRAW | CS_VREDRAW | CS_OWNDC;
 		wc.hInstance = GetModuleHandle(nullptr);
-		wc.lpfnWndProc = WindowEventProc;
+		wc.lpfnWndProc = _WindowEventProc;
 		wc.cbClsExtra = 0;
 		wc.cbWndExtra = 0;
 		wc.lpszMenuName = nullptr;
@@ -203,10 +203,10 @@ namespace game
 		if (!_attributes.isWindowFullscreen)
 		{
 			
-			int32_t adjustedWidth = _windowPositionSave.right -_windowPositionSave.left;
-			int32_t adjustedHeight = _windowPositionSave.bottom -_windowPositionSave.top;
+			int32_t width = _windowPositionSave.right -_windowPositionSave.left;
+			int32_t height = _windowPositionSave.bottom -_windowPositionSave.top;
 			// Move window to old position for window
-			SetWindowPos(_windowHandle, 0, _windowPositionSave.left, _windowPositionSave.top, adjustedWidth, adjustedHeight, SWP_DRAWFRAME | SWP_FRAMECHANGED);
+			SetWindowPos(_windowHandle, 0, _windowPositionSave.left, _windowPositionSave.top, width, height, SWP_DRAWFRAME | SWP_FRAMECHANGED);
 		}
 		else // swapping to fullscreen
 		{

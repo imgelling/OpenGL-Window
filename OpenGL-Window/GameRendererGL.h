@@ -208,11 +208,11 @@ namespace game
 		void _ReadExtensions() override;
 
 	private:
-		typedef HDC glDeviceContext_t;
-		typedef HGLRC glRenderContext_t;
+		typedef HDC _glDeviceContext_t;
+		typedef HGLRC _glRenderContext_t;
 
-		glDeviceContext_t _glDeviceContext = NULL;
-		glRenderContext_t _glRenderContext = NULL;
+		_glDeviceContext_t _glDeviceContext = NULL;
+		_glRenderContext_t _glRenderContext = NULL;
 
 	};
 }

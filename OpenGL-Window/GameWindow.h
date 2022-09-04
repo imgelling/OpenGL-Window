@@ -24,6 +24,6 @@ namespace game
 		RECT _windowPositionSave;
 		HWND _windowHandle;
 		MONITORINFO _monitorInfo = { 0 };
-		static LRESULT CALLBACK WindowEventProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+		static LRESULT CALLBACK _WindowEventProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 	};
 }

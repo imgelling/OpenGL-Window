@@ -31,27 +31,27 @@ namespace game
 
 	void GameLogger::Write(const std::string logline)
 	{
-		Write(LogType::NORMAL, logline);
+		_Write(LogType::NORMAL, logline);
 	}
 
 	void GameLogger::Error(const std::string logline)
 	{
-		Write(LogType::ERRORS, logline);
+		_Write(LogType::ERRORS, logline);
 	}
 
 	void GameLogger::Error(const GameError error)
 	{
 		std::stringstream str;
 		str << error;
-		Write(LogType::ERRORS, str.str());
+		_Write(LogType::ERRORS, str.str());
 	}
 
 	void GameLogger::Warning(const std::string logline)
 	{
-		Write(LogType::WARNING, logline);
+		_Write(LogType::WARNING, logline);
 	}
 
-	void GameLogger::Write(const LogType type, const std::string logline)
+	void GameLogger::_Write(const LogType type, const std::string logline)
 	{
 		std::string color;
 		std::string temp;

@@ -24,7 +24,7 @@ namespace game
         time_t rawtime;
         tm timeinfo = { 0 };
         enum class LogType { NORMAL, WARNING, ERRORS, NONE };
-        void Write(const LogType type, const std::string logline);
+        void _Write(const LogType type, const std::string logline);
         inline void GetTime();
     };
 

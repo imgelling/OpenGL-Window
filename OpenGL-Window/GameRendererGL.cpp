@@ -17,8 +17,8 @@ namespace game
 
 	RendererGL::RendererGL()
 	{
-		glDeviceContext_t glTempDevice = NULL;
-		glRenderContext_t glTempRender = NULL;
+		_glDeviceContext_t glTempDevice = NULL;
+		_glRenderContext_t glTempRender = NULL;
 		game::Window tempWindow;
 		Attributes tempAttrib;
 		PIXELFORMATDESCRIPTOR pixelFormatDescriptor =

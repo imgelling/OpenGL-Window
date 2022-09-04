@@ -10,7 +10,7 @@ namespace game
 	extern GameError lastError;
 	class RendererBase
 	{
-	friend Window;
+	//friend Window;
 	public:
 		void SetAttributes(const Attributes attrib)
 		{
