@@ -34,6 +34,8 @@ namespace game
 		case WM_SIZE: enginePointer->HandleWindowResize(lParam & 0xFFF, (lParam >> 16) & 0xFFFF); return 0;
 		case WM_KEYDOWN: enginePointer->keyboard.SetKeyState((uint8_t)wParam, true); return 0;
 		case WM_KEYUP: enginePointer->keyboard.SetKeyState((uint8_t)wParam, false); return 0;
+		//case WM_SYSKEYDOWN: ptrPGE->olc_UpdateKeyState(mapKeys[wParam], true);						return 0;
+		//case WM_SYSKEYUP:	ptrPGE->olc_UpdateKeyState(mapKeys[wParam], false);
 		case WM_CLOSE:		if (enginePointer) enginePointer->isRunning = false; return 0;
 		case WM_DESTROY:	PostQuitMessage(0); DestroyWindow(hWnd); return 0;
 		}
