@@ -8,8 +8,8 @@
 #pragma comment(lib, "gdi32.lib")
 #pragma comment(lib, "opengl32.lib")
 // below is for flush (block till vsync), Windows only..maybe
-#include <dwmapi.h>
-#pragma comment(lib, "Dwmapi.lib")
+//#include <dwmapi.h>
+//#pragma comment(lib, "Dwmapi.lib")
 #pragma endregion
 #pragma endregion
 
@@ -31,6 +31,7 @@
 #include "GameRendererBase.h"
 #include "GameRendererGL.h"
 #include "GameRendererVK.h"
+#include "GameTerminal.h"
 #include "GameTimer.h"
 #include "GameWindow.h"
 #pragma endregion
