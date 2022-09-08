@@ -14,13 +14,10 @@ namespace game
 		_renderer = nullptr;
 		_frameTime = 0.0f;
 		this->logger = logger;
-		Initialize();
-
 	}
 
 	Engine::~Engine()
 	{
-		Shutdown();
 		if (_renderer) _renderer->DestroyDevice();
 		delete _renderer;
 	}
@@ -56,6 +53,8 @@ namespace game
 			}
 
 		} while (isRunning);
+
+		Shutdown();
 	}
 
 	void Engine::Stop()
@@ -110,6 +109,8 @@ namespace game
 	bool Engine::Create()
 	{
 		logger->Header(_attributes.WindowTitle, _attributes.GameVersion);
+
+		Initialize();
 
 		// Create the window
 		_window.SetAttributes(_attributes);

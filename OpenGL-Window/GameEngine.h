@@ -39,13 +39,13 @@ namespace game
 		void SetFrameLock(const uint32_t limit);
 		void ToggleFullscreen();
 		void HandleWindowResize(const uint32_t width, const uint32_t height);
-	private:
 #pragma region NeedsToBeCreatedByUser
-		void Update(const float msElapsed);
-		void Render(const float msElapsed);
-		void Initialize();
-		void Shutdown();
+		virtual void Update(const float msElapsed) {};
+		virtual void Render(const float msElapsed) {};
+		virtual void Initialize() {};
+		virtual void Shutdown() {};
 #pragma endregion
+	private:
 		float _frameTime;
 		Attributes _attributes;
 		RendererBase* _renderer;
