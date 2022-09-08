@@ -190,7 +190,7 @@ namespace game
 		typedef const GLubyte* (WINAPI* PFNGLGETSTRINGIPROC) (GLenum name, GLuint index);
 		extern PFNGLGETSTRINGIPROC glGetStringi;
 
-		typedef int (WINAPI* PFNWGLGETSWAPINTERVALEXTPROC) (void);
+		typedef int (WINAPI* PFNWGLGETSWAPINTERVALEXTPROC) ();
 		extern PFNWGLGETSWAPINTERVALEXTPROC wglGetSwapInterval;
 
 		typedef BOOL(WINAPI* PFNWGLSWAPINTERVALEXTPROC) (int interval);

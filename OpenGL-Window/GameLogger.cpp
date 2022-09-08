@@ -1,101 +1,103 @@
 #include "GameLogger.h"
 #include <iostream>
 #include <sstream>
+#include <Windows.h>
 
 namespace game
 {
 
-	void GameLogger::Line()
+	void Logger::Line()
 	{
 		//#ifdef _DEBUG
-		streamlock.lock();
+		_streamlock.lock();
 		std::cout << "--------------------------------------------------------------------------------" << std::endl;
-		streamlock.unlock();
+		_streamlock.unlock();
 		//#endif
-		streamlock.lock();
-		stream << "<HR>";
-		streamlock.unlock();
+		_streamlock.lock();
+		_stream << "<HR>";
+		_streamlock.unlock();
 	}
 
-	GameLogger::GameLogger(const std::string filename)
+	Logger::Logger(const std::string filename)
 	{
 		for (uint16_t buff = 0; buff < 256; buff++)
 		{
-			buffer[buff] = 0;
+			_buffer[buff] = 0;
 		}
-		rawtime = 0;
-		streamlock.lock();
-		stream.open(filename.c_str(), std::ios::out);
-		streamlock.unlock();
+		_rawtime = 0;
+		_streamlock.lock();
+		_stream.open(filename.c_str(), std::ios::out);
+		SetLastError(0);
+		_streamlock.unlock();
 	}
 
-	void GameLogger::Write(const std::string logline)
+	void Logger::Write(const std::string logline)
 	{
-		_Write(LogType::NORMAL, logline);
+		_Write(_LogType::NORMAL, logline);
 	}
 
-	void GameLogger::Error(const std::string logline)
+	void Logger::Error(const std::string logline)
 	{
-		_Write(LogType::ERRORS, logline);
+		_Write(_LogType::ERRORS, logline);
 	}
 
-	void GameLogger::Error(const GameError error)
+	void Logger::Error(const GameError error)
 	{
 		std::stringstream str;
 		str << error;
-		_Write(LogType::ERRORS, str.str());
+		_Write(_LogType::ERRORS, str.str());
 	}
 
-	void GameLogger::Warning(const std::string logline)
+	void Logger::Warning(const std::string logline)
 	{
-		_Write(LogType::WARNING, logline);
+		_Write(_LogType::WARNING, logline);
 	}
 
-	void GameLogger::_Write(const LogType type, const std::string logline)
+	void Logger::_Write(const _LogType type, const std::string logline)
 	{
 		std::string color;
 		std::string temp;
 		std::string pre;
 		std::string time;
 
-		GetTime();
-		time = std::string(buffer);
+		_GetTime();
+		time = std::string(_buffer);
 		time.pop_back();
 		pre = "[" + time + "] ";
 		color = "FFFFFF";
 
-		if (type == LogType::ERRORS)
+		if (type == _LogType::ERRORS)
 		{
 			pre += "ERROR : ";
 			color = "FF0000";
 		}
-		else if (type == LogType::WARNING)
+		else if (type == _LogType::WARNING)
 		{
 			pre += "WARNING : ";
 			color = "FFFF00";
 		}
 		//#ifdef _DEBUG
-		streamlock.lock();
+		_streamlock.lock();
 		std::cout << pre << logline << std::endl;
-		streamlock.unlock();
+		_streamlock.unlock();
 		//#endif
 		temp += "<FONT style=\"background-color:#" + color + "\">";
 		temp += pre;
 		temp += logline + "</FONT><BR>";
-		streamlock.lock();
-		stream << temp << std::endl;
-		streamlock.unlock();
+		_streamlock.lock();
+		_stream << temp << std::endl;
+		_streamlock.unlock();
 	}
 
-	void GameLogger::WriteQuiet(const std::string logline)
+	void Logger::WriteQuiet(const std::string logline)
 	{
 		std::string color;
 		std::string temp;
 		std::string pre;
 		std::string time;
 
-		GetTime();
-		time = std::string(buffer);
+		_GetTime();
+		time = std::string(_buffer);
 		time.pop_back();
 		pre = "[" + time + "] ";
 		color = "FFFFFF";
@@ -103,34 +105,34 @@ namespace game
 		temp += "<FONT style=\"background-color:#" + color + "\">";
 		temp += pre;
 		temp += logline + "</FONT><BR>";
-		streamlock.lock();
-		stream << temp << std::endl;
-		streamlock.unlock();
+		_streamlock.lock();
+		_stream << temp << std::endl;
+		_streamlock.unlock();
 	}
 
-	inline void GameLogger::GetTime()
+	inline void Logger::_GetTime()
 	{
 #ifdef __linux__
 
 #else
-		time(&rawtime);
-		localtime_s(&timeinfo, &rawtime);
-		asctime_s(buffer, &timeinfo);
+		time(&_rawtime);
+		localtime_s(&_timeinfo, &_rawtime);
+		asctime_s(_buffer, &_timeinfo);
 #endif
 	}
 
-	void GameLogger::Header(const std::string name, const std::string version)
+	void Logger::Header(const std::string name, const std::string version)
 	{
 		Write(name + ", version " + version);
 		Write("Built on " + std::string(__DATE__) + " at " + std::string(__TIME__) + ".");
 		Line();
 	}
 
-	GameLogger::~GameLogger()
+	Logger::~Logger()
 	{
-		streamlock.lock();
-		stream.close();
-		streamlock.unlock();
+		_streamlock.lock();
+		_stream.close();
+		_streamlock.unlock();
 	}
 
 }

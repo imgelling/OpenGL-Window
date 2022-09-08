@@ -25,10 +25,10 @@ namespace game
 		//friend Window;
 	public:
 		bool isRunning;
-		GameLogger* logger;
+		Logger* logger;
 		Keyboard keyboard;
 
-		Engine(GameLogger* logger);
+		Engine(Logger* logger);
 		~Engine();
 		void SetAttributes(const Attributes &attrib);
 		bool Create();

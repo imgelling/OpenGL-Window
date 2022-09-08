@@ -7,7 +7,7 @@
 namespace game
 {
 
-	Engine::Engine(GameLogger* logger)
+	Engine::Engine(Logger* logger)
 	{
 		isRunning = false;
 		enginePointer = this;
@@ -108,9 +108,9 @@ namespace game
 	
 	bool Engine::Create()
 	{
-		logger->Header(_attributes.WindowTitle, _attributes.GameVersion);
-
 		Initialize();
+
+		logger->Header(_attributes.WindowTitle, _attributes.GameVersion);
 
 		// Create the window
 		_window.SetAttributes(_attributes);

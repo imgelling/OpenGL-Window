@@ -8,7 +8,9 @@
 class Game : public game::Engine
 {
 public:
-	Game(game::GameLogger& logger) : game::Engine(&logger)
+	game::Terminal terminal;
+
+	Game(game::Logger& logger) : game::Engine(&logger)
 	{
 	}
 
@@ -18,7 +20,7 @@ public:
 
 		attrib.WindowTitle = "Spinning Triangle";
 		attrib.GameVersion = "0.01";
-		attrib.Framelock = 60;
+		attrib.Framelock = 69;
 		attrib.isVsyncOn = false;
 		attrib.isDebugMode = false;
 		attrib.isWindowFullscreen = true;
@@ -39,11 +41,12 @@ public:
 		updatesCounted++;
 		if (upsTime >= 1000.0f)
 		{
-			SetWindowTitle("Spinning Triangle - " + std::to_string(updatesCounted) + " ups.");
+			std::cout << terminal.SetPosition(0, 10) << "Updates per second : " << updatesCounted << "\n";
 			updatesCounted = 0;
 			upsTime = upsTime - 1000.0f;
 		}
 
+		// Handle Input
 		if (keyboard.WasKeyReleased(VK_F11))
 		{
 			ToggleFullscreen();
@@ -52,6 +55,7 @@ public:
 		{
 			Stop();
 		}
+
 		glClearColor(0.25f, 0.25f, 0.25f, 1.0f);
 	}
 
@@ -64,7 +68,7 @@ public:
 		framesCounted++;
 		if (fpsTime >= 1000.0f)
 		{
-			SetWindowTitle("Spinning Triangle - " + std::to_string(framesCounted) + " fps.");
+			std::cout << terminal.SetPosition(0, 11) << "Frames per second : " << framesCounted << "\n";
 			framesCounted = 0;
 			fpsTime = fpsTime - 1000.0f;
 		}
@@ -89,7 +93,7 @@ public:
 
 int main()
 {
-	game::GameLogger logger("Log.html");
+	game::Logger logger("Log.html");
 	Game engine(logger);
 
 	// Create the needed bits for the engine

@@ -12,7 +12,7 @@ namespace game
 	class Terminal
 	{
 	public:
-		Terminal(void)
+		Terminal()
 		{
 			std::cout << resetAll;
 #if _WIN32
@@ -59,7 +59,7 @@ namespace game
 			}
 #endif
 		}
-		~Terminal(void)
+		~Terminal()
 		{
 #if _WIN32
 			DWORD err = 0;
