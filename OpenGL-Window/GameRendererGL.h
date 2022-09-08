@@ -201,12 +201,12 @@ namespace game
 	{
 	public:
 		RendererGL();
-		bool CreateDevice(Window window) override;
-		void DestroyDevice() override;
-		void Swap() override;
-		void HandleWindowResize(const uint32_t width, const uint32_t height) override;
+		bool CreateDevice(Window window);
+		void DestroyDevice();
+		void Swap();
+		void HandleWindowResize(const uint32_t width, const uint32_t height);
 	protected:
-		void _ReadExtensions() override;
+		void _ReadExtensions();
 
 	private:
 		typedef HDC _glDeviceContext_t;

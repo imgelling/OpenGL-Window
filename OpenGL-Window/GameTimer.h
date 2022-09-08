@@ -7,7 +7,7 @@ namespace game
 	{
 	public:
 		Timer();
-		float Elapsed();
+		float_t Elapsed();
 		void Reset();
 	private:
 		std::chrono::high_resolution_clock::time_point _startTime;

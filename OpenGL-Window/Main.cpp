@@ -30,9 +30,9 @@ public:
 	{
 	}
 
-	void Update(const float msElapsed)
+	void Update(const float_t msElapsed)
 	{
-		static double upsTime = 0.0f;
+		static double_t upsTime = 0.0f;
 		static uint32_t updatesCounted = 0;
 
 		upsTime += msElapsed;
@@ -55,9 +55,9 @@ public:
 		glClearColor(0.25f, 0.25f, 0.25f, 1.0f);
 	}
 
-	void Render(const float msElapsed)
+	void Render(const float_t msElapsed)
 	{
-		static double fpsTime = 0.0f;
+		static float_t fpsTime = 0.0f;
 		static uint32_t framesCounted = 0;
 
 		fpsTime += msElapsed;

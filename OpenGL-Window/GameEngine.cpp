@@ -25,7 +25,7 @@ namespace game
 	void Engine::Start()
 	{
 		// Storage of time
-		float msElapsed = 0.0f;
+		float_t msElapsed = 0.0f;
 
 		_renderTimer.Reset();
 		_frameLockTimer.Reset();

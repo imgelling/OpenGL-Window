@@ -13,9 +13,9 @@ namespace game
 		struct _FunctionToTime
 		{
 			std::string _name;
-			double _time = 0.0;
+			double_t _time = 0.0;
 			uint32_t _ticks = 0;
-			double _cumulative = 0.0;
+			double_t _cumulative = 0.0;
 			std::chrono::high_resolution_clock::time_point _start;
 		};
 		// Think I need this if using threads
@@ -31,13 +31,13 @@ namespace game
 		uint32_t Ticks(const std::string name);
 
 		// Returns the nanoseconds the function took on the last call, -1 if not found
-		double LastRun(const std::string name);
+		double_t LastRun(const std::string name);
 
 		// Returns the total nanoseconds the function ran over all the calls, -1 if not found
-		double Cumulative(const std::string name);
+		double_t Cumulative(const std::string name);
 
 		// Returns the average nanoseconds the function ran over all the calls, -1 if not found
-		double Average(const std::string name);
+		double_t Average(const std::string name);
 
 		// Returns an unmodifiable container of timed functions
 		const std::unordered_map <std::string, _FunctionToTime>& TimedFunctions()

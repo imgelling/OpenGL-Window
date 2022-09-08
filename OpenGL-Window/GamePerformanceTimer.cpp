@@ -18,10 +18,10 @@ namespace game
 		_mutex.unlock();
 		return ret;
 	}
-	double PerformanceTimer::LastRun(const std::string name)
+	double_t PerformanceTimer::LastRun(const std::string name)
 	{
 		_mutex.lock();
-		double ret = 0.0;
+		double_t ret = 0.0;
 		try
 		{
 			ret = _timedFuncs.at(name)._time;
@@ -33,10 +33,10 @@ namespace game
 		_mutex.unlock();
 		return ret;
 	}
-	double PerformanceTimer::Cumulative(const std::string name)
+	double_t PerformanceTimer::Cumulative(const std::string name)
 	{
 		_mutex.lock();
-		double ret = 0.0;
+		double_t ret = 0.0;
 		try
 		{
 			ret = _timedFuncs.at(name)._cumulative;
@@ -48,10 +48,10 @@ namespace game
 		_mutex.unlock();
 		return ret;
 	}
-	double PerformanceTimer::Average(const std::string name)
+	double_t PerformanceTimer::Average(const std::string name)
 	{
 		_mutex.lock();
-		double ret = 0.0;
+		double_t ret = 0.0;
 		try
 		{
 			ret = _timedFuncs.at(name)._cumulative / _timedFuncs.at(name)._ticks;

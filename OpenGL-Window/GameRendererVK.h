@@ -12,17 +12,17 @@ namespace game
 	class RendererVK : public RendererBase
 	{
 	public:
-		bool CreateDevice(Window window) override;
+		bool CreateDevice(Window window);
 
-		void DestroyDevice() override;
+		void DestroyDevice();
 
-		void Swap() override;
+		void Swap();
 
 		bool CreateInstance();
 
-		void HandleWindowResize(const uint32_t width, const uint32_t height) override;
+		void HandleWindowResize(const uint32_t width, const uint32_t height);
 	protected:
-		void _ReadExtensions() override;
+		void _ReadExtensions();
 
 	private:
 		VkInstance _vkInstance = nullptr;

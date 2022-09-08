@@ -16,10 +16,10 @@ namespace game
 		{
 			_attributes = attrib;
 		}
-		virtual bool CreateDevice(Window window) { return false; };
-		virtual void DestroyDevice() {};
-		virtual void Swap() {};
-		virtual void HandleWindowResize(const uint32_t width, const uint32_t height) {};
+		virtual bool CreateDevice(Window window) = 0;
+		virtual void DestroyDevice() = 0;
+		virtual void Swap() = 0;
+		virtual void HandleWindowResize(const uint32_t width, const uint32_t height) = 0;
 	protected:
 		Attributes _attributes;
 		std::vector<std::string> _extensionsAvailable;

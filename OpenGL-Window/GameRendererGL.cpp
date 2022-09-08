@@ -129,7 +129,7 @@ namespace game
 		}; 
 		// 	WGL_SWAP_EXCHANGE_ARB vs WGL_SWAP_COPY_ARB.
 
-		float pixelAttribFloatList[] = { 0, 0 };
+		float_t pixelAttribFloatList[] = { 0, 0 };
 		PIXELFORMATDESCRIPTOR pixelFormatDescriptor = { 0 };
 
 		// Get the window handle as the device we are using

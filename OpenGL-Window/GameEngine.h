@@ -40,13 +40,13 @@ namespace game
 		void ToggleFullscreen();
 		void HandleWindowResize(const uint32_t width, const uint32_t height);
 #pragma region NeedsToBeCreatedByUser
-		virtual void Update(const float msElapsed) {};
-		virtual void Render(const float msElapsed) {};
-		virtual void Initialize() {};
-		virtual void Shutdown() {};
+		virtual void Update(const float_t msElapsed) = 0;
+		virtual void Render(const float_t msElapsed) = 0;
+		virtual void Initialize() = 0;
+		virtual void Shutdown() = 0;
 #pragma endregion
 	private:
-		float _frameTime;
+		float_t _frameTime;
 		Attributes _attributes;
 		RendererBase* _renderer;
 		Window _window;
