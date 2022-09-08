@@ -165,8 +165,6 @@ namespace game
 	{
 #ifdef UNICODE
 		SetWindowText(_windowHandle, ConvertToWide(title).c_str());
-		if (GetLastError())
-			std::cout << "different error\n";
 #else
 		SetWindowText(olc_hWnd, s.c_str());
 #endif

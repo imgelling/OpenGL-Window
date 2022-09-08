@@ -44,6 +44,7 @@ namespace game
 		virtual void Render(const float_t msElapsed) = 0;
 		virtual void Initialize() = 0;
 		virtual void Shutdown() = 0;
+		virtual void LoadContent() = 0;
 #pragma endregion
 	private:
 		float_t _frameTime;

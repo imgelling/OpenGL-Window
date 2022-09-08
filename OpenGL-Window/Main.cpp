@@ -20,12 +20,17 @@ public:
 
 		attrib.WindowTitle = "Spinning Triangle";
 		attrib.GameVersion = "0.01";
-		attrib.Framelock = 69;
+		attrib.Framelock = 60;
 		attrib.isVsyncOn = false;
 		attrib.isDebugMode = false;
-		attrib.isWindowFullscreen = true;
+		//attrib.isWindowFullscreen = true;
 		//attrib.RenderingAPI = RenderAPI::Vulkan;
 		SetAttributes(attrib);
+	}
+
+	void LoadContent()
+	{
+		glClearColor(0.25f, 0.25f, 0.25f, 1.0f);
 	}
 
 	void Shutdown()
@@ -55,8 +60,6 @@ public:
 		{
 			Stop();
 		}
-
-		glClearColor(0.25f, 0.25f, 0.25f, 1.0f);
 	}
 
 	void Render(const float_t msElapsed)

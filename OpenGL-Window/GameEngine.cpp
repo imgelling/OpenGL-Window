@@ -108,6 +108,7 @@ namespace game
 	
 	bool Engine::Create()
 	{
+		// Let user choose how they want things
 		Initialize();
 
 		logger->Header(_attributes.WindowTitle, _attributes.GameVersion);
@@ -142,6 +143,9 @@ namespace game
 			_renderer->DestroyDevice();
 			return false;
 		}
+
+		// Load user content
+		LoadContent();
 
 		return true;
 	}
