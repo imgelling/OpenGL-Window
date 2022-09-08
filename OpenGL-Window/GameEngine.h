@@ -5,6 +5,7 @@
 #include "GameTimer.h"
 #include "GameLogger.h"
 #include "GameKeyboard.h"
+#include "GameMouse.h"
 
 namespace game
 {
@@ -27,6 +28,7 @@ namespace game
 		bool isRunning;
 		Logger* logger;
 		Keyboard keyboard;
+		Mouse mouse;
 
 		Engine(Logger* logger);
 		~Engine();
@@ -39,6 +41,8 @@ namespace game
 		void SetFrameLock(const uint32_t limit);
 		void ToggleFullscreen();
 		void HandleWindowResize(const uint32_t width, const uint32_t height);
+		void HandleMouseWheel(const int32_t wheel);
+		void HandleMouseMove(const int32_t xPosition, const int32_t yPosition);
 #pragma region NeedsToBeCreatedByUser
 		virtual void Update(const float_t msElapsed) = 0;
 		virtual void Render(const float_t msElapsed) = 0;

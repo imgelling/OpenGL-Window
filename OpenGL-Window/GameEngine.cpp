@@ -33,11 +33,14 @@ namespace game
 	
 		do
 		{
+			mouse._xPositionRelative = 0;
+			mouse._yPositionRelative = 0;
+
 			// Do window messages
 			_ProcessMessages();
 
 			msElapsed = _updateTimer.Elapsed();
-			if (msElapsed > 0.0f)
+			if (msElapsed > (0.0f))
 			{
 				Update(msElapsed);
 				_updateTimer.Reset();
@@ -49,6 +52,7 @@ namespace game
 				msElapsed = _renderTimer.Elapsed();
 				_renderTimer.Reset();
 				Render(msElapsed);
+
 				_Swap();
 			}
 
@@ -161,5 +165,15 @@ namespace game
 		{
 			_renderer->HandleWindowResize(width, height);
 		}
+	}
+
+	void Engine::HandleMouseWheel(const int32_t wheel)
+	{
+
+	}
+
+	void Engine::HandleMouseMove(const int32_t xPosition, const int32_t yPosition)
+	{
+		mouse.HandleMouseMove(xPosition, yPosition);
 	}
 }

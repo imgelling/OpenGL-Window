@@ -144,6 +144,7 @@
     <ClCompile Include="GameEngine.cpp" />
     <ClCompile Include="GameKeyboard.cpp" />
     <ClCompile Include="GameLogger.cpp" />
+    <ClCompile Include="GameMouse.cpp" />
     <ClCompile Include="GamePerformanceTimer.cpp" />
     <ClCompile Include="GameRendererGL.cpp" />
     <ClCompile Include="GameRendererVK.cpp" />
@@ -160,6 +161,7 @@
     <ClInclude Include="GameHelpers.h" />
     <ClInclude Include="GameKeyboard.h" />
     <ClInclude Include="GameLogger.h" />
+    <ClInclude Include="GameMouse.h" />
     <ClInclude Include="GamePerformanceTimer.h" />
     <ClInclude Include="GameRendererBase.h" />
     <ClInclude Include="GameRendererGL.h" />

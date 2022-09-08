@@ -19,15 +19,15 @@ namespace game
 	{
 		switch (uMsg)
 		{
-			//case WM_MOUSEMOVE:
-			//{
-			//	// Thanks @ForAbby (Discord)
-			//	uint16_t x = lParam & 0xFFFF; uint16_t y = (lParam >> 16) & 0xFFFF;
-			//	int16_t ix = *(int16_t*)&x;   int16_t iy = *(int16_t*)&y;
-			//	ptrPGE->olc_UpdateMouse(ix, iy);
-			//	return 0;
-			//}
-			//case WM_MOUSEWHEEL:	ptrPGE->olc_UpdateMouseWheel(GET_WHEEL_DELTA_WPARAM(wParam));           return 0;
+			case WM_MOUSEMOVE:
+			{
+				// Thanks @ForAbby (Discord)
+				//int32_t x = lParam & 0xFFFF; int32_t y = (lParam >> 16) & 0xFFFF;
+				//int16_t ix = *(int16_t*)&x;   int16_t iy = *(int16_t*)&y;
+				enginePointer->HandleMouseMove(lParam & 0xFFFF, (lParam >> 16) & 0xFFFF);
+				return 0;
+			}
+		case WM_MOUSEWHEEL:	enginePointer->HandleMouseWheel(GET_WHEEL_DELTA_WPARAM(wParam)); return 0;//ptrPGE->olc_UpdateMouseWheel(GET_WHEEL_DELTA_WPARAM(wParam));           return 0;
 			//case WM_MOUSELEAVE: ptrPGE->olc_UpdateMouseFocus(false);                                    return 0;
 			//case WM_SETFOCUS:	ptrPGE->olc_UpdateKeyFocus(true);                                       return 0;
 			//case WM_KILLFOCUS:	ptrPGE->olc_UpdateKeyFocus(false);                                      return 0;
