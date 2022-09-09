@@ -27,12 +27,12 @@ namespace game
 		_positionRelative = { 0, 0 };
 	}
 
-	Vector2i Mouse::GetPosition()
+	Pointi Mouse::GetPosition()
 	{
 		return _position;
 	}
 	
-	Vector2i Mouse::GetPositionRelative()
+	Pointi Mouse::GetPositionRelative()
 	{
 		return _positionRelative;
 	}

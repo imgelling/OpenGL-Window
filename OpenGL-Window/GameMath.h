@@ -28,4 +28,7 @@ namespace game
 	typedef Vector2<int> Vector2i;	
 	typedef Vector2<float> Vector2f;
 	typedef Vector2<double> Vector2d;
+	typedef Vector2<int> Pointi;
+	typedef Vector2<float> Pointf;
+	typedef Vector2<double> Pointd;
 }
