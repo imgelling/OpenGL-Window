@@ -1,5 +1,6 @@
 #pragma once
 #include <stdint.h>
+#include <Windows.h>
 #include "GameMath.h"
 
 namespace game
@@ -14,6 +15,7 @@ namespace game
 		Pointi GetPosition();
 		Pointi GetPositionRelative();
 		int32_t GetWheelDelta();
+		void ShowMouse(const bool isShown);
 	private:
 		int32_t _wheelDelta;
 		Pointi _position;

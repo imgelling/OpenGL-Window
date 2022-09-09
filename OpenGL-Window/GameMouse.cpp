@@ -41,4 +41,8 @@ namespace game
 	{
 		return _wheelDelta;
 	}
+	void Mouse::ShowMouse(const bool isShown)
+	{
+		ShowCursor(isShown);
+	}
 }

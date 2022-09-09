@@ -13,6 +13,7 @@ namespace game
 		enginePointer = this;
 		_renderer = nullptr;
 		_frameTime = 0.0f;
+		_updatesPerSecond = 0;
 		this->logger = logger;
 	}
 
@@ -26,6 +27,15 @@ namespace game
 	{
 		// Storage of time
 		float_t msElapsed = 0.0f;
+
+		double_t upsTime = 0.0f;
+		uint32_t updatesCounted = 0;
+
+		float_t fpsTime = 0.0f;
+		uint32_t framesCounted = 0;
+
+
+
 
 		_renderTimer.Reset();
 		_frameLockTimer.Reset();
@@ -43,6 +53,14 @@ namespace game
 			{
 				Update(msElapsed);
 				_updateTimer.Reset();
+				upsTime += msElapsed;
+				updatesCounted++;
+				if (upsTime >= 1000.0f)
+				{
+					_updatesPerSecond = updatesCounted;
+					updatesCounted = 0;
+					upsTime = upsTime - 1000.0f;
+				}
 			}
 
 			if (_frameLockTimer.Elapsed() >= _frameTime)
@@ -51,6 +69,15 @@ namespace game
 				msElapsed = _renderTimer.Elapsed();
 				_renderTimer.Reset();
 				Render(msElapsed);
+				fpsTime += msElapsed;
+				framesCounted++;
+				if (fpsTime >= 1000.0f)
+				{
+					//std::cout << terminal.SetPosition(0, 11) << "Frames per second : " << framesCounted << "\n";
+					_framesPerSecond = framesCounted;
+					framesCounted = 0;
+					fpsTime = fpsTime - 1000.0f;
+				}
 
 				_Swap();
 			}
@@ -95,6 +122,16 @@ namespace game
 			_frameTime = 0.0f;
 		}
 
+	}
+
+	uint32_t Engine::GetUpdatesPerSecond()
+	{
+		return _updatesPerSecond;
+	}
+
+	uint32_t Engine::GetFramesPerSecond()
+	{
+		return _framesPerSecond;
 	}
 	
 	void Engine::SetWindowTitle(const std::string title)

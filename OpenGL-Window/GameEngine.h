@@ -1,5 +1,6 @@
 #pragma once
 
+
 #include "GameRendererBase.h"
 #include "GameAttributes.h"
 #include "GameTimer.h"
@@ -39,6 +40,8 @@ namespace game
 
 		void SetWindowTitle(const std::string title);
 		void SetFrameLock(const uint32_t limit);
+		uint32_t GetUpdatesPerSecond();
+		uint32_t GetFramesPerSecond();
 		void ToggleFullscreen();
 		void HandleWindowResize(const uint32_t width, const uint32_t height);
 		void HandleMouseWheel(const int32_t wheelDelta);
@@ -60,6 +63,8 @@ namespace game
 		Timer _frameLockTimer;
 		void _ProcessMessages();
 		void _Swap();
+		uint32_t _updatesPerSecond;
+		uint32_t _framesPerSecond;
 
 
 	};
