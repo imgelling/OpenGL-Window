@@ -15,6 +15,7 @@ namespace game
 		PFNWGLSWAPINTERVALEXTPROC wglSwapInterval = nullptr;
 	}
 
+
 	RendererGL::RendererGL()
 	{
 		_glDeviceContext_t glTempDevice = NULL;

@@ -33,6 +33,7 @@
 #include "GameRendererBase.h"
 #include "GameRendererGL.h"
 #include "GameRendererVK.h"
+#include "GameSystemInfo.h"
 #include "GameTerminal.h"
 #include "GameTimer.h"
 #include "GameWindow.h"

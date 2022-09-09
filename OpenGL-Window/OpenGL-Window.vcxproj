@@ -152,6 +152,7 @@
     <ClCompile Include="GamePerformanceTimer.cpp" />
     <ClCompile Include="GameRendererGL.cpp" />
     <ClCompile Include="GameRendererVK.cpp" />
+    <ClCompile Include="GameSystemInfo.cpp" />
     <ClCompile Include="GameTerminal.cpp" />
     <ClCompile Include="GameTimer.cpp" />
     <ClCompile Include="GameMath.cpp" />
@@ -171,6 +172,7 @@
     <ClInclude Include="GameRendererBase.h" />
     <ClInclude Include="GameRendererGL.h" />
     <ClInclude Include="GameRendererVK.h" />
+    <ClInclude Include="GameSystemInfo.h" />
     <ClInclude Include="GameTerminal.h" />
     <ClInclude Include="GameTimer.h" />
     <ClInclude Include="GameMath.h" />
