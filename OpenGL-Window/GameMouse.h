@@ -1,5 +1,6 @@
 #pragma once
 #include <stdint.h>
+#include "GameMath.h"
 
 namespace game
 {
@@ -8,14 +9,15 @@ namespace game
 	public:
 		Mouse();
 		void HandleMouseMove(const int32_t xPosition, const int32_t yPosition);
-		int32_t _wheel;
-		int32_t _xPosition;
-		int32_t _yPosition;
-		int32_t _xPositionOld;
-		int32_t _yPositionOld;
-		int32_t _xPositionRelative;
-		int32_t _yPositionRelative;
+		void HandleMouseWheel(const int32_t delta);
+		void ResetMouseValues();
+		Vector2i GetPosition();
+		Vector2i GetPositionRelative();
+		int32_t GetWheelDelta();
 	private:
-
+		int32_t _wheelDelta;
+		Vector2i _position;
+		Vector2i _positionOld;
+		Vector2i _positionRelative;
 	};
 }

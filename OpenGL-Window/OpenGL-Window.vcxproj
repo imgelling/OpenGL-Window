@@ -150,6 +150,7 @@
     <ClCompile Include="GameRendererVK.cpp" />
     <ClCompile Include="GameTerminal.cpp" />
     <ClCompile Include="GameTimer.cpp" />
+    <ClCompile Include="GameMath.cpp" />
     <ClCompile Include="GameWindow.cpp" />
     <ClCompile Include="Main.cpp" />
   </ItemGroup>
@@ -168,6 +169,7 @@
     <ClInclude Include="GameRendererVK.h" />
     <ClInclude Include="GameTerminal.h" />
     <ClInclude Include="GameTimer.h" />
+    <ClInclude Include="GameMath.h" />
     <ClInclude Include="GameWindow.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

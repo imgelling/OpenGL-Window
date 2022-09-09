@@ -27,6 +27,7 @@
 #include "GameHelpers.h"
 #include "GameKeyboard.h"
 #include "GameLogger.h"
+#include "GameMath.h"
 #include "GameMouse.h"
 #include "GamePerformanceTimer.h"
 #include "GameRendererBase.h"

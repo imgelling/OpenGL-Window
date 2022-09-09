@@ -22,7 +22,7 @@ namespace game
 		delete _renderer;
 	}
 
-	void Engine::Start()
+	void Engine::StartEngine()
 	{
 		// Storage of time
 		float_t msElapsed = 0.0f;
@@ -33,8 +33,7 @@ namespace game
 	
 		do
 		{
-			mouse._xPositionRelative = 0;
-			mouse._yPositionRelative = 0;
+			mouse.ResetMouseValues();
 
 			// Do window messages
 			_ProcessMessages();
@@ -61,7 +60,7 @@ namespace game
 		Shutdown();
 	}
 
-	void Engine::Stop()
+	void Engine::StopEngine()
 	{
 		isRunning = false;
 	}
@@ -167,9 +166,9 @@ namespace game
 		}
 	}
 
-	void Engine::HandleMouseWheel(const int32_t wheel)
+	void Engine::HandleMouseWheel(const int32_t wheelDelta)
 	{
-
+		mouse.HandleMouseWheel(wheelDelta);
 	}
 
 	void Engine::HandleMouseMove(const int32_t xPosition, const int32_t yPosition)

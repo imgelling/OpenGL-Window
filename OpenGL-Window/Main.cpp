@@ -53,11 +53,16 @@ public:
 		}
 
 		// Write out mouse info if it has changed
-		if ((mouse._xPositionRelative != 0) || (mouse._yPositionRelative != 0))
+		if (mouse.GetWheelDelta())
 		{
-			std::cout << terminal.SetPosition(0, 8) << terminal.EraseLine << "Mouse Relative Movement : " << mouse._xPositionRelative << "," << mouse._yPositionRelative << '\n';
-			std::cout << terminal.SetPosition(0, 9) << terminal.EraseLine << "Mouse Position : " << mouse._xPosition << "," << mouse._yPosition << '\n';
+			std::cout << terminal.SetPosition(0, 7) << terminal.EraseLine << "Mouse Wheel Delta : " << mouse.GetWheelDelta() << "\n";
 		}
+		if ((mouse.GetPositionRelative().x != 0) || (mouse.GetPositionRelative().y != 0))
+		{
+			std::cout << terminal.SetPosition(0, 8) << terminal.EraseLine << "Mouse Relative Movement : " << mouse.GetPositionRelative().x << "," << mouse.GetPositionRelative().y << '\n';
+			std::cout << terminal.SetPosition(0, 9) << terminal.EraseLine << "Mouse Position : " << mouse.GetPosition().x << "," << mouse.GetPosition().y << '\n';
+		}
+
 		// Handle Input
 		if (keyboard.WasKeyReleased(VK_F11))
 		{
@@ -65,7 +70,7 @@ public:
 		}
 		if (keyboard.WasKeyReleased(VK_ESCAPE))
 		{
-			Stop();
+			StopEngine();
 		}
 	}
 
@@ -114,7 +119,7 @@ int main()
 	}
 
 	// Start the engine
-	engine.Start();
+	engine.StartEngine();
 
 	return EXIT_SUCCESS;
 }
