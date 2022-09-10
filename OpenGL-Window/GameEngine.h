@@ -44,15 +44,11 @@ namespace game
 		uint32_t GetFramesPerSecond();
 		void ToggleFullscreen();
 		void HandleWindowResize(const uint32_t width, const uint32_t height);
-		void HandleMouseWheel(const int32_t wheelDelta);
-		void HandleMouseMove(const int32_t xPosition, const int32_t yPosition);
-#pragma region NeedsToBeCreatedByUser
 		virtual void Update(const float_t msElapsed) = 0;
 		virtual void Render(const float_t msElapsed) = 0;
 		virtual void Initialize() = 0;
 		virtual void LoadContent() = 0;
 		virtual void Shutdown() = 0;
-#pragma endregion
 	private:
 		float_t _frameTime;
 		Attributes _attributes;

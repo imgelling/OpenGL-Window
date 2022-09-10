@@ -9,8 +9,11 @@ namespace game
 	{
 	public:
 		Mouse();
+		~Mouse();
+		bool IsButtonPressed(const int32_t button);
 		void HandleMouseMove(const int32_t xPosition, const int32_t yPosition);
 		void HandleMouseWheel(const int32_t delta);
+		void SetMouseState(const uint32_t button, const bool pressed);
 		void ResetMouseValues();
 		Pointi GetPosition();
 		Pointi GetPositionRelative();
@@ -21,5 +24,6 @@ namespace game
 		Pointi _position;
 		Pointi _positionOld;
 		Pointi _positionRelative;
+		bool* _buttons;
 	};
 }

@@ -14,6 +14,7 @@ namespace game
 		_renderer = nullptr;
 		_frameTime = 0.0f;
 		_updatesPerSecond = 0;
+		_framesPerSecond = 0;
 		this->logger = logger;
 	}
 
@@ -33,8 +34,6 @@ namespace game
 
 		float_t fpsTime = 0.0f;
 		uint32_t framesCounted = 0;
-
-
 
 
 		_renderTimer.Reset();
@@ -201,15 +200,5 @@ namespace game
 		{
 			_renderer->HandleWindowResize(width, height);
 		}
-	}
-
-	void Engine::HandleMouseWheel(const int32_t wheelDelta)
-	{
-		mouse.HandleMouseWheel(wheelDelta);
-	}
-
-	void Engine::HandleMouseMove(const int32_t xPosition, const int32_t yPosition)
-	{
-		mouse.HandleMouseMove(xPosition, yPosition);
 	}
 }

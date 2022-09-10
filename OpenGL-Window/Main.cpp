@@ -4,7 +4,7 @@
 
 
 // Engine header
-//#define GAME_USE_DEDICATED_GPU
+#define GAME_USE_DEDICATED_GPU
 #include "Game.h"
 
 class Game : public game::Engine
@@ -22,7 +22,7 @@ public:
 
 		attrib.WindowTitle = "Spinning Triangle";
 		attrib.GameVersion = "0.01";
-		attrib.Framelock = 60;
+		attrib.Framelock = 36;
 		attrib.isVsyncOn = false;
 		attrib.isDebugMode = false;
 		//attrib.isWindowFullscreen = true;
