@@ -1,6 +1,8 @@
 #include <windows.h>
 #include <iostream>
 
+
+
 // Engine header
 //#define GAME_USE_DEDICATED_GPU
 #include "Game.h"
@@ -47,7 +49,7 @@ public:
 			std::cout << terminal.SetPosition(0, 10) << "Updates per second : " << GetUpdatesPerSecond() << "\n";
 			upsTime = upsTime - 1000.0f;
 		}
-
+		
 		// Write out mouse info if it has changed
 		if (mouse.GetWheelDelta())
 		{
