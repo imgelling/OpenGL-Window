@@ -28,18 +28,21 @@ namespace game
 	{
 		// Storage of time
 		float_t msElapsed = 0.0f;
-
+		// Tracks updates per second
 		double_t upsTime = 0.0f;
 		uint32_t updatesCounted = 0;
-
+		// Tracks frames per second
 		float_t fpsTime = 0.0f;
 		uint32_t framesCounted = 0;
 
+		
 
+		// Reset the timers
 		_renderTimer.Reset();
 		_frameLockTimer.Reset();
 		_updateTimer.Reset();
 	
+		// Do the game loop
 		do
 		{
 			mouse.ResetMouseValues();
@@ -72,7 +75,6 @@ namespace game
 				framesCounted++;
 				if (fpsTime >= 1000.0f)
 				{
-					//std::cout << terminal.SetPosition(0, 11) << "Frames per second : " << framesCounted << "\n";
 					_framesPerSecond = framesCounted;
 					framesCounted = 0;
 					fpsTime = fpsTime - 1000.0f;
@@ -182,6 +184,8 @@ namespace game
 			_renderer->DestroyDevice();
 			return false;
 		}
+
+		_renderer->FillOutRendererInfo(systemInfo);
 
 		// Load user content
 		LoadContent();

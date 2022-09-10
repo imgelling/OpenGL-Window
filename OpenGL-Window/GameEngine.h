@@ -7,6 +7,7 @@
 #include "GameLogger.h"
 #include "GameKeyboard.h"
 #include "GameMouse.h"
+#include "GameSystemInfo.h"
 
 namespace game
 {
@@ -30,6 +31,7 @@ namespace game
 		Logger* logger;
 		Keyboard keyboard;
 		Mouse mouse;
+		SystemInfo systemInfo;
 
 		Engine(Logger* logger);
 		~Engine();

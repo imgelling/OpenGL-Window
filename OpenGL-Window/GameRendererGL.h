@@ -72,6 +72,11 @@ namespace game
 //#define WGL_TRANSPARENT_ALPHA_VALUE_ARB 0x203A
 //#define WGL_TRANSPARENT_INDEX_VALUE_ARB 0x203B
 
+#define GL_TEXTURE_IMAGE_FORMAT 0x828F
+#define GL_TEXTURE_IMAGE_TYPE 0x8290
+#define GL_SHADING_LANGUAGE_VERSION 0x8B8C
+#define GL_NUM_SHADING_LANGUAGE_VERSIONS 0x82E9
+
 //opengl 3.0 stuff
 //#define GL_CLIP_DISTANCE0 GL_CLIP_PLANE0
 //#define GL_CLIP_DISTANCE1 GL_CLIP_PLANE1
@@ -187,6 +192,7 @@ namespace game
 		void DestroyDevice();
 		void Swap();
 		void HandleWindowResize(const uint32_t width, const uint32_t height);
+		void FillOutRendererInfo(SystemInfo& info);
 	protected:
 		void _ReadExtensions();
 
@@ -210,5 +216,8 @@ namespace game
 
 		typedef BOOL(WINAPI* _PFNWGLSWAPINTERVALEXTPROC) (int interval);
 		_PFNWGLSWAPINTERVALEXTPROC _wglSwapInterval = nullptr;
+
+		typedef void (WINAPI* _PFNGLGETINTERNALFORMATIVPROC) (GLenum target, GLenum internalformat, GLenum pname, GLsizei bufSize, GLint* params);
+		_PFNGLGETINTERNALFORMATIVPROC _glGetInternalformativ = nullptr;
 	};
 }

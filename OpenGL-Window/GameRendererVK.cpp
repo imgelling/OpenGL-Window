@@ -95,4 +95,9 @@ namespace game
 	{
 
 	}
+
+	void RendererVK::FillOutRendererInfo(SystemInfo& info)
+	{
+
+	}
 }

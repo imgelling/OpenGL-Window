@@ -21,6 +21,7 @@ namespace game
 		bool CreateInstance();
 
 		void HandleWindowResize(const uint32_t width, const uint32_t height);
+		void FillOutRendererInfo(SystemInfo& info);
 	protected:
 		void _ReadExtensions();
 

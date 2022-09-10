@@ -1,5 +1,6 @@
 #include "GameRendererGL.h"
 #include "GameEngine.h"
+#include <sstream>
 
 namespace game
 {
@@ -185,6 +186,14 @@ namespace game
 			return false;
 		}
 
+		// Load glGetInternalformativ
+		_glGetInternalformativ = (_PFNGLGETINTERNALFORMATIVPROC)wglGetProcAddress("glGetInternalformativ");
+		if (_glGetInternalformativ == nullptr)
+		{
+			lastError = { GameErrors::GameOpenGLSpecific, "Extension glGetInternalformativ not available." };
+			return false;
+		}
+
 		// Set vertical sync
 		if (_attributes.isVsyncOn)
 			_wglSwapInterval(1);
@@ -240,12 +249,103 @@ namespace game
 	{
 		glViewport(0, 0, width, height);
 	}
+
+	void RendererGL::FillOutRendererInfo(SystemInfo& info)
+	{
+		auto LOG = [&](std::stringstream & s)
+		{
+			enginePointer->logger->Write(s.str());
+			s.str("");
+		};
+
+		int32_t value = 0;
+		std::stringstream sStream;
+
+		glGetIntegerv(WGL_CONTEXT_MAJOR_VERSION_ARB, &info.gpuInfo.glVersionMajor);
+		glGetIntegerv(WGL_CONTEXT_MINOR_VERSION_ARB, &info.gpuInfo.glVersionMinor);
+		info.gpuInfo.renderer = (char *)glGetString(GL_VERSION);
+		sStream << "OpenGL renderer : " << info.gpuInfo.renderer;
+		LOG(sStream);
+
+		// Extract numerical major and minor version numbers
+		info.gpuInfo.glVersionMajor = std::strtol(info.gpuInfo.renderer.c_str(), NULL, 10);
+		info.gpuInfo.renderer.erase(0, 2);
+		info.gpuInfo.glVersionMinor = std::strtol(info.gpuInfo.renderer.c_str(), NULL, 10);
+
+		// Get the vender of the renderer
+		info.gpuInfo.vendor = (char*)glGetString(GL_VENDOR);
+		sStream << "Vendor : " << info.gpuInfo.vendor;
+		LOG(sStream);
+
+		// Get the shader language version
+		//int32_t numberOfVersions = 0;
+		//glGetIntegerv(GL_NUM_SHADING_LANGUAGE_VERSIONS, &numberOfVersions);
+		//std::cout << numberOfVersions << "\n";
+		//for (int32_t version = 0; version < numberOfVersions; version++)
+		//{
+		//	std::cout << _glGetStringi(GL_SHADING_LANGUAGE_VERSION, version) << "\n";
+		//}
+		info.gpuInfo.glMaxShaderLanguageVersion = (char *)_glGetStringi(GL_SHADING_LANGUAGE_VERSION, 0);
+		sStream << "Max supported GLSL version : " << info.gpuInfo.glMaxShaderLanguageVersion;
+		LOG(sStream);
+
+		// Log video memory
+		GLint total_mem_kb[4] = { 0 };
+		GLint cur_avail_mem_kb[4] = { 0 };
+		if (info.gpuInfo.vendor.find("NVIDIA") != std::string::npos)
+		{
+#define GL_GPU_MEM_INFO_TOTAL_AVAILABLE_MEM_NVX 0x9048
+#define GL_GPU_MEM_INFO_CURRENT_AVAILABLE_MEM_NVX 0x9049
+
+			glGetIntegerv(GL_GPU_MEM_INFO_TOTAL_AVAILABLE_MEM_NVX, &total_mem_kb[0]);
+
+
+			glGetIntegerv(GL_GPU_MEM_INFO_CURRENT_AVAILABLE_MEM_NVX, &cur_avail_mem_kb[0]);
+			info.gpuInfo.totalMemory = total_mem_kb[0] / 1024;
+			info.gpuInfo.freeMemory = cur_avail_mem_kb[0] / 1024;
+			sStream << "GPU total memory is " << total_mem_kb[0] / 1024.0f << "MB and has " << cur_avail_mem_kb[0] / 1024.0f << "MB available.";
+			LOG(sStream);
+#undef GL_GPU_MEM_INFO_TOTAL_AVAILABLE_MEM_NVX
+#undef GL_GPU_MEM_INFO_CURRENT_AVAILABLE_MEM_NVX 
+		}
+		else
+		{
+			sStream << "Can not retrieve video RAM on AMD.";
+			LOG(sStream);
+		}
+
+		// Get texture formats
+		_glGetInternalformativ(GL_TEXTURE_2D, GL_RGBA8, GL_TEXTURE_IMAGE_FORMAT, 1, &info.gpuInfo.internalPixelFormat);
+		// Convert to hexidecimal
+		sStream << std::hex << info.gpuInfo.internalPixelFormat;
+		std::string hex(sStream.str());
+		sStream.str("");
+		info.gpuInfo.internalPixelFormat = std::strtol(hex.c_str(), NULL, 16);
+
+		_glGetInternalformativ(GL_TEXTURE_2D, GL_RGBA8, GL_TEXTURE_IMAGE_TYPE, 1, &info.gpuInfo.internalPixelType);
+		// Convert to hexidecimal
+		sStream << std::hex << info.gpuInfo.internalPixelType;
+		hex = sStream.str();
+		sStream.str("");
+		info.gpuInfo.internalPixelType = std::strtol(hex.c_str(), NULL, 16);
+
+		//nvidia type is GL_UNSIGNED_INT_8_8_8_8_REV (0x8367) difference is endianness
+		//amd type is GL_UNSIGNED_BYTE (0x1401)
+		// both formats are RGBA
+		sStream << "Internal texture format is " << info.gpuInfo.internalPixelFormat << " and is type " << info.gpuInfo.internalPixelType;
+		LOG(sStream);
+		 
+	}
 }
 
 
 // Undefine what we have done, if someone uses an extension loader 
 
 // OpenGL context stuff
+#undef GL_NUM_SHADING_LANGUAGE_VERSIONS 
+#undef GL_SHADING_LANGUAGE_VERSION
+#undef GL_TEXTURE_IMAGE_FORMAT
+#undef GL_TEXTURE_IMAGE_TYPE 
 #undef WGL_CONTEXT_DEBUG_BIT_ARB
 //#define WGL_CONTEXT_FORWARD_COMPATIBLE_BIT_ARB 0x0002
 #undef WGL_CONTEXT_MAJOR_VERSION_ARB 

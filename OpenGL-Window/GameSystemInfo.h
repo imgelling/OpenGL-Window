@@ -18,18 +18,18 @@ namespace game
 		// Contains information about the host's gpu being used
 		struct GPUInfo
 		{
-			int internalPixelFormat = 0;
-			int internalPixelType = 0;
-			int totalMemory = 0;
-			int freeMemory = 0;
-			int glVersionMajor = 0;
-			int glVersionMinor = 0;
-			int glShaderLanguageVersion = 0;
-			int glMultisampleBuffers = 0;
-			int glMultisampleSamples = 0;
-			//Color frontBufferColorSize;
-			//Color backBufferColorSize;
-			int depthBufferSize = 0;
+			int32_t internalPixelFormat = 0;
+			int32_t internalPixelType = 0;
+			int32_t totalMemory = 0;
+			int32_t freeMemory = 0;
+			int32_t glVersionMajor = 0;
+			int32_t glVersionMinor = 0;
+			std::string glMaxShaderLanguageVersion;
+			int32_t glMultisampleBuffers = 0;
+			int32_t glMultisampleSamples = 0;
+			int32_t frontBufferColorSize;
+			int32_t backBufferColorSize;
+			int32_t depthBufferSize = 0;
 			std::string renderer;
 			std::string vendor;
 		};
