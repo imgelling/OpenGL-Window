@@ -6,9 +6,10 @@
 
 namespace game
 {
-// OpenGL context stuff
+// OpenGL defines (removed at end of RendererGL.cpp)
+
 #define WGL_CONTEXT_DEBUG_BIT_ARB  0x0001
-//#define WGL_CONTEXT_FORWARD_COMPATIBLE_BIT_ARB 0x0002
+
 #define WGL_CONTEXT_MAJOR_VERSION_ARB 0x2091
 #define WGL_CONTEXT_MINOR_VERSION_ARB 0x2092
 #define WGL_CONTEXT_FLAGS_ARB 0x2094

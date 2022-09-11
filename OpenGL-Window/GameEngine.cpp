@@ -50,6 +50,7 @@ namespace game
 			// Do window messages
 			_ProcessMessages();
 
+			// Try to update as fast as possible and keep track of UPS
 			msElapsed = _updateTimer.Elapsed();
 			if (msElapsed > (0.0f))
 			{
@@ -65,6 +66,8 @@ namespace game
 				}
 			}
 
+			// If software frame lock is on, make sure we adhere to that
+			// and keep track of FPS
 			if (_frameLockTimer.Elapsed() >= _frameTime)
 			{
 				_frameLockTimer.Reset();
@@ -80,11 +83,13 @@ namespace game
 					fpsTime = fpsTime - 1000.0f;
 				}
 
+				// Swap the buffers
 				_Swap();
 			}
 
 		} while (isRunning);
 
+		// Clean up end user stuff
 		Shutdown();
 	}
 

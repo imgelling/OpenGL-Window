@@ -15,18 +15,18 @@ namespace game
 			unsigned int processorCount = 0;
 			//systemInfo.cpuInfo.processorCount = std::thread::hardware_concurrency();
 		};
-		// Contains information about the host's gpu being used
+		// Contains information about the host's renderer
 		struct GPUInfo
 		{
 			int32_t internalPixelFormat = 0;
 			int32_t internalPixelType = 0;
 			int32_t totalMemory = 0;
 			int32_t freeMemory = 0;
-			int32_t glVersionMajor = 0;
-			int32_t glVersionMinor = 0;
-			std::string glMaxShaderLanguageVersion;
-			int32_t glMultisampleBuffers = 0;
-			int32_t glMultisampleSamples = 0;
+			int32_t versionMajor = 0;
+			int32_t versionMinor = 0;
+			std::string maxShaderLanguageVersion;
+			int32_t multisampleBuffers = 0;
+			int32_t multisampleSamples = 0;
 			int32_t frontBufferColorSize;
 			int32_t backBufferColorSize;
 			int32_t depthBufferSize = 0;

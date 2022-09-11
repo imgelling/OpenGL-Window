@@ -22,9 +22,9 @@ public:
 
 		attrib.WindowTitle = "Spinning Triangle";
 		attrib.GameVersion = "0.01";
-		attrib.Framelock = 60;
-		attrib.isVsyncOn = true;
-		attrib.isDebugMode = false;
+		attrib.Framelock = 0;
+		attrib.isVsyncOn = false;
+		attrib.isDebugMode = true;
 		//attrib.isWindowFullscreen = true;
 		//attrib.RenderingAPI = RenderAPI::Vulkan;
 		SetAttributes(attrib);
@@ -43,12 +43,12 @@ public:
 	{
 		static double_t upsTime = 0.0f;
 
-		//upsTime += msElapsed;
-		//if (upsTime >= 1000.0f)
-		//{
-		//	std::cout << terminal.SetPosition(0, 10) << "Updates per second : " << GetUpdatesPerSecond() << "\n";
-		//	upsTime = upsTime - 1000.0f;
-		//}
+		upsTime += msElapsed;
+		if (upsTime >= 1000.0f)
+		{
+			std::cout << terminal.SetPosition(0, 10) << "Updates per second : " << GetUpdatesPerSecond() << "\n";
+			upsTime = upsTime - 1000.0f;
+		}
 		
 		//// Write out mouse info if it has changed
 		//if (mouse.GetWheelDelta())
@@ -76,12 +76,12 @@ public:
 	{
 		static float_t fpsTime = 0.0f;
 
-		//fpsTime += msElapsed;
-		//if (fpsTime >= 1000.0f)
-		//{
-		//	std::cout << terminal.SetPosition(0, 11) << "Frames per second : " << GetFramesPerSecond() << "\n";
-		//	fpsTime = fpsTime - 1000.0f;
-		//}
+		fpsTime += msElapsed;
+		if (fpsTime >= 1000.0f)
+		{
+			std::cout << terminal.SetPosition(0, 11) << "Frames per second : " << GetFramesPerSecond() << "\n";
+			fpsTime = fpsTime - 1000.0f;
+		}
 
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
