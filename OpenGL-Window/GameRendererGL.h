@@ -39,6 +39,8 @@ namespace game
 #define GL_SHADING_LANGUAGE_VERSION 0x8B8C
 #define GL_NUM_SHADING_LANGUAGE_VERSIONS 0x82E9
 #define GL_NUM_EXTENSIONS 0x821D
+#define GL_UNSIGNED_INT_8_8_8_8_REV 0x8367
+#define GL_UNSIGNED_BYTE 0x1401
 	
 	class RendererGL : public RendererBase
 	{
@@ -49,6 +51,7 @@ namespace game
 		void Swap();
 		void HandleWindowResize(const uint32_t width, const uint32_t height);
 		void FillOutRendererInfo(SystemInfo& info);
+		bool LoadTexture(std::string fileName);
 	protected:
 		void _ReadExtensions();
 
@@ -75,5 +78,8 @@ namespace game
 
 		typedef void (WINAPI* _PFNGLGETINTERNALFORMATIVPROC) (GLenum target, GLenum internalformat, GLenum pname, GLsizei bufSize, GLint* params);
 		_PFNGLGETINTERNALFORMATIVPROC _glGetInternalformativ = nullptr;
+
+		typedef void (WINAPI* _PFNGLGENERATEMIPMAPPROC) (GLenum target);
+		_PFNGLGENERATEMIPMAPPROC _glGenerateMipmap = nullptr;
 	};
 }

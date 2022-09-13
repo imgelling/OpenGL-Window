@@ -7,8 +7,11 @@
 //#define GAME_USE_DEDICATED_GPU
 #include "Game.h"
 
+class Game;
+uint32_t bindTexture;
 class Game : public game::Engine
 {
+
 public:
 	game::Terminal terminal;
 
@@ -23,7 +26,7 @@ public:
 		attrib.WindowTitle = "Spinning Triangle";
 		attrib.GameVersion = "0.01";
 		attrib.Framelock = 0;
-		attrib.isVsyncOn = false;
+		attrib.isVsyncOn = true;
 		attrib.isDebugMode = true;
 		//attrib.isWindowFullscreen = true;
 		//attrib.RenderingAPI = RenderAPI::Vulkan;
@@ -33,6 +36,11 @@ public:
 	void LoadContent()
 	{
 		glClearColor(0.25f, 0.25f, 0.25f, 1.0f);
+		if (!LoadTexture("content/test.png"))
+		{
+			logger->Error(game::lastError);
+		}
+		glEnable(GL_TEXTURE_2D);
 	}
 
 	void Shutdown()
@@ -85,16 +93,20 @@ public:
 
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+		glBindTexture(GL_TEXTURE_2D, bindTexture);
 		glRotatef(1, 1.0, 1.0f, 1.0f);
 		glBegin(GL_TRIANGLES);
 
-		glColor3f(1.0f, 0.0f, 0.0f);
+		//glColor3f(1.0f, 0.0f, 0.0f);
+		glTexCoord2f(0.0f, 1.0f);
 		glVertex2f(-0.5, 0); // Pass first vertex
 
-		glColor3f(0.0f, 1.0f, 0.0f);
+		//glColor3f(0.0f, 1.0f, 0.0f);
+		glTexCoord2f(1.0f, 0.0f);
 		glVertex2f(0.5, 0); // Pass second vertex
 
-		glColor3f(0.0f, 0.0f, 1.0f);
+		//glColor3f(0.0f, 0.0f, 1.0f);
+		glTexCoord2f(1.0f, 1.0f);
 		glVertex2f(0, 0.5); // Pass third vertex
 
 		glEnd();

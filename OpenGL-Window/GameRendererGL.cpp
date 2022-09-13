@@ -1,7 +1,11 @@
 #include "GameRendererGL.h"
 #include "GameEngine.h"
 #include <sstream>
+#define STB_IMAGE_IMPLEMENTATION
+#define STBI_ONLY_PNG
+#include "stb_image.h"
 
+	extern uint32_t bindTexture;
 namespace game
 {
 	extern Engine* enginePointer;
@@ -193,6 +197,13 @@ namespace game
 			return false;
 		}
 
+		_glGenerateMipmap = (_PFNGLGENERATEMIPMAPPROC)wglGetProcAddress("glGenerateMipmap");
+		if (_glGetInternalformativ == nullptr)
+		{
+			lastError = { GameErrors::GameOpenGLSpecific, "Extension glGenerateMipmap not available." };
+			return false;
+		}
+
 		// Set vertical sync
 		if (_attributes.isVsyncOn)
 			_wglSwapInterval(1);
@@ -360,10 +371,68 @@ namespace game
 		//else
 		//	Logger->Write("Multisampling disabled.");
 	}
+	bool  RendererGL::LoadTexture(std::string fileName)
+	{
+		//Content content;
+		void* data = nullptr;
+		int32_t width = 0;
+		int32_t height = 0;
+		int32_t bytesPerPixel = 0;
+
+		// Read data
+		data = stbi_load(fileName.c_str(), &width, &height, &bytesPerPixel, 0);
+		if (data == NULL)
+		{
+			lastError = { GameErrors::GameContent, "Failed to load texture : " + fileName };
+			if (data) stbi_image_free(data);
+			return false;
+		}
+		// Not already loaded so we create it
+		
+		glGenTextures(1, &bindTexture);
+		glBindTexture(GL_TEXTURE_2D, bindTexture);
+		//tex.name = filename;
+
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR); // min
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR); //max
+		//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+		// Anisotropy
+		//GLfloat largest_supported_anisotropy;
+		//glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &largest_supported_anisotropy);
+		//glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, largest_supported_anisotropy);
+		// When adding gfx options, just div by 2 down to 2x; so 16, 8, 4, 2, 0
+
+		//tex.width = width;
+		//tex.height = height;
+		//tex.widthDiv = 1.0f / (float)tex.width;
+		//tex.heightDiv = 1.0f / (float)tex.height;
+
+		// needs to be adjusted for amd (GL_BYTE or whatever)
+		if (bytesPerPixel == 4)
+		{
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_INT_8_8_8_8_REV, data);
+		}
+		else if (bytesPerPixel == 3)
+		{
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGBA, GL_UNSIGNED_INT_8_8_8_8_REV, data);
+		}
+		if (true)
+			_glGenerateMipmap(GL_TEXTURE_2D);
+		//Textures[filename] = tex;
+
+
+
+		stbi_image_free(data);
+		return true;
+	}
 }
 
 
 // Undefine what we have done, if someone uses an extension loader 
+#undef GL_UNSIGNED_INT_8_8_8_8_REV
+#undef GL_UNSIGNED_BYTE
 #undef GL_NUM_SHADING_LANGUAGE_VERSIONS 
 #undef GL_SHADING_LANGUAGE_VERSION
 #undef GL_TEXTURE_IMAGE_FORMAT

@@ -21,6 +21,7 @@ namespace game
 		virtual void Swap() = 0;
 		virtual void HandleWindowResize(const uint32_t width, const uint32_t height) = 0;
 		virtual void FillOutRendererInfo(SystemInfo& info) = 0;
+		virtual bool LoadTexture(std::string fileName) = 0;
 	protected:
 		Attributes _attributes;
 		std::vector<std::string> _extensionsAvailable;

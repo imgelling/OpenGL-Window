@@ -139,6 +139,11 @@ namespace game
 	{
 		return _framesPerSecond;
 	}
+
+	bool Engine::LoadTexture(std::string fileName)
+	{
+		return _renderer->LoadTexture(fileName);
+	}
 	
 	void Engine::SetWindowTitle(const std::string title)
 	{

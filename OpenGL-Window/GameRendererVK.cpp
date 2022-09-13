@@ -100,4 +100,9 @@ namespace game
 	{
 
 	}
+
+	bool RendererVK::LoadTexture(std::string fileName)
+	{
+		return true;
+	}
 }
