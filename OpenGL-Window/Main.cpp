@@ -25,7 +25,7 @@ public:
 		attrib.WindowTitle = "Spinning Triangle";
 		attrib.GameVersion = "0.01";
 		attrib.Framelock = 0;
-		attrib.isVsyncOn = true;
+		attrib.isVsyncOn = false;
 		attrib.isDebugMode = true;
 		//attrib.isWindowFullscreen = true;
 		//attrib.RenderingAPI = RenderAPI::Vulkan;
@@ -34,16 +34,21 @@ public:
 
 	void LoadContent()
 	{
-		glClearColor(0.25f, 0.25f, 0.25f, 1.0f);
 		if (!LoadTexture("content/test.png"))
 		{
 			logger->Error(game::lastError);
 		}
+		else
+		{
+			logger->Write("test.png loaded!");
+		}
 
 
+		glClearColor(0.25f, 0.25f, 0.25f, 1.0f);
 		glEnable(GL_TEXTURE_2D);
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		//glEnable(GL_CULL_FACE);
 	}
 
 	void Shutdown()
@@ -52,26 +57,6 @@ public:
 
 	void Update(const float_t msElapsed)
 	{
-		static double_t upsTime = 0.0f;
-
-		upsTime += msElapsed;
-		if (upsTime >= 1000.0f)
-		{
-			std::cout << terminal.SetPosition(0, 10) << "Updates per second : " << GetUpdatesPerSecond() << "\n";
-			upsTime = upsTime - 1000.0f;
-		}
-		
-		//// Write out mouse info if it has changed
-		//if (mouse.GetWheelDelta())
-		//{
-		//	std::cout << terminal.SetPosition(0, 7) << terminal.EraseLine << "Mouse Wheel Delta : " << mouse.GetWheelDelta() << "\n";
-		//}
-		//if ((mouse.GetPositionRelative().x != 0) || (mouse.GetPositionRelative().y != 0))
-		//{
-		//	std::cout << terminal.SetPosition(0, 8) << terminal.EraseLine << "Mouse Relative Movement : " << mouse.GetPositionRelative().x << "," << mouse.GetPositionRelative().y << '\n';
-		//	std::cout << terminal.SetPosition(0, 9) << terminal.EraseLine << "Mouse Position : " << mouse.GetPosition().x << "," << mouse.GetPosition().y << '\n';
-		//}
-
 		// Handle Input
 		if (keyboard.WasKeyReleased(VK_F11))
 		{
@@ -85,15 +70,6 @@ public:
 
 	void Render(const float_t msElapsed)
 	{
-		static float_t fpsTime = 0.0f;
-
-		fpsTime += msElapsed;
-		if (fpsTime >= 1000.0f)
-		{
-			std::cout << terminal.SetPosition(0, 11) << "Frames per second : " << GetFramesPerSecond() << "\n";
-			fpsTime = fpsTime - 1000.0f;
-		}
-
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		glBindTexture(GL_TEXTURE_2D, bindTexture);
