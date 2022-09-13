@@ -7,8 +7,7 @@
 //#define GAME_USE_DEDICATED_GPU
 #include "Game.h"
 
-class Game;
-uint32_t bindTexture;
+uint32_t bindTexture; // hacky, needs better way Texture Class maybe
 class Game : public game::Engine
 {
 
@@ -40,7 +39,11 @@ public:
 		{
 			logger->Error(game::lastError);
 		}
+
+
 		glEnable(GL_TEXTURE_2D);
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	}
 
 	void Shutdown()
@@ -97,17 +100,30 @@ public:
 		glRotatef(1, 1.0, 1.0f, 1.0f);
 		glBegin(GL_TRIANGLES);
 
-		//glColor3f(1.0f, 0.0f, 0.0f);
+		glColor3f(1.0f, 1.0f, 1.0f);
 		glTexCoord2f(0.0f, 1.0f);
 		glVertex2f(-0.5, 0); // Pass first vertex
 
-		//glColor3f(0.0f, 1.0f, 0.0f);
+		glColor3f(1.0f, 1.0f, 1.0f);
 		glTexCoord2f(1.0f, 0.0f);
 		glVertex2f(0.5, 0); // Pass second vertex
 
-		//glColor3f(0.0f, 0.0f, 1.0f);
+		glColor3f(1.0f, 1.0f, 1.0f);
 		glTexCoord2f(1.0f, 1.0f);
 		glVertex2f(0, 0.5); // Pass third vertex
+
+
+		glColor3f(1.0f, 1.0f, 1.0f);
+		glTexCoord2f(1.0f, 0.0f);
+		glVertex2f(0.5, 0); // Pass first vertex
+
+		glColor3f(1.0f, 1.0f, 1.0f);
+		glTexCoord2f(0.0f, 1.0f);
+		glVertex2f(-0.5, 0); // Pass second vertex
+
+		glColor3f(1.0f, 1.0f, 1.0f);
+		glTexCoord2f(0.0f, 0.0f);
+		glVertex2f(0, -0.5); // Pass third vertex
 
 		glEnd();
 	}

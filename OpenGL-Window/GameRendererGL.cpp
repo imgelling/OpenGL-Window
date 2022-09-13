@@ -409,14 +409,14 @@ namespace game
 		//tex.widthDiv = 1.0f / (float)tex.width;
 		//tex.heightDiv = 1.0f / (float)tex.height;
 
-		// needs to be adjusted for amd (GL_BYTE or whatever)
+		// needs to be adjusted for amd (GL_UNSIGNED_BYTE amd or whatever) GL_UNSIGNED_INT_8_8_8_8_REV nvidia
 		if (bytesPerPixel == 4)
 		{
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_INT_8_8_8_8_REV, data);
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, enginePointer->systemInfo.gpuInfo.internalPixelType, data);
 		}
 		else if (bytesPerPixel == 3)
 		{
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGBA, GL_UNSIGNED_INT_8_8_8_8_REV, data);
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGBA, enginePointer->systemInfo.gpuInfo.internalPixelType, data);
 		}
 		if (true)
 			_glGenerateMipmap(GL_TEXTURE_2D);
