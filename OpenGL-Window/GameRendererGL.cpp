@@ -204,6 +204,13 @@ namespace game
 			return false;
 		}
 
+		_glGetFramebufferAttachmentParameteriv = (_PFNGLGETFRAMEBUFFERATTACHMENTPARAMETERIVPROC)wglGetProcAddress("glGetFramebufferAttachmentParameteriv");
+		if (_glGetFramebufferAttachmentParameteriv == nullptr)
+		{
+			lastError = { GameErrors::GameOpenGLSpecific, "Extension glGetFramebufferAttachmentParameteriv not available " };
+			return false;
+		}
+
 		// Set vertical sync
 		if (_attributes.isVsyncOn)
 			_wglSwapInterval(1);
@@ -334,28 +341,53 @@ namespace game
 		// Nvidia type is GL_UNSIGNED_INT_8_8_8_8_REV (0x8367) 
 		// Amd type is GL_UNSIGNED_BYTE (0x1401)
 		// The difference is endianness, both pixel formats are RGBA
-		sStream << "Internal texture format is " << info.gpuInfo.internalPixelFormat << " and is type " << info.gpuInfo.internalPixelType;
+		sStream << "Internal pixel format : " << info.gpuInfo.internalPixelFormat << " and pixel type : " << info.gpuInfo.internalPixelType;
 		LOG(sStream);
 
-	
-		// ----------- color stuff
-		////Front Buffer
-		//glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_FRONT_LEFT, GL_FRAMEBUFFER_ATTACHMENT_RED_SIZE, &r);
-		//glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_FRONT_LEFT, GL_FRAMEBUFFER_ATTACHMENT_GREEN_SIZE, &g);
-		//glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_FRONT_LEFT, GL_FRAMEBUFFER_ATTACHMENT_BLUE_SIZE, &b);
-		//glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_FRONT_LEFT, GL_FRAMEBUFFER_ATTACHMENT_ALPHA_SIZE, &a);
-		//systemInfo.gpuInfo.frontBufferColorSize.Set((unsigned int)r, g, b, a);
-		//// Back Buffer
-		//glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_BACK_LEFT, GL_FRAMEBUFFER_ATTACHMENT_RED_SIZE, &br);
-		//glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_BACK_LEFT, GL_FRAMEBUFFER_ATTACHMENT_GREEN_SIZE, &bg);
-		//glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_BACK_LEFT, GL_FRAMEBUFFER_ATTACHMENT_BLUE_SIZE, &bb);
-		//glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_BACK_LEFT, GL_FRAMEBUFFER_ATTACHMENT_ALPHA_SIZE, &ba);
-		//back = br + bg + bb + ba;
-		//systemInfo.gpuInfo.backBufferColorSize.Set((unsigned int)br, bg, bb, ba);
+		// log front buffer
+		int32_t r, g, b, a = 0;
+		_glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_FRONT_LEFT, GL_FRAMEBUFFER_ATTACHMENT_RED_SIZE, &r);
+		_glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_FRONT_LEFT, GL_FRAMEBUFFER_ATTACHMENT_GREEN_SIZE, &g);
+		_glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_FRONT_LEFT, GL_FRAMEBUFFER_ATTACHMENT_BLUE_SIZE, &b);
+		_glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_FRONT_LEFT, GL_FRAMEBUFFER_ATTACHMENT_ALPHA_SIZE, &a);
+		// hex to dec
+		info.gpuInfo.frontBufferColorSize = r + b + g + a;
+		sStream << std::dec << info.gpuInfo.frontBufferColorSize;
+		hex = sStream.str();
+		sStream.str("");
+		info.gpuInfo.frontBufferColorSize = std::strtol(hex.c_str(), NULL, 10);
+		sStream << "Front buffer : " << info.gpuInfo.frontBufferColorSize << " bits";
+		LOG(sStream);
 
-		//// Depth Buffer
-		//glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_DEPTH, GL_FRAMEBUFFER_ATTACHMENT_DEPTH_SIZE, &depth);
-		//systemInfo.gpuInfo.depthBufferSize = depth;
+		// log back buffer
+		_glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_BACK_LEFT, GL_FRAMEBUFFER_ATTACHMENT_RED_SIZE, &r);
+		_glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_BACK_LEFT, GL_FRAMEBUFFER_ATTACHMENT_GREEN_SIZE, &g);
+		_glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_BACK_LEFT, GL_FRAMEBUFFER_ATTACHMENT_BLUE_SIZE, &b);
+		_glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_BACK_LEFT, GL_FRAMEBUFFER_ATTACHMENT_ALPHA_SIZE, &a);
+		enginePointer->systemInfo.gpuInfo.backBufferColorSize = r + b + g + a;
+		// hex to dec
+		sStream << std::dec << info.gpuInfo.backBufferColorSize;
+		hex = sStream.str();
+		sStream.str("");
+		info.gpuInfo.backBufferColorSize = std::strtol(hex.c_str(), NULL, 10);
+		sStream << "Back buffer : " << info.gpuInfo.backBufferColorSize << " bits";
+		LOG(sStream);
+
+		// Log depth buffer
+		_glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_DEPTH, GL_FRAMEBUFFER_ATTACHMENT_DEPTH_SIZE, &info.gpuInfo.depthBufferSize);
+		sStream << "Depth buffer : " << info.gpuInfo.depthBufferSize;
+		LOG(sStream);
+		
+		// Get the max anisotropy
+		glGetIntegerv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &info.gpuInfo.maxAnisotropy);
+		// Convert hex to dec
+		sStream << std::dec << info.gpuInfo.maxAnisotropy;
+		hex = sStream.str();
+		sStream.str("");
+		info.gpuInfo.maxAnisotropy = std::strtol(hex.c_str(), NULL, 10);
+		sStream << "Max anisotropy : " << info.gpuInfo.maxAnisotropy;
+		LOG(sStream);
+
 
 		// ---------- multisampling
 		//int MSbuff, MSsamp;
@@ -395,13 +427,11 @@ namespace game
 
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);// LINEAR_MIPMAP_LINEAR); // min
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);// GL_LINEAR); //max
-		//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-		//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
 		// Anisotropy
-		//GLfloat largest_supported_anisotropy;
-		//glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &largest_supported_anisotropy);
-		//glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, largest_supported_anisotropy);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, enginePointer->systemInfo.gpuInfo.maxAnisotropy);
 		// When adding gfx options, just div by 2 down to 2x; so 16, 8, 4, 2, 0
 
 		//tex.width = width;
@@ -431,6 +461,16 @@ namespace game
 
 
 // Undefine what we have done, if someone uses an extension loader 
+#undef GL_FRAMEBUFFER 
+#undef GL_FRAMEBUFFER_ATTACHMENT_RED_SIZE
+#undef GL_FRAMEBUFFER_ATTACHMENT_GREEN_SIZE 
+#undef GL_FRAMEBUFFER_ATTACHMENT_BLUE_SIZE 
+#undef GL_FRAMEBUFFER_ATTACHMENT_ALPHA_SIZE 
+#undef GL_FRAMEBUFFER_ATTACHMENT_DEPTH_SIZE 
+#undef GL_FRAMEBUFFER_ATTACHMENT_STENCIL_SIZE 
+#undef GL_CLAMP_TO_EDGE
+#undef GL_TEXTURE_MAX_ANISOTROPY_EXT
+#undef GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT
 #undef GL_UNSIGNED_INT_8_8_8_8_REV
 #undef GL_UNSIGNED_BYTE
 #undef GL_NUM_SHADING_LANGUAGE_VERSIONS 

@@ -205,7 +205,10 @@ namespace game
 
 	void Engine::_Swap()
 	{
-		_renderer->Swap();
+		if (_renderer)
+		{
+			_renderer->Swap();
+		}
 	}
 
 	void Engine::HandleWindowResize(const uint32_t width, const uint32_t height)
