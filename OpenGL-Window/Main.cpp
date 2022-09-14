@@ -28,7 +28,7 @@ public:
 		attrib.isVsyncOn = false;
 		attrib.isDebugMode = true;
 		//attrib.isWindowFullscreen = true;
-		//attrib.RenderingAPI = RenderAPI::Vulkan;
+		//attrib.RenderingAPI = game::RenderAPI::Vulkan;
 		SetAttributes(attrib);
 	}
 
@@ -48,7 +48,7 @@ public:
 		glEnable(GL_TEXTURE_2D);
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-		//glEnable(GL_CULL_FACE);
+		glEnable(GL_CULL_FACE);
 	}
 
 	void Shutdown()
@@ -73,33 +73,35 @@ public:
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		glBindTexture(GL_TEXTURE_2D, bindTexture);
-		glRotatef(1, 1.0, 1.0f, 1.0f);
+		glRotatef(0.01f, 1.0, 1.0f, 1.0f);
 		glBegin(GL_TRIANGLES);
 
-		glColor3f(1.0f, 1.0f, 1.0f);
-		glTexCoord2f(0.0f, 1.0f);
-		glVertex2f(-0.5, 0); // Pass first vertex
-
-		glColor3f(1.0f, 1.0f, 1.0f);
-		glTexCoord2f(1.0f, 0.0f);
-		glVertex2f(0.5, 0); // Pass second vertex
-
-		glColor3f(1.0f, 1.0f, 1.0f);
-		glTexCoord2f(1.0f, 1.0f);
-		glVertex2f(0, 0.5); // Pass third vertex
-
-
-		glColor3f(1.0f, 1.0f, 1.0f);
-		glTexCoord2f(1.0f, 0.0f);
-		glVertex2f(0.5, 0); // Pass first vertex
-
-		glColor3f(1.0f, 1.0f, 1.0f);
-		glTexCoord2f(0.0f, 1.0f);
-		glVertex2f(-0.5, 0); // Pass second vertex
-
-		glColor3f(1.0f, 1.0f, 1.0f);
+		// TL triangle
+		glColor3f(1.0f, 0.0f, 0.0f);
 		glTexCoord2f(0.0f, 0.0f);
-		glVertex2f(0, -0.5); // Pass third vertex
+		glVertex2f(-0.5, 0.5f);
+
+		glColor3f(0.0f, 0.0f, 1.0f);
+		glTexCoord2f(0.0f, 1.0f);
+		glVertex2f(-0.5, -0.5);
+
+		glColor3f(0.0f, 1.0f, 0.0f);
+		glTexCoord2f(1.0f, 0.0f);
+		glVertex2f(0.5, 0.5);
+
+		// BR triangle
+		glColor3f(0.0f, 1.0f, 0.0f);
+		glTexCoord2f(1.0f, 0.0f);
+		glVertex2f(0.5, 0.5); 
+
+		glColor3f(0.0f, 0.0f, 1.0f);
+		glTexCoord2f(0.0f, 1.0f);
+		glVertex2f(-0.5, -0.5); 
+
+		glColor3f(1.0f, 0.0f, 0.0f);
+		glTexCoord2f(1.0f, 1.0f);
+		glVertex2f(0.5, -0.5);
+
 
 		glEnd();
 	}
