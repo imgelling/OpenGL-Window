@@ -8,6 +8,8 @@
 #include "Game.h"
 
 uint32_t bindTexture; // hacky, needs better way Texture Class maybe
+
+
 class Game : public game::Engine
 {
 
@@ -53,6 +55,7 @@ public:
 
 	void Shutdown()
 	{
+		glDeleteTextures(1, &bindTexture);
 	}
 
 	void Update(const float_t msElapsed)
