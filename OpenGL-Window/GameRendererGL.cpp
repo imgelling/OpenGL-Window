@@ -321,27 +321,39 @@ namespace game
 			LOG(sStream);
 		}
 
-		// Get internal texture format
+		// Log internal pixel format
 		_glGetInternalformativ(GL_TEXTURE_2D, GL_RGBA8, GL_TEXTURE_IMAGE_FORMAT, 1, &info.gpuInfo.internalPixelFormat);
 		// Convert to hexidecimal
 		sStream << std::hex << info.gpuInfo.internalPixelFormat;
 		std::string hex(sStream.str());
 		sStream.str("");
 		info.gpuInfo.internalPixelFormat = std::strtol(hex.c_str(), NULL, 16);
+		sStream << "Internal pixel format : " << info.gpuInfo.internalPixelFormat;
+		std::string pixelFormat = (info.gpuInfo.internalPixelFormat == 0x1908) ? " (RGBA)" : " (Unknown)";
+		sStream << pixelFormat;
+		LOG(sStream);
 
-		// Get internal pixel type
+		// Log internal pixel type
 		_glGetInternalformativ(GL_TEXTURE_2D, GL_RGBA8, GL_TEXTURE_IMAGE_TYPE, 1, &info.gpuInfo.internalPixelType);
 		// Convert to hexidecimal
 		sStream << std::hex << info.gpuInfo.internalPixelType;
 		hex = sStream.str();
 		sStream.str("");
 		info.gpuInfo.internalPixelType = std::strtol(hex.c_str(), NULL, 16);
+		sStream << "Internal pixel type : " << info.gpuInfo.internalPixelType;
+		std::string pixelType;
+		if (info.gpuInfo.internalPixelType == 0x8367)
+			pixelType = " (GL_UNSIGNED_INT_8_8_8_8_REV)";
+		else if (info.gpuInfo.internalPixelType == 0x1401)
+			pixelType = " (GL_UNSIGNED_BYTE)";
+		else
+			pixelType = " (Unknown)";
+		sStream << pixelType;
 
-		// Log the pixel format and type
 		// Nvidia type is GL_UNSIGNED_INT_8_8_8_8_REV (0x8367) 
 		// Amd type is GL_UNSIGNED_BYTE (0x1401)
 		// The difference is endianness, both pixel formats are RGBA
-		sStream << "Internal pixel format : " << info.gpuInfo.internalPixelFormat << " and pixel type : " << info.gpuInfo.internalPixelType;
+		 
 		LOG(sStream);
 
 		// log front buffer
@@ -375,7 +387,7 @@ namespace game
 
 		// Log depth buffer
 		_glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_DEPTH, GL_FRAMEBUFFER_ATTACHMENT_DEPTH_SIZE, &info.gpuInfo.depthBufferSize);
-		sStream << "Depth buffer : " << info.gpuInfo.depthBufferSize;
+		sStream << "Depth buffer : " << info.gpuInfo.depthBufferSize << "bits";
 		LOG(sStream);
 		
 		// Get the max anisotropy
@@ -385,7 +397,7 @@ namespace game
 		hex = sStream.str();
 		sStream.str("");
 		info.gpuInfo.maxAnisotropy = std::strtol(hex.c_str(), NULL, 10);
-		sStream << "Max anisotropy : " << info.gpuInfo.maxAnisotropy;
+		sStream << "Max anisotropy : " << info.gpuInfo.maxAnisotropy << "x";
 		LOG(sStream);
 
 
