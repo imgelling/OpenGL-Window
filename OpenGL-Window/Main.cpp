@@ -4,7 +4,7 @@
 
 
 // Engine header
-#define GAME_USE_DEDICATED_GPU
+//#define GAME_USE_DEDICATED_GPU
 #include "Game.h"
 
 uint32_t bindTexture; // hacky, needs better way Texture Class maybe
