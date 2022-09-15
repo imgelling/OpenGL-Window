@@ -22,6 +22,7 @@ namespace game
 
 		void HandleWindowResize(const uint32_t width, const uint32_t height);
 		void FillOutRendererInfo(SystemInfo& info);
+		bool LoadTexture(std::string fileName);
 	protected:
 		void _ReadExtensions();
 

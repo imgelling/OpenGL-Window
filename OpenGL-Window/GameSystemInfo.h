@@ -25,7 +25,8 @@ namespace game
 			int32_t versionMajor = 0;
 			int32_t versionMinor = 0;
 			std::string maxShaderLanguageVersion;
-			int32_t multisampleBuffers = 0;
+			int32_t maxAnisotropy = 1;
+			int32_t maxMultisamples = 0;
 			int32_t multisampleSamples = 0;
 			int32_t frontBufferColorSize;
 			int32_t backBufferColorSize;

@@ -7,7 +7,7 @@ namespace game
 	bool RendererVK::CreateDevice(Window window)
 	{
 		// Enable Validation Layers if debug mode was wanted
-		if (_attributes.isDebugMode)
+		if (_attributes.DebugMode)
 		{
 			_enableValidationLayers = true;
 		}
@@ -99,5 +99,10 @@ namespace game
 	void RendererVK::FillOutRendererInfo(SystemInfo& info)
 	{
 
+	}
+
+	bool RendererVK::LoadTexture(std::string fileName)
+	{
+		return true;
 	}
 }

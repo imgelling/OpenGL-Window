@@ -7,8 +7,12 @@
 //#define GAME_USE_DEDICATED_GPU
 #include "Game.h"
 
+uint32_t bindTexture; // hacky, needs better way Texture Class maybe
+
+
 class Game : public game::Engine
 {
+
 public:
 	game::Terminal terminal;
 
@@ -20,47 +24,43 @@ public:
 	{
 		game::Attributes attrib;
 
-		attrib.WindowTitle = "Spinning Triangle";
+		attrib.WindowTitle = "Spinning Quad";
 		attrib.GameVersion = "0.01";
 		attrib.Framelock = 0;
-		attrib.isVsyncOn = false;
-		attrib.isDebugMode = true;
+		attrib.VsyncOn = false;
+		attrib.DebugMode = true;
+		attrib.MultiSamples = 1; // max 8 amd, 16 nvidia
 		//attrib.isWindowFullscreen = true;
-		//attrib.RenderingAPI = RenderAPI::Vulkan;
+		//attrib.RenderingAPI = game::RenderAPI::Vulkan;
 		SetAttributes(attrib);
 	}
 
 	void LoadContent()
 	{
+		if (!LoadTexture("content/test.png"))
+		{
+			logger->Error(game::lastError);
+		}
+		else
+		{
+			logger->Write("test.png loaded!");
+		}
+
+
 		glClearColor(0.25f, 0.25f, 0.25f, 1.0f);
+		glEnable(GL_TEXTURE_2D);
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		//glEnable(GL_CULL_FACE);
 	}
 
 	void Shutdown()
 	{
+		glDeleteTextures(1, &bindTexture);
 	}
 
 	void Update(const float_t msElapsed)
 	{
-		static double_t upsTime = 0.0f;
-
-		upsTime += msElapsed;
-		if (upsTime >= 1000.0f)
-		{
-			std::cout << terminal.SetPosition(0, 10) << "Updates per second : " << GetUpdatesPerSecond() << "\n";
-			upsTime = upsTime - 1000.0f;
-		}
-		
-		//// Write out mouse info if it has changed
-		//if (mouse.GetWheelDelta())
-		//{
-		//	std::cout << terminal.SetPosition(0, 7) << terminal.EraseLine << "Mouse Wheel Delta : " << mouse.GetWheelDelta() << "\n";
-		//}
-		//if ((mouse.GetPositionRelative().x != 0) || (mouse.GetPositionRelative().y != 0))
-		//{
-		//	std::cout << terminal.SetPosition(0, 8) << terminal.EraseLine << "Mouse Relative Movement : " << mouse.GetPositionRelative().x << "," << mouse.GetPositionRelative().y << '\n';
-		//	std::cout << terminal.SetPosition(0, 9) << terminal.EraseLine << "Mouse Position : " << mouse.GetPosition().x << "," << mouse.GetPosition().y << '\n';
-		//}
-
 		// Handle Input
 		if (keyboard.WasKeyReleased(VK_F11))
 		{
@@ -74,28 +74,38 @@ public:
 
 	void Render(const float_t msElapsed)
 	{
-		static float_t fpsTime = 0.0f;
-
-		fpsTime += msElapsed;
-		if (fpsTime >= 1000.0f)
-		{
-			std::cout << terminal.SetPosition(0, 11) << "Frames per second : " << GetFramesPerSecond() << "\n";
-			fpsTime = fpsTime - 1000.0f;
-		}
-
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		glRotatef(1, 1.0, 1.0f, 1.0f);
+		glBindTexture(GL_TEXTURE_2D, bindTexture);
+		glRotatef(0.01f, 1.0, 1.0f, 1.0f);
 		glBegin(GL_TRIANGLES);
 
+		// TL triangle
 		glColor3f(1.0f, 0.0f, 0.0f);
-		glVertex2f(-0.5, 0); // Pass first vertex
-
-		glColor3f(0.0f, 1.0f, 0.0f);
-		glVertex2f(0.5, 0); // Pass second vertex
+		glTexCoord2f(0.0f, 0.0f);
+		glVertex2f(-0.5, 0.5f);
 
 		glColor3f(0.0f, 0.0f, 1.0f);
-		glVertex2f(0, 0.5); // Pass third vertex
+		glTexCoord2f(0.0f, 1.0f);
+		glVertex2f(-0.5, -0.5);
+
+		glColor3f(0.0f, 1.0f, 0.0f);
+		glTexCoord2f(1.0f, 0.0f);
+		glVertex2f(0.5, 0.5);
+
+		// BR triangle
+		glColor3f(0.0f, 1.0f, 0.0f);
+		glTexCoord2f(1.0f, 0.0f);
+		glVertex2f(0.5, 0.5); 
+
+		glColor3f(0.0f, 0.0f, 1.0f);
+		glTexCoord2f(0.0f, 1.0f);
+		glVertex2f(-0.5, -0.5); 
+
+		glColor3f(1.0f, 0.0f, 0.0f);
+		glTexCoord2f(1.0f, 1.0f);
+		glVertex2f(0.5, -0.5);
+
 
 		glEnd();
 	}

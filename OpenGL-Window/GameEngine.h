@@ -1,6 +1,5 @@
 #pragma once
 
-
 #include "GameRendererBase.h"
 #include "GameAttributes.h"
 #include "GameTimer.h"
@@ -44,6 +43,9 @@ namespace game
 		void SetFrameLock(const uint32_t limit);
 		uint32_t GetUpdatesPerSecond();
 		uint32_t GetFramesPerSecond();
+		
+		bool LoadTexture(std::string fileName);
+		
 		void ToggleFullscreen();
 		void HandleWindowResize(const uint32_t width, const uint32_t height);
 		virtual void Update(const float_t msElapsed) = 0;
@@ -51,6 +53,7 @@ namespace game
 		virtual void Initialize() = 0;
 		virtual void LoadContent() = 0;
 		virtual void Shutdown() = 0;
+
 	private:
 		float_t _frameTime;
 		Attributes _attributes;

@@ -139,6 +139,11 @@ namespace game
 	{
 		return _framesPerSecond;
 	}
+
+	bool Engine::LoadTexture(std::string fileName)
+	{
+		return _renderer->LoadTexture(fileName);
+	}
 	
 	void Engine::SetWindowTitle(const std::string title)
 	{
@@ -149,7 +154,7 @@ namespace game
 	void Engine::ToggleFullscreen()
 	{
 		_window.ToggleFullScreen();
-		_attributes.isWindowFullscreen = !_attributes.isWindowFullscreen;
+		_attributes.WindowFullscreen = !_attributes.WindowFullscreen;
 	}
 	
 	bool Engine::Create()
@@ -200,7 +205,10 @@ namespace game
 
 	void Engine::_Swap()
 	{
-		_renderer->Swap();
+		if (_renderer)
+		{
+			_renderer->Swap();
+		}
 	}
 
 	void Engine::HandleWindowResize(const uint32_t width, const uint32_t height)

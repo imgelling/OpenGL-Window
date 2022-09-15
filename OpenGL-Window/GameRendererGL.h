@@ -39,6 +39,22 @@ namespace game
 #define GL_SHADING_LANGUAGE_VERSION 0x8B8C
 #define GL_NUM_SHADING_LANGUAGE_VERSIONS 0x82E9
 #define GL_NUM_EXTENSIONS 0x821D
+#define GL_UNSIGNED_INT_8_8_8_8_REV 0x8367
+#define GL_UNSIGNED_BYTE 0x1401
+#define GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT 0x84FF
+#define GL_TEXTURE_MAX_ANISOTROPY_EXT 0x84FE
+#define GL_CLAMP_TO_EDGE 0x812F
+#define GL_FRAMEBUFFER_ATTACHMENT_RED_SIZE 0x8212
+#define GL_FRAMEBUFFER_ATTACHMENT_GREEN_SIZE 0x8213
+#define GL_FRAMEBUFFER_ATTACHMENT_BLUE_SIZE 0x8214
+#define GL_FRAMEBUFFER_ATTACHMENT_ALPHA_SIZE 0x8215
+#define GL_FRAMEBUFFER_ATTACHMENT_DEPTH_SIZE 0x8216
+#define GL_FRAMEBUFFER_ATTACHMENT_STENCIL_SIZE 0x8217
+#define GL_FRAMEBUFFER 0x8D40
+#define GL_MAX_SAMPLES 0x8D57
+#define WGL_SAMPLE_BUFFERS_ARB 0x2041
+#define WGL_SAMPLES_ARB 0x2042
+#define GL_MULTISAMPLE 0x809D
 	
 	class RendererGL : public RendererBase
 	{
@@ -49,6 +65,7 @@ namespace game
 		void Swap();
 		void HandleWindowResize(const uint32_t width, const uint32_t height);
 		void FillOutRendererInfo(SystemInfo& info);
+		bool LoadTexture(std::string fileName);
 	protected:
 		void _ReadExtensions();
 
@@ -75,5 +92,11 @@ namespace game
 
 		typedef void (WINAPI* _PFNGLGETINTERNALFORMATIVPROC) (GLenum target, GLenum internalformat, GLenum pname, GLsizei bufSize, GLint* params);
 		_PFNGLGETINTERNALFORMATIVPROC _glGetInternalformativ = nullptr;
+
+		typedef void (WINAPI* _PFNGLGENERATEMIPMAPPROC) (GLenum target);
+		_PFNGLGENERATEMIPMAPPROC _glGenerateMipmap = nullptr;
+
+		typedef void (WINAPI* _PFNGLGETFRAMEBUFFERATTACHMENTPARAMETERIVPROC) (GLenum target, GLenum attachment, GLenum pname, GLint* params);
+		_PFNGLGETFRAMEBUFFERATTACHMENTPARAMETERIVPROC _glGetFramebufferAttachmentParameteriv = nullptr;
 	};
 }
