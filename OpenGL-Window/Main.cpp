@@ -24,11 +24,12 @@ public:
 	{
 		game::Attributes attrib;
 
-		attrib.WindowTitle = "Spinning Triangle";
+		attrib.WindowTitle = "Spinning Quad";
 		attrib.GameVersion = "0.01";
 		attrib.Framelock = 0;
-		attrib.isVsyncOn = false;
-		attrib.isDebugMode = true;
+		attrib.VsyncOn = false;
+		attrib.DebugMode = true;
+		attrib.MultiSamples = 1; // max 8 amd, 16 nvidia
 		//attrib.isWindowFullscreen = true;
 		//attrib.RenderingAPI = game::RenderAPI::Vulkan;
 		SetAttributes(attrib);
@@ -50,7 +51,7 @@ public:
 		glEnable(GL_TEXTURE_2D);
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-		glEnable(GL_CULL_FACE);
+		//glEnable(GL_CULL_FACE);
 	}
 
 	void Shutdown()

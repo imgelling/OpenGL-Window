@@ -25,7 +25,7 @@ namespace game
 		};
 
 		// Create a temporary invisible window
-		tempAttrib.isWindowVisible = false;
+		tempAttrib.WindowVisible = false;
 		tempWindow.SetAttributes(tempAttrib);
 		if (!tempWindow.CreateTheWindow())
 		{
@@ -78,6 +78,9 @@ namespace game
 			return;
 		}
 
+		// Need to know max multisamples the card can do before we create the real window
+		glGetIntegerv(GL_MAX_SAMPLES, &enginePointer->systemInfo.gpuInfo.maxMultisamples);
+
 		// Clean up OpenGL stuff
 		wglMakeCurrent(NULL, NULL);
 		if (glTempRender) wglDeleteContext(glTempRender);
@@ -94,9 +97,9 @@ namespace game
 			WGL_CONTEXT_MAJOR_VERSION_ARB,  _attributes.ContextMajor,
 			WGL_CONTEXT_MINOR_VERSION_ARB,  _attributes.ContextMinor,
 			WGL_CONTEXT_FLAGS_ARB,
-			_attributes.isDebugMode ? WGL_CONTEXT_DEBUG_BIT_ARB : 0,
+			_attributes.DebugMode ? WGL_CONTEXT_DEBUG_BIT_ARB : 0,
 			WGL_CONTEXT_PROFILE_MASK_ARB,
-			_attributes.isGLBackwardsCompatible ? WGL_CONTEXT_COMPATIBILITY_PROFILE_BIT_ARB : WGL_CONTEXT_CORE_PROFILE_BIT_ARB,
+			_attributes.GLBackwardsCompatible ? WGL_CONTEXT_COMPATIBILITY_PROFILE_BIT_ARB : WGL_CONTEXT_CORE_PROFILE_BIT_ARB,
 			0
 		};
 		int32_t pixelFormatsChosen[1] = { 0 };
@@ -120,8 +123,12 @@ namespace game
 			WGL_PIXEL_TYPE_ARB, WGL_TYPE_RGBA_ARB,
 			WGL_ACCELERATION_ARB, WGL_FULL_ACCELERATION_ARB,
 			WGL_SWAP_METHOD_ARB, WGL_SWAP_EXCHANGE_ARB,
+			WGL_SAMPLE_BUFFERS_ARB, _attributes.MultiSamples <= 1 ? 0 : 1,
+			WGL_SAMPLES_ARB, _attributes.MultiSamples,
 			0
 		}; 
+		//WGL_SAMPLE_BUFFERS_ARB, 1,
+		//	WGL_SAMPLES_EXT, 4,
 		// 	WGL_SWAP_EXCHANGE_ARB vs WGL_SWAP_COPY_ARB.
 
 		float_t pixelAttribFloatList[] = { 0, 0 };
@@ -212,10 +219,21 @@ namespace game
 		}
 
 		// Set vertical sync
-		if (_attributes.isVsyncOn)
+		if (_attributes.VsyncOn)
 			_wglSwapInterval(1);
 		else
 			_wglSwapInterval(0);
+
+		// If multisampling is desired enable it
+		if (_attributes.MultiSamples > 1)
+		{
+			glEnable(GL_MULTISAMPLE);
+		}
+		else
+		{
+			glDisable(GL_MULTISAMPLE);
+		}
+
 
 		// Renderer is good to go
 		enginePointer->logger->Write("OpenGL Device created!");
@@ -300,24 +318,26 @@ namespace game
 		LOG(sStream);
 
 		// Log video memory
-		int32_t totalGPUMemory[4] = { 0 };
-		int32_t availableGPUMemory[4] = { 0 };
 		if (info.gpuInfo.vendor.find("NVIDIA") != std::string::npos)
 		{
 #define GL_GPU_MEM_INFO_TOTAL_AVAILABLE_MEM_NVX 0x9048
 #define GL_GPU_MEM_INFO_CURRENT_AVAILABLE_MEM_NVX 0x9049
-			glGetIntegerv(GL_GPU_MEM_INFO_TOTAL_AVAILABLE_MEM_NVX, &totalGPUMemory[0]);
-			glGetIntegerv(GL_GPU_MEM_INFO_CURRENT_AVAILABLE_MEM_NVX, &availableGPUMemory[0]);
-			info.gpuInfo.totalMemory = totalGPUMemory[0] / 1024;
-			info.gpuInfo.freeMemory = availableGPUMemory[0] / 1024;
-			sStream << "GPU total memory is " << totalGPUMemory[0] / 1024.0f << "MB and has " << availableGPUMemory[0] / 1024.0f << "MB available.";
+			glGetIntegerv(GL_GPU_MEM_INFO_TOTAL_AVAILABLE_MEM_NVX, &info.gpuInfo.totalMemory);
+			glGetIntegerv(GL_GPU_MEM_INFO_CURRENT_AVAILABLE_MEM_NVX, &info.gpuInfo.freeMemory);
+			info.gpuInfo.totalMemory /= 1024;
+			info.gpuInfo.freeMemory /= 1024;
+			sStream << "GPU total memory : " << info.gpuInfo.totalMemory << "MB";
+			LOG(sStream);
+			sStream << "GPU available memory : " << info.gpuInfo.freeMemory << "MB";
 			LOG(sStream);
 #undef GL_GPU_MEM_INFO_TOTAL_AVAILABLE_MEM_NVX
 #undef GL_GPU_MEM_INFO_CURRENT_AVAILABLE_MEM_NVX 
 		}
 		else
 		{
-			sStream << "Can not retrieve video RAM on AMD.";
+			sStream << "GPU total memory : Can not retrieve video memory on AMD.";
+			LOG(sStream);
+			sStream << "GPU available memory : Can not retrieve video memory on AMD.";
 			LOG(sStream);
 		}
 
@@ -335,7 +355,7 @@ namespace game
 
 		// Log internal pixel type
 		_glGetInternalformativ(GL_TEXTURE_2D, GL_RGBA8, GL_TEXTURE_IMAGE_TYPE, 1, &info.gpuInfo.internalPixelType);
-		// Convert to hexidecimal
+		// Convert to hex
 		sStream << std::hex << info.gpuInfo.internalPixelType;
 		hex = sStream.str();
 		sStream.str("");
@@ -349,14 +369,25 @@ namespace game
 		else
 			pixelType = " (Unknown)";
 		sStream << pixelType;
-
-		// Nvidia type is GL_UNSIGNED_INT_8_8_8_8_REV (0x8367) 
-		// Amd type is GL_UNSIGNED_BYTE (0x1401)
-		// The difference is endianness, both pixel formats are RGBA
-		 
 		LOG(sStream);
+		// The difference is endianness, both pixel formats are RGBA
 
-		// log front buffer
+		// Log multisampling
+		if (_attributes.MultiSamples > 0)
+		{
+			info.gpuInfo.multisampleSamples = _attributes.MultiSamples;
+			sStream << "Multisampling samples : " << info.gpuInfo.multisampleSamples;
+			sStream << " out of " << info.gpuInfo.maxMultisamples << " max samples";
+			LOG(sStream);
+		}
+		else
+		{
+			sStream << "Multisampling samples : disabled";
+			LOG(sStream);
+		}
+		 
+
+		// Log front buffer
 		int32_t r, g, b, a = 0;
 		_glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_FRONT_LEFT, GL_FRAMEBUFFER_ATTACHMENT_RED_SIZE, &r);
 		_glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_FRONT_LEFT, GL_FRAMEBUFFER_ATTACHMENT_GREEN_SIZE, &g);
@@ -371,7 +402,7 @@ namespace game
 		sStream << "Front buffer : " << info.gpuInfo.frontBufferColorSize << " bits";
 		LOG(sStream);
 
-		// log back buffer
+		// Log back buffer
 		_glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_BACK_LEFT, GL_FRAMEBUFFER_ATTACHMENT_RED_SIZE, &r);
 		_glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_BACK_LEFT, GL_FRAMEBUFFER_ATTACHMENT_GREEN_SIZE, &g);
 		_glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_BACK_LEFT, GL_FRAMEBUFFER_ATTACHMENT_BLUE_SIZE, &b);
@@ -400,20 +431,6 @@ namespace game
 		sStream << "Max anisotropy : " << info.gpuInfo.maxAnisotropy << "x";
 		LOG(sStream);
 
-
-		// ---------- multisampling
-		//int MSbuff, MSsamp;
-		//SDL_GL_GetAttribute(SDL_GL_MULTISAMPLEBUFFERS, &MSbuff);
-		//systemInfo.gpuInfo.glMultisampleBuffers = MSbuff;
-		//if (MSbuff > 0)
-		//{
-		//	SDL_GL_GetAttribute(SDL_GL_MULTISAMPLESAMPLES, &MSsamp);
-		//	systemInfo.gpuInfo.glMultisampleSamples = MSsamp;
-		//	str << "Multisampling enabled with " << MSsamp << " samples.";
-		//	Logger->Write(str.str());
-		//}
-		//else
-		//	Logger->Write("Multisampling disabled.");
 	}
 	bool  RendererGL::LoadTexture(std::string fileName)
 	{
@@ -451,6 +468,7 @@ namespace game
 		//tex.widthDiv = 1.0f / (float)tex.width;
 		//tex.heightDiv = 1.0f / (float)tex.height;
 
+
 		// needs to be adjusted for amd (GL_UNSIGNED_BYTE amd or whatever) GL_UNSIGNED_INT_8_8_8_8_REV nvidia
 		if (bytesPerPixel == 4)
 		{
@@ -460,9 +478,12 @@ namespace game
 		{
 			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGBA, enginePointer->systemInfo.gpuInfo.internalPixelType, data);
 		}
+		
 		if (true)
 			_glGenerateMipmap(GL_TEXTURE_2D);
 		//Textures[filename] = tex;
+		glBindTexture(GL_TEXTURE_2D, 0);
+
 
 
 
@@ -473,6 +494,10 @@ namespace game
 
 
 // Undefine what we have done, if someone uses an extension loader 
+#undef GL_MULTISAMPLE
+#undef WGL_SAMPLE_BUFFERS_ARB 
+#undef WGL_SAMPLES_ARB
+#undef GL_MAX_SAMPLES
 #undef GL_FRAMEBUFFER 
 #undef GL_FRAMEBUFFER_ATTACHMENT_RED_SIZE
 #undef GL_FRAMEBUFFER_ATTACHMENT_GREEN_SIZE 

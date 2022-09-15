@@ -7,7 +7,7 @@ namespace game
 	bool RendererVK::CreateDevice(Window window)
 	{
 		// Enable Validation Layers if debug mode was wanted
-		if (_attributes.isDebugMode)
+		if (_attributes.DebugMode)
 		{
 			_enableValidationLayers = true;
 		}

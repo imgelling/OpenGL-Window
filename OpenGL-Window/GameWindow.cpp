@@ -71,7 +71,7 @@ namespace game
 
 		dwExStyle = WS_EX_APPWINDOW | WS_EX_WINDOWEDGE;
 		dwStyle = WS_CAPTION | WS_SYSMENU | WS_VISIBLE | WS_THICKFRAME | WS_MAXIMIZEBOX | WS_MINIMIZEBOX | WS_CLIPCHILDREN | WS_CLIPSIBLINGS;
-		if (!_attributes.isWindowVisible)
+		if (!_attributes.WindowVisible)
 		{
 			dwExStyle = 0;
 			dwStyle = 0;
@@ -92,7 +92,7 @@ namespace game
 		}
 		
 		// pretend we are making a window -- added for toggle fullscreen
-		if (_attributes.isWindowVisible)
+		if (_attributes.WindowVisible)
 		{
 			rWndRect = { 0, 0, windowWidth, windowHeight };
 			AdjustWindowRectEx(&rWndRect, dwStyle, FALSE, dwExStyle);
@@ -108,7 +108,7 @@ namespace game
 		}
 
 		// If the window is fullscreen, change the style of the window
-		if (_attributes.isWindowFullscreen)
+		if (_attributes.WindowFullscreen)
 		{
 			dwExStyle = 0;
 			dwStyle = WS_VISIBLE | WS_POPUP;
@@ -128,7 +128,7 @@ namespace game
 		windowTopPosition = 0;
 
 		// Center the window
-		if (!_attributes.isWindowFullscreen)
+		if (!_attributes.WindowFullscreen)
 		{
 			windowLeftPosition = ((_monitorInfo.rcMonitor.right >> 1) - (adjustedWidth >> 1));
 			windowTopPosition = ((_monitorInfo.rcMonitor.bottom >> 1) - (adjustedHeight >> 1));
@@ -178,11 +178,11 @@ namespace game
 		DWORD dwExStyle = WS_EX_APPWINDOW | WS_EX_WINDOWEDGE;
 		DWORD dwStyle = WS_CAPTION | WS_SYSMENU | WS_VISIBLE | WS_THICKFRAME | WS_MAXIMIZEBOX | WS_MINIMIZEBOX | WS_CLIPCHILDREN | WS_CLIPSIBLINGS;
 
-		_attributes.isWindowFullscreen = !_attributes.isWindowFullscreen;
+		_attributes.WindowFullscreen = !_attributes.WindowFullscreen;
 
 
 		// swapping to fullscreen
-		if (_attributes.isWindowFullscreen)
+		if (_attributes.WindowFullscreen)
 		{
 			dwExStyle = 0;
 			dwStyle = WS_VISIBLE | WS_POPUP;
@@ -195,7 +195,7 @@ namespace game
 		SetWindowLongPtr(_windowHandle, GWL_STYLE, dwStyle);
 
 		// Swapping to window
-		if (!_attributes.isWindowFullscreen)
+		if (!_attributes.WindowFullscreen)
 		{
 			
 			int32_t width = _windowPositionSave.right -_windowPositionSave.left;

@@ -154,7 +154,7 @@ namespace game
 	void Engine::ToggleFullscreen()
 	{
 		_window.ToggleFullScreen();
-		_attributes.isWindowFullscreen = !_attributes.isWindowFullscreen;
+		_attributes.WindowFullscreen = !_attributes.WindowFullscreen;
 	}
 	
 	bool Engine::Create()

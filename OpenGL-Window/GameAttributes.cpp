@@ -7,9 +7,9 @@ namespace game
 		WindowTitle = "";
 		WindowWidth = 1280;
 		WindowHeight = 720;
-		isWindowFullscreen = false;
-		isWindowBorderless = false;
-		isWindowVisible = true;
+		WindowFullscreen = false;
+		WindowBorderless = false;
+		WindowVisible = true;
 		ContextMajor = 3;
 		ContextMinor = 2;
 		RedSize = 8;
@@ -18,13 +18,13 @@ namespace game
 		AlphaSize = 8;
 		StencilSize = 8;
 		DoubleBuffer = 1; // may need to be -1 as was set in GameLib1
-		isGLBackwardsCompatible = true;
+		GLBackwardsCompatible = true;
 		DepthSize = 24; // 32 bit for amd only, 24 for nvidia
-		MultiSamples = 0;
-		isDebugMode = false;
+		MultiSamples = 1;
+		DebugMode = false;
 		Framelock = 0.0f;
 		RenderingAPI = RenderAPI::OpenGL; // Defaults to OpenGL
-		isVsyncOn = true;
+		VsyncOn = true;
 		GameVersion = "0";
 	}
 }
