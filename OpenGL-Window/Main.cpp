@@ -4,7 +4,7 @@
 
 
 // Engine header
-//#define GAME_USE_DEDICATED_GPU
+#define GAME_USE_DEDICATED_GPU
 #include "Game.h"
 
 uint32_t bindTexture; // hacky, needs better way Texture Class maybe
@@ -29,7 +29,7 @@ public:
 		attrib.Framelock = 0;
 		attrib.VsyncOn = false;
 		attrib.DebugMode = true;
-		attrib.MultiSamples = 1; // max 8 amd, 16 nvidia
+		attrib.MultiSamples = 32; // max 8 amd, 16 nvidia
 		//attrib.isWindowFullscreen = true;
 		//attrib.RenderingAPI = game::RenderAPI::Vulkan;
 		SetAttributes(attrib);

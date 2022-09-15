@@ -80,6 +80,11 @@ namespace game
 
 		// Need to know max multisamples the card can do before we create the real window
 		glGetIntegerv(GL_MAX_SAMPLES, &enginePointer->systemInfo.gpuInfo.maxMultisamples);
+		if (enginePointer->systemInfo.gpuInfo.maxMultisamples == 32)
+		{
+			// Nvidia reports 32 samples, but doesn't work for frame buffer
+			enginePointer->systemInfo.gpuInfo.maxMultisamples = 16;
+		}
 
 		// Clean up OpenGL stuff
 		wglMakeCurrent(NULL, NULL);
@@ -107,6 +112,11 @@ namespace game
 
 		int32_t colorBits = _attributes.RedSize + _attributes.BlueSize + _attributes.GreenSize + _attributes.AlphaSize;
 
+		// Make sure we don't go above limits
+		if (_attributes.MultiSamples > enginePointer->systemInfo.gpuInfo.maxMultisamples)
+		{
+			_attributes.MultiSamples = enginePointer->systemInfo.gpuInfo.maxMultisamples;
+		}
 		int32_t glPixelAttributeList[] =
 		{
 			WGL_SUPPORT_OPENGL_ARB, 1,
@@ -373,10 +383,10 @@ namespace game
 		// The difference is endianness, both pixel formats are RGBA
 
 		// Log multisampling
-		if (_attributes.MultiSamples > 0)
+		if (_attributes.MultiSamples > 1)
 		{
 			info.gpuInfo.multisampleSamples = _attributes.MultiSamples;
-			sStream << "Multisampling samples : " << info.gpuInfo.multisampleSamples;
+			sStream << "Multisampling samples : " << std::dec << info.gpuInfo.multisampleSamples;
 			sStream << " out of " << info.gpuInfo.maxMultisamples << " max samples";
 			LOG(sStream);
 		}
