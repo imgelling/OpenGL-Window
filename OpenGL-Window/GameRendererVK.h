@@ -22,7 +22,7 @@ namespace game
 		bool CreateInstance();
 
 		void HandleWindowResize(const uint32_t width, const uint32_t height);
-		void FillOutRendererInfo(SystemInfo& info);
+		void FillOutRendererInfo();
 		bool LoadTexture(std::string fileName);
 	protected:
 		void _ReadExtensions();
@@ -120,7 +120,7 @@ namespace game
 
 	}
 
-	inline void RendererVK::FillOutRendererInfo(SystemInfo& info)
+	inline void RendererVK::FillOutRendererInfo()
 	{
 
 	}

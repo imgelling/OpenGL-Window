@@ -30,7 +30,7 @@ namespace game
 	public:
 		Keyboard keyboard;
 		Mouse mouse;
-		SystemInfo systemInfo;
+		//SystemInfo systemInfo;
 		bool isRunning;
 
 		Engine(Logger* logger);
@@ -260,7 +260,7 @@ namespace game
 			return false;
 		}
 
-		_renderer->FillOutRendererInfo(systemInfo);
+		_renderer->FillOutRendererInfo();
 
 		// Load user content
 		LoadContent();

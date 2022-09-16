@@ -45,4 +45,5 @@ namespace game
 	Engine* enginePointer = nullptr;
 	// GameEngine global error tracking
 	GameError lastError;
+	SystemInfo systemInfo;
 }
