@@ -143,14 +143,11 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="GameMouse.cpp" />
-    <ClCompile Include="GamePerformanceTimer.cpp" />
     <ClCompile Include="GameRendererGL.cpp" />
     <ClCompile Include="GameRendererVK.cpp" />
     <ClCompile Include="GameSystemInfo.cpp" />
     <ClCompile Include="GameTerminal.cpp" />
     <ClCompile Include="GameTimer.cpp" />
-    <ClCompile Include="GameMath.cpp" />
     <ClCompile Include="GameWindow.cpp" />
     <ClCompile Include="Main.cpp" />
   </ItemGroup>

@@ -24,9 +24,6 @@
     <ClCompile Include="GameTimer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="GamePerformanceTimer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="GameRendererGL.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -34,12 +31,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="GameTerminal.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="GameMouse.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="GameMath.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="GameSystemInfo.cpp">
