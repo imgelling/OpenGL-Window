@@ -208,11 +208,11 @@ namespace game
 
 		int32_t colorBits = _attributes.RedSize + _attributes.BlueSize + _attributes.GreenSize + _attributes.AlphaSize;
 
-		//// Make sure we don't go above limits
-		//if (_attributes.MultiSamples > enginePointer->systemInfo.gpuInfo.maxMultisamples)
-		//{
-		//	_attributes.MultiSamples = enginePointer->systemInfo.gpuInfo.maxMultisamples;
-		//}
+		// Make sure we don't go above limits
+		if (_attributes.MultiSamples > systemInfo.gpuInfo.maxMultisamples)
+		{
+			_attributes.MultiSamples = systemInfo.gpuInfo.maxMultisamples;
+		}
 		int32_t glPixelAttributeList[] =
 		{
 			WGL_SUPPORT_OPENGL_ARB, 1,
@@ -489,7 +489,7 @@ namespace game
 
 
 		// Log front buffer
-		int32_t r, g, b, a = 0;
+		int32_t r = 0, g = 0, b = 0, a = 0;
 		_glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_FRONT_LEFT, GL_FRAMEBUFFER_ATTACHMENT_RED_SIZE, &r);
 		_glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_FRONT_LEFT, GL_FRAMEBUFFER_ATTACHMENT_GREEN_SIZE, &g);
 		_glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_FRONT_LEFT, GL_FRAMEBUFFER_ATTACHMENT_BLUE_SIZE, &b);

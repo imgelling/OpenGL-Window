@@ -28,6 +28,6 @@ namespace game
 		Attributes _attributes;
 		std::vector<std::string> _extensionsAvailable;
 		virtual void _ReadExtensions() {};
-		Logger* _logger;
+		Logger* _logger = nullptr;
 	};
 }
