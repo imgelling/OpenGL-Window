@@ -30,9 +30,6 @@
     <ClCompile Include="GameRendererVK.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="GameTerminal.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="GameSystemInfo.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
