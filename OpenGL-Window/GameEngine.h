@@ -66,7 +66,5 @@ namespace game
 		void _Swap();
 		uint32_t _updatesPerSecond;
 		uint32_t _framesPerSecond;
-
-
 	};
 }

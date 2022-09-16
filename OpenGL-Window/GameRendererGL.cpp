@@ -92,7 +92,6 @@ namespace game
 
 		// Clean up temporary window stuff
 		PostMessage(tempWindow.GetHandle(), WM_DESTROY, 0, 0);
-		tempWindow.DoMessagePump();
 	}
 
 	bool RendererGL::CreateDevice(Window window) 
@@ -137,9 +136,6 @@ namespace game
 			WGL_SAMPLES_ARB, _attributes.MultiSamples,
 			0
 		}; 
-		//WGL_SAMPLE_BUFFERS_ARB, 1,
-		//	WGL_SAMPLES_EXT, 4,
-		// 	WGL_SWAP_EXCHANGE_ARB vs WGL_SWAP_COPY_ARB.
 
 		float_t pixelAttribFloatList[] = { 0, 0 };
 		PIXELFORMATDESCRIPTOR pixelFormatDescriptor = { 0 };
@@ -387,7 +383,7 @@ namespace game
 		{
 			info.gpuInfo.multisampleSamples = _attributes.MultiSamples;
 			sStream << "Multisampling samples : " << std::dec << info.gpuInfo.multisampleSamples;
-			sStream << " out of " << info.gpuInfo.maxMultisamples << " max samples";
+			sStream << " (" << info.gpuInfo.maxMultisamples << " max)";
 			LOG(sStream);
 		}
 		else

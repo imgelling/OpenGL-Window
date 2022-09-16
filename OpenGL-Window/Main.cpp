@@ -4,7 +4,7 @@
 
 
 // Engine header
-//#define GAME_USE_DEDICATED_GPU
+#define GAME_USE_DEDICATED_GPU
 #include "Game.h"
 
 uint32_t bindTexture; // hacky, needs better way Texture Class maybe
@@ -24,7 +24,7 @@ public:
 	{
 		game::Attributes attrib;
 
-		attrib.WindowTitle = "Spinning Quad";
+		attrib.WindowTitle = "Textured Spinning Quad";
 		attrib.GameVersion = "0.01";
 		attrib.Framelock = 0;
 		attrib.VsyncOn = false;
