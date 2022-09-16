@@ -4,7 +4,7 @@
 
 #include "GameHelpers.h"
 #include "GameAttributes.h"
-#include "../../../Programming/GameLib2/GameErrors.h"
+#include "GameErrors.h"
 
 
 namespace game

@@ -23,7 +23,7 @@
 #pragma region Engine
 #include "GameAttributes.h"
 #include "GameEngine.h"
-#include "../../../Programming/GameLib2/GameErrors.h"
+#include "GameErrors.h"
 #include "GameHelpers.h"
 #include "GameKeyboard.h"
 #include "GameLogger.h"

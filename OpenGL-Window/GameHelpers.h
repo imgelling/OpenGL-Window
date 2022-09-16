@@ -2,7 +2,7 @@
 
 #include <string>
 #include <Windows.h>
-#include "../../../Programming/GameLib2/GameErrors.h"
+#include "GameErrors.h"
 
 namespace game
 {
