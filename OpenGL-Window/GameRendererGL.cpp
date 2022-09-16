@@ -242,7 +242,7 @@ namespace game
 
 
 		// Renderer is good to go
-		enginePointer->logger->Write("OpenGL Device created!");
+		_logger->Write("OpenGL Device created!");
 
 		// Engine is now running
 		enginePointer->isRunning = true;
@@ -261,7 +261,7 @@ namespace game
 
 		// Get the number of OpenGL extensions available
 		glGetIntegerv(GL_NUM_EXTENSIONS, &numberOfExtensions);
-		enginePointer->logger->WriteQuiet("Listing " + std::to_string(numberOfExtensions) + " OpenGL Extensions Available.");
+		_logger->WriteQuiet("Listing " + std::to_string(numberOfExtensions) + " OpenGL Extensions Available.");
 		
 		// Write all extensions out to the log file, not stdout 
 		// and store in a vector
@@ -269,7 +269,7 @@ namespace game
 		{
 			extensionName = (char*)_glGetStringi(GL_EXTENSIONS, extensionNumber);
 			_extensionsAvailable.emplace_back(extensionName);
-			enginePointer->logger->WriteQuiet(extensionName);
+			_logger->WriteQuiet(extensionName);
 		}
 	}
 
@@ -299,7 +299,7 @@ namespace game
 		// Lambda to log easier
 		auto LOG = [&](std::stringstream & stream)
 		{
-			enginePointer->logger->Write(stream.str());
+			_logger->Write(stream.str());
 			stream.str("");
 		};
 

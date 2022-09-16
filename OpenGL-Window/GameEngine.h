@@ -28,11 +28,10 @@ namespace game
 	{
 		//friend Window;
 	public:
-		bool isRunning;
-		Logger* logger;
 		Keyboard keyboard;
 		Mouse mouse;
 		SystemInfo systemInfo;
+		bool isRunning;
 
 		Engine(Logger* logger);
 		~Engine();
@@ -57,6 +56,7 @@ namespace game
 		virtual void Shutdown() = 0;
 
 	private:
+		Logger* _logger;
 		float_t _frameTime;
 		Attributes _attributes;
 		RendererBase* _renderer;
@@ -79,7 +79,7 @@ namespace game
 		_frameTime = 0.0f;
 		_updatesPerSecond = 0;
 		_framesPerSecond = 0;
-		this->logger = logger;
+		_logger = logger;
 	}
 
 	inline Engine::~Engine()
@@ -100,6 +100,7 @@ namespace game
 		uint32_t framesCounted = 0;
 
 
+		isRunning = true;
 
 		// Reset the timers
 		_renderTimer.Reset();
@@ -226,7 +227,7 @@ namespace game
 		// Let user choose how they want things
 		Initialize();
 
-		logger->Header(_attributes.WindowTitle, _attributes.GameVersion);
+		_logger->Header(_attributes.WindowTitle, _attributes.GameVersion);
 
 		// Create the window
 		_window.SetAttributes(_attributes);
@@ -250,7 +251,7 @@ namespace game
 			lastError = { GameErrors::GameInvalidParameter, "Only OpenGL is implemented." };
 			return false;
 		}
-		_renderer->SetAttributes(_attributes);
+		_renderer->SetAttributes(_attributes, _logger);
 
 		// Create rendering device
 		if (!_renderer->CreateDevice(_window))

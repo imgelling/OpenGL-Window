@@ -39,11 +39,11 @@ public:
 	{
 		if (!LoadTexture("content/test.png"))
 		{
-			logger->Error(game::lastError);
+			//logger->Error(game::lastError);
 		}
 		else
 		{
-			logger->Write("test.png loaded!");
+			//logger->Write("test.png loaded!");
 		}
 
 

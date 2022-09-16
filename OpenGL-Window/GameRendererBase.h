@@ -2,6 +2,7 @@
 #include "GameWindow.h"
 #include "GameAttributes.h"
 #include "GameSystemInfo.h"
+#include "GameLogger.h"
 
 #include <string>
 #include <vector>
@@ -12,9 +13,10 @@ namespace game
 	class RendererBase
 	{
 	public:
-		void SetAttributes(const Attributes attrib)
+		void SetAttributes(const Attributes attrib, Logger *logger)
 		{
 			_attributes = attrib;
+			_logger = logger;
 		}
 		virtual bool CreateDevice(Window window) = 0;
 		virtual void DestroyDevice() = 0;
@@ -26,5 +28,6 @@ namespace game
 		Attributes _attributes;
 		std::vector<std::string> _extensionsAvailable;
 		virtual void _ReadExtensions() {};
+		Logger* _logger;
 	};
 }
