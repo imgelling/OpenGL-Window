@@ -143,19 +143,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\..\Programming\GameLib2\GameErrors.cpp" />
-    <ClCompile Include="GameEngine.cpp" />
-    <ClCompile Include="GameKeyboard.cpp" />
-    <ClCompile Include="GameLogger.cpp" />
-    <ClCompile Include="GameMouse.cpp" />
-    <ClCompile Include="GamePerformanceTimer.cpp" />
-    <ClCompile Include="GameRendererGL.cpp" />
-    <ClCompile Include="GameRendererVK.cpp" />
-    <ClCompile Include="GameSystemInfo.cpp" />
-    <ClCompile Include="GameTerminal.cpp" />
-    <ClCompile Include="GameTimer.cpp" />
-    <ClCompile Include="GameMath.cpp" />
-    <ClCompile Include="GameWindow.cpp" />
     <ClCompile Include="Main.cpp" />
   </ItemGroup>
   <ItemGroup>

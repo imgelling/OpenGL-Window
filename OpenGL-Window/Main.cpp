@@ -4,7 +4,7 @@
 
 
 // Engine header
-//#define GAME_USE_DEDICATED_GPU
+#define GAME_USE_DEDICATED_GPU
 #include "Game.h"
 
 uint32_t bindTexture; // hacky, needs better way Texture Class maybe
@@ -24,7 +24,7 @@ public:
 	{
 		game::Attributes attrib;
 
-		attrib.WindowTitle = "Spinning Quad";
+		attrib.WindowTitle = "Textured Spinning Quad";
 		attrib.GameVersion = "0.01";
 		attrib.Framelock = 0;
 		attrib.VsyncOn = false;
@@ -39,11 +39,11 @@ public:
 	{
 		if (!LoadTexture("content/test.png"))
 		{
-			logger->Error(game::lastError);
+			//logger->Error(game::lastError);
 		}
 		else
 		{
-			logger->Write("test.png loaded!");
+			//logger->Write("test.png loaded!");
 		}
 
 
@@ -77,7 +77,7 @@ public:
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		glBindTexture(GL_TEXTURE_2D, bindTexture);
-		glRotatef(0.01f, 1.0, 1.0f, 1.0f);
+		glRotatef(0.1f, 0.0, 0.0f, 1.0f);
 		glBegin(GL_TRIANGLES);
 
 		// TL triangle
