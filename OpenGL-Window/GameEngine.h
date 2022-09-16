@@ -282,4 +282,31 @@ namespace game
 			_renderer->HandleWindowResize(width, height);
 		}
 	}
+
+	// Needs to be in engine.h because of cyclic dependency by using enginePointer.
+	inline LRESULT CALLBACK Window::_WindowEventProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+	{
+		switch (uMsg)
+		{
+		case WM_MOUSEMOVE: 	enginePointer->mouse.HandleMouseMove(lParam & 0xFFFF, (lParam >> 16) & 0xFFFF); return 0;
+		case WM_MOUSEWHEEL:	enginePointer->mouse.HandleMouseWheel(GET_WHEEL_DELTA_WPARAM(wParam)); return 0;
+			//case WM_MOUSELEAVE: ptrPGE->olc_UpdateMouseFocus(false);                                    return 0;
+			//case WM_SETFOCUS:	ptrPGE->olc_UpdateKeyFocus(true);                                       return 0;
+			//case WM_KILLFOCUS:	ptrPGE->olc_UpdateKeyFocus(false);                                      return 0;
+		case WM_LBUTTONDOWN:enginePointer->mouse.SetMouseState(0, true); return 0;
+		case WM_LBUTTONUP:	enginePointer->mouse.SetMouseState(0, false); return 0;
+		case WM_RBUTTONDOWN:enginePointer->mouse.SetMouseState(2, true); return 0;
+		case WM_RBUTTONUP:	enginePointer->mouse.SetMouseState(2, false); return 0;
+		case WM_MBUTTONDOWN:enginePointer->mouse.SetMouseState(1, true); return 0;
+		case WM_MBUTTONUP:	enginePointer->mouse.SetMouseState(1, false); return 0;
+		case WM_SIZE: enginePointer->HandleWindowResize(lParam & 0xFFF, (lParam >> 16) & 0xFFFF); return 0;
+		case WM_KEYDOWN: enginePointer->keyboard.SetKeyState((uint8_t)wParam, true); return 0;
+		case WM_KEYUP: enginePointer->keyboard.SetKeyState((uint8_t)wParam, false); return 0;
+			//case WM_SYSKEYDOWN: ptrPGE->olc_UpdateKeyState(mapKeys[wParam], true);						return 0;
+			//case WM_SYSKEYUP:	ptrPGE->olc_UpdateKeyState(mapKeys[wParam], false);
+		case WM_CLOSE:		if (enginePointer) enginePointer->isRunning = false; return 0;
+		case WM_DESTROY:	PostQuitMessage(0); DestroyWindow(hWnd); return 0;
+		}
+		return DefWindowProc(hWnd, uMsg, wParam, lParam);
+	}
 }

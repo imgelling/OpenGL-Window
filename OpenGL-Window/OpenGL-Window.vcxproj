@@ -145,9 +145,6 @@
   <ItemGroup>
     <ClCompile Include="GameRendererGL.cpp" />
     <ClCompile Include="GameRendererVK.cpp" />
-    <ClCompile Include="GameSystemInfo.cpp" />
-    <ClCompile Include="GameTimer.cpp" />
-    <ClCompile Include="GameWindow.cpp" />
     <ClCompile Include="Main.cpp" />
   </ItemGroup>
   <ItemGroup>

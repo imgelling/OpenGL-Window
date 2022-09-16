@@ -18,19 +18,10 @@
     <ClCompile Include="Main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="GameWindow.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="GameTimer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="GameRendererGL.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="GameRendererVK.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="GameSystemInfo.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
