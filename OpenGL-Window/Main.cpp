@@ -7,6 +7,12 @@
 
 uint32_t bindTexture; // hacky, needs better way Texture Class maybe
 
+class Texture2d
+{
+public:
+
+private:
+};
 
 class Game : public game::Engine
 {
