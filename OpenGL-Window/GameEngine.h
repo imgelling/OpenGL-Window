@@ -9,6 +9,7 @@
 #include "GameSystemInfo.h"
 #include "GameRendererGL.h"
 #include "GameRendererVK.h"
+#include "GameTexture2D.h"
 
 namespace game
 {
@@ -45,7 +46,7 @@ namespace game
 		uint32_t GetUpdatesPerSecond();
 		uint32_t GetFramesPerSecond();
 		
-		bool LoadTexture(std::string fileName);
+		bool LoadTexture(std::string fileName, Texture2d &texture);
 		
 		void ToggleFullscreen();
 		void HandleWindowResize(const uint32_t width, const uint32_t height);
@@ -204,9 +205,9 @@ namespace game
 		return _framesPerSecond;
 	}
 
-	inline bool Engine::LoadTexture(std::string fileName)
+	inline bool Engine::LoadTexture(std::string fileName, Texture2d &texture)
 	{
-		return _renderer->LoadTexture(fileName);
+		return _renderer->LoadTexture(fileName, texture);
 	}
 
 	inline void Engine::SetWindowTitle(const std::string title)

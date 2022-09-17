@@ -5,20 +5,13 @@
 //#define GAME_USE_DEDICATED_GPU
 #include "Game.h"
 
-uint32_t bindTexture; // hacky, needs better way Texture Class maybe
-
-class Texture2d
-{
-public:
-
-private:
-};
 
 class Game : public game::Engine
 {
 
 public:
 	game::Terminal terminal;
+	game::Texture2d texture;
 
 	Game(game::Logger& logger) : game::Engine(&logger)
 	{
@@ -37,11 +30,12 @@ public:
 		//attrib.WindowFullscreen = true;
 		//attrib.RenderingAPI = game::RenderAPI::Vulkan;
 		SetAttributes(attrib);
+		
 	}
 
 	void LoadContent()
 	{
-		if (!LoadTexture("content/test.png"))
+		if (!LoadTexture("content/test.png", texture))
 		{
 			logger->Error(game::lastError);
 		}
@@ -60,7 +54,7 @@ public:
 
 	void Shutdown()
 	{
-		glDeleteTextures(1, &bindTexture);
+		glDeleteTextures(1, &texture.bind);
 	}
 
 	void Update(const float_t msElapsed)
@@ -80,7 +74,7 @@ public:
 	{
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		glBindTexture(GL_TEXTURE_2D, bindTexture);
+		glBindTexture(GL_TEXTURE_2D, texture.bind);
 		glRotatef(1.0f, 0.0, 0.0f, 1.0f);
 		glBegin(GL_TRIANGLES);
 
