@@ -175,13 +175,13 @@ namespace game
 			return;
 		}
 
-		//// Need to know max multisamples the card can do before we create the real window
-		//glGetIntegerv(GL_MAX_SAMPLES, &enginePointer->systemInfo.gpuInfo.maxMultisamples);
-		//if (enginePointer->systemInfo.gpuInfo.maxMultisamples == 32)
-		//{
-		//	// Nvidia reports 32 samples, but doesn't work for frame buffer
-		//	enginePointer->systemInfo.gpuInfo.maxMultisamples = 16;
-		//}
+		// Need to know max multisamples the card can do before we create the real window
+		glGetIntegerv(GL_MAX_SAMPLES, &systemInfo.gpuInfo.maxMultisamples);
+		if (systemInfo.gpuInfo.maxMultisamples == 32)
+		{
+			// Nvidia reports 32 samples, but doesn't work for frame buffer
+			systemInfo.gpuInfo.maxMultisamples = 16;
+		}
 
 		// Clean up OpenGL stuff
 		wglMakeCurrent(NULL, NULL);

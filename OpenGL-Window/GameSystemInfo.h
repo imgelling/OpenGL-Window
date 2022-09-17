@@ -28,8 +28,8 @@ namespace game
 			int32_t maxAnisotropy = 1;
 			int32_t maxMultisamples = 0;
 			int32_t multisampleSamples = 0;
-			int32_t frontBufferColorSize;
-			int32_t backBufferColorSize;
+			int32_t frontBufferColorSize = 0;
+			int32_t backBufferColorSize = 0;
 			int32_t depthBufferSize = 0;
 			std::string renderer;
 			std::string vendor;

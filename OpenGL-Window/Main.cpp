@@ -1,8 +1,6 @@
 #include <windows.h>
 #include <iostream>
 
-
-
 // Engine header
 #define GAME_USE_DEDICATED_GPU
 #include "Game.h"
@@ -29,7 +27,7 @@ public:
 		attrib.Framelock = 0;
 		attrib.VsyncOn = false;
 		attrib.DebugMode = true;
-		attrib.MultiSamples = 32; // max 8 amd, 16 nvidia
+		attrib.MultiSamples = 8; // max 8 amd, 16 nvidia
 		//attrib.isWindowFullscreen = true;
 		//attrib.RenderingAPI = game::RenderAPI::Vulkan;
 		SetAttributes(attrib);
@@ -77,7 +75,7 @@ public:
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		glBindTexture(GL_TEXTURE_2D, bindTexture);
-		glRotatef(0.1f, 0.0, 0.0f, 1.0f);
+		glRotatef(1.0f, 0.0, 0.0f, 1.0f);
 		glBegin(GL_TRIANGLES);
 
 		// TL triangle
