@@ -2,7 +2,7 @@
 #include <iostream>
 
 // Engine header
-#define GAME_USE_DEDICATED_GPU
+//#define GAME_USE_DEDICATED_GPU
 #include "Game.h"
 
 uint32_t bindTexture; // hacky, needs better way Texture Class maybe
@@ -24,11 +24,11 @@ public:
 
 		attrib.WindowTitle = "Textured Spinning Quad";
 		attrib.GameVersion = "0.01";
-		attrib.Framelock = 0;
+		attrib.Framelock = 60;
 		attrib.VsyncOn = false;
 		attrib.DebugMode = true;
-		attrib.MultiSamples = 8; // max 8 amd, 16 nvidia
-		//attrib.isWindowFullscreen = true;
+		attrib.MultiSamples = 32; // max 8 amd, 16 nvidia
+		//attrib.WindowFullscreen = true;
 		//attrib.RenderingAPI = game::RenderAPI::Vulkan;
 		SetAttributes(attrib);
 	}
@@ -37,11 +37,11 @@ public:
 	{
 		if (!LoadTexture("content/test.png"))
 		{
-			//logger->Error(game::lastError);
+			logger->Error(game::lastError);
 		}
 		else
 		{
-			//logger->Write("test.png loaded!");
+			logger->Write("test.png loaded!");
 		}
 
 

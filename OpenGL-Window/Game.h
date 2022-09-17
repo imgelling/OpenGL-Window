@@ -41,9 +41,10 @@
 
 namespace game
 {
-	// Pointer to the engine created
+	// Pointer to the engine created, only needed for windows message pump
 	Engine* enginePointer = nullptr;
 	// GameEngine global error tracking
 	GameError lastError;
+
 	SystemInfo systemInfo;
 }

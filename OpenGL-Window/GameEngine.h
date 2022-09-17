@@ -30,7 +30,7 @@ namespace game
 	public:
 		Keyboard keyboard;
 		Mouse mouse;
-		//SystemInfo systemInfo;
+		Logger* logger;
 		bool isRunning;
 
 		Engine(Logger* logger);
@@ -56,7 +56,6 @@ namespace game
 		virtual void Shutdown() = 0;
 
 	private:
-		Logger* _logger;
 		float_t _frameTime;
 		Attributes _attributes;
 		RendererBase* _renderer;
@@ -79,7 +78,7 @@ namespace game
 		_frameTime = 0.0f;
 		_updatesPerSecond = 0;
 		_framesPerSecond = 0;
-		_logger = logger;
+		this->logger = logger;
 	}
 
 	inline Engine::~Engine()
@@ -227,7 +226,7 @@ namespace game
 		// Let user choose how they want things
 		Initialize();
 
-		_logger->Header(_attributes.WindowTitle, _attributes.GameVersion);
+		logger->Header(_attributes.WindowTitle, _attributes.GameVersion);
 
 		// Create the window
 		_window.SetAttributes(_attributes);
@@ -251,7 +250,7 @@ namespace game
 			lastError = { GameErrors::GameInvalidParameter, "Only OpenGL is implemented." };
 			return false;
 		}
-		_renderer->SetAttributes(_attributes, _logger);
+		_renderer->SetAttributes(_attributes, logger);
 
 		// Create rendering device
 		if (!_renderer->CreateDevice(_window))

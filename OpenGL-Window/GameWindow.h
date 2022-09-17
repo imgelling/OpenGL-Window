@@ -43,7 +43,6 @@ namespace game
 		int32_t windowWidth = 0;
 		int32_t windowHeight = 0;
 		HMONITOR monitorHandle = 0;
-		/*MONITORINFO monitorInfo = { 0 };*/
 		RECT rWndRect = { 0 };
 		int32_t adjustedWidth = 0;
 		int32_t adjustedHeight = 0;
