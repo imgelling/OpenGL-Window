@@ -35,6 +35,7 @@
 #include "GameRendererVK.h"
 #include "GameSystemInfo.h"
 #include "GameTerminal.h"
+#include "GameTexture2D.h"
 #include "GameTimer.h"
 #include "GameWindow.h"
 #pragma endregion

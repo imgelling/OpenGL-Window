@@ -6,9 +6,7 @@
 #define STB_IMAGE_IMPLEMENTATION
 #define STBI_ONLY_PNG
 #include "stb_image.h"
-
-extern uint32_t bindTexture;
-
+#include "GameTexture2D.h"
 
 namespace game
 {
@@ -72,7 +70,7 @@ namespace game
 		void Swap();
 		void HandleWindowResize(const uint32_t width, const uint32_t height);
 		void FillOutRendererInfo();
-		bool LoadTexture(std::string fileName);
+		bool LoadTexture(std::string fileName, Texture2d &texture);
 	protected:
 		void _ReadExtensions();
 
@@ -534,7 +532,7 @@ namespace game
 
 	}
 	
-	inline bool  RendererGL::LoadTexture(std::string fileName)
+	inline bool  RendererGL::LoadTexture(std::string fileName, Texture2d &texture)
 	{
 		//Content content;
 		void* data = nullptr;
@@ -550,11 +548,15 @@ namespace game
 			if (data) stbi_image_free(data);
 			return false;
 		}
-		// Not already loaded so we create it
+		texture.width = width;
+		texture.height = height;
+		texture.oneOverWidth = 1.0f / (float_t)width;
+		texture.oneOverHeight = 1.0f / (float_t)height;
+		texture.isCopy = false;
 
-		glGenTextures(1, &bindTexture);
-		glBindTexture(GL_TEXTURE_2D, bindTexture);
-		//tex.name = filename;
+		glGenTextures(1, &texture.bind);
+		glBindTexture(GL_TEXTURE_2D, texture.bind);
+		texture.name = fileName;
 
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);// LINEAR_MIPMAP_LINEAR); // min
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);// GL_LINEAR); //max
@@ -585,9 +587,6 @@ namespace game
 			_glGenerateMipmap(GL_TEXTURE_2D);
 		//Textures[filename] = tex;
 		glBindTexture(GL_TEXTURE_2D, 0);
-
-
-
 
 		stbi_image_free(data);
 		return true;

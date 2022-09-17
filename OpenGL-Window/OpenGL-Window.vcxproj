@@ -160,6 +160,7 @@
     <ClInclude Include="GameRendererVK.h" />
     <ClInclude Include="GameSystemInfo.h" />
     <ClInclude Include="GameTerminal.h" />
+    <ClInclude Include="GameTexture2D.h" />
     <ClInclude Include="GameTimer.h" />
     <ClInclude Include="GameMath.h" />
     <ClInclude Include="GameWindow.h" />

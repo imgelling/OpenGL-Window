@@ -4,6 +4,7 @@
 #include <vector>
 #include "GameRendererBase.h"
 #include "GameEngine.h"
+#include "GameTexture2D.h"
 
 
 
@@ -23,7 +24,7 @@ namespace game
 
 		void HandleWindowResize(const uint32_t width, const uint32_t height);
 		void FillOutRendererInfo();
-		bool LoadTexture(std::string fileName);
+		bool LoadTexture(std::string fileName, Texture2d &texture);
 	protected:
 		void _ReadExtensions();
 
@@ -125,8 +126,8 @@ namespace game
 
 	}
 
-	inline bool RendererVK::LoadTexture(std::string fileName)
+	inline bool RendererVK::LoadTexture(std::string fileName, Texture2d &texture)
 	{
-		return true;
+		return false;
 	}
 }

@@ -3,6 +3,7 @@
 #include "GameAttributes.h"
 #include "GameSystemInfo.h"
 #include "GameLogger.h"
+#include "GameTexture2D.h"
 
 #include <string>
 #include <vector>
@@ -23,7 +24,7 @@ namespace game
 		virtual void Swap() = 0;
 		virtual void HandleWindowResize(const uint32_t width, const uint32_t height) = 0;
 		virtual void FillOutRendererInfo() = 0;
-		virtual bool LoadTexture(std::string fileName) = 0;
+		virtual bool LoadTexture(std::string fileName, Texture2d &texture) = 0;
 	protected:
 		Attributes _attributes;
 		std::vector<std::string> _extensionsAvailable;
