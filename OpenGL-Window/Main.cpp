@@ -5,6 +5,34 @@
 //#define GAME_USE_DEDICATED_GPU
 #include "Game.h"
 
+//friend class GameContent;
+//friend class GameSpriteBatch;
+//	public:
+//		Shader();
+//		~Shader();
+//		void Bind();
+//		void UnBind();
+//		void UnLoad();
+//		unsigned int Id();
+//
+//	private:
+//		std::string Load(std::string vertex, std::string fragment);
+//		std::string validateShader(unsigned int shader, const char* file = 0);
+//		std::string validateProgram(unsigned int program);
+//		char* LoadTextFile(const char* fileName);
+//		unsigned int shaderId;
+//		unsigned int vertexId;
+//		unsigned int fragmentId;
+//		bool loaded;
+namespace game
+{
+	class Shader
+	{
+	public:
+
+	private:
+	};
+}
 
 class Game : public game::Engine
 {
@@ -23,7 +51,7 @@ public:
 
 		attrib.WindowTitle = "Textured Spinning Quad";
 		attrib.GameVersion = "0.01";
-		attrib.Framelock = 60;
+		attrib.Framelock = 0;
 		attrib.VsyncOn = false;
 		attrib.DebugMode = true;
 		attrib.MultiSamples = 32; // max 8 amd, 16 nvidia
