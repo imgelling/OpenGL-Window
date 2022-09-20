@@ -26,12 +26,32 @@
 //		bool loaded;
 namespace game
 {
-	class Shader
+	class ShaderGL
 	{
 	public:
+		ShaderGL();
+		~ShaderGL();
+		void Bind();
+		void UnBind();
+		std::string Load(const std::string vertex, const std::string fragment);
+		void UnLoad();
+		uint32_t iD;  // not sure what for
 
 	private:
+		uint32_t _shaderId;
+		uint32_t _vertexId;
+		uint32_t _fragmentId;
+		bool _loaded; // needed?
+
 	};
+
+	ShaderGL::ShaderGL()
+	{
+		_shaderId = 0;
+		_vertexId = 0;
+		_fragmentId = 0;
+		_loaded = false;
+	}
 }
 
 class Game : public game::Engine
@@ -39,7 +59,7 @@ class Game : public game::Engine
 
 public:
 	game::Terminal terminal;
-	game::Texture2d texture;
+	game::Texture2dGL texture;
 
 	Game(game::Logger& logger) : game::Engine(&logger)
 	{

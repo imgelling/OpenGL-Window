@@ -24,7 +24,7 @@ namespace game
 
 		void HandleWindowResize(const uint32_t width, const uint32_t height);
 		void FillOutRendererInfo();
-		bool LoadTexture(std::string fileName, Texture2d &texture);
+		bool LoadTexture(std::string fileName, Texture2dGL &texture);
 	protected:
 		void _ReadExtensions();
 
@@ -126,7 +126,7 @@ namespace game
 
 	}
 
-	inline bool RendererVK::LoadTexture(std::string fileName, Texture2d &texture)
+	inline bool RendererVK::LoadTexture(std::string fileName, Texture2dGL &texture)
 	{
 		return false;
 	}

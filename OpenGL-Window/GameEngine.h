@@ -46,7 +46,7 @@ namespace game
 		uint32_t GetUpdatesPerSecond();
 		uint32_t GetFramesPerSecond();
 		
-		bool LoadTexture(std::string fileName, Texture2d &texture);
+		bool LoadTexture(std::string fileName, Texture2dGL &texture);
 		
 		void ToggleFullscreen();
 		void HandleWindowResize(const uint32_t width, const uint32_t height);
@@ -205,7 +205,7 @@ namespace game
 		return _framesPerSecond;
 	}
 
-	inline bool Engine::LoadTexture(std::string fileName, Texture2d &texture)
+	inline bool Engine::LoadTexture(std::string fileName, Texture2dGL &texture)
 	{
 		return _renderer->LoadTexture(fileName, texture);
 	}

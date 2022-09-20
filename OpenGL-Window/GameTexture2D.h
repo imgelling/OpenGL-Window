@@ -2,7 +2,7 @@
 
 namespace game
 {
-	class Texture2d
+	class Texture2dGL
 	{
 	public:
 		uint32_t bind;
@@ -12,11 +12,11 @@ namespace game
 		float_t oneOverWidth;
 		float_t oneOverHeight;
 		bool isCopy;
-		Texture2d();
+		Texture2dGL();
 	private:
 	};
 
-	inline Texture2d::Texture2d()
+	inline Texture2dGL::Texture2dGL()
 	{
 		bind = 0;
 		width = 0;
