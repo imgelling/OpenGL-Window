@@ -7,6 +7,7 @@
 #define STBI_ONLY_PNG
 #include "stb_image.h"
 #include "GameTexture2D.h"
+#include "GameShaderGL.h"
 
 namespace game
 {
@@ -71,6 +72,7 @@ namespace game
 		void HandleWindowResize(const uint32_t width, const uint32_t height);
 		void FillOutRendererInfo();
 		bool LoadTexture(std::string fileName, Texture2dGL &texture);
+		bool LoadShader(const std::string vertex, const std::string fragment, ShaderGL& shader);
 	protected:
 		void _ReadExtensions();
 
@@ -532,7 +534,7 @@ namespace game
 
 	}
 	
-	inline bool  RendererGL::LoadTexture(std::string fileName, Texture2dGL &texture)
+	inline bool RendererGL::LoadTexture(std::string fileName, Texture2dGL &texture)
 	{
 		//Content content;
 		void* data = nullptr;
@@ -592,6 +594,10 @@ namespace game
 		return true;
 	}
 
+	inline bool RendererGL::LoadShader(const std::string vertex, const std::string fragment, ShaderGL &shader)
+	{
+		return true;
+	}
 	// Undefine what we have done, if someone uses an extension loader 
 #undef GL_MULTISAMPLE
 #undef WGL_SAMPLE_BUFFERS_ARB 

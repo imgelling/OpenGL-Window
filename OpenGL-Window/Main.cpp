@@ -5,61 +5,13 @@
 //#define GAME_USE_DEDICATED_GPU
 #include "Game.h"
 
-//friend class GameContent;
-//friend class GameSpriteBatch;
-//	public:
-//		Shader();
-//		~Shader();
-//		void Bind();
-//		void UnBind();
-//		void UnLoad();
-//		unsigned int Id();
-//
-//	private:
-//		std::string Load(std::string vertex, std::string fragment);
-//		std::string validateShader(unsigned int shader, const char* file = 0);
-//		std::string validateProgram(unsigned int program);
-//		char* LoadTextFile(const char* fileName);
-//		unsigned int shaderId;
-//		unsigned int vertexId;
-//		unsigned int fragmentId;
-//		bool loaded;
-namespace game
-{
-	class ShaderGL
-	{
-	public:
-		ShaderGL();
-		~ShaderGL();
-		void Bind();
-		void UnBind();
-		std::string Load(const std::string vertex, const std::string fragment);
-		void UnLoad();
-		uint32_t iD;  // not sure what for
-
-	private:
-		uint32_t _shaderId;
-		uint32_t _vertexId;
-		uint32_t _fragmentId;
-		bool _loaded; // needed?
-
-	};
-
-	ShaderGL::ShaderGL()
-	{
-		_shaderId = 0;
-		_vertexId = 0;
-		_fragmentId = 0;
-		_loaded = false;
-	}
-}
-
 class Game : public game::Engine
 {
 
 public:
-	game::Terminal terminal;
 	game::Texture2dGL texture;
+	game::ShaderGL shader;
+	game::Terminal terminal; // throwing an error 6, invalid handle goes away if in gameengine class
 
 	Game(game::Logger& logger) : game::Engine(&logger)
 	{

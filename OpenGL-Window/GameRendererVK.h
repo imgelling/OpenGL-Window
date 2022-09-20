@@ -25,6 +25,7 @@ namespace game
 		void HandleWindowResize(const uint32_t width, const uint32_t height);
 		void FillOutRendererInfo();
 		bool LoadTexture(std::string fileName, Texture2dGL &texture);
+		bool LoadShader(const std::string vertex, const std::string fragment, ShaderGL& shader);
 	protected:
 		void _ReadExtensions();
 
@@ -127,6 +128,11 @@ namespace game
 	}
 
 	inline bool RendererVK::LoadTexture(std::string fileName, Texture2dGL &texture)
+	{
+		return false;
+	}
+
+	inline bool RendererVK::LoadShader(const std::string vertex, const std::string fragment, ShaderGL& shader)
 	{
 		return false;
 	}
