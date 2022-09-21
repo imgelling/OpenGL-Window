@@ -10,6 +10,7 @@
 #include "GameRendererGL.h"
 #include "GameRendererVK.h"
 #include "GameTexture2D.h"
+//#include "GameTerminal.h"
 
 namespace game
 {
@@ -27,7 +28,6 @@ namespace game
 	
 	class Engine
 	{
-		//friend Window;
 	public:
 		Keyboard keyboard;
 		Mouse mouse;
@@ -46,7 +46,10 @@ namespace game
 		uint32_t GetUpdatesPerSecond();
 		uint32_t GetFramesPerSecond();
 		
-		bool LoadTexture(std::string fileName, Texture2d &texture);
+		bool LoadTexture(std::string fileName, Texture2dGL &texture);
+		void UnLoadTexture(Texture2dGL& texture);
+		bool LoadShader(const std::string vertex, const std::string fragment, ShaderGL& shader);
+		void UnLoadShader(ShaderGL& shader);
 		
 		void ToggleFullscreen();
 		void HandleWindowResize(const uint32_t width, const uint32_t height);
@@ -205,9 +208,24 @@ namespace game
 		return _framesPerSecond;
 	}
 
-	inline bool Engine::LoadTexture(std::string fileName, Texture2d &texture)
+	inline bool Engine::LoadTexture(std::string fileName, Texture2dGL &texture)
 	{
 		return _renderer->LoadTexture(fileName, texture);
+	}
+
+	inline void Engine::UnLoadTexture(Texture2dGL& texture)
+	{
+		_renderer->UnLoadTexture(texture);
+	}
+
+	inline bool Engine::LoadShader(const std::string vertex, const std::string fragment, ShaderGL& shader)
+	{
+		return _renderer->LoadShader(vertex, fragment, shader);
+	}
+
+	inline void Engine::UnLoadShader(ShaderGL& shader)
+	{
+		_renderer->UnLoadShader(shader);
 	}
 
 	inline void Engine::SetWindowTitle(const std::string title)

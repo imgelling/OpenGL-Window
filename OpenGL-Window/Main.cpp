@@ -5,41 +5,13 @@
 //#define GAME_USE_DEDICATED_GPU
 #include "Game.h"
 
-//friend class GameContent;
-//friend class GameSpriteBatch;
-//	public:
-//		Shader();
-//		~Shader();
-//		void Bind();
-//		void UnBind();
-//		void UnLoad();
-//		unsigned int Id();
-//
-//	private:
-//		std::string Load(std::string vertex, std::string fragment);
-//		std::string validateShader(unsigned int shader, const char* file = 0);
-//		std::string validateProgram(unsigned int program);
-//		char* LoadTextFile(const char* fileName);
-//		unsigned int shaderId;
-//		unsigned int vertexId;
-//		unsigned int fragmentId;
-//		bool loaded;
-namespace game
-{
-	class Shader
-	{
-	public:
-
-	private:
-	};
-}
-
 class Game : public game::Engine
 {
 
 public:
-	game::Terminal terminal;
-	game::Texture2d texture;
+	game::Texture2dGL texture;
+	game::ShaderGL shader;
+	game::Terminal terminal; // throwing an error 6, invalid handle goes away if in gameengine class
 
 	Game(game::Logger& logger) : game::Engine(&logger)
 	{
@@ -72,6 +44,14 @@ public:
 			logger->Write("test.png loaded!");
 		}
 
+		if (!LoadShader("content/SpriteBatch_vert.shader","content/SpriteBatch_frag.shader", shader))
+		{
+			logger->Error(game::lastError);
+		}
+		else
+		{
+			logger->Write("SpriteBatch shader loaded!");
+		}
 
 		glClearColor(0.25f, 0.25f, 0.25f, 1.0f);
 		glEnable(GL_TEXTURE_2D);
@@ -82,7 +62,8 @@ public:
 
 	void Shutdown()
 	{
-		glDeleteTextures(1, &texture.bind);
+		UnLoadTexture(texture);
+		UnLoadShader(shader);
 	}
 
 	void Update(const float_t msElapsed)

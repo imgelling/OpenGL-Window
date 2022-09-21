@@ -164,6 +164,7 @@
     <ClInclude Include="GameTimer.h" />
     <ClInclude Include="GameMath.h" />
     <ClInclude Include="GameWindow.h" />
+    <ClInclude Include="GameShaderGL.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
