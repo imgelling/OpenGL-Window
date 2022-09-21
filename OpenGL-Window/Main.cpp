@@ -53,9 +53,6 @@ public:
 			logger->Write("SpriteBatch shader loaded!");
 		}
 
-
-
-
 		glClearColor(0.25f, 0.25f, 0.25f, 1.0f);
 		glEnable(GL_TEXTURE_2D);
 		glEnable(GL_BLEND);
@@ -65,7 +62,8 @@ public:
 
 	void Shutdown()
 	{
-		glDeleteTextures(1, &texture.bind);
+		UnLoadTexture(texture);
+		UnLoadShader(shader);
 	}
 
 	void Update(const float_t msElapsed)

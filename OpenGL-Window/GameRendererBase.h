@@ -26,7 +26,9 @@ namespace game
 		virtual void HandleWindowResize(const uint32_t width, const uint32_t height) = 0;
 		virtual void FillOutRendererInfo() = 0;
 		virtual bool LoadTexture(std::string fileName, Texture2dGL &texture) = 0;
+		virtual void UnLoadTexture(Texture2dGL& texture) = 0;
 		virtual bool LoadShader(const std::string vertex, const std::string fragment, ShaderGL& shader) = 0;
+		virtual void UnLoadShader(ShaderGL& shader) = 0;
 	protected:
 		Attributes _attributes;
 		std::vector<std::string> _extensionsAvailable;

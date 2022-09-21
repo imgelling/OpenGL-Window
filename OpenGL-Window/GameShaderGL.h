@@ -29,10 +29,8 @@ namespace game
 		ShaderGL();
 		~ShaderGL();
 		// Below will be handled by engine > renderer
-		//std::string Load(const std::string vertex, const std::string fragment);
 		//void Bind();
 		//void UnBind();
-		//void UnLoad();
 		uint32_t iD;  // not sure what for
 		uint32_t shaderId;
 		uint32_t vertexId;

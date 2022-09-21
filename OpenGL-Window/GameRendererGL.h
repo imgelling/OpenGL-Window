@@ -64,6 +64,7 @@ namespace game
 #define GL_MULTISAMPLE 0x809D
 #define GL_FRAGMENT_SHADER 0x8B30
 #define GL_VERTEX_SHADER 0x8B31
+#define GL_VALIDATE_STATUS 0x8B83
 	
 	class RendererGL : public RendererBase
 	{
@@ -75,12 +76,15 @@ namespace game
 		void HandleWindowResize(const uint32_t width, const uint32_t height);
 		void FillOutRendererInfo();
 		bool LoadTexture(std::string fileName, Texture2dGL &texture);
+		void UnLoadTexture(Texture2dGL& texture);
 		bool LoadShader(const std::string vertex, const std::string fragment, ShaderGL& shader);
+		void UnLoadShader(ShaderGL& shader);
 	protected:
 		void _ReadExtensions();
 
 	private:
-		std::string validateShader(unsigned int shader, const char* file); 
+		std::string _validateShader(const uint32_t shader, const char* file); 
+		std::string _validateProgram(const uint32_t program);
 		typedef HDC _glDeviceContext_t;
 		typedef HGLRC _glRenderContext_t;
 
@@ -124,6 +128,30 @@ namespace game
 
 		typedef GLuint(WINAPI* _PFNGLCREATEPROGRAMPROC) (void);
 		_PFNGLCREATEPROGRAMPROC _glCreateProgram = nullptr;
+
+		typedef void (WINAPI* _PFNGLATTACHSHADERPROC) (GLuint program, GLuint shader);
+		_PFNGLATTACHSHADERPROC _glAttachShader = nullptr;
+
+		typedef void (WINAPI* _PFNGLLINKPROGRAMPROC) (GLuint program);
+		_PFNGLLINKPROGRAMPROC _glLinkProgram = nullptr;
+
+		typedef void (WINAPI* _PFNGLGETPROGRAMINFOLOGPROC) (GLuint program, GLsizei bufSize, GLsizei* length, char* infoLog);
+		_PFNGLGETPROGRAMINFOLOGPROC _glGetProgramInfoLog = nullptr;
+
+		typedef void (WINAPI* _PFNGLGETPROGRAMIVPROC) (GLuint program, GLenum pname, GLint* param);
+		_PFNGLGETPROGRAMIVPROC _glGetProgramiv = nullptr;
+
+		typedef void (WINAPI* _PFNGLVALIDATEPROGRAMPROC) (GLuint program);
+		_PFNGLVALIDATEPROGRAMPROC _glValidateProgram = nullptr;
+
+		typedef void (WINAPI* _PFNGLDELETEPROGRAMPROC) (GLuint program);
+		_PFNGLDELETEPROGRAMPROC _glDeleteProgram = nullptr;
+
+		typedef void (WINAPI* _PFNGLDELETESHADERPROC) (GLuint shader);
+		_PFNGLDELETESHADERPROC _glDeleteShader = nullptr;
+
+		typedef void (WINAPI* _PFNGLDETACHSHADERPROC) (GLuint program, GLuint shader);
+		_PFNGLDETACHSHADERPROC _glDetachShader = nullptr;
 	};
 
 	inline RendererGL::RendererGL()
@@ -372,6 +400,62 @@ namespace game
 		if (_glCreateProgram == nullptr)
 		{
 			lastError = { GameErrors::GameOpenGLSpecific, "Extension glCreateProgram not available." };
+			return false;
+		}
+
+		_glAttachShader = (_PFNGLATTACHSHADERPROC)wglGetProcAddress("glAttachShader");
+		if (_glAttachShader == nullptr)
+		{
+			lastError = { GameErrors::GameOpenGLSpecific, "Extension glAttachShader not available." };
+			return false;
+		}
+
+		_glLinkProgram = (_PFNGLLINKPROGRAMPROC)wglGetProcAddress("glLinkProgram");
+		if (_glLinkProgram == nullptr)
+		{
+			lastError = { GameErrors::GameOpenGLSpecific, "Extension glLinkProgram not available." };
+			return false;
+		}
+
+		_glGetProgramInfoLog = (_PFNGLGETPROGRAMINFOLOGPROC)wglGetProcAddress("glGetProgramInfoLog");
+		if (_glGetProgramInfoLog == nullptr)
+		{
+			lastError = { GameErrors::GameOpenGLSpecific, "Extension glGetProgramInfo not available." };
+			return false;
+		}
+
+		_glGetProgramiv = (_PFNGLGETPROGRAMIVPROC)wglGetProcAddress("glGetProgramiv");
+		if (_glGetProgramiv == nullptr)
+		{
+			lastError = { GameErrors::GameOpenGLSpecific, "Extension glGetProgramiv not available." };
+			return false;
+		}
+
+		_glValidateProgram = (_PFNGLVALIDATEPROGRAMPROC)wglGetProcAddress("glValidateProgram");
+		if (_glValidateProgram == nullptr)
+		{
+			lastError = { GameErrors::GameOpenGLSpecific, "Extension glValidateprogram not available." };
+			return false;
+		}
+
+		_glDeleteProgram = (_PFNGLDELETEPROGRAMPROC)wglGetProcAddress("glDeleteProgram");
+		if (_glDeleteProgram == nullptr)
+		{
+			lastError = { GameErrors::GameOpenGLSpecific, "Extension glDeleteProgram not available." };
+			return false;
+		}
+
+		_glDeleteShader = (_PFNGLDELETESHADERPROC)wglGetProcAddress("glDeleteShader");
+		if (_glDeleteShader == nullptr)
+		{
+			lastError = { GameErrors::GameOpenGLSpecific, "Extension glDeleteShader not available." };
+			return false;
+		}
+
+		_glDetachShader = (_PFNGLDETACHSHADERPROC)wglGetProcAddress("glDetachShader");
+		if (_glDetachShader == nullptr)
+		{
+			lastError = { GameErrors::GameOpenGLSpecific, "Extension glDetachShader not available." };
 			return false;
 		}
 
@@ -648,7 +732,12 @@ namespace game
 		return true;
 	}
 
-	inline std::string RendererGL::validateShader(unsigned int shader, const char* file) {
+	inline void RendererGL::UnLoadTexture(Texture2dGL& texture)
+	{
+		glDeleteTextures(1, &texture.bind);
+	}
+
+	inline std::string RendererGL::_validateShader(const uint32_t shader, const char* file) {
 		const uint32_t BUFFER_SIZE = 512;
 		char buffer[BUFFER_SIZE];
 		memset(buffer, 0, BUFFER_SIZE);
@@ -659,6 +748,27 @@ namespace game
 		if (length > 0) {
 			err << "Shader " << shader << " (" << (file ? file : "") << ") compile: " << buffer << std::endl;
 		}
+		return err.str();
+	}
+
+	inline std::string RendererGL::_validateProgram(const uint32_t program)
+	{
+		const unsigned int BUFFER_SIZE = 512;
+		char buffer[BUFFER_SIZE];
+		memset(buffer, 0, BUFFER_SIZE);
+		GLsizei length = 0;
+		std::stringstream err;
+
+		memset(buffer, 0, BUFFER_SIZE);
+		_glGetProgramInfoLog(program, BUFFER_SIZE, &length, buffer);
+		if (length > 0)
+			err << "Program " << program << " link: " << buffer << std::endl;
+
+		_glValidateProgram(program);
+		GLint status;
+		_glGetProgramiv(program, GL_VALIDATE_STATUS, &status);
+		if (status == GL_FALSE)
+			err << "Error validating shader " << program << std::endl;
 		return err.str();
 	}
 
@@ -710,7 +820,7 @@ namespace game
 		// Compile the vertex shader
 		_glCompileShader(shader.vertexId);
 		std::string output;
-		output = validateShader(shader.vertexId, vertex.c_str());
+		output = _validateShader(shader.vertexId, vertex.c_str());
 		if (output.length() > 0)
 		{
 			lastError = { GameErrors::GameOpenGLSpecific, output };
@@ -719,7 +829,7 @@ namespace game
 		
 		// Compile the fragment shader
 		_glCompileShader(shader.fragmentId);
-		output = validateShader(shader.fragmentId, fragment.c_str());
+		output = _validateShader(shader.fragmentId, fragment.c_str());
 		if (output.length() > 0)
 		{
 			lastError = { GameErrors::GameOpenGLSpecific, output };
@@ -728,13 +838,34 @@ namespace game
 
 		// Link the vertex and fragment shader
 		shader.shaderId = _glCreateProgram();
-		//glAttachShader(shader.shaderId, shader.fragmentId);
-		//glAttachShader(shader.shaderId, shader.vertexId);
-		//glLinkProgram(shader.shaderId);
+		_glAttachShader(shader.shaderId, shader.fragmentId);
+		_glAttachShader(shader.shaderId, shader.vertexId);
+		_glLinkProgram(shader.shaderId);
+		output = _validateProgram(shader.shaderId);
+		if (output.length() > 0)
+		{
+			lastError = { GameErrors::GameOpenGLSpecific, output };
+			return false;
+		}
 
 		return true;
 	}
+
+	void RendererGL::UnLoadShader(ShaderGL& shader)
+	{
+		_glDetachShader(shader.shaderId, shader.fragmentId);
+		_glDetachShader(shader.shaderId, shader.vertexId);
+
+		_glDeleteShader(shader.fragmentId);
+		_glDeleteShader(shader.vertexId);
+		_glDeleteProgram(shader.shaderId);
+
+		shader.shaderId = 0;
+		shader.fragmentId = 0;
+		shader.vertexId = 0;
+	}
 	// Undefine what we have done, if someone uses an extension loader 
+#undef GL_VALIDATE_STATUS 
 #undef GL_FRAGMENT_SHADER 
 #undef GL_VERTEX_SHADER 
 #undef GL_MULTISAMPLE
