@@ -34,20 +34,20 @@ namespace game
 		//void UnBind();
 		//void UnLoad();
 		uint32_t iD;  // not sure what for
+		uint32_t shaderId;
+		uint32_t vertexId;
+		uint32_t fragmentId;
 
 	private:
-		uint32_t _shaderId;
-		uint32_t _vertexId;
-		uint32_t _fragmentId;
 		bool _loaded; // needed?
 
 	};
 
 	ShaderGL::ShaderGL()
 	{
-		_shaderId = 0;
-		_vertexId = 0;
-		_fragmentId = 0;
+		shaderId = 0;
+		vertexId = 0;
+		fragmentId = 0;
 		_loaded = false;
 		iD = 0;
 	}

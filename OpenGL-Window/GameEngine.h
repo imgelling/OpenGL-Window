@@ -10,7 +10,7 @@
 #include "GameRendererGL.h"
 #include "GameRendererVK.h"
 #include "GameTexture2D.h"
-#include "GameTerminal.h"
+//#include "GameTerminal.h"
 
 namespace game
 {

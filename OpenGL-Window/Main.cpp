@@ -44,6 +44,17 @@ public:
 			logger->Write("test.png loaded!");
 		}
 
+		if (!LoadShader("content/SpriteBatch_vert.shader","content/SpriteBatch_frag.shader", shader))
+		{
+			logger->Error(game::lastError);
+		}
+		else
+		{
+			logger->Write("SpriteBatch shader loaded!");
+		}
+
+
+
 
 		glClearColor(0.25f, 0.25f, 0.25f, 1.0f);
 		glEnable(GL_TEXTURE_2D);
