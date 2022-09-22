@@ -30,6 +30,7 @@
 #include "GameMath.h"
 #include "GameMouse.h"
 #include "GamePerformanceTimer.h"
+#include "GamePixelMode.h"
 #include "GameRendererBase.h"
 #include "GameRendererGL.h"
 #include "GameRendererVK.h"

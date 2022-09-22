@@ -28,17 +28,10 @@ namespace game
 	public:
 		ShaderGL();
 		~ShaderGL();
-		// Below will be handled by engine > renderer
-		//void Bind();
-		//void UnBind();
-		uint32_t iD;  // not sure what for
 		uint32_t shaderId;
 		uint32_t vertexId;
 		uint32_t fragmentId;
-
 	private:
-		bool _loaded; // needed?
-
 	};
 
 	ShaderGL::ShaderGL()
@@ -46,8 +39,6 @@ namespace game
 		shaderId = 0;
 		vertexId = 0;
 		fragmentId = 0;
-		_loaded = false;
-		iD = 0;
 	}
 
 	ShaderGL::~ShaderGL()
