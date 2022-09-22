@@ -787,6 +787,7 @@ namespace game
 				vertexFile += file.get();
 			} while (!file.eof());
 			file.close();
+			vertexFile.pop_back();
 		}
 		else
 		{
@@ -803,6 +804,7 @@ namespace game
 				fragmentFile += file.get();
 			} while (!file.eof());
 			file.close();
+			fragmentFile.pop_back();
 		}
 		else
 		{
