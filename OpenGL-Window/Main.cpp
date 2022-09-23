@@ -11,11 +11,12 @@ class Game : public game::Engine
 public:
 	game::Texture2dGL texture;
 	game::ShaderGL shader;
-	game::Terminal terminal; // throwing an error 6, invalid handle goes away if in gameengine class
+	game::Terminal terminal; // throwing an error 6, invalid handle, doesn't show when using nvidia
+	uint32_t fullScreenTri;
 
 	Game(game::Logger& logger) : game::Engine(&logger)
 	{
-		
+		fullScreenTri = 0;
 	}
 
 	void Initialize()
@@ -59,13 +60,36 @@ public:
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		glEnable(GL_CULL_FACE);
+
+		fullScreenTri = glGenLists(1);
+		glNewList(fullScreenTri, GL_COMPILE);
+		glBegin(GL_TRIANGLES);
+		// Draws a single triangle
+		//bl
+		glColor3f(1.0f, 1.0f, 1.0f);
+		glTexCoord2f(0, 0);
+		glVertex2f(-1.0f, -1.0f);
+
+		//br
+		glColor3f(1.0f, 1.0f, 1.0f);
+		glTexCoord2f(2.0f, 0.0f);
+		glVertex2f(3.0f, -1.0f);
+
+		// tl
+		glColor3f(1.0f, 1.0f, 1.0f);
+		glTexCoord2f(0, 2);
+		glVertex2f(-1.0f, 3.0f);
+
+		glEnd();
+		glEndList();
+
 	}
 
 	void Shutdown()
 	{
 		UnLoadTexture(texture);
 		UnLoadShader(shader);
-		terminal.~Terminal();
+		//terminal.~Terminal();
 	}
 
 	void Update(const float_t msElapsed)
@@ -86,52 +110,9 @@ public:
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		glBindTexture(GL_TEXTURE_2D, texture.bind);
-		//glRotatef(0.1f, 0.0, 0.0f, 1.0f);
-		glBegin(GL_TRIANGLES);
+		glRotatef(0.1f, 0.0, 0.0f, 1.0f);
 
-		//// TL triangle
-		//glColor3f(1.0f, 0.0f, 0.0f);
-		//glTexCoord2f(0.0f, 0.0f);
-		//glVertex2f(-0.5, 0.5f);
-
-		//glColor3f(0.0f, 0.0f, 1.0f);
-		//glTexCoord2f(0.0f, 1.0f);
-		//glVertex2f(-0.5, -0.5);
-
-		//glColor3f(0.0f, 1.0f, 0.0f);
-		//glTexCoord2f(1.0f, 0.0f);
-		//glVertex2f(0.5, 0.5);
-
-		//// BR triangle
-		//glColor3f(0.0f, 1.0f, 0.0f);
-		//glTexCoord2f(1.0f, 0.0f);
-		//glVertex2f(0.5, 0.5); 
-
-		//glColor3f(0.0f, 0.0f, 1.0f);
-		//glTexCoord2f(0.0f, 1.0f);
-		//glVertex2f(-0.5, -0.5); 
-
-		//glColor3f(1.0f, 0.0f, 0.0f);
-		//glTexCoord2f(1.0f, 1.0f);
-		//glVertex2f(0.5, -0.5);
-
-		// Draws a single triangle
-		//bl
-		glColor3f(1.0f, 1.0f, 1.0f);
-		glTexCoord2f(0, 0);
-		glVertex2f(-1.0f, -1.0f);
-
-		//br
-		glColor3f(1.0f, 1.0f, 1.0f);
-		glTexCoord2f(2.0f, 0.0f);
-		glVertex2f(3.0f, -1.0f);
-
-		// tl
-		glColor3f(1.0f, 1.0f, 1.0f);
-		glTexCoord2f(0, 2);
-		glVertex2f(-1.0f, 3.0f);
-
-		glEnd();
+		glCallList(fullScreenTri);
 	}
 };
 
