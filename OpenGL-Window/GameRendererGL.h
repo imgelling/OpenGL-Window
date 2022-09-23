@@ -705,16 +705,11 @@ namespace game
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
 		// Anisotropy
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, systemInfo.gpuInfo.maxAnisotropy);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, systemInfo.gpuInfo.multisampleSamples);
 		// When adding gfx options, just div by 2 down to 2x; so 16, 8, 4, 2, 0
 
-		//tex.width = width;
-		//tex.height = height;
-		//tex.widthDiv = 1.0f / (float)tex.width;
-		//tex.heightDiv = 1.0f / (float)tex.height;
 
-
-		// needs to be adjusted for amd (GL_UNSIGNED_BYTE amd or whatever) GL_UNSIGNED_INT_8_8_8_8_REV nvidia
+		// Uses internal pixel type for textures
 		if (bytesPerPixel == 4)
 		{
 			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, systemInfo.gpuInfo.internalPixelType, data);

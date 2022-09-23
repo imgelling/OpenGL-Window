@@ -23,9 +23,9 @@ public:
 	{
 		game::Attributes attrib;
 
-		attrib.WindowTitle = "Textured Spinning Quad";
+		attrib.WindowTitle = "Full Screen single triangle";
 		attrib.GameVersion = "0.01";
-		attrib.Framelock = 0;
+		attrib.Framelock = 60;
 		attrib.VsyncOn = false;
 		attrib.DebugMode = true;
 		attrib.MultiSamples = 32; // max 8 amd, 16 nvidia
@@ -43,7 +43,7 @@ public:
 		}
 		else
 		{
-			logger->Write("test.png loaded!");
+			logger->Write("Screen boundries.png loaded!");
 		}
 
 		if (!LoadShader("content/SpriteBatch_vert.shader","content/SpriteBatch_frag.shader", shader))
@@ -55,6 +55,7 @@ public:
 			logger->Write("SpriteBatch shader loaded!");
 		}
 
+		// Setup OpenGL
 		glClearColor(0.25f, 0.25f, 0.25f, 1.0f);
 		glEnable(GL_TEXTURE_2D);
 		glEnable(GL_BLEND);
@@ -64,7 +65,29 @@ public:
 		fullScreenTri = glGenLists(1);
 		glNewList(fullScreenTri, GL_COMPILE);
 		glBegin(GL_TRIANGLES);
+		//// Draws a single triangle
+		////bl
+		//glColor3f(1.0f, 1.0f, 1.0f);
+		//glTexCoord2f(0, 0);
+		//glVertex2f(-1.0f, -1.0f);
+
+		////br
+		//glColor3f(1.0f, 1.0f, 1.0f);
+		//glTexCoord2f(2.0f, 0.0f);
+		//glVertex2f(3.0f, -1.0f);
+
+		//// tl
+		//glColor3f(1.0f, 1.0f, 1.0f);
+		//glTexCoord2f(0, 2);
+		//glVertex2f(-1.0f, 3.0f);
+
 		// Draws a single triangle
+
+		float sx = 0;
+		float sy = 0;
+		
+		
+
 		//bl
 		glColor3f(1.0f, 1.0f, 1.0f);
 		glTexCoord2f(0, 0);
@@ -110,7 +133,7 @@ public:
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		glBindTexture(GL_TEXTURE_2D, texture.bind);
-		glRotatef(0.1f, 0.0, 0.0f, 1.0f);
+		//glRotatef(0.1f, 0.0, 0.0f, 1.0f);
 
 		glCallList(fullScreenTri);
 	}
