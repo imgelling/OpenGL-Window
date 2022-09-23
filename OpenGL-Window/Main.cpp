@@ -2,7 +2,7 @@
 #include <iostream>
 
 // Engine header
-//#define GAME_USE_DEDICATED_GPU
+#define GAME_USE_DEDICATED_GPU
 #include "Game.h"
 
 class Game : public game::Engine
@@ -10,8 +10,9 @@ class Game : public game::Engine
 
 public:
 	game::Texture2dGL texture;
+	game::Texture2dGL createdTexture;
 	game::ShaderGL shader;
-	game::Terminal terminal; // throwing an error 6, invalid handle, doesn't show when using nvidia, now just magically gone
+	game::Terminal terminal;
 	uint32_t fullScreenTri;
 
 	Game(game::Logger& logger) : game::Engine(&logger)
@@ -29,14 +30,12 @@ public:
 		attrib.VsyncOn = false;
 		attrib.DebugMode = true;
 		attrib.MultiSamples = 32; // max 8 amd, 16 nvidia
-		//attrib.WindowFullscreen = true;
-		//attrib.RenderingAPI = game::RenderAPI::Vulkan;
 		SetAttributes(attrib);
-		
 	}
 
 	void LoadContent()
 	{
+		texture.filterType = game::TextureFilterType::Point;
 		if (!LoadTexture("content/Screen boundries.png", texture))
 		{
 			logger->Error(game::lastError);
@@ -54,6 +53,20 @@ public:
 		{
 			logger->Write("SpriteBatch shader loaded!");
 		}
+
+		createdTexture.width = 640;
+		createdTexture.height = 480;
+		createdTexture.componentsPerPixel = 4;
+		createdTexture.filterType = game::TextureFilterType::Point;
+		if (!CreateTexture(createdTexture))
+		{
+			logger->Error(game::lastError);
+		}
+		else
+		{
+			logger->Write("Texture created!");
+		}
+
 
 		// Setup OpenGL
 		glClearColor(0.25f, 0.25f, 0.25f, 1.0f);
@@ -122,6 +135,7 @@ public:
 	void Shutdown()
 	{
 		UnLoadTexture(texture);
+		UnLoadTexture(createdTexture);
 		UnLoadShader(shader);
 		//terminal.~Terminal();
 	}
@@ -143,7 +157,7 @@ public:
 	{
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		glBindTexture(GL_TEXTURE_2D, texture.bind);
+		glBindTexture(GL_TEXTURE_2D, createdTexture.bind);
 		//glRotatef(0.1f, 0.0, 0.0f, 1.0f);
 
 		glCallList(fullScreenTri);

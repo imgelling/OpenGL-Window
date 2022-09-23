@@ -46,6 +46,7 @@ namespace game
 		uint32_t GetUpdatesPerSecond();
 		uint32_t GetFramesPerSecond();
 		
+		bool CreateTexture(Texture2dGL& texture);
 		bool LoadTexture(std::string fileName, Texture2dGL &texture);
 		void UnLoadTexture(Texture2dGL& texture);
 		bool LoadShader(const std::string vertex, const std::string fragment, ShaderGL& shader);
@@ -206,6 +207,11 @@ namespace game
 	inline uint32_t Engine::GetFramesPerSecond()
 	{
 		return _framesPerSecond;
+	}
+
+	inline bool Engine::CreateTexture(Texture2dGL& texture)
+	{
+		return _renderer->CreateTexture(texture);
 	}
 
 	inline bool Engine::LoadTexture(std::string fileName, Texture2dGL &texture)

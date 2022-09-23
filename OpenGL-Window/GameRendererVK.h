@@ -24,6 +24,7 @@ namespace game
 
 		void HandleWindowResize(const uint32_t width, const uint32_t height);
 		void FillOutRendererInfo();
+		bool CreateTexture(Texture2dGL& texture);
 		bool LoadTexture(std::string fileName, Texture2dGL &texture);
 		void UnLoadTexture(Texture2dGL& texture);
 		bool LoadShader(const std::string vertex, const std::string fragment, ShaderGL& shader);
@@ -127,6 +128,11 @@ namespace game
 	inline void RendererVK::FillOutRendererInfo()
 	{
 
+	}
+
+	inline bool RendererVK::CreateTexture(Texture2dGL& texture)
+	{
+		return false;
 	}
 
 	inline bool RendererVK::LoadTexture(std::string fileName, Texture2dGL &texture)

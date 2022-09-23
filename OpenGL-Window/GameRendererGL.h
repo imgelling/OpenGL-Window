@@ -75,6 +75,7 @@ namespace game
 		void Swap();
 		void HandleWindowResize(const uint32_t width, const uint32_t height);
 		void FillOutRendererInfo();
+		bool CreateTexture(Texture2dGL& texture);
 		bool LoadTexture(std::string fileName, Texture2dGL &texture);
 		void UnLoadTexture(Texture2dGL& texture);
 		bool LoadShader(const std::string vertex, const std::string fragment, ShaderGL& shader);
@@ -672,17 +673,82 @@ namespace game
 
 	}
 	
+	inline bool RendererGL::CreateTexture(Texture2dGL& texture)
+	{
+		//int32_t width = 0;
+		//int32_t height = 0;
+
+		//width = texture.width;
+		//height = texture.height;
+		texture.oneOverWidth = 1.0f / (float_t)texture.width;
+		texture.oneOverHeight = 1.0f / (float_t)texture.height;
+		texture.isCopy = false;
+
+		glGenTextures(1, &texture.bind);
+		glBindTexture(GL_TEXTURE_2D, texture.bind);
+		//GL_NEAREST is point filtering
+		//GL_LINEAR will give you bilinear filtering.GL_LINEAR_MIPMAP_LINEAR should be trilinear.
+		//GL_NEAREST_MIPMAP_NEAREST: takes the nearest mipmap to match the pixel sizeand uses nearest neighbor interpolation for texture sampling.
+		//GL_LINEAR_MIPMAP_NEAREST : takes the nearest mipmap leveland samples that level using linear interpolation.
+		//GL_NEAREST_MIPMAP_LINEAR : linearly interpolates between the two mipmaps that most closely match the size of a pixeland samples the interpolated level via nearest neighbor interpolation.
+		//GL_LINEAR_MIPMAP_LINEAR : linearly interpolates between the two closest mipmapsand samples the interpolated level via linear interpolation.
+		if (texture.filterType == TextureFilterType::Point)
+		{
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);// LINEAR_MIPMAP_LINEAR); // min
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);// GL_LINEAR); //max
+		}
+		else if (texture.filterType == TextureFilterType::Bilinear)
+		{
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);// LINEAR_MIPMAP_LINEAR); // min
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);// GL_LINEAR); //max
+		}
+		else if (texture.filterType == TextureFilterType::Trilinear)
+		{
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		}
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+		// Anisotropy
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, systemInfo.gpuInfo.multisampleSamples);
+		// When adding gfx options, just div by 2 down to 2x; so 16, 8, 4, 2, 0
+
+
+		// Uses internal pixel type for textures
+		if (texture.componentsPerPixel == 4)
+		{
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, texture.width, texture.height, 0, GL_RGBA, systemInfo.gpuInfo.internalPixelType, 0);
+		}
+		else if (texture.componentsPerPixel == 3)
+		{
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, texture.width, texture.height, 0, GL_RGBA, systemInfo.gpuInfo.internalPixelType, 0);
+		}
+		if (glGetError())
+		{
+			lastError = { GameErrors::GameOpenGLSpecific, "Error with glTexImage2D." };
+			glBindTexture(GL_TEXTURE_2D, 0);
+			glDeleteTextures(1, &texture.bind);
+			return false;
+		}
+		if (texture.isMipMapped)
+			_glGenerateMipmap(GL_TEXTURE_2D);
+
+		glBindTexture(GL_TEXTURE_2D, 0);
+		return true;
+	}
+
 	inline bool RendererGL::LoadTexture(std::string fileName, Texture2dGL &texture)
 	{
 		//Content content;
 		void* data = nullptr;
 		int32_t width = 0;
 		int32_t height = 0;
-		int32_t bytesPerPixel = 0;
+		int32_t componentsPerPixel = 0;
 
 		// Read data
 		stbi_set_flip_vertically_on_load(true); // inverted for opengl
-		data = stbi_load(fileName.c_str(), &width, &height, &bytesPerPixel, 0);
+		data = stbi_load(fileName.c_str(), &width, &height, &componentsPerPixel, 0);
 		if (data == NULL)
 		{
 			lastError = { GameErrors::GameContent, "Failed to load texture : " + fileName };
@@ -698,9 +764,27 @@ namespace game
 		glGenTextures(1, &texture.bind);
 		glBindTexture(GL_TEXTURE_2D, texture.bind);
 		texture.name = fileName;
-
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);// LINEAR_MIPMAP_LINEAR); // min
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);// GL_LINEAR); //max
+		// GL_Nearest is point filtering
+		//GL_LINEAR will give you bilinear filtering.GL_LINEAR_MIPMAP_LINEAR should be trilinear.
+		//GL_NEAREST_MIPMAP_NEAREST: takes the nearest mipmap to match the pixel sizeand uses nearest neighbor interpolation for texture sampling.
+		//GL_LINEAR_MIPMAP_NEAREST : takes the nearest mipmap leveland samples that level using linear interpolation.
+		//GL_NEAREST_MIPMAP_LINEAR : linearly interpolates between the two mipmaps that most closely match the size of a pixeland samples the interpolated level via nearest neighbor interpolation.
+		//GL_LINEAR_MIPMAP_LINEAR : linearly interpolates between the two closest mipmapsand samples the interpolated level via linear interpolation.
+		if (texture.filterType == TextureFilterType::Point)
+		{
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);// LINEAR_MIPMAP_LINEAR); // min
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);// GL_LINEAR); //max
+		}
+		else if (texture.filterType == TextureFilterType::Bilinear)
+		{
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);// LINEAR_MIPMAP_LINEAR); // min
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);// GL_LINEAR); //max
+		}
+		else if (texture.filterType == TextureFilterType::Trilinear)
+		{
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		}
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
@@ -710,18 +794,17 @@ namespace game
 
 
 		// Uses internal pixel type for textures
-		if (bytesPerPixel == 4)
+		if (componentsPerPixel == 4)
 		{
 			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, systemInfo.gpuInfo.internalPixelType, data);
 		}
-		else if (bytesPerPixel == 3)
+		else if (componentsPerPixel == 3)
 		{
 			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGBA, systemInfo.gpuInfo.internalPixelType, data);
 		}
 
-		if (true)
+		if (texture.isMipMapped)
 			_glGenerateMipmap(GL_TEXTURE_2D);
-		//Textures[filename] = tex;
 		glBindTexture(GL_TEXTURE_2D, 0);
 
 		stbi_image_free(data);
