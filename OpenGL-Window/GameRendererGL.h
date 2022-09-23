@@ -681,6 +681,7 @@ namespace game
 		int32_t bytesPerPixel = 0;
 
 		// Read data
+		stbi_set_flip_vertically_on_load(true); // inverted for opengl
 		data = stbi_load(fileName.c_str(), &width, &height, &bytesPerPixel, 0);
 		if (data == NULL)
 		{
@@ -812,6 +813,7 @@ namespace game
 			return false;
 		}
 		
+		// Create the shaders
 		shader.vertexId = _glCreateShader(GL_VERTEX_SHADER);
 		shader.fragmentId = _glCreateShader(GL_FRAGMENT_SHADER);
 		const char* vs = (const char*)vertexFile.c_str();
