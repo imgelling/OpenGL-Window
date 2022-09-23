@@ -2,7 +2,7 @@
 #include <iostream>
 
 // Engine header
-#define GAME_USE_DEDICATED_GPU
+//#define GAME_USE_DEDICATED_GPU
 #include "Game.h"
 
 class Game : public game::Engine
@@ -11,7 +11,7 @@ class Game : public game::Engine
 public:
 	game::Texture2dGL texture;
 	game::ShaderGL shader;
-	game::Terminal terminal; // throwing an error 6, invalid handle, doesn't show when using nvidia
+	game::Terminal terminal; // throwing an error 6, invalid handle, doesn't show when using nvidia, now just magically gone
 	uint32_t fullScreenTri;
 
 	Game(game::Logger& logger) : game::Engine(&logger)
@@ -81,13 +81,9 @@ public:
 		//glTexCoord2f(0, 2);
 		//glVertex2f(-1.0f, 3.0f);
 
-		// Draws a single triangle
 
-		float sx = 0;
-		float sy = 0;
-		
-		
-
+		// Fullscreen with 2 triangles
+		// Bottom left triangle
 		//bl
 		glColor3f(1.0f, 1.0f, 1.0f);
 		glTexCoord2f(0, 0);
@@ -95,15 +91,30 @@ public:
 
 		//br
 		glColor3f(1.0f, 1.0f, 1.0f);
-		glTexCoord2f(2.0f, 0.0f);
-		glVertex2f(3.0f, -1.0f);
+		glTexCoord2f(1.0f, 0.0f);
+		glVertex2f(1.0f, -1.0f);
 
 		// tl
 		glColor3f(1.0f, 1.0f, 1.0f);
-		glTexCoord2f(0, 2);
-		glVertex2f(-1.0f, 3.0f);
+		glTexCoord2f(0, 1);
+		glVertex2f(-1.0f, 1.0f);
+
+		// Top right triangle
+		//br
+		glColor3f(1.0f, 1.0f, 1.0f);
+		glTexCoord2f(1.0f, 0.0f);
+		glVertex2f(1.0f, -1.0f);
+		//tr
+		glColor3f(1.0f, 1.0f, 1.0f);
+		glTexCoord2f(1, 1);
+		glVertex2f(1.0f, 1.0f);
+		// tl
+		glColor3f(1.0f, 1.0f, 1.0f);
+		glTexCoord2f(0, 1);
+		glVertex2f(-1.0f, 1.0f);
 
 		glEnd();
+
 		glEndList();
 
 	}
