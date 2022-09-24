@@ -1,7 +1,7 @@
 #pragma once
 
-#include "GameRendererBase.h"
 #include <gl/GL.h>
+#include "GameRendererBase.h"
 #include <sstream>
 #include <fstream>
 #define STB_IMAGE_IMPLEMENTATION
@@ -675,11 +675,6 @@ namespace game
 	
 	inline bool RendererGL::CreateTexture(Texture2dGL& texture)
 	{
-		//int32_t width = 0;
-		//int32_t height = 0;
-
-		//width = texture.width;
-		//height = texture.height;
 		texture.oneOverWidth = 1.0f / (float_t)texture.width;
 		texture.oneOverHeight = 1.0f / (float_t)texture.height;
 		texture.isCopy = false;
