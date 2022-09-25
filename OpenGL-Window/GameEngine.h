@@ -10,7 +10,8 @@
 #include "GameRendererGL.h"
 #include "GameRendererVK.h"
 #include "GameTexture2D.h"
-//#include "GameTerminal.h"
+#include "GameMath.h"
+
 
 namespace game
 {
@@ -45,6 +46,7 @@ namespace game
 		void SetFrameLock(const uint32_t limit);
 		uint32_t GetUpdatesPerSecond();
 		uint32_t GetFramesPerSecond();
+		Vector2i GetWindowSize();
 		
 		bool CreateTexture(Texture2dGL& texture);
 		bool LoadTexture(std::string fileName, Texture2dGL &texture);
@@ -209,6 +211,11 @@ namespace game
 		return _framesPerSecond;
 	}
 
+	inline Vector2i Engine::GetWindowSize()
+	{
+		return { (int)_attributes.WindowWidth, (int)_attributes.WindowHeight};
+	}
+
 	inline bool Engine::CreateTexture(Texture2dGL& texture)
 	{
 		return _renderer->CreateTexture(texture);
@@ -306,6 +313,8 @@ namespace game
 		{
 			_renderer->HandleWindowResize(width, height);
 		}
+		_attributes.WindowWidth = width;
+		_attributes.WindowHeight = height;
 	}
 
 	// Needs to be in engine.h because of cyclic dependency by using enginePointer.

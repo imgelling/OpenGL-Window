@@ -8,8 +8,17 @@ namespace game
 	class Vector2
 	{
 	public:
-		T x;
-		T y;
+		union 
+		{
+			T x;
+			T width;
+		};
+		union
+		{
+			T y;
+			T height;
+		};
+
 		Vector2()  
 		{
 			x = (T)0.0;
