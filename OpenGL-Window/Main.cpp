@@ -164,88 +164,76 @@ public:
 		//glRotatef(0.1f, 0.0, 0.0f, 1.0f);
 
 		//glCallList(fullScreenTri);
-		game::Vector2i windowSize;
-
-		windowSize.x = 320;
-		windowSize.height = 240;
-		std::cout << "Width = " << windowSize.width << "\n";
-		std::cout << "height = " << windowSize.y << "\n";
+		game::Vector2i windowSize = GetWindowSize();
 
 		// scale in old lib
-		//int posx = 0;
-		//int posy = 0;
-		//double sx = 0;
-		//double sy = 0;
-		//double temp = 0;
-		//if (gameHeight < gameWidth)
-		//{
+		float posx = 0;
+		float posy = 0;
+		float sx = 0;
+		float sy = 0;
+		float temp = 0;
+		if (windowSize.height < windowSize.width)
+		{
 
-		//	sy = (double)gameHeight / (double)height;
-		//	temp = (double)gameWidth / (double)width;
-		//	if (temp > sy)
-		//	{
-		//		sx = sy;
-		//	}
-		//	else
-		//	{
-		//		sx = sy = temp;
-		//		posy = (int)((double)gameHeight / 2.0 - ((double)height * sy / 2.0)); // gameHeight / 2 - (height*sy / 2);
-		//	}
-		//	posx = (int)((double)gameWidth / 2.0 - ((double)width * sx / 2.0));
+			sy = (float)windowSize.height / (float)texture.height;
+			temp = (float)windowSize.width / (float)texture.width;
+			if (temp > sy)
+			{
+				sx = sy;
+			}
+			else
+			{
+				sx = sy = temp;
+				posy = ((float)windowSize.height / 2.0f - ((float)texture.height * sy / 2.0f)); // windowSize.height / 2 - (height*sy / 2);
+			}
+			posx = ((float)windowSize.width / 2.0f - ((float)texture.width * sx / 2.0f));
 
-		//}
-		//else if (gameHeight > gameWidth)
-		//{
-		//	sx = (double)gameWidth / (double)width;
-		//	sy = sx;
-		//	posy = (int)((double)gameHeight / 2.0 - ((double)height * sy / 2.0));
-		//}
-		//else
-		//{
-		//	sx = sy = 1.0;
+		}
+		else if (windowSize.height > windowSize.width)
+		{
+			sx = (float)windowSize.width / (float)texture.width;
+			sy = sx;
+			posy = ((float)windowSize.height / 2.0f - ((float)texture.height * sy / 2.0f));
+		}
+		else
+		{
+			sx = sy = 1.0;
 
-		//}
+		}
 
 		//if (full)
-		//	sb->Draw(WindowBuffer[current], Recti(0, 0, gameWidth, gameHeight), Recti(0, 0, width, height), Colors::White);
+		//	sb->Draw(WindowBuffer[current], Recti(0, 0, texture.width, texture.height), Recti(0, 0, width, height), Colors::White);
 		//else
 		//	sb->Draw(WindowBuffer[current], Recti(posx, posy, (int)(width * sx), (int)(height * sy)), Recti(0, 0, width, height), Colors::White);
 
 		// position.x * 2.0 / width - 1.0
 		// position.y * 2.0 / height - 1.0;
-		glBegin(GL_TRIANGLES);
+		float px = posx;
+		float py = posy;
+		posx = ((float) posx * 2.0f / (float)windowSize.width - 1.0f);
+		posy = ((float) posy * 2.0f / (float)windowSize.height - 1.0f);
+		float width = (texture.width) * sx;
+		width = ((float)width * 2.0f / (float)windowSize.width - 1.0f);
+		float height = (texture.height) * sy;
+		height = ((float)height * 2.0f / (float)windowSize.height - 1.0f);
+		glBegin(GL_QUADS);
 		//bl
 		glColor3f(1.0f, 1.0f, 1.0f);
 		glTexCoord2f(0, 0);
-		glVertex2f(-1.0f, -1.0f);
-
+		glVertex2f(posx, -height);
 		//br
 		glColor3f(1.0f, 1.0f, 1.0f);
 		glTexCoord2f(1.0f, 0.0f);
-		glVertex2f(1.0f, -1.0f);
-
-
-		// tl
-		glColor3f(1.0f, 1.0f, 1.0f);
-		glTexCoord2f(0, 1);
-		glVertex2f(-1.0f, 1.0f);
-
-
-
-
-		// Top right triangle
-		//br
-		glColor3f(1.0f, 1.0f, 1.0f);
-		glTexCoord2f(1.0f, 0.0f);
-		glVertex2f(1.0f, -1.0f);
+		glVertex2f(width, -height);
 		//tr
 		glColor3f(1.0f, 1.0f, 1.0f);
 		glTexCoord2f(1, 1);
-		glVertex2f(1.0f, 1.0f);
+		glVertex2f(width, -posy);
 		// tl
 		glColor3f(1.0f, 1.0f, 1.0f);
 		glTexCoord2f(0, 1);
-		glVertex2f(-1.0f, 1.0f);
+		glVertex2f(posx, -posy);// -1.0f, 1.0f);
+
 		glEnd();
 	}
 };
