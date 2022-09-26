@@ -167,16 +167,17 @@ public:
 		game::Vector2i windowSize = GetWindowSize();
 
 		// scale in old lib
-		float posx = 0;
-		float posy = 0;
-		float sx = 0;
-		float sy = 0;
-		float temp = 0;
+		game::Vector2f position;
+		//float_t posx = 0;
+		//float_t posy = 0;
+		float_t sx = 0;
+		float_t sy = 0;
+		float_t temp = 0;
 		if (windowSize.height < windowSize.width)
 		{
 
-			sy = (float)windowSize.height / (float)texture.height;
-			temp = (float)windowSize.width / (float)texture.width;
+			sy = (float_t)windowSize.height / (float_t)texture.height;
+			temp = (float_t)windowSize.width / (float_t)texture.width;
 			if (temp > sy)
 			{
 				sx = sy;
@@ -184,16 +185,16 @@ public:
 			else
 			{
 				sx = sy = temp;
-				posy = ((float)windowSize.height / 2.0f - ((float)texture.height * sy / 2.0f)); // windowSize.height / 2 - (height*sy / 2);
+				position.y = (((float_t)windowSize.height / 2.0f) - ((float_t)texture.height * sy / 2.0f));
 			}
-			posx = ((float)windowSize.width / 2.0f - ((float)texture.width * sx / 2.0f));
+			position.x = (((float_t)windowSize.width / 2.0f) - ((float_t)texture.width * sx / 2.0f));
 
 		}
 		else if (windowSize.height > windowSize.width)
 		{
-			sx = (float)windowSize.width / (float)texture.width;
+			sx = (float_t)windowSize.width / (float_t)texture.width;
 			sy = sx;
-			posy = ((float)windowSize.height / 2.0f - ((float)texture.height * sy / 2.0f));
+			position.y = (((float_t)windowSize.height / 2.0f) - ((float_t)texture.height * sy / 2.0f));
 		}
 		else
 		{
@@ -201,26 +202,22 @@ public:
 
 		}
 
-		//if (full)
-		//	sb->Draw(WindowBuffer[current], Recti(0, 0, texture.width, texture.height), Recti(0, 0, width, height), Colors::White);
-		//else
-		//	sb->Draw(WindowBuffer[current], Recti(posx, posy, (int)(width * sx), (int)(height * sy)), Recti(0, 0, width, height), Colors::White);
-
+		float_t width = position.x+(texture.width * sx);
+		float_t height = position.y+(texture.height * sy);
+		// scale the rect to -1 to 1 range
 		// position.x * 2.0 / width - 1.0
 		// position.y * 2.0 / height - 1.0;
-		float px = posx;
-		float py = posy;
-		posx = ((float) posx * 2.0f / (float)windowSize.width - 1.0f);
-		posy = ((float) posy * 2.0f / (float)windowSize.height - 1.0f);
-		float width = (texture.width) * sx;
-		width = ((float)width * 2.0f / (float)windowSize.width - 1.0f);
-		float height = (texture.height) * sy;
-		height = ((float)height * 2.0f / (float)windowSize.height - 1.0f);
+		position.x = (position.x * 2.0f / (float_t)windowSize.width) - 1.0f;
+		position.y = (position.y * 2.0f / (float_t)windowSize.height) - 1.0f;
+		width = ((float_t)width * 2.0f / (float_t)windowSize.width) - 1.0f;
+		height = ((float_t)height * 2.0f / (float_t)windowSize.height) - 1.0f;
+
+		// draw the quad
 		glBegin(GL_QUADS);
 		//bl
 		glColor3f(1.0f, 1.0f, 1.0f);
 		glTexCoord2f(0, 0);
-		glVertex2f(posx, -height);
+		glVertex2f(position.x, -height);
 		//br
 		glColor3f(1.0f, 1.0f, 1.0f);
 		glTexCoord2f(1.0f, 0.0f);
@@ -228,11 +225,11 @@ public:
 		//tr
 		glColor3f(1.0f, 1.0f, 1.0f);
 		glTexCoord2f(1, 1);
-		glVertex2f(width, -posy);
+		glVertex2f(width, -position.y);
 		// tl
 		glColor3f(1.0f, 1.0f, 1.0f);
 		glTexCoord2f(0, 1);
-		glVertex2f(posx, -posy);// -1.0f, 1.0f);
+		glVertex2f(position.x, -position.y);
 
 		glEnd();
 	}
