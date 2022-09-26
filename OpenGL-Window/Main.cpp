@@ -80,34 +80,7 @@ public:
 		{
 			glBegin(GL_TRIANGLES);
 			{
-				// bl
-				glColor3f(1.0f, 1.0f, 1.0f);
-				glTexCoord2f(0, 0);
-				glVertex2f(-1.0f, -1.0f);
 
-				//br
-				glColor3f(1.0f, 1.0f, 1.0f);
-				glTexCoord2f(1.0f, 0.0f);
-				glVertex2f(1.0f, -1.0f);
-
-				// tl
-				glColor3f(1.0f, 1.0f, 1.0f);
-				glTexCoord2f(0, 1);
-				glVertex2f(-1.0f, 1.0f);
-
-				// Top right triangle
-				//br
-				glColor3f(1.0f, 1.0f, 1.0f);
-				glTexCoord2f(1.0f, 0.0f);
-				glVertex2f(1.0f, -1.0f);
-				//tr
-				glColor3f(1.0f, 1.0f, 1.0f);
-				glTexCoord2f(1, 1);
-				glVertex2f(1.0f, 1.0f);
-				// tl
-				glColor3f(1.0f, 1.0f, 1.0f);
-				glTexCoord2f(0, 1);
-				glVertex2f(-1.0f, 1.0f);
 			}
 			glEnd();
 		}
@@ -143,7 +116,7 @@ public:
 
 		//glCallList(fullScreenTri);
 
-		// ---------- Begin scaling of texture
+		// ---------- Begin scaling of quad
 		game::Vector2i windowSize = GetWindowSize();
 
 		// scale in old lib
@@ -191,7 +164,7 @@ public:
 		sizeOfScaledTexture.width = ((float_t)sizeOfScaledTexture.width * 2.0f / (float_t)windowSize.width) - 1.0f;
 		sizeOfScaledTexture.height = ((float_t)sizeOfScaledTexture.height * 2.0f / (float_t)windowSize.height) - 1.0f;
 
-		// ---------- End scaling of texture
+		// ---------- End scaling of quad
 
 
 		// Draw the quad needs to be a drawlist that only updates on window size change

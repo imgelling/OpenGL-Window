@@ -80,5 +80,8 @@
     <ClInclude Include="GamePixelMode.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="GameColor.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
