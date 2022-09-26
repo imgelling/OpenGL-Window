@@ -45,7 +45,7 @@ public:
 			logger->Write("Screen boundries.png loaded!");
 		}
 
-		if (!LoadShader("content/SpriteBatch_vert.shader","content/SpriteBatch_frag.shader", shader))
+		if (!LoadShader("content/SpriteBatch_vert.shader", "content/SpriteBatch_frag.shader", shader))
 		{
 			logger->Error(game::lastError);
 		}
@@ -142,16 +142,21 @@ public:
 		//glRotatef(0.1f, 0.0, 0.0f, 1.0f);
 
 		//glCallList(fullScreenTri);
+
+		// ---------- Begin scaling of texture
 		game::Vector2i windowSize = GetWindowSize();
 
 		// scale in old lib
-		game::Vector2f position;
+		game::Vector2f positionOfScaledTexture;
 		game::Vector2f scale;
-		float_t tempScale = 0;
+		game::Vector2f sizeOfScaledTexture;
+		float_t tempScale = 0.0f;
+
+
 		if (windowSize.height < windowSize.width)
 		{
-			scale.y = (float_t)windowSize.height * texture.oneOverHeight;// / (float_t)texture.height;
-			tempScale = (float_t)windowSize.width * texture.oneOverWidth;// / (float_t)texture.width;
+			scale.y = (float_t)windowSize.height * texture.oneOverHeight;
+			tempScale = (float_t)windowSize.width * texture.oneOverWidth;
 			if (tempScale > scale.y)
 			{
 				scale.x = scale.y;
@@ -159,49 +164,54 @@ public:
 			else
 			{
 				scale.x = scale.y = tempScale;
-				position.y = (((float_t)windowSize.height / 2.0f) - ((float_t)texture.height * scale.y / 2.0f));
+				positionOfScaledTexture.y = (((float_t)windowSize.height / 2.0f) - ((float_t)texture.height * scale.y / 2.0f));
 			}
-			position.x = (((float_t)windowSize.width / 2.0f) - ((float_t)texture.width * scale.x / 2.0f));
+			positionOfScaledTexture.x = (((float_t)windowSize.width / 2.0f) - ((float_t)texture.width * scale.x / 2.0f));
 		}
 		else if (windowSize.height > windowSize.width)
 		{
-			scale.x = (float_t)windowSize.width * texture.oneOverWidth;// / (float_t)texture.width;
+			scale.x = (float_t)windowSize.width * texture.oneOverWidth;
 			scale.y = scale.x;
-			position.y = (((float_t)windowSize.height / 2.0f) - ((float_t)texture.height * scale.y / 2.0f));
+			positionOfScaledTexture.y = (((float_t)windowSize.height / 2.0f) - ((float_t)texture.height * scale.y / 2.0f));
 		}
 		else
 		{
-			scale = { 1.0f, 1.0f };// .x = scale.y = 1.0;
+			scale = { 1.0f, 1.0f };
 		}
 
-		float_t width = position.x+(texture.width * scale.x);
-		float_t height = position.y+(texture.height * scale.y);
-		// scale the rect to -1 to 1 range
-		// position.x * 2.0 / width - 1.0
-		// position.y * 2.0 / height - 1.0;
-		position.x = (position.x * 2.0f / (float_t)windowSize.width) - 1.0f;
-		position.y = (position.y * 2.0f / (float_t)windowSize.height) - 1.0f;
-		width = ((float_t)width * 2.0f / (float_t)windowSize.width) - 1.0f;
-		height = ((float_t)height * 2.0f / (float_t)windowSize.height) - 1.0f;
+		// Set the size of the scaled texture
+		sizeOfScaledTexture.width = positionOfScaledTexture.x + (texture.width * scale.x);
+		sizeOfScaledTexture.height = positionOfScaledTexture.y + (texture.height * scale.y);
 
-		// draw the quad
+		// Homoginize the scaled rect to -1 to 1 range using
+		// position.x = position.x * 2.0 / width - 1.0
+		// position.y = position.y * 2.0 / height - 1.0;
+		positionOfScaledTexture.x = (positionOfScaledTexture.x * 2.0f / (float_t)windowSize.width) - 1.0f;
+		positionOfScaledTexture.y = (positionOfScaledTexture.y * 2.0f / (float_t)windowSize.height) - 1.0f;
+		sizeOfScaledTexture.width = ((float_t)sizeOfScaledTexture.width * 2.0f / (float_t)windowSize.width) - 1.0f;
+		sizeOfScaledTexture.height = ((float_t)sizeOfScaledTexture.height * 2.0f / (float_t)windowSize.height) - 1.0f;
+
+		// ---------- End scaling of texture
+
+
+		// Draw the quad needs to be a drawlist that only updates on window size change
 		glBegin(GL_QUADS);
 		//bl
 		glColor3f(1.0f, 1.0f, 1.0f);
 		glTexCoord2f(0, 0);
-		glVertex2f(position.x, -height);
+		glVertex2f(positionOfScaledTexture.x, -sizeOfScaledTexture.height);
 		//br
 		glColor3f(1.0f, 1.0f, 1.0f);
 		glTexCoord2f(1.0f, 0.0f);
-		glVertex2f(width, -height);
+		glVertex2f(sizeOfScaledTexture.width, -sizeOfScaledTexture.height);
 		//tr
 		glColor3f(1.0f, 1.0f, 1.0f);
 		glTexCoord2f(1, 1);
-		glVertex2f(width, -position.y);
+		glVertex2f(sizeOfScaledTexture.width, -positionOfScaledTexture.y);
 		// tl
 		glColor3f(1.0f, 1.0f, 1.0f);
 		glTexCoord2f(0, 1);
-		glVertex2f(position.x, -position.y);
+		glVertex2f(positionOfScaledTexture.x, -positionOfScaledTexture.y);
 
 		glEnd();
 	}
