@@ -73,66 +73,45 @@ public:
 		glEnable(GL_TEXTURE_2D);
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-		//glEnable(GL_CULL_FACE);
+		glEnable(GL_CULL_FACE);
 
 		fullScreenTri = glGenLists(1);
 		glNewList(fullScreenTri, GL_COMPILE);
-		glBegin(GL_TRIANGLES);
-		//// Draws a single triangle
-		////bl
-		//glColor3f(1.0f, 1.0f, 1.0f);
-		//glTexCoord2f(0, 0);
-		//glVertex2f(-1.0f, -1.0f);
+		{
+			glBegin(GL_TRIANGLES);
+			{
+				// bl
+				glColor3f(1.0f, 1.0f, 1.0f);
+				glTexCoord2f(0, 0);
+				glVertex2f(-1.0f, -1.0f);
 
-		////br
-		//glColor3f(1.0f, 1.0f, 1.0f);
-		//glTexCoord2f(2.0f, 0.0f);
-		//glVertex2f(3.0f, -1.0f);
+				//br
+				glColor3f(1.0f, 1.0f, 1.0f);
+				glTexCoord2f(1.0f, 0.0f);
+				glVertex2f(1.0f, -1.0f);
 
-		//// tl
-		//glColor3f(1.0f, 1.0f, 1.0f);
-		//glTexCoord2f(0, 2);
-		//glVertex2f(-1.0f, 3.0f);
+				// tl
+				glColor3f(1.0f, 1.0f, 1.0f);
+				glTexCoord2f(0, 1);
+				glVertex2f(-1.0f, 1.0f);
 
-
-		// Fullscreen with 2 triangles
-		// Bottom left triangle
-		//bl
-		game::Vector2i windowSize;
-
-		// bl
-		glColor3f(1.0f, 1.0f, 1.0f);
-		glTexCoord2f(0, 0);
-		glVertex2f(-1.0f, -1.0f);
-
-		//br
-		glColor3f(1.0f, 1.0f, 1.0f);
-		glTexCoord2f(1.0f, 0.0f);
-		glVertex2f(1.0f, -1.0f);
-
-		// tl
-		glColor3f(1.0f, 1.0f, 1.0f);
-		glTexCoord2f(0, 1);
-		glVertex2f(-1.0f, 1.0f);
-
-		// Top right triangle
-		//br
-		glColor3f(1.0f, 1.0f, 1.0f);
-		glTexCoord2f(1.0f, 0.0f);
-		glVertex2f(1.0f, -1.0f);
-		//tr
-		glColor3f(1.0f, 1.0f, 1.0f);
-		glTexCoord2f(1, 1);
-		glVertex2f(1.0f, 1.0f);
-		// tl
-		glColor3f(1.0f, 1.0f, 1.0f);
-		glTexCoord2f(0, 1);
-		glVertex2f(-1.0f, 1.0f);
-
-		glEnd();
-
+				// Top right triangle
+				//br
+				glColor3f(1.0f, 1.0f, 1.0f);
+				glTexCoord2f(1.0f, 0.0f);
+				glVertex2f(1.0f, -1.0f);
+				//tr
+				glColor3f(1.0f, 1.0f, 1.0f);
+				glTexCoord2f(1, 1);
+				glVertex2f(1.0f, 1.0f);
+				// tl
+				glColor3f(1.0f, 1.0f, 1.0f);
+				glTexCoord2f(0, 1);
+				glVertex2f(-1.0f, 1.0f);
+			}
+			glEnd();
+		}
 		glEndList();
-
 	}
 
 	void Shutdown()
@@ -140,7 +119,6 @@ public:
 		UnLoadTexture(texture);
 		UnLoadTexture(createdTexture);
 		UnLoadShader(shader);
-		//terminal.~Terminal();
 	}
 
 	void Update(const float_t msElapsed)
@@ -168,42 +146,36 @@ public:
 
 		// scale in old lib
 		game::Vector2f position;
-		//float_t posx = 0;
-		//float_t posy = 0;
-		float_t sx = 0;
-		float_t sy = 0;
-		float_t temp = 0;
+		game::Vector2f scale;
+		float_t tempScale = 0;
 		if (windowSize.height < windowSize.width)
 		{
-
-			sy = (float_t)windowSize.height / (float_t)texture.height;
-			temp = (float_t)windowSize.width / (float_t)texture.width;
-			if (temp > sy)
+			scale.y = (float_t)windowSize.height * texture.oneOverHeight;// / (float_t)texture.height;
+			tempScale = (float_t)windowSize.width * texture.oneOverWidth;// / (float_t)texture.width;
+			if (tempScale > scale.y)
 			{
-				sx = sy;
+				scale.x = scale.y;
 			}
 			else
 			{
-				sx = sy = temp;
-				position.y = (((float_t)windowSize.height / 2.0f) - ((float_t)texture.height * sy / 2.0f));
+				scale.x = scale.y = tempScale;
+				position.y = (((float_t)windowSize.height / 2.0f) - ((float_t)texture.height * scale.y / 2.0f));
 			}
-			position.x = (((float_t)windowSize.width / 2.0f) - ((float_t)texture.width * sx / 2.0f));
-
+			position.x = (((float_t)windowSize.width / 2.0f) - ((float_t)texture.width * scale.x / 2.0f));
 		}
 		else if (windowSize.height > windowSize.width)
 		{
-			sx = (float_t)windowSize.width / (float_t)texture.width;
-			sy = sx;
-			position.y = (((float_t)windowSize.height / 2.0f) - ((float_t)texture.height * sy / 2.0f));
+			scale.x = (float_t)windowSize.width * texture.oneOverWidth;// / (float_t)texture.width;
+			scale.y = scale.x;
+			position.y = (((float_t)windowSize.height / 2.0f) - ((float_t)texture.height * scale.y / 2.0f));
 		}
 		else
 		{
-			sx = sy = 1.0;
-
+			scale = { 1.0f, 1.0f };// .x = scale.y = 1.0;
 		}
 
-		float_t width = position.x+(texture.width * sx);
-		float_t height = position.y+(texture.height * sy);
+		float_t width = position.x+(texture.width * scale.x);
+		float_t height = position.y+(texture.height * scale.y);
 		// scale the rect to -1 to 1 range
 		// position.x * 2.0 / width - 1.0
 		// position.y * 2.0 / height - 1.0;
