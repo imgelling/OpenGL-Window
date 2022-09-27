@@ -13,6 +13,7 @@ public:
 	game::Texture2dGL createdTexture;
 	game::ShaderGL shader;
 	game::Terminal terminal;
+	game::Color whitecol = { 1.0f, 1.0f, 1.0f, 1.0f };
 	uint32_t fullScreenTri;
 
 	Game(game::Logger& logger) : game::Engine(&logger)
@@ -53,6 +54,7 @@ public:
 		{
 			logger->Write("SpriteBatch shader loaded!");
 		}
+		std::cout << whitecol.r << whitecol.g << "\n";
 
 		createdTexture.width = 640;
 		createdTexture.height = 480;

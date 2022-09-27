@@ -16,21 +16,21 @@ namespace game
 		uint32_t packed;
 
 		Color();
-		Color(float_t r, float_t g, float_t b, float_t a);
-		Color(double_t r, double_t g, double_t b, double_t a);
-		Color(uint32_t r, uint32_t g, uint32_t b, uint32_t a);
-		Color(float_t r, float_t g, float_t b);
-		Color(double_t r, double_t g, double_t b);
-		Color(uint32_t r, uint32_t g, uint32_t b);
 		~Color();
+		Color(const float_t r, const float_t g, const float_t b, const float_t a);
+		//Color(const double_t r, const double_t g, const double_t b, const double_t a);
+		//Color(const uint32_t r, const uint32_t g, const uint32_t b, const uint32_t a);
+		//Color(const float_t r, const float_t g, const float_t b);
+		//Color(const double_t r, const double_t g, const double_t b);
+		//Color(const uint32_t r, const uint32_t g, const uint32_t b);
 
-		void Set(float_t r, float_t g, float_t b, float_t a);
-		void Set(double_t r, double_t g, double_t b, double_t a);
-		void Set(uint32_t r, uint32_t g, uint32_t b, uint32_t a);
-		void Set(float_t r, float_t g, float_t b);
-		void Set(double_t r, double_t g, double_t b);
-		void Set(uint32_t r, uint32_t g, uint32_t b);
-		void Set(uint8_t r, uint8_t b, uint8_t g);
+		//void Set(const float_t r, const float_t g, const float_t b, const float_t a);
+		//void Set(const double_t r, const double_t g, const double_t b, const double_t a);
+		//void Set(const uint32_t r, const uint32_t g, const uint32_t b, const uint32_t a);
+		//void Set(const float_t r, const float_t g, const float_t b);
+		//void Set(const double_t r, const double_t g, const double_t b);
+		//void Set(const uint32_t r, const uint32_t g, const uint32_t b);
+		//void Set(const uint8_t r, const uint8_t b, const uint8_t g);
 
 	private:
 		const float_t _convert256toF = 1.0f / 255.0f;
@@ -41,14 +41,35 @@ namespace game
 		rf = 0.0f;
 		gf = 0.0f;
 		bf = 0.0f;
+		af = 0.0f;
 		r = 0;
 		g = 0;
 		b = 0;
+		a = 0;
 		packed = 0;
 	}
 
 	inline Color::~Color()
 	{
 
+	}
+
+	inline Color::Color(const float_t r, const float_t g, const float_t b, const float_t a)
+	{
+		this->r = (uint32_t)(r * 255.0f);
+		this->g = (uint32_t)(g * 255.0f);
+		this->b = (uint32_t)(b * 255.0f);
+		this->a = (uint32_t)(a * 255.0f);
+		this->rf = r;
+		this->gf = g;
+		this->bf = b;
+		this->af = a;
+
+		// this may need to be changed for amd/nvidia
+		uint32_t packedR = this->r << 0;
+		uint32_t pacedG = this->g << 8;
+		uint32_t pacedB = this->b << 16;
+		uint32_t packedA = this->a << 24;
+		packed = ((packedA) | (packedR) | (pacedG) | (pacedB));
 	}
 }
