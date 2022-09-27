@@ -12,20 +12,21 @@ public:
 	game::Texture2dGL texture;
 	game::Texture2dGL createdTexture;
 	game::ShaderGL shader;
-	game::Terminal terminal;
+	game::Terminal terminal; // error 6 when clicking x button to close
 	game::Color whitecol = { 1.0f, 1.0f, 1.0f, 1.0f };
 	
 	// pixel mode stuff
 	uint32_t fullScreenTri;
 	uint32_t* video = nullptr;
-	uint32_t widthBuffer = 320;
-	uint32_t heightBuffer = 240;
+	game::Vector2i bufferSize = {320,240};
 
 
 	Game(game::Logger& logger) : game::Engine(&logger)
 	{
 		fullScreenTri = 0;
-		video = new uint32_t[widthBuffer*heightBuffer];
+
+		// pixel mode stuff
+		video = new uint32_t[bufferSize.width*bufferSize.height];
 		if (video == nullptr)
 		{
 			//error out
@@ -65,11 +66,11 @@ public:
 		{
 			logger->Write("SpriteBatch shader loaded!");
 		}
-		whitecol.Set(1.0f, 0.0f, 0.0f, 1.0f);
-		std::cout << whitecol.r << whitecol.g << "\n";
+		whitecol.Set(1.0f, 0.0f, 1.0f, 1.0f);
 
-		createdTexture.width = widthBuffer;
-		createdTexture.height = heightBuffer;
+		// pixel mode stuff
+		createdTexture.width = bufferSize.width;
+		createdTexture.height = bufferSize.height;
 		createdTexture.componentsPerPixel = 4;
 		createdTexture.filterType = game::TextureFilterType::Point;
 		if (!CreateTexture(createdTexture))
@@ -80,15 +81,19 @@ public:
 		{
 			logger->Write("Texture created!");
 		}
+		// end pixel mode
 
 
 		// Setup OpenGL
 		glClearColor(0.25f, 0.25f, 0.25f, 1.0f);
 		glEnable(GL_TEXTURE_2D);
+		// pixel mode needs blend off
 		//glEnable(GL_BLEND);
 		//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		glEnable(GL_CULL_FACE);
 
+		// will be part of pixel mode stuff
+		// after being able to check window size change
 		fullScreenTri = glGenLists(1);
 		glNewList(fullScreenTri, GL_COMPILE);
 		{
@@ -104,8 +109,9 @@ public:
 	void Shutdown()
 	{
 		UnLoadTexture(texture);
-		UnLoadTexture(createdTexture);
 		UnLoadShader(shader);
+		// pixel mode stuff
+		UnLoadTexture(createdTexture);
 		if (video) delete[] video;
 	}
 
@@ -121,44 +127,45 @@ public:
 			StopEngine();
 		}
 	}
-
+	// pixel mode stuff
 	void UpdateFrameBuffer()
 	{
+		// needs to double buffer
 		glBindTexture(GL_TEXTURE_2D, createdTexture.bind);
 		// Swap texture to draw to
 		//current++;
 		//if (current > 1) current = 0;
 
-		glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, widthBuffer, heightBuffer, GL_RGBA, game::systemInfo.gpuInfo.internalPixelType, (GLvoid*)video);  // for intel 
+		glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, bufferSize.width, bufferSize.height, GL_RGBA, game::systemInfo.gpuInfo.internalPixelType, (GLvoid*)video);  // for intel 
 		glBindTexture(GL_TEXTURE_2D, 0);
 	}
-
-	void Clear(unsigned int color)
+	// pixel mode stuff
+	void Clear(const uint32_t color)
 	{
-		std::fill_n(video, widthBuffer * heightBuffer, color);
+		std::fill_n(video, bufferSize.width * bufferSize.height, color);
 	}
-	
+	// pixel mode stuff
 	void Clear()
 	{
-		memset(video, 0, (size_t)widthBuffer * (size_t)heightBuffer * sizeof(uint32_t));
+		memset(video, 0, (size_t)bufferSize.width * (size_t)bufferSize.height * sizeof(uint32_t));
+	}
+	// pixel mode stuff
+	void Pixel(const uint32_t x, const uint32_t y, const game::Color &color)
+	{
+		video[y * bufferSize.width + x] = color.packed;
 	}
 
-	void Pixel(uint32_t x, uint32_t y, game::Color color)
-	{
-		video[y * widthBuffer + x] = color.packed;
-	}
 	void Render(const float_t msElapsed)
 	{
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-		Clear();// whitecol.packed);
+		
+		// pixel mode stuff
+		Clear(whitecol.packed);
 		for (int i = 10; i < 100; i++)
 			Pixel(i, 10, { 1.0f, 1.0f, 1.0f, 1.0f });
 		UpdateFrameBuffer();
 
 		glBindTexture(GL_TEXTURE_2D, createdTexture.bind);
-		//glRotatef(0.1f, 0.0, 0.0f, 1.0f);
-
 		//glCallList(fullScreenTri);
 
 		// ---------- Begin scaling of quad
@@ -182,15 +189,15 @@ public:
 			else
 			{
 				scale.x = scale.y = tempScale;
-				positionOfScaledTexture.y = (((float_t)windowSize.height / 2.0f) - ((float_t)createdTexture.height * scale.y / 2.0f));
+				positionOfScaledTexture.y = ((windowSize.height >> 1) - ((float_t)createdTexture.height * scale.y / 2.0f));
 			}
-			positionOfScaledTexture.x = (((float_t)windowSize.width / 2.0f) - ((float_t)createdTexture.width * scale.x / 2.0f));
+			positionOfScaledTexture.x = ((windowSize.width >> 1) - ((float_t)createdTexture.width * scale.x / 2.0f));
 		}
 		else if (windowSize.height > windowSize.width)
 		{
 			scale.x = (float_t)windowSize.width * createdTexture.oneOverWidth;
 			scale.y = scale.x;
-			positionOfScaledTexture.y = (((float_t)windowSize.height / 2.0f) - ((float_t)createdTexture.height * scale.y / 2.0f));
+			positionOfScaledTexture.y = ((windowSize.height >> 1) - ((float_t)createdTexture.height * scale.y / 2.0f));
 		}
 		else
 		{
