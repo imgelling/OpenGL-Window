@@ -18,18 +18,17 @@ namespace game
 		bool Initialize(const Vector2i& sizeOfScreen);
 		void Render();
 		void Clear(const Color &color);
-		void Clear();
 		void Pixel(const uint32_t x, const uint32_t y, const game::Color& color);
 
 	private:
-		void _UpdateFrameBuffer();
 		Texture2dGL _frameBuffer[2];
-		void _ScaleQuadToWindow();
 		uint32_t _compiledQuad;
 		uint32_t* _video;
 		Vector2i _bufferSize;
 		Vector2i _windowSize;
 		uint32_t _currentBuffer;
+		void _UpdateFrameBuffer();
+		void _ScaleQuadToWindow();
 	};
 
 	inline PixelMode::PixelMode()
@@ -192,11 +191,6 @@ namespace game
 	inline void PixelMode::Clear(const Color &color)
 	{
 		std::fill_n(_video, _bufferSize.width * _bufferSize.height, color.packed);
-	}
-
-	inline void PixelMode::Clear()
-	{
-		memset(_video, 0, (size_t)_bufferSize.width * (size_t)_bufferSize.height * sizeof(uint32_t));
 	}
 
 	inline void PixelMode::Pixel(const uint32_t x, const uint32_t y, const game::Color& color)

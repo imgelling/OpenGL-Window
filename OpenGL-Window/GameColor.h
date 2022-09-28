@@ -90,4 +90,16 @@ namespace game
 		unsigned int cA = this->a << 24;
 		packed = ((cA) | (cR) | (cG) | (cB));
 	}
+
+	namespace Colors
+	{
+		const Color White((uint32_t)255, 255, 255, 255);
+		const Color Red((uint32_t)255, 0, 0, 255);
+		const Color Green((uint32_t)0, 255, 0, 255);
+		const Color Blue((uint32_t)0, 0, 255, 128);
+		const Color Black((uint32_t)0, 0, 0, 1.0f);
+		const Color Pink((uint32_t)255, 0, 255, 255);
+		const Color Gray((uint32_t)128, 128, 128, 255);
+		const Color DarkGray((uint32_t)64, 64, 64, 255);
+	}
 }

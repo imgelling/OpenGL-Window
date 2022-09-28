@@ -93,7 +93,7 @@ public:
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		
 		// pixel mode stuff
-		pixelMode.Clear(whitecol);
+		pixelMode.Clear(game::Colors::Black);
 		for (int i = 10; i < 100; i++)
 			pixelMode.Pixel(i, 10, { 1.0f, 1.0f, 1.0f, 1.0f });
 
