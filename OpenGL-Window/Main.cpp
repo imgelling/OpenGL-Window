@@ -95,7 +95,7 @@ public:
 		// pixel mode stuff
 		pixelMode.Clear(game::Colors::Black);
 		for (int i = 10; i < 100; i++)
-			pixelMode.Pixel(i, 10, { 1.0f, 1.0f, 1.0f, 1.0f });
+			pixelMode.Pixel(i, 10, { 1.0f, 0.0f, 1.0f, 1.0f });
 
 		pixelMode.Render();
 	}

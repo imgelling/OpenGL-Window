@@ -56,6 +56,7 @@ namespace game
 
 	inline Color::Color(const float_t r, const float_t g, const float_t b, const float_t a)
 	{
+		Set(r, g, b, a);
 		this->r = (uint32_t)(r * 255.0f);
 		this->g = (uint32_t)(g * 255.0f);
 		this->b = (uint32_t)(b * 255.0f);
@@ -67,28 +68,28 @@ namespace game
 
 		// this may need to be changed for amd/nvidia
 		uint32_t packedR = this->r << 0;
-		uint32_t pacedG = this->g << 8;
-		uint32_t pacedB = this->b << 16;
+		uint32_t packedG = this->g << 8;
+		uint32_t packedB = this->b << 16;
 		uint32_t packedA = this->a << 24;
-		packed = ((packedA) | (packedR) | (pacedG) | (pacedB));
+		packed = ((packedA) | (packedR) | (packedG) | (packedB));
 	}
 
 	void Color::Set(const float_t r, const float_t g, const float_t b, const float_t a)
 	{
-		this->r = (unsigned int)(r * 255.0f);
-		this->g = (unsigned int)(g * 255.0f);
-		this->b = (unsigned int)(b * 255.0f);
-		this->a = (unsigned int)(a * 255.0f);
+		this->r = (uint32_t)(r * 255.0f);
+		this->g = (uint32_t)(g * 255.0f);
+		this->b = (uint32_t)(b * 255.0f);
+		this->a = (uint32_t)(a * 255.0f);
 		this->rf = r;
 		this->gf = g;
 		this->bf = b;
 		this->af = a;
 
-		unsigned int cR = this->r << 0;
-		unsigned int cG = this->g << 8;
-		unsigned int cB = this->b << 16;
-		unsigned int cA = this->a << 24;
-		packed = ((cA) | (cR) | (cG) | (cB));
+		uint32_t packedR = this->r << 0;
+		uint32_t packedG = this->g << 8;
+		uint32_t packedB = this->b << 16;
+		uint32_t packedA = this->a << 24;
+		packed = ((packedA) | (packedR) | (packedG) | (packedB));
 	}
 
 	namespace Colors
