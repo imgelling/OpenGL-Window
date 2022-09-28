@@ -2,14 +2,21 @@
 
 namespace game
 {
-
 #pragma region Vector2 
 	template <typename T>
 	class Vector2
 	{
 	public:
-		T x;
-		T y;
+		union 
+		{
+			T x;
+			T width;
+		};
+		union
+		{
+			T y;
+			T height;
+		};
 		Vector2()  
 		{
 			x = (T)0.0;
@@ -53,6 +60,4 @@ namespace game
 	typedef Vector2<float> Vector2f, Pointf;
 	typedef Vector2<double> Vector2d, Pointd;
 #pragma endregion
-
-
 }

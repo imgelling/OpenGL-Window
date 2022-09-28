@@ -22,6 +22,7 @@
 
 #pragma region Engine
 #include "GameAttributes.h"
+#include "GameColor.h"
 #include "GameEngine.h"
 #include "GameErrors.h"
 #include "GameHelpers.h"
