@@ -10,15 +10,15 @@ class Game : public game::Engine
 
 public:
 	game::Texture2dGL texture;
-	game::Texture2dGL createdTexture;
 	game::ShaderGL shader;
 	game::Terminal terminal; // error 6 when clicking x button to close
 	game::Color whitecol = { 1.0f, 1.0f, 1.0f, 1.0f };
 	
 	// pixel mode stuff
+	game::Texture2dGL createdTexture;
 	uint32_t fullScreenTri;
 	uint32_t* video = nullptr;
-	game::Vector2i bufferSize = {320,240};
+	game::Vector2i bufferSize = { 320,240 };
 
 
 	Game(game::Logger& logger) : game::Engine(&logger)
