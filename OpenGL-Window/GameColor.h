@@ -93,13 +93,13 @@ namespace game
 
 	namespace Colors
 	{
-		const Color White((uint32_t)255, 255, 255, 255);
-		const Color Red((uint32_t)255, 0, 0, 255);
-		const Color Green((uint32_t)0, 255, 0, 255);
-		const Color Blue((uint32_t)0, 0, 255, 128);
-		const Color Black((uint32_t)0, 0, 0, 1.0f);
-		const Color Pink((uint32_t)255, 0, 255, 255);
-		const Color Gray((uint32_t)128, 128, 128, 255);
-		const Color DarkGray((uint32_t)64, 64, 64, 255);
+		const Color White(1.0f, 1.0f, 1.0f, 1.0f);
+		const Color Red(1.0f, 0, 0, 1.0f);
+		const Color Green(0, 1.0f, 0, 1.0f);
+		const Color Blue(0, 0, 1.0f, 1.0f);
+		const Color Black(0, 0, 0, 1.0f);
+		const Color Pink(1.0f, 0, 1.0f, 1.0f);
+		const Color Gray(0.5f, 0.5f, 0.5f, 1.0f);
+		const Color DarkGray(0.25f, 0.25f, 0.25, 1.0f);
 	}
 }
