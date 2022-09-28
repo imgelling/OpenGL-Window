@@ -41,12 +41,12 @@ namespace game
 		rf = 0.0f;
 		gf = 0.0f;
 		bf = 0.0f;
-		af = 0.0f;
+		af = 1.0f;
 		r = 0;
 		g = 0;
 		b = 0;
-		a = 0;
-		packed = 0;
+		a = 255;
+		packed = a << 24;
 	}
 
 	inline Color::~Color()
