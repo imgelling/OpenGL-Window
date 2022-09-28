@@ -7,12 +7,6 @@
 
 namespace game
 {
-	//  Needs to create a texture
-	//  Needs to copy a texture to vram
-	//		Need a texture property to pick mipmap, sampling, pow of 2 size, 
-	//  Needs a color class
-	//  Needs a working copy of frame
-	//
 	extern GameError lastError;
 	extern Engine* enginePointer;
 	class PixelMode
@@ -27,11 +21,10 @@ namespace game
 		void Clear();
 		void Pixel(const uint32_t x, const uint32_t y, const game::Color& color);
 
-
 	private:
 		void _UpdateFrameBuffer();
 		Texture2dGL _frameBuffer[2];
-		void _ScaleTextureToWindow();
+		void _ScaleQuadToWindow();
 		uint32_t _compiledQuad;
 		uint32_t* _video;
 		Vector2i _bufferSize;
@@ -83,7 +76,7 @@ namespace game
 		_compiledQuad = glGenLists(1);
 
 		// Scale the texture to window size
-		_ScaleTextureToWindow();
+		_ScaleQuadToWindow();
 
 		return true;
 	}
@@ -101,7 +94,7 @@ namespace game
 		if (_currentBuffer > 1) _currentBuffer = 0;
 	}
 
-	inline void PixelMode::_ScaleTextureToWindow()
+	inline void PixelMode::_ScaleQuadToWindow()
 	{
 
 		game::Vector2f positionOfScaledTexture;
@@ -182,8 +175,8 @@ namespace game
 		{
 			_windowSize = currentWindowSize;
 
-			// rebuild display list
-			_ScaleTextureToWindow();
+			// Rescale the quad to fit new window size
+			_ScaleQuadToWindow();
 		}
 
 		// Cope video buffer to gpu
