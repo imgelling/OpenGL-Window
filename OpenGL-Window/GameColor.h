@@ -18,18 +18,11 @@ namespace game
 		Color();
 		Color(const float_t r, const float_t g, const float_t b, const float_t a);
 		Color(const double_t r, const double_t g, const double_t b, const double_t a);
-		//Color(const uint32_t r, const uint32_t g, const uint32_t b, const uint32_t a);
-		//Color(const float_t r, const float_t g, const float_t b);
-		//Color(const double_t r, const double_t g, const double_t b);
-		//Color(const uint32_t r, const uint32_t g, const uint32_t b);
+		Color(const uint32_t r, const uint32_t g, const uint32_t b, const uint32_t a);
 
 		void Set(const float_t r, const float_t g, const float_t b, const float_t a);
 		void Set(const double_t r, const double_t g, const double_t b, const double_t a);
-		//void Set(const uint32_t r, const uint32_t g, const uint32_t b, const uint32_t a);
-		//void Set(const float_t r, const float_t g, const float_t b);
-		//void Set(const double_t r, const double_t g, const double_t b);
-		//void Set(const uint32_t r, const uint32_t g, const uint32_t b);
-		//void Set(const uint8_t r, const uint8_t b, const uint8_t g);
+		void Set(const uint32_t r, const uint32_t g, const uint32_t b, const uint32_t a);
 
 	private:
 		const float_t _convert256toF = 1.0f / 255.0f;
@@ -97,6 +90,32 @@ namespace game
 		packed = ((packedA) | (packedR) | (packedG) | (packedB));
 	}
 	// End double_t
+
+	// Start uint32_t
+	inline Color::Color(const uint32_t r, const uint32_t g, const uint32_t b, const uint32_t a)
+	{
+		Set(r, g, b, a);
+	}
+
+	inline void Color::Set(const uint32_t r, const uint32_t g, const uint32_t b, const uint32_t a)
+	{
+		this->r = r;
+		this->g = g;
+		this->b = b;
+		this->a = a;
+		this->rf = r * _convert256toF;
+		this->gf = g * _convert256toF;
+		this->bf = b * _convert256toF;
+		this->af = a * _convert256toF;
+
+		uint32_t packedR = r << 0;
+		uint32_t packedG = g << 8;
+		uint32_t packedB = b << 16;
+		uint32_t packedA = a << 24;
+		packed = ((packedA) | (packedR) | (packedG) | (packedB));
+	}
+	// End uint32_t
+
 
 
 	// Defined standard colors (full alpha)

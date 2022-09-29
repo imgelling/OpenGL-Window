@@ -60,4 +60,25 @@ namespace game
 	typedef Vector2<float> Vector2f, Pointf;
 	typedef Vector2<double> Vector2d, Pointd;
 #pragma endregion
+
+#pragma region Rect
+	template <typename T>
+	class Rect
+	{
+		T top;
+		T left;
+		T bottom;
+		T right;
+		Rect()
+		{
+			top = 0;
+			left = 0;
+			bottom = 0;
+			right = 0;
+		}
+	};
+	typedef Rect<int> Recti;
+	typedef Rect<float> Rectf;
+	typedef Rect<double> Rectd;
+#pragma endregion
 }
