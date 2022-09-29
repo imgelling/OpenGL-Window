@@ -9,9 +9,7 @@ class Game : public game::Engine
 {
 
 public:
-	game::Texture2dGL texture;
-	game::ShaderGL shader;
-	game::Terminal terminal; // error 6 when clicking x button to close
+	game::Terminal terminal; // error 6 randomly
 	game::Color whitecol = { 1.0f, 1.0f, 1.0f, 1.0f };
 	game::PixelMode pixelMode;
 
@@ -25,7 +23,7 @@ public:
 
 		attrib.WindowTitle = "PixelMode tests";
 		attrib.GameVersion = "0.01";
-		attrib.Framelock = 60;
+		attrib.Framelock = 0;
 		attrib.VsyncOn = false;
 		attrib.DebugMode = true;
 		attrib.MultiSamples = 32; // max 8 amd, 16 nvidia
@@ -34,25 +32,6 @@ public:
 
 	void LoadContent()
 	{
-		texture.filterType = game::TextureFilterType::Point;
-		if (!LoadTexture("content/Screen boundries.png", texture))
-		{
-			logger->Error(game::lastError);
-		}
-		else
-		{
-			logger->Write("Screen boundries.png loaded!");
-		}
-
-		if (!LoadShader("content/SpriteBatch_vert.shader", "content/SpriteBatch_frag.shader", shader))
-		{
-			logger->Error(game::lastError);
-		}
-		else
-		{
-			logger->Write("SpriteBatch shader loaded!");
-		}
-
 		whitecol.Set(1.0f, 0.0f, 1.0f, 0.25f);
 
 		// Setup OpenGL
@@ -71,8 +50,6 @@ public:
 
 	void Shutdown()
 	{
-		UnLoadTexture(texture);
-		UnLoadShader(shader);
 	}
 
 	void Update(const float_t msElapsed)
@@ -90,11 +67,12 @@ public:
 
 	void Render(const float_t msElapsed)
 	{
+		std::cout << terminal.SetPosition(0, 19) << terminal.EraseLine << "Frames per second : " << GetFramesPerSecond() << "\n";
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		
 		// pixel mode stuff
 		pixelMode.Clear(game::Colors::Black);
-		for (int i = -300; i < 400; i++)
+		for (int i = 0; i < 400; i++)
 			pixelMode.PixelClip(i, 10, { 1.0f, 0.0f, 1.0f, 1.0f });
 
 		pixelMode.Render();
