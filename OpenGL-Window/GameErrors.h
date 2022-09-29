@@ -36,7 +36,7 @@ namespace game
 			case (uint32_t)GameErrors::GameVulkanSpecific: _stream << "GameErrorVulkanSpecific"; break;
 			case (uint32_t)GameErrors::GameRenderer: _stream << "GameRenderer"; break;
 			case (uint32_t)GameErrors::GameContent: _stream << "GameContent"; break;
-			default: return _stream << "GameErrorUnknown";
+			default: _stream << "GameErrorUnknown"; break;
 			}
 			// Append the error text to general error code
 			return _stream << " : " << error.lastErrorString << "\n";
