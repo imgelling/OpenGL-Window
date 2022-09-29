@@ -2,7 +2,7 @@
 #include <iostream>
 
 // Engine header
-#define GAME_USE_DEDICATED_GPU
+//#define GAME_USE_DEDICATED_GPU
 #include "Game.h"
 
 class Game : public game::Engine
@@ -23,7 +23,7 @@ public:
 	{
 		game::Attributes attrib;
 
-		attrib.WindowTitle = "Full Screen single triangle";
+		attrib.WindowTitle = "PixelMode tests";
 		attrib.GameVersion = "0.01";
 		attrib.Framelock = 60;
 		attrib.VsyncOn = false;

@@ -85,7 +85,7 @@ namespace game
 		// needs to double buffer
 		glBindTexture(GL_TEXTURE_2D, _frameBuffer[_currentBuffer].bind);
 
-		glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, _frameBuffer[_currentBuffer].width, _frameBuffer[_currentBuffer].height, GL_RGBA, game::systemInfo.gpuInfo.internalPixelType, (GLvoid*)_video);  // for intel 
+		glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, _frameBuffer[_currentBuffer].width, _frameBuffer[_currentBuffer].height, GL_RGBA, game::systemInfo.gpuInfo.internalPixelType, (GLvoid*)_video);
 		glBindTexture(GL_TEXTURE_2D, 0);
 		
 		// Swap texture buffer to draw to

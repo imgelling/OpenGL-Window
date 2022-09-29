@@ -65,8 +65,17 @@ namespace game
 	template <typename T>
 	class Rect
 	{
-		T top;
-		T left;
+	public:
+		union
+		{
+			T top;
+			T y;
+		};
+		union
+		{
+			T left;
+			T x;
+		};
 		T bottom;
 		T right;
 		Rect()
@@ -76,6 +85,14 @@ namespace game
 			bottom = 0;
 			right = 0;
 		}
+		void Set(const T left, const T top, const T right, const T bottom)
+		{
+			this->left = left;
+			this->top = top;
+			this->right = right;
+			this->bottom = bottom;
+		}
+	private:
 	};
 	typedef Rect<int> Recti;
 	typedef Rect<float> Rectf;
