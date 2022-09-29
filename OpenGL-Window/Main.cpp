@@ -62,7 +62,7 @@ public:
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		glEnable(GL_CULL_FACE);
 
-
+		// Setup pixel mode
 		if (!pixelMode.Initialize({ 320, 240 }))
 		{
 			logger->Error(game::lastError);
@@ -94,8 +94,8 @@ public:
 		
 		// pixel mode stuff
 		pixelMode.Clear(game::Colors::Black);
-		for (int i = 10; i < 100; i++)
-			pixelMode.Pixel(i, 10, { 1.0f, 0.0f, 1.0f, 1.0f });
+		for (int i = -300; i < 400; i++)
+			pixelMode.PixelClip(i, 10, { 1.0f, 0.0f, 1.0f, 1.0f });
 
 		pixelMode.Render();
 	}

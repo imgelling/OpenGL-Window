@@ -18,8 +18,8 @@ namespace game
 		bool Initialize(const Vector2i& sizeOfScreen);
 		void Render();
 		void Clear(const Color &color);
-		void Pixel(const uint32_t x, const uint32_t y, const game::Color& color);
-
+		void Pixel(const int32_t x, const int32_t y, const game::Color& color);
+		void PixelClip(const int32_t x, const int32_t y, const game::Color& color);
 	private:
 		Texture2dGL _frameBuffer[2];
 		uint32_t _compiledQuad;
@@ -193,8 +193,17 @@ namespace game
 		std::fill_n(_video, _bufferSize.width * _bufferSize.height, color.packed);
 	}
 
-	inline void PixelMode::Pixel(const uint32_t x, const uint32_t y, const game::Color& color)
+	inline void PixelMode::Pixel(const int32_t x, const int32_t y, const game::Color& color)
 	{
+		_video[y * _bufferSize.width + x] = color.packed;
+	}
+
+	inline void PixelMode::PixelClip(const int32_t x, const int32_t y, const game::Color& color)
+	{
+		if (x < 0) return;
+		if (y < 0) return;
+		if (x > _bufferSize.width-1) return;
+		if (y > _bufferSize.height-1) return;
 		_video[y * _bufferSize.width + x] = color.packed;
 	}
 }
