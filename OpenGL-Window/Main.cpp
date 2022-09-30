@@ -11,7 +11,7 @@ class Game : public game::Engine
 public:
 	game::Terminal terminal; // error 6 randomly
 	game::Color whitecol = { 1.0f, 1.0f, 1.0f, 1.0f };
-	game::PixelMode pixelMode;
+	game::PixelModeShaderless pixelMode;
 
 	Game(game::Logger& logger) : game::Engine(&logger)
 	{
@@ -54,6 +54,9 @@ public:
 
 	void Update(const float_t msElapsed)
 	{
+		std::cout << terminal.HideCursor;
+		std::cout << terminal.SetPosition(0, 20) << "Updates per second : " << terminal.EraseLineFromCursor << GetUpdatesPerSecond() << "\n";
+		std::cout << terminal.ShowCursor;
 		// Handle Input
 		if (keyboard.WasKeyReleased(VK_F11))
 		{
@@ -67,7 +70,9 @@ public:
 
 	void Render(const float_t msElapsed)
 	{
-		std::cout << terminal.SetPosition(0, 19) << terminal.EraseLine << "Frames per second : " << GetFramesPerSecond() << "\n";
+		std::cout << terminal.HideCursor;
+		std::cout << terminal.SetPosition(0, 19) << "Frames per second : " << terminal.EraseLineFromCursor << GetFramesPerSecond() << "\n";
+		std::cout << terminal.ShowCursor;
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		
 		// pixel mode stuff

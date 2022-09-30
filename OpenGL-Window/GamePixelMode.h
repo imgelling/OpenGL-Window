@@ -9,11 +9,11 @@ namespace game
 {
 	extern GameError lastError;
 	extern Engine* enginePointer;
-	class PixelMode
+	class PixelModeShaderless
 	{
 	public:
-		PixelMode();
-		~PixelMode();
+		PixelModeShaderless();
+		~PixelModeShaderless();
 
 		bool Initialize(const Vector2i& sizeOfScreen);
 		void Render();
@@ -31,19 +31,19 @@ namespace game
 		void _ScaleQuadToWindow();
 	};
 
-	inline PixelMode::PixelMode()
+	inline PixelModeShaderless::PixelModeShaderless()
 	{
 		_compiledQuad = 0;
 		_video = nullptr;
 		_currentBuffer = 0;
 	}
 
-	inline PixelMode::~PixelMode()
+	inline PixelModeShaderless::~PixelModeShaderless()
 	{
 		if (_video != nullptr) delete[] _video;
 	}
 
-	inline bool PixelMode::Initialize(const Vector2i& sizeOfScreen)
+	inline bool PixelModeShaderless::Initialize(const Vector2i& sizeOfScreen)
 	{
 		_bufferSize = sizeOfScreen;
 
@@ -54,7 +54,7 @@ namespace game
 		_video = new uint32_t[_bufferSize.width * _bufferSize.height];
 		if (_video == nullptr)
 		{
-			lastError = { GameErrors::GameRenderer, "Could not allocate RAM for video buffer." };
+			lastError = { GameErrors::GameRenderer, "Could not allocate RAM for PixelModeShaderless video buffer." };
 			return false;
 		}
 
@@ -80,7 +80,7 @@ namespace game
 		return true;
 	}
 
-	inline void PixelMode::_UpdateFrameBuffer()
+	inline void PixelModeShaderless::_UpdateFrameBuffer()
 	{
 		// needs to double buffer
 		glBindTexture(GL_TEXTURE_2D, _frameBuffer[_currentBuffer].bind);
@@ -93,7 +93,7 @@ namespace game
 		if (_currentBuffer > 1) _currentBuffer = 0;
 	}
 
-	inline void PixelMode::_ScaleQuadToWindow()
+	inline void PixelModeShaderless::_ScaleQuadToWindow()
 	{
 
 		game::Vector2f positionOfScaledTexture;
@@ -163,7 +163,7 @@ namespace game
 		glEndList();
 	}
 
-	inline void PixelMode::Render()
+	inline void PixelModeShaderless::Render()
 	{
 		Vector2i currentWindowSize;
 
@@ -188,17 +188,17 @@ namespace game
 
 	}
 
-	inline void PixelMode::Clear(const Color &color)
+	inline void PixelModeShaderless::Clear(const Color &color)
 	{
 		std::fill_n(_video, _bufferSize.width * _bufferSize.height, color.packed);
 	}
 
-	inline void PixelMode::Pixel(const int32_t x, const int32_t y, const game::Color& color)
+	inline void PixelModeShaderless::Pixel(const int32_t x, const int32_t y, const game::Color& color)
 	{
 		_video[y * _bufferSize.width + x] = color.packed;
 	}
 
-	inline void PixelMode::PixelClip(const int32_t x, const int32_t y, const game::Color& color)
+	inline void PixelModeShaderless::PixelClip(const int32_t x, const int32_t y, const game::Color& color)
 	{
 		if (x < 0) return;
 		if (y < 0) return;
