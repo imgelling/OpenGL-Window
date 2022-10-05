@@ -2,18 +2,16 @@
 #include <gl/GL.h>
 #include "GameMath.h"
 #include "GameErrors.h"
-#include "GameEngine.h"
 #include "GameTexture2D.h"
 
 namespace game
 {
 	extern GameError lastError;
-	extern Engine* enginePointer;
-	class PixelModeShaderless
+	class PixelModeFixed
 	{
 	public:
-		PixelModeShaderless();
-		~PixelModeShaderless();
+		PixelModeFixed();
+		~PixelModeFixed();
 
 		bool Initialize(const Vector2i& sizeOfScreen);
 		void Render();
@@ -31,19 +29,19 @@ namespace game
 		void _ScaleQuadToWindow();
 	};
 
-	inline PixelModeShaderless::PixelModeShaderless()
+	inline PixelModeFixed::PixelModeFixed()
 	{
 		_compiledQuad = 0;
 		_video = nullptr;
 		_currentBuffer = 0;
 	}
 
-	inline PixelModeShaderless::~PixelModeShaderless()
+	inline PixelModeFixed::~PixelModeFixed()
 	{
 		if (_video != nullptr) delete[] _video;
 	}
 
-	inline bool PixelModeShaderless::Initialize(const Vector2i& sizeOfScreen)
+	inline bool PixelModeFixed::Initialize(const Vector2i& sizeOfScreen)
 	{
 		_bufferSize = sizeOfScreen;
 
@@ -67,6 +65,7 @@ namespace game
 			_frameBuffer[loop].filterType = game::TextureFilterType::Point;
 			if (!enginePointer->CreateTexture(_frameBuffer[loop]))
 			{
+				lastError = { GameErrors::GameRenderer, "Could not create textures for PixelModeShaderless frame buffers." };
 				return false;
 			}
 		}
@@ -80,7 +79,7 @@ namespace game
 		return true;
 	}
 
-	inline void PixelModeShaderless::_UpdateFrameBuffer()
+	inline void PixelModeFixed::_UpdateFrameBuffer()
 	{
 		// needs to double buffer
 		glBindTexture(GL_TEXTURE_2D, _frameBuffer[_currentBuffer].bind);
@@ -93,7 +92,7 @@ namespace game
 		if (_currentBuffer > 1) _currentBuffer = 0;
 	}
 
-	inline void PixelModeShaderless::_ScaleQuadToWindow()
+	inline void PixelModeFixed::_ScaleQuadToWindow()
 	{
 
 		game::Vector2f positionOfScaledTexture;
@@ -163,7 +162,7 @@ namespace game
 		glEndList();
 	}
 
-	inline void PixelModeShaderless::Render()
+	inline void PixelModeFixed::Render()
 	{
 		Vector2i currentWindowSize;
 
@@ -188,17 +187,17 @@ namespace game
 
 	}
 
-	inline void PixelModeShaderless::Clear(const Color &color)
+	inline void PixelModeFixed::Clear(const Color &color)
 	{
 		std::fill_n(_video, _bufferSize.width * _bufferSize.height, color.packed);
 	}
 
-	inline void PixelModeShaderless::Pixel(const int32_t x, const int32_t y, const game::Color& color)
+	inline void PixelModeFixed::Pixel(const int32_t x, const int32_t y, const game::Color& color)
 	{
 		_video[y * _bufferSize.width + x] = color.packed;
 	}
 
-	inline void PixelModeShaderless::PixelClip(const int32_t x, const int32_t y, const game::Color& color)
+	inline void PixelModeFixed::PixelClip(const int32_t x, const int32_t y, const game::Color& color)
 	{
 		if (x < 0) return;
 		if (y < 0) return;

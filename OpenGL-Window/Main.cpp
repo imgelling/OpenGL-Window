@@ -1,3 +1,4 @@
+
 #include <windows.h>
 #include <iostream>
 
@@ -11,7 +12,7 @@ class Game : public game::Engine
 public:
 	game::Terminal terminal; // error 6 randomly
 	game::Color whitecol = { 1.0f, 1.0f, 1.0f, 1.0f };
-	game::PixelModeShaderless pixelMode;
+	game::PixelModeFixed pixelMode;
 
 	Game(game::Logger& logger) : game::Engine(&logger)
 	{
@@ -77,8 +78,8 @@ public:
 		
 		// pixel mode stuff
 		pixelMode.Clear(game::Colors::Black);
-		for (int i = 0; i < 400; i++)
-			pixelMode.PixelClip(i, 10, { 1.0f, 0.0f, 1.0f, 1.0f });
+		for (int i = 0; i < 256; i++)
+			pixelMode.PixelClip(i, 10, { 1.0f, 0.0f, 1.0f, 1.0f});
 
 		pixelMode.Render();
 	}
