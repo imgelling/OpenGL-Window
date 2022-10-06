@@ -24,13 +24,14 @@ namespace game
 		uint32_t* _video;
 		Vector2i _bufferSize;
 		Vector2i _windowSize;
-		uint32_t _currentBuffer;
+		uint32_t _currentBuffer; // gl only
 		void _UpdateFrameBuffer();
 		void _ScaleQuadToWindow();
 	};
 
 	inline PixelModeFixed::PixelModeFixed()
 	{
+		// gl only
 		_compiledQuad = 0;
 		_video = nullptr;
 		_currentBuffer = 0;
@@ -56,6 +57,7 @@ namespace game
 			return false;
 		}
 
+		// gl only
 		// Create frame buffer textures
 		for (uint32_t loop = 0; loop < 2; loop++)
 		{
@@ -70,6 +72,7 @@ namespace game
 			}
 		}
 
+		// gl only
 		// Generate the display list
 		_compiledQuad = glGenLists(1);
 
@@ -81,9 +84,11 @@ namespace game
 
 	inline void PixelModeFixed::_UpdateFrameBuffer()
 	{
+		// gl only
 		// needs to double buffer
 		glBindTexture(GL_TEXTURE_2D, _frameBuffer[_currentBuffer].bind);
 
+		// gl only
 		glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, _frameBuffer[_currentBuffer].width, _frameBuffer[_currentBuffer].height, GL_RGBA, game::systemInfo.gpuInfo.internalPixelType, (GLvoid*)_video);
 		glBindTexture(GL_TEXTURE_2D, 0);
 		
@@ -137,6 +142,7 @@ namespace game
 		sizeOfScaledTexture.width = ((float_t)sizeOfScaledTexture.width * 2.0f / (float_t)_windowSize.width) - 1.0f;
 		sizeOfScaledTexture.height = ((float_t)sizeOfScaledTexture.height * 2.0f / (float_t)_windowSize.height) - 1.0f;
 		
+		// gl only
 		glNewList(_compiledQuad, GL_COMPILE);
 		{
 			glBegin(GL_QUADS);
@@ -177,9 +183,10 @@ namespace game
 			_ScaleQuadToWindow();
 		}
 
-		// Cope video buffer to gpu
+		// Copy video buffer to gpu
 		_UpdateFrameBuffer();
 
+		// gl only
 		// Draw the quad
 		glBindTexture(GL_TEXTURE_2D, _frameBuffer[_currentBuffer].bind);
 		glCallList(_compiledQuad);
