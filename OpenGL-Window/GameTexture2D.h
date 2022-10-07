@@ -24,6 +24,7 @@ namespace game
 		// Attributes of the texture filtering
 		bool isMipMapped;
 		TextureFilterType filterType;
+		uint8_t anisotropyLevel;		// 1 is off, then powers of 2 up to max
 
 		Texture2dGL();
 	private:
@@ -50,5 +51,6 @@ namespace game
 		// Attributes of texture filtering
 		isMipMapped = true;
 		filterType = TextureFilterType::Trilinear;
+		anisotropyLevel = 1;
 	}
 }

@@ -189,7 +189,7 @@ namespace game
 
 	inline void Engine::SetFrameLock(const uint32_t limit)
 	{
-		_attributes.Framelock = (float)limit;
+		_attributes.Framelock = (float_t)limit;
 		if (_attributes.Framelock > 0)
 		{
 			_frameTime = 1000.0f / _attributes.Framelock;
@@ -264,7 +264,6 @@ namespace game
 		_window.SetAttributes(_attributes);
 		if (!_window.CreateTheWindow())
 		{
-			std::cout << game::lastError;
 			return false;
 		}
 
@@ -275,7 +274,9 @@ namespace game
 		}
 		else if (_attributes.RenderingAPI == RenderAPI::Vulkan)
 		{
-			_renderer = new game::RendererVK();
+			lastError = { GameErrors::GameInvalidParameter, "Only OpenGL is implemented." };
+			//_renderer = new game::RendererVK();
+			return false;
 		}
 		else
 		{

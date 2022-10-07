@@ -706,7 +706,11 @@ namespace game
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
 		// Anisotropy
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, systemInfo.gpuInfo.multisampleSamples);
+		if (texture.anisotropyLevel > systemInfo.gpuInfo.maxAnisotropy)
+		{
+			texture.anisotropyLevel = systemInfo.gpuInfo.maxAnisotropy;
+		}
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, texture.anisotropyLevel);
 		// When adding gfx options, just div by 2 down to 2x; so 16, 8, 4, 2, 0
 
 
@@ -784,7 +788,11 @@ namespace game
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
 		// Anisotropy
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, systemInfo.gpuInfo.multisampleSamples);
+		if (texture.anisotropyLevel > systemInfo.gpuInfo.maxAnisotropy)
+		{
+			texture.anisotropyLevel = systemInfo.gpuInfo.maxAnisotropy;
+		}
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, texture.anisotropyLevel);
 		// When adding gfx options, just div by 2 down to 2x; so 16, 8, 4, 2, 0
 
 

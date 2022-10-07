@@ -3,7 +3,7 @@
 #include <iostream>
 
 // Engine header
-//#define GAME_USE_DEDICATED_GPU
+#define GAME_USE_DEDICATED_GPU
 #include "Game.h"
 
 class Game : public game::Engine
@@ -24,10 +24,11 @@ public:
 
 		attrib.WindowTitle = "PixelMode tests";
 		attrib.GameVersion = "0.01";
-		attrib.Framelock = 0;
+		attrib.Framelock = 60;
 		attrib.VsyncOn = false;
 		attrib.DebugMode = true;
 		attrib.MultiSamples = 32; // max 8 amd, 16 nvidia
+		attrib.RenderingAPI = game::RenderAPI::OpenGL;
 		SetAttributes(attrib);
 	}
 
@@ -55,9 +56,6 @@ public:
 
 	void Update(const float_t msElapsed)
 	{
-		std::cout << terminal.HideCursor;
-		std::cout << terminal.SetPosition(0, 20) << "Updates per second : " << terminal.EraseLineFromCursor << GetUpdatesPerSecond() << "\n";
-		std::cout << terminal.ShowCursor;
 		// Handle Input
 		if (keyboard.WasKeyReleased(VK_F11))
 		{
@@ -71,15 +69,15 @@ public:
 
 	void Render(const float_t msElapsed)
 	{
-		std::cout << terminal.HideCursor;
-		std::cout << terminal.SetPosition(0, 19) << "Frames per second : " << terminal.EraseLineFromCursor << GetFramesPerSecond() << "\n";
-		std::cout << terminal.ShowCursor;
+		SetWindowTitle("fps : " + std::to_string(GetFramesPerSecond()) + " ups : " + std::to_string(GetUpdatesPerSecond()));
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		
 		// pixel mode stuff
 		pixelMode.Clear(game::Colors::Black);
-		for (int i = 0; i < 256; i++)
+		for (uint32_t i = 0; i < 256; i++)
+		{
 			pixelMode.PixelClip(i, 10, { 1.0f, 0.0f, 1.0f, 1.0f});
+		}
 
 		pixelMode.Render();
 	}
