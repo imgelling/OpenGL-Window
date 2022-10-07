@@ -529,6 +529,7 @@ namespace game
 	{
 		int32_t value = 0;
 		std::stringstream sStream;
+		std::string tempValue;
 
 		// Lambda to log easier
 		auto LOG = [&](std::stringstream& stream)
@@ -537,20 +538,29 @@ namespace game
 			stream.str("");
 		};
 
-		// Log the version of OpenGL context
-		systemInfo.gpuInfo.renderer = (char*)glGetString(GL_VERSION);
+		// Log the OpenGL rendering device
+		systemInfo.gpuInfo.renderer = (char*)glGetString(GL_RENDERER);
 		sStream << "OpenGL renderer : " << systemInfo.gpuInfo.renderer;
 		LOG(sStream);
 
+		// Log the version of OpenGL context
+		systemInfo.gpuInfo.version = (char*)glGetString(GL_VERSION);
+		sStream << "OpenGL version : " << systemInfo.gpuInfo.version;
+		LOG(sStream);
+
 		// Extract numerical major and minor version numbers
-		systemInfo.gpuInfo.versionMajor = std::strtol(systemInfo.gpuInfo.renderer.c_str(), NULL, 10);
-		systemInfo.gpuInfo.renderer.erase(0, 2);
-		systemInfo.gpuInfo.versionMinor = std::strtol(systemInfo.gpuInfo.renderer.c_str(), NULL, 10);
+		tempValue = (char*)glGetString(GL_VERSION);
+		systemInfo.gpuInfo.versionMajor = std::strtol(tempValue.c_str(), NULL, 10);
+		tempValue.erase(0, 2);
+		systemInfo.gpuInfo.versionMinor = std::strtol(tempValue.c_str(), NULL, 10);
+		tempValue = "";
 
 		// Log the vender of the renderer
 		systemInfo.gpuInfo.vendor = (char*)glGetString(GL_VENDOR);
 		sStream << "Vendor : " << systemInfo.gpuInfo.vendor;
 		LOG(sStream);
+
+
 
 		// Log the max shader language version
 		systemInfo.gpuInfo.maxShaderLanguageVersion = (char*)_glGetStringi(GL_SHADING_LANGUAGE_VERSION, 0);

@@ -22,6 +22,7 @@ namespace game
 			int32_t internalPixelType = 0;
 			int32_t totalMemory = 0;
 			int32_t freeMemory = 0;
+			std::string version;
 			int32_t versionMajor = 0;
 			int32_t versionMinor = 0;
 			std::string maxShaderLanguageVersion;
