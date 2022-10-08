@@ -70,10 +70,12 @@ namespace game
 		Timer _renderTimer;
 		Timer _updateTimer;
 		Timer _frameLockTimer;
-		void _ProcessMessages();
-		void _Swap();
 		uint32_t _updatesPerSecond;
 		uint32_t _framesPerSecond;
+		void _LogCPUInfo();
+		void _ProcessMessages();
+		void _Swap();
+
 	};
 
 
@@ -253,12 +255,33 @@ namespace game
 		_attributes.WindowFullscreen = !_attributes.WindowFullscreen;
 	}
 
+	inline void Engine::_LogCPUInfo()
+	{
+		std::stringstream sStream;
+
+		// Lambda to log easier
+		auto LOG = [&](std::stringstream& stream)
+		{
+			logger->Write(stream.str());
+			stream.str("");
+		};
+
+		systemInfo.GetCPUInfo();
+
+		sStream << "CPU processor thread count : " << systemInfo.cpuInfo.processorCount;
+		LOG(sStream);
+		
+	}
+
 	inline bool Engine::Create()
 	{
 		// Let user choose how they want things
 		Initialize();
 
 		logger->Header(_attributes.WindowTitle, _attributes.GameVersion);
+
+		// Get and log the cpu info
+		_LogCPUInfo();
 
 		// Create the window
 		_window.SetAttributes(_attributes);

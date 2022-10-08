@@ -1,5 +1,8 @@
 #pragma once
 #include <string>
+#include <sstream>
+#include <thread>
+#include <intrin.h>
 
 namespace game
 {
@@ -12,8 +15,7 @@ namespace game
 		struct CPUInfo
 		{
 		public:
-			unsigned int processorCount = 0;
-			//systemInfo.cpuInfo.processorCount = std::thread::hardware_concurrency();
+			uint32_t processorCount = 0;
 		};
 		// Contains information about the host's renderer
 		struct GPUInfo
@@ -38,7 +40,30 @@ namespace game
 	public:
 		CPUInfo cpuInfo;
 		GPUInfo gpuInfo;
+		void GetCPUInfo();
 	};
+
+	inline void SystemInfo::GetCPUInfo()
+	{
+		cpuInfo.processorCount = std::thread::hardware_concurrency();
+
+		// cpu maker
+		int regs[4] = { 0 };
+		char vendor[13];
+		__cpuid(regs, 0);              // mov eax,0; cpuid
+		memcpy(vendor, &regs[1], 4);   // copy EBX
+		memcpy(vendor + 4, &regs[3], 4); // copy EDX
+		memcpy(vendor + 8, &regs[2], 4); // copy ECX
+		vendor[12] = '\0';
+		std::cout << "My CPU is a " << vendor << "\n";
+
+		__cpuidex(regs, 1,0);              // mov eax,0; cpuid
+		memcpy(vendor, &regs[1], 4);   // copy EBX
+		memcpy(vendor + 4, &regs[3], 4); // copy EDX
+		memcpy(vendor + 8, &regs[2], 4); // copy ECX
+		vendor[12] = '\0';
+		std::cout << "My CPU is a " << vendor << "\n";
+	}
 
 }
 
