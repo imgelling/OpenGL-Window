@@ -276,6 +276,12 @@ namespace game
 
 		sStream << "CPU processor thread count : " << systemInfo.cpuInfo.processorCount;
 		LOG(sStream);
+
+		sStream << "RAM physical total : " << systemInfo.ramInfo.totalPhysicalMemory << "MBs";
+		LOG(sStream);
+
+		sStream << "RAM free physical total : " << systemInfo.ramInfo.totalPhysicalMemoryAvailable << "MBs";
+		LOG(sStream);
 		
 	}
 

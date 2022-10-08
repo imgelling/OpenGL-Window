@@ -3,6 +3,7 @@
 #include <sstream>
 #include <thread>
 #include <intrin.h>
+#include <psapi.h>
 
 namespace game
 {
@@ -19,6 +20,19 @@ namespace game
 			std::string processorName;
 			uint32_t processorCount = 0;
 		};
+        // Contains information about the host's RAM
+        struct RAMInfo
+        {
+        public:
+            uint64_t totalVirtualMemory = 0;
+            uint64_t totalVirtualMemoryUsed = 0;
+            uint64_t totalVirtualMemoryUsedByGame = 0;
+            uint64_t totalVirtualMemoryAvailable = 0;
+            uint64_t totalPhysicalMemory = 0;
+            uint64_t totalPhysicalMemoryUsed = 0;
+            uint64_t totalPhysicalMemoryAvailable = 0;
+            uint64_t totalPhysicalMemoryUsedByGame = 0;
+        };
 		// Contains information about the host's renderer
 		struct GPUInfo
 		{
@@ -42,30 +56,12 @@ namespace game
 	public:
 		CPUInfo cpuInfo;
 		GPUInfo gpuInfo;
+        RAMInfo ramInfo;
 		void GetCPUInfo();
 	};
 
     inline void SystemInfo::GetCPUInfo()
     {
-        cpuInfo.processorCount = std::thread::hardware_concurrency();
-
-        //// cpu vendor
-        //int32_t regs[4] = { 0 };
-        //int8_t vendor[17] = { 0 };
-        //__cpuidex(regs, 0,0);              // mov eax,0; cpuid
-        //memcpy(vendor, &regs[1], 4);   // copy EBX
-        //memcpy(vendor + 4, &regs[3], 4); // copy EDX
-        //memcpy(vendor + 8, &regs[2], 4); // copy ECX
-        //vendor[12] = '\0';
-        //cpuInfo.processorVendor = (const char *)vendor;
-        //
-        //__cpuid(regs, 1);              // mov eax,0; cpuid
-        //uint32_t stepping = regs[0] & 0x00000111b;
-
-
-        //std::cout << "CPU Stepping : " << stepping << "\n";#include <stdio.h>
-
-
         const char* szFeatures[] =
         {
             "x87 FPU On Chip",
@@ -102,8 +98,8 @@ namespace game
             "Pending Break Enable"
         };
 
-        char CPUString[0x20];
-        char CPUBrandString[0x40];
+        char CPUString[0x20] = { 0 };
+        char CPUBrandString[0x40] = { 0 };
         int CPUInfo[4] = { -1 };
         int nSteppingID = 0;
         int nModel = 0;
@@ -185,7 +181,6 @@ namespace game
         // in a human readable form.
         __cpuid(CPUInfo, 0);
         nIds = CPUInfo[0];
-        memset(CPUString, 0, sizeof(CPUString));
         *((int*)CPUString) = CPUInfo[1];
         *((int*)(CPUString + 4)) = CPUInfo[3];
         *((int*)(CPUString + 8)) = CPUInfo[2];
@@ -231,7 +226,6 @@ namespace game
         // gets the number of valid extended IDs.
         __cpuid(CPUInfo, 0x80000000);
         nExIds = CPUInfo[0];
-        memset(CPUBrandString, 0, sizeof(CPUBrandString));
 
         // Get the information associated with each extended ID.
         for (i = 0x80000000; i <= nExIds; ++i)
@@ -438,8 +432,38 @@ namespace game
         //}
 
         cpuInfo.processorCount = nLogicalProcessors;
+        CPUBrandString[63] = '\0';
         cpuInfo.processorName = CPUBrandString;
         cpuInfo.processorVendor = CPUString;
+
+        // ram info
+        MEMORYSTATUSEX memInfo = { 0 };
+        memInfo.dwLength = sizeof(MEMORYSTATUSEX);
+        GlobalMemoryStatusEx(&memInfo);
+        DWORDLONG totalVirtualMem = memInfo.ullTotalPageFile;
+        DWORDLONG virtualMemUsed = memInfo.ullTotalPageFile - memInfo.ullAvailPageFile;
+        PROCESS_MEMORY_COUNTERS_EX pmc = {0};
+        GetProcessMemoryInfo(GetCurrentProcess(), (PROCESS_MEMORY_COUNTERS*)&pmc, sizeof(pmc));
+        SIZE_T virtualMemUsedByMe = pmc.PrivateUsage;
+        DWORDLONG totalPhysMem = memInfo.ullTotalPhys;
+        DWORDLONG physMemUsed = memInfo.ullTotalPhys - memInfo.ullAvailPhys;
+        SIZE_T physMemUsedByMe = pmc.WorkingSetSize;
+
+
+		ramInfo.totalVirtualMemory = (uint64_t)(totalVirtualMem / 1024.0f / 1024.0f);
+		ramInfo.totalVirtualMemoryUsed = (uint64_t)(virtualMemUsed / 1024.0f / 1024.0f);
+		ramInfo.totalVirtualMemoryUsedByGame = (uint64_t)(virtualMemUsedByMe / 1024.0f / 1024.0f);
+        ramInfo.totalVirtualMemoryAvailable = (uint64_t)(memInfo.ullAvailPageFile / 1024.0f / 1024.0f);
+
+
+		ramInfo.totalPhysicalMemory = (uint64_t)(totalPhysMem / 1024.0f / 1024.0f);
+		ramInfo.totalPhysicalMemoryUsed = (uint64_t)(physMemUsed / 1024.0f / 1024.0f);
+		ramInfo.totalPhysicalMemoryUsedByGame = (uint64_t)(physMemUsedByMe / 1024.0f / 1024.0f);
+        ramInfo.totalPhysicalMemoryAvailable = (uint64_t)(memInfo.ullAvailPhys / 1024.0f / 1024.0f);
+
+
+        // cpu usage
+
     }
 
 }
