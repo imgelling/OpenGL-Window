@@ -1125,6 +1125,7 @@ namespace game
 		shader.fragmentId = 0;
 		shader.vertexId = 0;
 	}
+
 	// Undefine what we have done, if someone uses an extension loader 
 #undef GL_TEXTURE_BASE_LEVEL 
 #undef GL_TEXTURE_MAX_LEVEL 

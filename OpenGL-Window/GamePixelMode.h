@@ -93,9 +93,9 @@ namespace game
 		glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, _frameBuffer[_currentBuffer].width, _frameBuffer[_currentBuffer].height, GL_RGBA, game::systemInfo.gpuInfo.internalPixelType, (GLvoid*)_video);
 		glBindTexture(GL_TEXTURE_2D, 0);
 		
-		// Swap texture buffer to draw to
-		_currentBuffer++;
-		if (_currentBuffer > 1) _currentBuffer = 0;
+		//// Swap texture buffer to draw to
+		//_currentBuffer++;
+		//if (_currentBuffer > 1) _currentBuffer = 0;
 	}
 
 	inline void PixelModeFixed::_ScaleQuadToWindow()
@@ -189,9 +189,14 @@ namespace game
 
 		// gl only
 		// Draw the quad
+		glEnable(GL_TEXTURE_2D);
 		glBindTexture(GL_TEXTURE_2D, _frameBuffer[_currentBuffer].bind);
 		glCallList(_compiledQuad);
 		glBindTexture(GL_TEXTURE_2D, 0);
+		glDisable(GL_TEXTURE_2D);
+
+		_currentBuffer++;
+		if (_currentBuffer > 1) _currentBuffer = 0;
 
 	}
 

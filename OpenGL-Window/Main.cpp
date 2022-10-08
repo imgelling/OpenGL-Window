@@ -37,7 +37,6 @@ public:
 		whitecol.Set(1.0f, 0.0f, 1.0f, 0.25f);
 
 		// Setup OpenGL
-		glEnable(GL_TEXTURE_2D);
 		glClearColor(0.25f, 0.25f, 0.25f, 1.0f);
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -70,10 +69,8 @@ public:
 	void Render(const float_t msElapsed)
 	{
 		SetWindowTitle("fps : " + std::to_string(GetFramesPerSecond()) + " ups : " + std::to_string(GetUpdatesPerSecond()));
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);  // removal of this fixes nvidia error
-															// disabling of texture 2d fixes error
-		
-		// pixel mode stuff
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); 
+															
 		pixelMode.Clear(game::Colors::Black);
 		for (uint32_t i = 0; i < 256; i++)
 		{
