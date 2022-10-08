@@ -65,6 +65,7 @@ namespace game
 			_frameBuffer[loop].height = _bufferSize.height;
 			_frameBuffer[loop].componentsPerPixel = 4;
 			_frameBuffer[loop].filterType = game::TextureFilterType::Point;
+			_frameBuffer[loop].isMipMapped = false;
 			if (!enginePointer->CreateTexture(_frameBuffer[loop]))
 			{
 				lastError = { GameErrors::GameRenderer, "Could not create textures for PixelModeShaderless frame buffers." };

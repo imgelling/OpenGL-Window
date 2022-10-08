@@ -88,6 +88,8 @@ namespace game
 #define GL_DEBUG_SEVERITY_HIGH 0x9146
 #define GL_DEBUG_SEVERITY_MEDIUM 0x9147
 #define GL_DEBUG_SEVERITY_LOW 0x9148
+#define GL_TEXTURE_BASE_LEVEL 0x813C
+#define GL_TEXTURE_MAX_LEVEL 0x813D
 
 	
 
@@ -206,7 +208,7 @@ namespace game
 		case 131185: // glBufferData
 		case 131184: // VBO buffer data
 		case 131218: // NVIDIA recompile msg
-			std::cout << "USELESS----------\n";
+			std::cout << "____USELESS----------\n";
 			return;
 		}
 
@@ -863,6 +865,8 @@ namespace game
 		{
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);// LINEAR_MIPMAP_LINEAR); // min
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);// GL_LINEAR); //max
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 0);
 		}
 		else if (texture.filterType == TextureFilterType::Bilinear)
 		{
@@ -1122,6 +1126,8 @@ namespace game
 		shader.vertexId = 0;
 	}
 	// Undefine what we have done, if someone uses an extension loader 
+#undef GL_TEXTURE_BASE_LEVEL 
+#undef GL_TEXTURE_MAX_LEVEL 
 #undef GL_DEBUG_SEVERITY_HIGH
 #undef GL_DEBUG_SEVERITY_MEDIUM
 #undef GL_DEBUG_SEVERITY_LOW
