@@ -78,7 +78,6 @@ public:
 		}
 
 		pixelMode.Render();
-		glFlush();
 	}
 };
 

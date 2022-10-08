@@ -639,10 +639,6 @@ namespace game
 			_glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
 		}
 
-		// Renderer is good to go
-		_logger->Write("OpenGL Device created!");
-
-
 		// Read all available extensions
 		_ReadExtensions();
 
