@@ -65,6 +65,33 @@ namespace game
 #define GL_FRAGMENT_SHADER 0x8B30
 #define GL_VERTEX_SHADER 0x8B31
 #define GL_VALIDATE_STATUS 0x8B83
+#define GL_DEBUG_OUTPUT 0x92E0
+#define GL_DEBUG_OUTPUT_SYNCHRONOUS 0x8242
+#define GLAPIENTRY __stdcall
+#define GL_DEBUG_OUTPUT_SYNCHRONOUS_ARB 0x8242
+#define GL_DEBUG_SOURCE_API 0x8246
+#define GL_DEBUG_SOURCE_WINDOW_SYSTEM 0x8247
+#define GL_DEBUG_SOURCE_SHADER_COMPILER 0x8248
+#define GL_DEBUG_SOURCE_THIRD_PARTY 0x8249
+#define GL_DEBUG_SOURCE_APPLICATION 0x824A
+#define GL_DEBUG_SOURCE_OTHER 0x824B
+#define GL_DEBUG_TYPE_ERROR 0x824C
+#define GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR 0x824D
+#define GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR 0x824E
+#define GL_DEBUG_TYPE_PORTABILITY 0x824F
+#define GL_DEBUG_TYPE_PERFORMANCE 0x8250
+#define GL_DEBUG_TYPE_OTHER 0x8251
+#define GL_DEBUG_TYPE_MARKER 0x8268
+#define GL_DEBUG_TYPE_PUSH_GROUP 0x8269
+#define GL_DEBUG_TYPE_POP_GROUP 0x826A
+#define GL_DEBUG_SEVERITY_NOTIFICATION 0x826B
+#define GL_DEBUG_SEVERITY_HIGH 0x9146
+#define GL_DEBUG_SEVERITY_MEDIUM 0x9147
+#define GL_DEBUG_SEVERITY_LOW 0x9148
+
+	
+
+	
 	
 	class RendererGL : public RendererBase
 	{
@@ -80,12 +107,16 @@ namespace game
 		void UnLoadTexture(Texture2dGL& texture);
 		bool LoadShader(const std::string vertex, const std::string fragment, ShaderGL& shader);
 		void UnLoadShader(ShaderGL& shader);
+
+
 	protected:
 		void _ReadExtensions();
 
 	private:
 		std::string _validateShader(const uint32_t shader, const char* file); 
 		std::string _validateProgram(const uint32_t program);
+
+
 		typedef HDC _glDeviceContext_t;
 		typedef HGLRC _glRenderContext_t;
 
@@ -153,7 +184,112 @@ namespace game
 
 		typedef void (WINAPI* _PFNGLDETACHSHADERPROC) (GLuint program, GLuint shader);
 		_PFNGLDETACHSHADERPROC _glDetachShader = nullptr;
+
+		typedef void (WINAPI* _GLDEBUGPROCAMD)(GLenum source, GLuint id, GLenum category, GLenum severity, GLsizei length, const char* message, void* userParam);
+		typedef void (WINAPI* _PFNGLDEBUGMESSAGECALLBACKAMDPROC) (_GLDEBUGPROCAMD callback, void* userParam);
+		_PFNGLDEBUGMESSAGECALLBACKAMDPROC _glDebugMessageCallback = nullptr;
+
+		typedef void (WINAPI* _PFNGLDEBUGMESSAGECONTROLPROC) (GLenum source, GLenum type, GLenum severity, GLsizei count, const GLuint* ids, GLboolean enabled);
+		_PFNGLDEBUGMESSAGECONTROLPROC _glDebugMessageControl = nullptr;
+
+		static void _openglCallbackFunction(GLenum source, GLuint id, GLenum category, GLenum severity, GLsizei length, const char* message, void* userParam)
+		{
+			// Some debug messages are just annoying informational messages
+			switch (id)
+			{
+			case 131169: // The driver allocated storage for renderbuffer
+			case 131185: // glBufferData
+			case 131184: // VBO buffer data
+			case 131218: // NVIDIA recompile msg
+				std::cout << "USELESS----------\n";
+				return;
+			}
+
+			printf("Message: %s\n", message);
+			printf("Source: ");
+
+			switch (source)
+			{
+			case GL_DEBUG_SOURCE_API:
+				printf("API");
+				break;
+			case GL_DEBUG_SOURCE_WINDOW_SYSTEM:
+				printf("Window System");
+				break;
+			case GL_DEBUG_SOURCE_SHADER_COMPILER:
+				printf("Shader Compiler");
+				break;
+			case GL_DEBUG_SOURCE_THIRD_PARTY:
+				printf("Third Party");
+				break;
+			case GL_DEBUG_SOURCE_APPLICATION:
+				printf("Application");
+				break;
+			case GL_DEBUG_SOURCE_OTHER:
+				printf("Other");
+				break;
+			}
+
+			printf("\n");
+			printf("Type: ");
+
+			switch (category)
+			{
+			case GL_DEBUG_TYPE_ERROR:
+				printf("Error");
+				break;
+			case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR:
+				printf("Deprecated Behaviour");
+				break;
+			case GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR:
+				printf("Undefined Behaviour");
+				break;
+			case GL_DEBUG_TYPE_PORTABILITY:
+				printf("Portability");
+				break;
+			case GL_DEBUG_TYPE_PERFORMANCE:
+				printf("Performance");
+				break;
+			case GL_DEBUG_TYPE_MARKER:
+				printf("Marker");
+				break;
+			case GL_DEBUG_TYPE_PUSH_GROUP:
+				printf("Push Group");
+				break;
+			case GL_DEBUG_TYPE_POP_GROUP:
+				printf("Pop Group");
+				break;
+			case GL_DEBUG_TYPE_OTHER:
+				printf("Other");
+				break;
+			}
+
+			printf("\n");
+			printf("ID: %d\n", id);
+			printf("Severity: ");
+
+			switch (severity)
+			{
+			case GL_DEBUG_SEVERITY_HIGH:
+				printf("High");
+				break;
+			case GL_DEBUG_SEVERITY_MEDIUM:
+				printf("Medium");
+				break;
+			case GL_DEBUG_SEVERITY_LOW:
+				printf("Low");
+				break;
+			case GL_DEBUG_SEVERITY_NOTIFICATION:
+				printf("Notification");
+				break;
+			}
+			printf("\n\n");
+			return;
+		}
 	};
+
+
+
 
 	inline RendererGL::RendererGL()
 	{
@@ -460,6 +596,20 @@ namespace game
 			return false;
 		}
 
+		_glDebugMessageCallback = (_PFNGLDEBUGMESSAGECALLBACKAMDPROC)wglGetProcAddress("glDebugMessageCallback");
+		if (_glDebugMessageCallback == nullptr)
+		{
+			lastError = { GameErrors::GameOpenGLSpecific, "Extension glDebugMessageCallback not available." };
+			return false;
+		}
+
+		_glDebugMessageControl = (_PFNGLDEBUGMESSAGECONTROLPROC)wglGetProcAddress("glDebugMessageControl");
+		if (_glDebugMessageControl == nullptr)
+		{
+			lastError = { GameErrors::GameOpenGLSpecific, "Extension glDebugMessgeControl not available" };
+			return false;
+		}
+
 		// Set vertical sync
 		if (_attributes.VsyncOn)
 			_wglSwapInterval(1);
@@ -476,6 +626,14 @@ namespace game
 			glDisable(GL_MULTISAMPLE);
 		}
 
+		if (_attributes.DebugMode)
+		{
+			glEnable(GL_DEBUG_OUTPUT);
+			glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+
+			_glDebugMessageCallback(_openglCallbackFunction, nullptr);
+			_glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
+		}
 
 		// Renderer is good to go
 		_logger->Write("OpenGL Device created!");
@@ -487,6 +645,8 @@ namespace game
 
 		return true;
 	}
+
+	
 
 	inline void RendererGL::_ReadExtensions()
 	{
@@ -960,6 +1120,32 @@ namespace game
 		shader.vertexId = 0;
 	}
 	// Undefine what we have done, if someone uses an extension loader 
+#undef GL_DEBUG_SEVERITY_HIGH
+#undef GL_DEBUG_SEVERITY_MEDIUM
+#undef GL_DEBUG_SEVERITY_LOW
+#undef GL_DEBUG_SOURCE_API 
+#undef GL_DEBUG_SOURCE_WINDOW_SYSTEM 
+#undef GL_DEBUG_SOURCE_SHADER_COMPILER 
+#undef GL_DEBUG_SOURCE_THIRD_PARTY 
+#undef GL_DEBUG_SOURCE_APPLICATION 
+#undef GL_DEBUG_SOURCE_OTHER 
+#undef GL_DEBUG_TYPE_ERROR 
+#undef GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR 
+#undef GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR 
+#undef GL_DEBUG_TYPE_PORTABILITY 
+#undef GL_DEBUG_TYPE_PERFORMANCE 
+#undef GL_DEBUG_TYPE_OTHER 
+#undef GL_DEBUG_TYPE_MARKER 
+#undef GL_DEBUG_TYPE_PUSH_GROUP 
+#undef GL_DEBUG_TYPE_POP_GROUP 
+#undef GL_DEBUG_SEVERITY_NOTIFICATION 
+#undef GL_DEBUG_SEVERITY_HIGH_ARB 
+#undef GL_DEBUG_SEVERITY_MEDIUM_ARB 
+#undef GL_DEBUG_SEVERITY_LOW_ARB 
+
+#undef GLAPIENTRY
+#undef GL_DEBUG_OUTPUT_SYNCHRONOUS
+#undef GL_DEBUG_OUTPUT 
 #undef GL_VALIDATE_STATUS 
 #undef GL_FRAGMENT_SHADER 
 #undef GL_VERTEX_SHADER 
