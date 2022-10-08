@@ -268,6 +268,12 @@ namespace game
 
 		systemInfo.GetCPUInfo();
 
+		sStream << "CPU vendor : " << systemInfo.cpuInfo.processorVendor;
+		LOG(sStream);
+
+		sStream << "CPU name : " << systemInfo.cpuInfo.processorName;
+		LOG(sStream);
+
 		sStream << "CPU processor thread count : " << systemInfo.cpuInfo.processorCount;
 		LOG(sStream);
 		
