@@ -3,7 +3,7 @@
 #include <iostream>
 
 // Engine header
-//#define GAME_USE_DEDICATED_GPU
+#define GAME_USE_DEDICATED_GPU
 #include "Game.h"
 
 class Game : public game::Engine
