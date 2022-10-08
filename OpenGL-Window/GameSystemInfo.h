@@ -55,7 +55,7 @@ namespace game
 		memcpy(vendor + 4, &regs[3], 4); // copy EDX
 		memcpy(vendor + 8, &regs[2], 4); // copy ECX
 		vendor[12] = '\0';
-		std::cout << "My CPU is a " << vendor << "\n";
+		std::cout << "CPU Vendor : " << vendor << "\n";
 
 		
 		__cpuidex(regs, 1,0);              // mov eax,0; cpuid
@@ -63,7 +63,7 @@ namespace game
 		memcpy(vendor + 4, &regs[3], 4); // copy EDX
 		memcpy(vendor + 8, &regs[2], 4); // copy ECX
 		vendor[12] = '\0';
-		std::cout << "My CPU is a " << vendor << "\n";
+		std::cout << "CPU Name : " << vendor << "\n";
 	}
 
 }
