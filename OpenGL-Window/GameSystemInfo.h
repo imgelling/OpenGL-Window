@@ -47,16 +47,17 @@ namespace game
 	{
 		cpuInfo.processorCount = std::thread::hardware_concurrency();
 
-		// cpu maker
-		int regs[4] = { 0 };
-		char vendor[13];
-		__cpuid(regs, 0);              // mov eax,0; cpuid
+		// cpu vendor
+		int32_t regs[4] = { 0 };
+		int8_t vendor[13] = { 0 };
+		__cpuidex(regs, 0,0);              // mov eax,0; cpuid
 		memcpy(vendor, &regs[1], 4);   // copy EBX
 		memcpy(vendor + 4, &regs[3], 4); // copy EDX
 		memcpy(vendor + 8, &regs[2], 4); // copy ECX
 		vendor[12] = '\0';
 		std::cout << "My CPU is a " << vendor << "\n";
 
+		
 		__cpuidex(regs, 1,0);              // mov eax,0; cpuid
 		memcpy(vendor, &regs[1], 4);   // copy EBX
 		memcpy(vendor + 4, &regs[3], 4); // copy EDX

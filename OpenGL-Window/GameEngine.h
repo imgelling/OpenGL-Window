@@ -72,7 +72,7 @@ namespace game
 		Timer _frameLockTimer;
 		uint32_t _updatesPerSecond;
 		uint32_t _framesPerSecond;
-		void _LogCPUInfo();
+		void _GetAndLogCPUInfo();
 		void _ProcessMessages();
 		void _Swap();
 
@@ -255,7 +255,7 @@ namespace game
 		_attributes.WindowFullscreen = !_attributes.WindowFullscreen;
 	}
 
-	inline void Engine::_LogCPUInfo()
+	inline void Engine::_GetAndLogCPUInfo()
 	{
 		std::stringstream sStream;
 
@@ -281,7 +281,7 @@ namespace game
 		logger->Header(_attributes.WindowTitle, _attributes.GameVersion);
 
 		// Get and log the cpu info
-		_LogCPUInfo();
+		_GetAndLogCPUInfo();
 
 		// Create the window
 		_window.SetAttributes(_attributes);

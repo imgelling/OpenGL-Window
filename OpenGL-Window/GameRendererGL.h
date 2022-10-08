@@ -537,7 +537,7 @@ namespace game
 			_logger->Write(stream.str());
 			stream.str("");
 		};
-
+		
 		// Log the OpenGL rendering device
 		systemInfo.gpuInfo.renderer = (char*)glGetString(GL_RENDERER);
 		sStream << "OpenGL renderer : " << systemInfo.gpuInfo.renderer;
