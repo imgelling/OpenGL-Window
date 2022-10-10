@@ -68,9 +68,10 @@ public:
 		// Cpu speed
 		static double ptime = 0.0f;
 		ptime += (double)msElapsed;
+
 		if (ptime >= 1000.0)
 		{
-			std::cout << "-- speed : " << ((double)__rdtsc() - (double)cyclesStart) / 1000000.0f / 1000.0f << "GHZ (ticks measured)\n";
+			std::cout << "-- speed : " << ((double)__rdtsc() - (double)cyclesStart) / (double)1000000 / 1000.0f << "GHZ (ticks measured)\n";
 			cyclesStart = __rdtsc();
 			ptime = ptime - 1000.0f;
 		}
