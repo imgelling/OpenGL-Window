@@ -3,7 +3,7 @@
 #include <iostream>
 
 // Engine header
-#define GAME_USE_DEDICATED_GPU
+//#define GAME_USE_DEDICATED_GPU
 #include "Game.h"
 
 class Game : public game::Engine
@@ -25,7 +25,7 @@ public:
 		attrib.WindowTitle = "PixelMode tests";
 		attrib.GameVersion = "0.01";
 		attrib.Framelock = 60;
-		attrib.VsyncOn = false;
+		attrib.VsyncOn = true;
 		attrib.DebugMode = true;
 		attrib.MultiSamples = 32; // max 8 amd, 16 nvidia
 		attrib.RenderingAPI = game::RenderAPI::OpenGL;
@@ -55,6 +55,7 @@ public:
 
 	void Update(const float_t msElapsed)
 	{
+		static __int64 cyclesStart = __rdtsc();
 		// Handle Input
 		if (keyboard.WasKeyReleased(VK_F11))
 		{
@@ -63,6 +64,15 @@ public:
 		if (keyboard.WasKeyReleased(VK_ESCAPE))
 		{
 			StopEngine();
+		}
+		// Cpu speed
+		static double ptime = 0.0f;
+		ptime += (double)msElapsed;
+		if (ptime >= 1000.0)
+		{
+			std::cout << "-- speed : " << ((double)__rdtsc() - (double)cyclesStart) / 1000000.0f / 1000.0f << "GHZ (ticks measured)\n";
+			cyclesStart = __rdtsc();
+			ptime = ptime - 1000.0f;
 		}
 	}
 

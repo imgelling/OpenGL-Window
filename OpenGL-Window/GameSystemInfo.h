@@ -4,6 +4,10 @@
 #include <thread>
 #include <intrin.h>
 #include <psapi.h>
+#include <powerbase.h>
+#include <windows.h>
+
+#pragma comment(lib, "Powrprof.lib")
 
 namespace game
 {
@@ -463,7 +467,7 @@ namespace game
 
 
         // cpu usage
-
+       
     }
 
 }
