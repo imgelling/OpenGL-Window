@@ -46,6 +46,7 @@ namespace game
 		void SetFrameLock(const uint32_t limit);
 		uint32_t GetUpdatesPerSecond();
 		uint32_t GetFramesPerSecond();
+		uint32_t GetCPUFrequency();
 		Vector2i GetWindowSize();
 		
 		bool CreateTexture(Texture2dGL& texture);
@@ -70,6 +71,8 @@ namespace game
 		Timer _renderTimer;
 		Timer _updateTimer;
 		Timer _frameLockTimer;
+		Timer _cpuSpeedTimer;
+		uint32_t _cpuFrequency;
 		uint32_t _updatesPerSecond;
 		uint32_t _framesPerSecond;
 		void _GetAndLogCPUInfo();
@@ -87,6 +90,7 @@ namespace game
 		_frameTime = 0.0f;
 		_updatesPerSecond = 0;
 		_framesPerSecond = 0;
+		_cpuFrequency = 0;
 		this->logger = logger;
 	}
 
@@ -106,7 +110,7 @@ namespace game
 		// Tracks frames per second
 		float_t fpsTime = 0.0f;
 		uint32_t framesCounted = 0;
-
+		__int64 cyclesStart = __rdtsc();
 
 		isRunning = true;
 
@@ -114,6 +118,7 @@ namespace game
 		_renderTimer.Reset();
 		_frameLockTimer.Reset();
 		_updateTimer.Reset();
+		_cpuSpeedTimer.Reset();
 
 		// Do the game loop
 		do
@@ -122,6 +127,16 @@ namespace game
 
 			// Do window messages
 			_ProcessMessages();
+
+			// Update cpu frequency
+			if (_cpuSpeedTimer.Elapsed() > 1000.0f)
+			{
+				__int64 cyclesEnd = __rdtsc();
+				_cpuFrequency = (uint32_t)(cyclesEnd - cyclesStart) / 1000000;
+				cyclesStart = cyclesEnd;
+				_cpuSpeedTimer.Reset();
+			}
+
 
 			// Try to update as fast as possible and keep track of UPS
 			msElapsed = _updateTimer.Elapsed();
@@ -201,6 +216,11 @@ namespace game
 			_frameTime = 0.0f;
 		}
 
+	}
+
+	inline uint32_t Engine::GetCPUFrequency()
+	{
+		return _cpuFrequency;
 	}
 
 	inline uint32_t Engine::GetUpdatesPerSecond()

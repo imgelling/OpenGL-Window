@@ -55,7 +55,6 @@ public:
 
 	void Update(const float_t msElapsed)
 	{
-		static __int64 cyclesStart = __rdtsc();
 		// Handle Input
 		if (keyboard.WasKeyReleased(VK_F11))
 		{
@@ -65,21 +64,11 @@ public:
 		{
 			StopEngine();
 		}
-		// Cpu speed
-		static double ptime = 0.0f;
-		ptime += (double)msElapsed;
-
-		if (ptime >= 1000.0)
-		{
-			std::cout << "-- speed : " << ((double)__rdtsc() - (double)cyclesStart) / (double)1000000 / 1000.0f << "GHZ (ticks measured)\n";
-			cyclesStart = __rdtsc();
-			ptime = ptime - 1000.0f;
-		}
 	}
 
 	void Render(const float_t msElapsed)
 	{
-		SetWindowTitle("fps : " + std::to_string(GetFramesPerSecond()) + " ups : " + std::to_string(GetUpdatesPerSecond()));
+		SetWindowTitle("fps : " + std::to_string(GetFramesPerSecond()) + " ups : " + std::to_string(GetUpdatesPerSecond()) + " cpu : " + std::to_string(GetCPUFrequency()) + "Mhz");
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); 
 															
 		pixelMode.Clear(game::Colors::Black);
