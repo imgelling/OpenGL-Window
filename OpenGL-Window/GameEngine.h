@@ -35,6 +35,7 @@ namespace game
 		Logger* logger;
 		bool isRunning;
 
+		// Engine setup
 		Engine(Logger* logger);
 		~Engine();
 		void SetAttributes(const Attributes &attrib);
@@ -42,21 +43,26 @@ namespace game
 		void StartEngine();
 		void StopEngine();
 
-		void SetWindowTitle(const std::string title);
+		// Frame and update timing 
 		void SetFrameLock(const uint32_t limit);
-		uint32_t GetUpdatesPerSecond();
-		uint32_t GetFramesPerSecond();
-		uint32_t GetCPUFrequency();
-		Vector2i GetWindowSize();
+		uint32_t GetUpdatesPerSecond() const noexcept;
+		uint32_t GetFramesPerSecond() const noexcept;
+		uint32_t GetCPUFrequency() const noexcept;
 		
+		// Renderer specific
 		bool CreateTexture(Texture2dGL& texture);
-		bool LoadTexture(std::string fileName, Texture2dGL &texture);
+		bool LoadTexture(const std::string fileName, Texture2dGL &texture);
 		void UnLoadTexture(Texture2dGL& texture);
 		bool LoadShader(const std::string vertex, const std::string fragment, ShaderGL& shader);
 		void UnLoadShader(ShaderGL& shader);
 		
+		// Window stuff
+		void SetWindowTitle(const std::string title);
 		void ToggleFullscreen();
 		void HandleWindowResize(const uint32_t width, const uint32_t height);
+		Vector2i GetWindowSize() const noexcept;
+		
+		// Created by end user
 		virtual void Update(const float_t msElapsed) = 0;
 		virtual void Render(const float_t msElapsed) = 0;
 		virtual void Initialize() = 0;
@@ -218,22 +224,22 @@ namespace game
 
 	}
 
-	inline uint32_t Engine::GetCPUFrequency()
+	inline uint32_t Engine::GetCPUFrequency() const noexcept
 	{
 		return _cpuFrequency;
 	}
 
-	inline uint32_t Engine::GetUpdatesPerSecond()
+	inline uint32_t Engine::GetUpdatesPerSecond() const noexcept
 	{
 		return _updatesPerSecond;
 	}
 
-	inline uint32_t Engine::GetFramesPerSecond()
+	inline uint32_t Engine::GetFramesPerSecond() const noexcept
 	{
 		return _framesPerSecond;
 	}
 
-	inline Vector2i Engine::GetWindowSize()
+	inline Vector2i Engine::GetWindowSize() const noexcept
 	{
 		return { (int)_attributes.WindowWidth, (int)_attributes.WindowHeight};
 	}
@@ -243,7 +249,7 @@ namespace game
 		return _renderer->CreateTexture(texture);
 	}
 
-	inline bool Engine::LoadTexture(std::string fileName, Texture2dGL &texture)
+	inline bool Engine::LoadTexture(const std::string fileName, Texture2dGL &texture)
 	{
 		return _renderer->LoadTexture(fileName, texture);
 	}

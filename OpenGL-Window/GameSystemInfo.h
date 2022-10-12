@@ -266,27 +266,7 @@ namespace game
                 memcpy(CPUBrandString + 16, CPUInfo, sizeof(CPUInfo));
             else if (i == 0x80000004)
                 memcpy(CPUBrandString + 32, CPUInfo, sizeof(CPUInfo));
-            else if (i == 0x80000006)
-            {
-                nCacheLineSize = CPUInfo[2] & 0xff;
-                nL2Associativity = (CPUInfo[2] >> 12) & 0xf;
-                nCacheSizeK = (CPUInfo[2] >> 16) & 0xffff;
-            }
-            else if (i == 0x80000008)
-            {
-                nPhysicalAddress = CPUInfo[0] & 0xff;
-                nVirtualAddress = (CPUInfo[0] >> 8) & 0xff;
-            }
-            else if (i == 0x8000000A)
-            {
-                bNestedPaging = (CPUInfo[3] & 0x1) || false;
-                bLBRVisualization = (CPUInfo[3] & 0x2) || false;
-            }
-            else if (i == 0x8000001A)
-            {
-                bFP128 = (CPUInfo[0] & 0x1) || false;
-                bMOVOptimization = (CPUInfo[0] & 0x2) || false;
-            }
+
         }
 
         //// Display all the information in user-friendly format.
@@ -435,6 +415,7 @@ namespace game
         //    printf_s("Cache Size = %dK\n", nCacheSizeK);
         //}
 
+        // Save cpu info into global struct
         cpuInfo.processorCount = nLogicalProcessors;
         CPUBrandString[63] = '\0';
         cpuInfo.processorName = CPUBrandString;
@@ -444,19 +425,21 @@ namespace game
         MEMORYSTATUSEX memInfo = { 0 };
         memInfo.dwLength = sizeof(MEMORYSTATUSEX);
         GlobalMemoryStatusEx(&memInfo);
-        DWORDLONG totalVirtualMem = memInfo.ullTotalPageFile;
-        DWORDLONG virtualMemUsed = memInfo.ullTotalPageFile - memInfo.ullAvailPageFile;
+        uint64_t totalVirtualMem = memInfo.ullTotalPageFile;
+        uint64_t virtualMemUsed = memInfo.ullTotalPageFile - memInfo.ullAvailPageFile;
         PROCESS_MEMORY_COUNTERS_EX pmc = {0};
+
+
         GetProcessMemoryInfo(GetCurrentProcess(), (PROCESS_MEMORY_COUNTERS*)&pmc, sizeof(pmc));
-        SIZE_T virtualMemUsedByMe = pmc.PrivateUsage;
-        DWORDLONG totalPhysMem = memInfo.ullTotalPhys;
-        DWORDLONG physMemUsed = memInfo.ullTotalPhys - memInfo.ullAvailPhys;
-        SIZE_T physMemUsedByMe = pmc.WorkingSetSize;
+        uint64_t virtualMemUsedByThis = pmc.PrivateUsage;
+        uint64_t totalPhysMem = memInfo.ullTotalPhys;
+        uint64_t physMemUsed = memInfo.ullTotalPhys - memInfo.ullAvailPhys;
+        uint64_t physMemUsedByMe = pmc.WorkingSetSize;
 
 
 		ramInfo.totalVirtualMemory = (uint64_t)(totalVirtualMem / 1024.0f / 1024.0f);
 		ramInfo.totalVirtualMemoryUsed = (uint64_t)(virtualMemUsed / 1024.0f / 1024.0f);
-		ramInfo.totalVirtualMemoryUsedByGame = (uint64_t)(virtualMemUsedByMe / 1024.0f / 1024.0f);
+		ramInfo.totalVirtualMemoryUsedByGame = (uint64_t)(virtualMemUsedByThis / 1024.0f / 1024.0f);
         ramInfo.totalVirtualMemoryAvailable = (uint64_t)(memInfo.ullAvailPageFile / 1024.0f / 1024.0f);
 
 

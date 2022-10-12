@@ -9,9 +9,12 @@ namespace game
 	// --- Helpers Start
 	enum class RenderAPI
 	{
-		OpenGL = 0,		// OpenGL, any context
-		Vulkan,			// Vulkan, ??? about version
-		DirectX			// DirectX 10, 11, or 12
+		OpenGL = 0,		// OpenGL
+		Vulkan,			// Vulkan
+		DirectX9,		// DirectX
+		DirectX10,
+		DirectX11,
+		DirectX12
 	};
 
 	inline std::wstring ConvertToWide(const std::string s)

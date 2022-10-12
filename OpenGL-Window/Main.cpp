@@ -3,7 +3,7 @@
 #include <iostream>
 
 // Engine header
-//#define GAME_USE_DEDICATED_GPU
+#define GAME_USE_DEDICATED_GPU
 #include "Game.h"
 
 class Game : public game::Engine
@@ -24,9 +24,9 @@ public:
 
 		attrib.WindowTitle = "PixelMode tests";
 		attrib.GameVersion = "0.01";
-		attrib.Framelock = 60;
-		attrib.VsyncOn = true;
-		attrib.DebugMode = true;
+		attrib.Framelock = 0;
+		attrib.VsyncOn = false;
+		attrib.DebugMode = false;
 		attrib.MultiSamples = 32; // max 8 amd, 16 nvidia
 		attrib.RenderingAPI = game::RenderAPI::OpenGL;
 		SetAttributes(attrib);
@@ -37,6 +37,7 @@ public:
 		whitecol.Set(1.0f, 0.0f, 1.0f, 0.25f);
 
 		// Setup OpenGL
+		// This all needs to be engine calls, not opengl
 		glClearColor(0.25f, 0.25f, 0.25f, 1.0f);
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -69,6 +70,8 @@ public:
 	void Render(const float_t msElapsed)
 	{
 		SetWindowTitle("fps : " + std::to_string(GetFramesPerSecond()) + " ups : " + std::to_string(GetUpdatesPerSecond()) + " cpu : " + std::to_string(GetCPUFrequency()) + "Mhz");
+		
+		// Make Engine function not opengl
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); 
 															
 		pixelMode.Clear(game::Colors::Black);
