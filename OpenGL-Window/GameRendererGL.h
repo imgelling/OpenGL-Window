@@ -109,6 +109,8 @@ namespace game
 		void UnLoadTexture(Texture2dGL& texture);
 		bool LoadShader(const std::string vertex, const std::string fragment, ShaderGL& shader);
 		void UnLoadShader(ShaderGL& shader);
+		void SetClearColor(const Color& color) noexcept;
+		void Clear(const bool color, const bool depth, const bool stencil) noexcept;
 
 
 	protected:
@@ -1108,7 +1110,7 @@ namespace game
 		return true;
 	}
 
-	void RendererGL::UnLoadShader(ShaderGL& shader)
+	inline void RendererGL::UnLoadShader(ShaderGL& shader)
 	{
 		_glDetachShader(shader.shaderId, shader.fragmentId);
 		_glDetachShader(shader.shaderId, shader.vertexId);
@@ -1122,6 +1124,18 @@ namespace game
 		shader.vertexId = 0;
 	}
 
+	inline void RendererGL::SetClearColor(const Color& color) noexcept
+	{
+		glClearColor(color.rf, color.gf, color.bf, color.af);
+	}
+	inline void RendererGL::Clear(const bool color, const bool depth, const bool stencil) noexcept
+	{
+		uint32_t clearType = 0;
+		if (color) clearType |= GL_COLOR_BUFFER_BIT;
+		if (depth) clearType |= GL_DEPTH_BUFFER_BIT;
+		if (stencil) clearType |= GL_STENCIL_BUFFER_BIT;
+		glClear(clearType);
+	}
 	// Undefine what we have done, if someone uses an extension loader 
 #undef GL_TEXTURE_BASE_LEVEL 
 #undef GL_TEXTURE_MAX_LEVEL 

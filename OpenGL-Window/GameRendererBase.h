@@ -30,6 +30,8 @@ namespace game
 		virtual void UnLoadTexture(Texture2dGL& texture) = 0;
 		virtual bool LoadShader(const std::string vertex, const std::string fragment, ShaderGL& shader) = 0;
 		virtual void UnLoadShader(ShaderGL& shader) = 0;
+		virtual void SetClearColor(const Color& color) noexcept = 0;
+		virtual void Clear(const bool color, const bool depth, const bool stencil) noexcept = 0;
 	protected:
 		Attributes _attributes;
 		std::vector<std::string> _extensionsAvailable;

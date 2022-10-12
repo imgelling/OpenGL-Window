@@ -36,6 +36,7 @@ namespace game
 		bool isRunning;
 
 		// Engine setup
+
 		Engine(Logger* logger);
 		~Engine();
 		void SetAttributes(const Attributes &attrib);
@@ -44,25 +45,31 @@ namespace game
 		void StopEngine();
 
 		// Frame and update timing 
-		void SetFrameLock(const uint32_t limit);
+		
+		void SetFrameLock(const uint32_t limit) noexcept;
 		uint32_t GetUpdatesPerSecond() const noexcept;
 		uint32_t GetFramesPerSecond() const noexcept;
 		uint32_t GetCPUFrequency() const noexcept;
 		
 		// Renderer specific
+		
 		bool CreateTexture(Texture2dGL& texture);
-		bool LoadTexture(const std::string fileName, Texture2dGL &texture);
+		bool LoadTexture(const std::string fileName, Texture2dGL& texture);
 		void UnLoadTexture(Texture2dGL& texture);
 		bool LoadShader(const std::string vertex, const std::string fragment, ShaderGL& shader);
 		void UnLoadShader(ShaderGL& shader);
-		
+		void SetClearColor(const Color& color) noexcept;
+		void Clear(const bool Color, const bool Depth, const bool Stencil) noexcept;
+
 		// Window stuff
+		
 		void SetWindowTitle(const std::string title);
 		void ToggleFullscreen();
 		void HandleWindowResize(const uint32_t width, const uint32_t height);
 		Vector2i GetWindowSize() const noexcept;
 		
 		// Created by end user
+		
 		virtual void Update(const float_t msElapsed) = 0;
 		virtual void Render(const float_t msElapsed) = 0;
 		virtual void Initialize() = 0;
@@ -210,7 +217,7 @@ namespace game
 		}
 	}
 
-	inline void Engine::SetFrameLock(const uint32_t limit)
+	inline void Engine::SetFrameLock(const uint32_t limit) noexcept
 	{
 		_attributes.Framelock = (float_t)limit;
 		if (_attributes.Framelock > 0)
@@ -242,6 +249,21 @@ namespace game
 	inline Vector2i Engine::GetWindowSize() const noexcept
 	{
 		return { (int)_attributes.WindowWidth, (int)_attributes.WindowHeight};
+	}
+
+	inline void Engine::SetClearColor(const Color &color) noexcept
+	{
+		if (_renderer)
+		{
+			_renderer->SetClearColor(color);
+		}
+	}
+	inline void Engine::Clear(const bool color, const bool depth, const bool stencil) noexcept
+	{
+		if (_renderer)
+		{
+			_renderer->Clear(color, depth, stencil);
+		}
 	}
 
 	inline bool Engine::CreateTexture(Texture2dGL& texture)

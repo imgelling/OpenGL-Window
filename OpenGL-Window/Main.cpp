@@ -11,7 +11,6 @@ class Game : public game::Engine
 
 public:
 	game::Terminal terminal; // error 6 randomly
-	game::Color whitecol = { 1.0f, 1.0f, 1.0f, 1.0f };
 	game::PixelModeFixed pixelMode;
 
 	Game(game::Logger& logger) : game::Engine(&logger)
@@ -34,11 +33,11 @@ public:
 
 	void LoadContent()
 	{
-		whitecol.Set(1.0f, 0.0f, 1.0f, 0.25f);
+
+		SetClearColor(game::Colors::Gray);
 
 		// Setup OpenGL
 		// This all needs to be engine calls, not opengl
-		glClearColor(0.25f, 0.25f, 0.25f, 1.0f);
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		glEnable(GL_CULL_FACE);
@@ -71,9 +70,8 @@ public:
 	{
 		SetWindowTitle("fps : " + std::to_string(GetFramesPerSecond()) + " ups : " + std::to_string(GetUpdatesPerSecond()) + " cpu : " + std::to_string(GetCPUFrequency()) + "Mhz");
 		
-		// Make Engine function not opengl
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); 
-															
+		Clear(true, true, true);
+
 		pixelMode.Clear(game::Colors::Black);
 		for (uint32_t i = 0; i < 256; i++)
 		{
