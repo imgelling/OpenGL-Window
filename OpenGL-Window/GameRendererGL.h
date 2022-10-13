@@ -1,14 +1,14 @@
 #pragma once
 
 #include <gl/GL.h>
-#include "GameRendererBase.h"
 #include <sstream>
 #include <fstream>
 #define STB_IMAGE_IMPLEMENTATION
 #define STBI_ONLY_PNG
 #include "stb_image.h"
-#include "GameTexture2D.h"
+#include "GameRendererBase.h"
 #include "GameShaderGL.h"
+#include "GameTexture2D.h"
 
 namespace game
 {

@@ -5,6 +5,7 @@
 #include "GameLogger.h"
 #include "GameTexture2D.h"
 #include "GameShaderGL.h"
+#include "GameColor.h"
 
 #include <string>
 #include <vector>

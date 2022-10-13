@@ -7,8 +7,24 @@
 #include "GameKeyboard.h"
 #include "GameMouse.h"
 #include "GameSystemInfo.h"
+
+#pragma region Opengl
+#if defined(GAME_SUPPORT_OPENGL) || defined(GAME_SUPPORT_ALL)
 #include "GameRendererGL.h"
+#pragma endregion
+#endif
+
+#pragma region Vulkan
+#if defined(GAME_SUPPORT_VULKAN) || defined(GAME_SUPPORT_ALL)
 #include "GameRendererVK.h"
+#endif
+#pragma endregion
+
+#pragma region DirectX9
+#if defined(GAME_SUPPORT_DIRECTX9) || defined(GAME_SUPPORT_ALL)
+#include "GameRendererDX9.h"
+#endif
+#pragma endregion
 #include "GameTexture2D.h"
 #include "GameMath.h"
 
@@ -26,6 +42,7 @@ namespace game
 
 	class Engine;
 	extern Engine* enginePointer;
+	extern SystemInfo systemInfo;
 	
 	class Engine
 	{
@@ -353,12 +370,24 @@ namespace game
 		// Set the renderer
 		if (_attributes.RenderingAPI == RenderAPI::OpenGL)
 		{
+#if defined(GAME_SUPPORT_OPENGL) || defined(GAME_SUPPORT_ALL)
 			_renderer = new game::RendererGL();
+#endif
 		}
 		else if (_attributes.RenderingAPI == RenderAPI::Vulkan)
 		{
 			lastError = { GameErrors::GameInvalidParameter, "Only OpenGL is implemented." };
-			//_renderer = new game::RendererVK();
+#if defined(GAME_SUPPORT_VULKAN) || defined(GAME_SUPPORT_ALL)
+			_renderer = new game::RendererVK();
+#endif
+			return false;
+		}
+		else if (_attributes.RenderingAPI == RenderAPI::DirectX9)
+		{
+			lastError = { GameErrors::GameInvalidParameter, "Starting to implement" };
+#if defined(GAME_SUPPORT_DIRECTX9) || defined(GAME_SUPPORT_ALL)
+			_renderer = new game::RendererDX9();
+#endif
 			return false;
 		}
 		else

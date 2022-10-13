@@ -83,5 +83,8 @@
     <ClInclude Include="GameColor.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="GameRendererDX9.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

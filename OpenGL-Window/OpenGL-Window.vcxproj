@@ -158,6 +158,7 @@
     <ClInclude Include="GamePerformanceTimer.h" />
     <ClInclude Include="GamePixelMode.h" />
     <ClInclude Include="GameRendererBase.h" />
+    <ClInclude Include="GameRendererDX9.h" />
     <ClInclude Include="GameRendererGL.h" />
     <ClInclude Include="GameRendererVK.h" />
     <ClInclude Include="GameSystemInfo.h" />

@@ -2,8 +2,11 @@
 #include <windows.h>
 #include <iostream>
 
+
 // Engine header
-#define GAME_USE_DEDICATED_GPU
+//#define GAME_USE_DEDICATED_GPU
+#define GAME_SUPPORT_DIRECTX9
+#define GAME_SUPPORT_OPENGL
 #include "Game.h"
 
 class Game : public game::Engine
@@ -27,7 +30,7 @@ public:
 		attrib.VsyncOn = false;
 		attrib.DebugMode = false;
 		attrib.MultiSamples = 32; // max 8 amd, 16 nvidia
-		attrib.RenderingAPI = game::RenderAPI::OpenGL;
+		attrib.RenderingAPI = game::RenderAPI::DirectX9;
 		SetAttributes(attrib);
 	}
 
