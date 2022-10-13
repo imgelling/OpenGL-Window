@@ -30,14 +30,14 @@ public:
 		attrib.VsyncOn = false;
 		attrib.DebugMode = false;
 		attrib.MultiSamples = 32; // max 8 amd, 16 nvidia
-		attrib.RenderingAPI = game::RenderAPI::DirectX9;
+		attrib.RenderingAPI = game::RenderAPI::OpenGL;
 		SetAttributes(attrib);
 	}
 
 	void LoadContent()
 	{
 
-		SetClearColor(game::Colors::Gray);
+		SetClearColor(game::Colors::DarkGray);
 
 		// Setup OpenGL
 		// This all needs to be engine calls, not opengl

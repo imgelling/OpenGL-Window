@@ -62,15 +62,8 @@ namespace game
 		~Terminal()
 		{
 #if _WIN32
-			DWORD err = 0;
-
-			// Reset the console back to initial state
+			// Try to reset the console back to initial state
 			SetConsoleMode(consoleHandle, initialConsoleMode);
-			err = GetLastError();
-			if (err)
-			{
-				std::cout << "SetConsoleMode() error " << err;
-			}
 #endif
 		}
 
