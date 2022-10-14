@@ -4,7 +4,7 @@
 
 
 // Engine header
-//#define GAME_USE_DEDICATED_GPU
+#define GAME_USE_DEDICATED_GPU
 #define GAME_SUPPORT_DIRECTX9
 #define GAME_SUPPORT_OPENGL
 #include "Game.h"
@@ -31,19 +31,16 @@ public:
 		attrib.DebugMode = true;
 		attrib.MultiSamples = 32; // max 8 amd, 16 nvidia
 		attrib.RenderingAPI = game::RenderAPI::OpenGL;
-		SetAttributes(attrib);
+		geSetAttributes(attrib);
 	}
 
 	void LoadContent()
 	{
 
-		SetClearColor(game::Colors::DarkGray);
+		geSetClearColor(game::Colors::DarkGray);
 
-		// Setup OpenGL
-		// This all needs to be engine calls, not opengl
-		glEnable(GL_BLEND); //Enable (#define GAME_Blend etc)
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); //BlendFunc (#define SRC, #define oneminusblah)
-		glEnable(GL_CULL_FACE); //Enable (#define GAME_CULLface, Blend etc)
+		geEnable(GAME_BLEND);
+		geEnable(GAME_CULL_FACE); 
 
 		// Setup pixel mode
 		if (!pixelMode.Initialize({ 320, 240 }))
@@ -51,7 +48,7 @@ public:
 			logger->Error(game::lastError);
 		}
 		game::Texture2dGL test;
-		if (!LoadTexture("content/test.png", test))
+		if (!geLoadTexture("content/test.png", test))
 		{
 			std::cout << "---------------- faile\n";
 		}
@@ -66,20 +63,19 @@ public:
 		// Handle Input
 		if (keyboard.WasKeyReleased(VK_F11))
 		{
-			ToggleFullscreen();
+			geToggleFullscreen();
 		}
 		if (keyboard.WasKeyReleased(VK_ESCAPE))
 		{
-			StopEngine();
+			geStopEngine();
 		}
 	}
 
 	void Render(const float_t msElapsed)
 	{
-		SetWindowTitle("fps : " + std::to_string(GetFramesPerSecond()) + " ups : " + std::to_string(GetUpdatesPerSecond()) + " cpu : " + std::to_string(GetCPUFrequency()) + "Mhz");
+		geSetWindowTitle("fps : " + std::to_string(geGetFramesPerSecond()) + " ups : " + std::to_string(geGetUpdatesPerSecond()) + " cpu : " + std::to_string(geGetCPUFrequency()) + "Mhz");
 		
-		Clear(true, true, true);
-
+		geClear(true, true, true);
 		pixelMode.Clear(game::Colors::Black);
 		for (uint32_t i = 0; i < 256; i++)
 		{
@@ -96,14 +92,14 @@ int main()
 	Game engine(logger);
 
 	// Create the needed bits for the engine
-	if (!engine.Create())
+	if (!engine.geCreate())
 	{
 		logger.Error(game::lastError);
 		return EXIT_FAILURE;
 	}
 
 	// Start the engine
-	engine.StartEngine();
+	engine.geStartEngine();
 
 	return EXIT_SUCCESS;
 }

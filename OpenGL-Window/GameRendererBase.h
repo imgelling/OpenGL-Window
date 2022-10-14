@@ -33,6 +33,8 @@ namespace game
 		virtual void UnLoadShader(ShaderGL& shader) = 0;
 		virtual void SetClearColor(const Color& color) noexcept = 0;
 		virtual void Clear(const bool color, const bool depth, const bool stencil) noexcept = 0;
+		virtual void Enable(const uint32_t capability) noexcept = 0;
+		virtual void Disable(const uint32_t capability) noexcept = 0;
 	protected:
 		Attributes _attributes;
 		std::vector<std::string> _extensionsAvailable;

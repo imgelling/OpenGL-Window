@@ -1,5 +1,6 @@
 #pragma once
 #include <gl/GL.h>
+#include "GameDefines.h"
 #include "GameMath.h"
 #include "GameErrors.h"
 #include "GameTexture2D.h"
@@ -47,7 +48,7 @@ namespace game
 		_bufferSize = sizeOfScreen;
 
 		// Save window size
-		_windowSize = enginePointer->GetWindowSize();
+		_windowSize = enginePointer->geGetWindowSize();
 
 		// Create video buffer
 		_video = new uint32_t[_bufferSize.width * _bufferSize.height];
@@ -65,7 +66,7 @@ namespace game
 			_frameBuffer[loop].componentsPerPixel = 4;
 			_frameBuffer[loop].filterType = game::TextureFilterType::Point;
 			_frameBuffer[loop].isMipMapped = false;
-			if (!enginePointer->CreateTexture(_frameBuffer[loop]))
+			if (!enginePointer->geCreateTexture(_frameBuffer[loop]))
 			{
 				lastError = { GameErrors::GameRenderer, "Could not create textures for PixelModeShaderless frame buffers." };
 				return false;
@@ -172,7 +173,7 @@ namespace game
 	{
 		Vector2i currentWindowSize;
 
-		currentWindowSize = enginePointer->GetWindowSize();
+		currentWindowSize = enginePointer->geGetWindowSize();
 
 		// If window size has changed
 		if ((currentWindowSize.width != _windowSize.width) || (currentWindowSize.height != _windowSize.height))
@@ -186,13 +187,13 @@ namespace game
 		// Copy video buffer to gpu
 		_UpdateFrameBuffer();
 
-		// gl only
+		// gl only FOR NOW.
 		// Draw the quad
-		glEnable(GL_TEXTURE_2D);  //Enable (#define GAME_TEXTURE2D, Blend etc)
+		enginePointer->geEnable(GAME_TEXTURE_2D);
 		glBindTexture(GL_TEXTURE_2D, _frameBuffer[_currentBuffer].bind); // BindTexture
 		glCallList(_compiledQuad);	// ?? defined object(_compiledQuad) ???
 		glBindTexture(GL_TEXTURE_2D, 0);  //BindTexture(0 or null) to disable texture unit
-		glDisable(GL_TEXTURE_2D);	// Opposite of Enable
+		enginePointer->geDisable(GAME_TEXTURE_2D);
 
 		_currentBuffer++;
 		if (_currentBuffer > 1) _currentBuffer = 0;

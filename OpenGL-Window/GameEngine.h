@@ -7,6 +7,7 @@
 #include "GameKeyboard.h"
 #include "GameMouse.h"
 #include "GameSystemInfo.h"
+#include "GameDefines.h"
 
 #pragma region Opengl
 #if defined(GAME_SUPPORT_OPENGL) || defined(GAME_SUPPORT_ALL)
@@ -27,6 +28,9 @@
 #pragma endregion
 #include "GameTexture2D.h"
 #include "GameMath.h"
+
+
+
 
 
 namespace game
@@ -56,34 +60,36 @@ namespace game
 
 		Engine(Logger* logger);
 		~Engine();
-		void SetAttributes(const Attributes &attrib);
-		bool Create();
-		void StartEngine();
-		void StopEngine();
+		void geSetAttributes(const Attributes &attrib);
+		bool geCreate();
+		void geStartEngine();
+		void geStopEngine();
 
 		// Frame and update timing 
 		
-		void SetFrameLock(const uint32_t limit) noexcept;
-		uint32_t GetUpdatesPerSecond() const noexcept;
-		uint32_t GetFramesPerSecond() const noexcept;
-		uint32_t GetCPUFrequency() const noexcept;
+		void geSetFrameLock(const uint32_t limit) noexcept;
+		uint32_t geGetUpdatesPerSecond() const noexcept;
+		uint32_t geGetFramesPerSecond() const noexcept;
+		uint32_t geGetCPUFrequency() const noexcept;
 		
 		// Renderer specific
 		
-		bool CreateTexture(Texture2dGL& texture);
-		bool LoadTexture(const std::string fileName, Texture2dGL& texture);
-		void UnLoadTexture(Texture2dGL& texture);
-		bool LoadShader(const std::string vertex, const std::string fragment, ShaderGL& shader);
-		void UnLoadShader(ShaderGL& shader);
-		void SetClearColor(const Color& color) noexcept;
-		void Clear(const bool Color, const bool Depth, const bool Stencil) noexcept;
+		bool geCreateTexture(Texture2dGL& texture);
+		bool geLoadTexture(const std::string fileName, Texture2dGL& texture);
+		void geUnLoadTexture(Texture2dGL& texture);
+		bool geLoadShader(const std::string vertex, const std::string fragment, ShaderGL& shader);
+		void geUnLoadShader(ShaderGL& shader);
+		void geSetClearColor(const Color& color) noexcept;
+		void geClear(const bool Color, const bool Depth, const bool Stencil) noexcept;
+		void geEnable(const uint32_t capability) noexcept;
+		void geDisable(const uint32_t capability) noexcept;
 
 		// Window stuff
 		
-		void SetWindowTitle(const std::string title);
-		void ToggleFullscreen();
+		void geSetWindowTitle(const std::string title);
+		void geToggleFullscreen();
 		void HandleWindowResize(const uint32_t width, const uint32_t height);
-		Vector2i GetWindowSize() const noexcept;
+		Vector2i geGetWindowSize() const noexcept;
 		
 		// Created by end user
 		
@@ -130,7 +136,7 @@ namespace game
 		delete _renderer;
 	}
 
-	inline void Engine::StartEngine()
+	inline void Engine::geStartEngine()
 	{
 		// Storage of time
 		float_t msElapsed = 0.0f;
@@ -211,7 +217,7 @@ namespace game
 		Shutdown();
 	}
 
-	inline void Engine::StopEngine()
+	inline void Engine::geStopEngine()
 	{
 		isRunning = false;
 	}
@@ -221,7 +227,7 @@ namespace game
 		_window.DoMessagePump();
 	}
 
-	inline void Engine::SetAttributes(const Attributes& attrib)
+	inline void Engine::geSetAttributes(const Attributes& attrib)
 	{
 		_attributes = attrib;
 		if (_attributes.Framelock > 0)
@@ -234,7 +240,7 @@ namespace game
 		}
 	}
 
-	inline void Engine::SetFrameLock(const uint32_t limit) noexcept
+	inline void Engine::geSetFrameLock(const uint32_t limit) noexcept
 	{
 		_attributes.Framelock = (float_t)limit;
 		if (_attributes.Framelock > 0)
@@ -248,34 +254,34 @@ namespace game
 
 	}
 
-	inline uint32_t Engine::GetCPUFrequency() const noexcept
+	inline uint32_t Engine::geGetCPUFrequency() const noexcept
 	{
 		return _cpuFrequency;
 	}
 
-	inline uint32_t Engine::GetUpdatesPerSecond() const noexcept
+	inline uint32_t Engine::geGetUpdatesPerSecond() const noexcept
 	{
 		return _updatesPerSecond;
 	}
 
-	inline uint32_t Engine::GetFramesPerSecond() const noexcept
+	inline uint32_t Engine::geGetFramesPerSecond() const noexcept
 	{
 		return _framesPerSecond;
 	}
 
-	inline Vector2i Engine::GetWindowSize() const noexcept
+	inline Vector2i Engine::geGetWindowSize() const noexcept
 	{
 		return { (int)_attributes.WindowWidth, (int)_attributes.WindowHeight};
 	}
 
-	inline void Engine::SetClearColor(const Color &color) noexcept
+	inline void Engine::geSetClearColor(const Color &color) noexcept
 	{
 		if (_renderer)
 		{
 			_renderer->SetClearColor(color);
 		}
 	}
-	inline void Engine::Clear(const bool color, const bool depth, const bool stencil) noexcept
+	inline void Engine::geClear(const bool color, const bool depth, const bool stencil) noexcept
 	{
 		if (_renderer)
 		{
@@ -283,41 +289,56 @@ namespace game
 		}
 	}
 
-	inline bool Engine::CreateTexture(Texture2dGL& texture)
+	inline bool Engine::geCreateTexture(Texture2dGL& texture)
 	{
 		return _renderer->CreateTexture(texture);
 	}
 
-	inline bool Engine::LoadTexture(const std::string fileName, Texture2dGL &texture)
+	inline bool Engine::geLoadTexture(const std::string fileName, Texture2dGL &texture)
 	{
 		return _renderer->LoadTexture(fileName, texture);
 	}
 
-	inline void Engine::UnLoadTexture(Texture2dGL& texture)
+	inline void Engine::geUnLoadTexture(Texture2dGL& texture)
 	{
 		_renderer->UnLoadTexture(texture);
 	}
 
-	inline bool Engine::LoadShader(const std::string vertex, const std::string fragment, ShaderGL& shader)
+	inline bool Engine::geLoadShader(const std::string vertex, const std::string fragment, ShaderGL& shader)
 	{
 		return _renderer->LoadShader(vertex, fragment, shader);
 	}
 
-	inline void Engine::UnLoadShader(ShaderGL& shader)
+	inline void Engine::geUnLoadShader(ShaderGL& shader)
 	{
 		_renderer->UnLoadShader(shader);
 	}
 
-	inline void Engine::SetWindowTitle(const std::string title)
+	inline void Engine::geSetWindowTitle(const std::string title)
 	{
 		_window.SetWindowTitle(title);
 		_attributes.WindowTitle = title;
 	}
 
-	inline void Engine::ToggleFullscreen()
+	inline void Engine::geToggleFullscreen()
 	{
 		_window.ToggleFullScreen();
 		_attributes.WindowFullscreen = !_attributes.WindowFullscreen;
+	}
+
+	inline void Engine::geEnable(const uint32_t capability) noexcept
+	{
+		if (_renderer)
+		{
+			_renderer->Enable(capability);
+		}
+	}
+	inline void Engine::geDisable(const uint32_t capability) noexcept
+	{
+		if (_renderer)
+		{
+			_renderer->Disable(capability);
+		}
 	}
 
 	inline void Engine::_GetAndLogCPUInfo()
@@ -350,7 +371,7 @@ namespace game
 		
 	}
 
-	inline bool Engine::Create()
+	inline bool Engine::geCreate()
 	{
 		// Let user choose how they want things
 		Initialize();

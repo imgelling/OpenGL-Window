@@ -149,6 +149,7 @@
     <ClInclude Include="Game.h" />
     <ClInclude Include="GameAttributes.h" />
     <ClInclude Include="GameColor.h" />
+    <ClInclude Include="GameDefines.h" />
     <ClInclude Include="GameEngine.h" />
     <ClInclude Include="GameErrors.h" />
     <ClInclude Include="GameHelpers.h" />

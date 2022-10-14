@@ -14,6 +14,7 @@
 #include "GameRendererBase.h"
 #include "GameShaderGL.h"
 #include "GameTexture2D.h"
+#include "GameDefines.h"
 
 namespace game
 {
@@ -116,6 +117,8 @@ namespace game
 		void UnLoadShader(ShaderGL& shader);
 		void SetClearColor(const Color& color) noexcept;
 		void Clear(const bool color, const bool depth, const bool stencil) noexcept;
+		void Enable(const uint32_t capability) noexcept;
+		void Disable(const uint32_t capability) noexcept;
 
 
 	protected:
@@ -1140,6 +1143,50 @@ namespace game
 		if (depth) clearType |= GL_DEPTH_BUFFER_BIT;
 		if (stencil) clearType |= GL_STENCIL_BUFFER_BIT;
 		glClear(clearType);
+	}
+
+	inline void RendererGL::Enable(const uint32_t capability) noexcept
+	{
+		if (capability & GAME_TEXTURE_2D)
+		{
+			glEnable(GL_TEXTURE_2D);
+			return;
+		}
+
+		if (capability & GAME_BLEND)
+		{
+			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); // needs its own
+			glEnable(GL_BLEND);
+			return;
+		}
+
+		if (capability & GAME_CULL_FACE)
+		{
+			glEnable(GL_CULL_FACE);
+			return;
+		}
+	}
+
+	inline void RendererGL::Disable(const uint32_t capability) noexcept
+	{
+		if (capability & GAME_TEXTURE_2D)
+		{
+			glDisable(GL_TEXTURE_2D);
+			return;
+		}
+
+		if (capability & GAME_BLEND)
+		{
+			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+			glDisable(GL_BLEND);
+			return;
+		}
+
+		if (capability & GAME_CULL_FACE)
+		{
+			glDisable(GL_CULL_FACE);
+			return;
+		}
 	}
 	// Undefine what we have done, if someone uses an extension loader 
 #undef GL_TEXTURE_BASE_LEVEL 

@@ -31,6 +31,8 @@ namespace game
 		void UnLoadShader(ShaderGL& shader);
 		void SetClearColor(const Color& color) noexcept {};
 		void Clear(const bool color, const bool depth, const bool stencil) noexcept {};
+		void Enable(const uint32_t capability) noexcept {};
+		void Disable(const uint32_t capability) noexcept {};
 	protected:
 		void _ReadExtensions();
 
