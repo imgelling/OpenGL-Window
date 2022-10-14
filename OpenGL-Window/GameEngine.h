@@ -50,11 +50,12 @@ namespace game
 	
 	class Engine
 	{
+		friend class PixelModeFixed;
 	public:
-		Keyboard keyboard;
-		Mouse mouse;
-		Logger* logger;
-		bool isRunning;
+		Keyboard geKeyboard;
+		Mouse geMouse;
+		Logger* geLogger;
+		bool geIsRunning;
 
 		// Engine setup
 
@@ -120,14 +121,14 @@ namespace game
 
 	inline Engine::Engine(Logger* logger)
 	{
-		isRunning = false;
+		geIsRunning = false;
 		enginePointer = this;
 		_renderer = nullptr;
 		_frameTime = 0.0f;
 		_updatesPerSecond = 0;
 		_framesPerSecond = 0;
 		_cpuFrequency = 0;
-		this->logger = logger;
+		this->geLogger = logger;
 	}
 
 	inline Engine::~Engine()
@@ -148,7 +149,7 @@ namespace game
 		uint32_t framesCounted = 0;
 		__int64 cyclesStart = __rdtsc();
 
-		isRunning = true;
+		geIsRunning = true;
 
 		// Reset the timers
 		_renderTimer.Reset();
@@ -159,7 +160,7 @@ namespace game
 		// Do the game loop
 		do
 		{
-			mouse.ResetMouseValues();
+			geMouse.ResetMouseValues();
 
 			// Do window messages
 			_ProcessMessages();
@@ -211,7 +212,7 @@ namespace game
 				_Swap();
 			}
 
-		} while (isRunning);
+		} while (geIsRunning);
 
 		// Clean up end user stuff
 		Shutdown();
@@ -219,7 +220,7 @@ namespace game
 
 	inline void Engine::geStopEngine()
 	{
-		isRunning = false;
+		geIsRunning = false;
 	}
 
 	inline void Engine::_ProcessMessages()
@@ -281,6 +282,7 @@ namespace game
 			_renderer->SetClearColor(color);
 		}
 	}
+	
 	inline void Engine::geClear(const bool color, const bool depth, const bool stencil) noexcept
 	{
 		if (_renderer)
@@ -348,7 +350,7 @@ namespace game
 		// Lambda to log easier
 		auto LOG = [&](std::stringstream& stream)
 		{
-			logger->Write(stream.str());
+			geLogger->Write(stream.str());
 			stream.str("");
 		};
 
@@ -376,7 +378,7 @@ namespace game
 		// Let user choose how they want things
 		Initialize();
 
-		logger->Header(_attributes.WindowTitle, _attributes.GameVersion);
+		geLogger->Header(_attributes.WindowTitle, _attributes.GameVersion);
 
 		// Get and log the cpu info
 		_GetAndLogCPUInfo();
@@ -393,6 +395,9 @@ namespace game
 		{
 #if defined(GAME_SUPPORT_OPENGL) || defined(GAME_SUPPORT_ALL)
 			_renderer = new game::RendererGL();
+#else
+			lastError = { GameErrors::GameInvalidParameter, "Requested OpenGL without #defining GAME_SUPPORT_OPENGL or GAME_SUPPORT ALL." };
+			return false;
 #endif
 		}
 		else if (_attributes.RenderingAPI == RenderAPI::Vulkan)
@@ -400,6 +405,9 @@ namespace game
 			lastError = { GameErrors::GameInvalidParameter, "Only OpenGL is implemented." };
 #if defined(GAME_SUPPORT_VULKAN) || defined(GAME_SUPPORT_ALL)
 			_renderer = new game::RendererVK();
+#else
+			lastError = { GameErrors::GameInvalidParameter, "Requested Vulkan without #defining GAME_SUPPORT_VULKAN or GAME_SUPPORT ALL." };
+			return false;
 #endif
 			return false;
 		}
@@ -408,6 +416,9 @@ namespace game
 			lastError = { GameErrors::GameInvalidParameter, "Starting to implement" };
 #if defined(GAME_SUPPORT_DIRECTX9) || defined(GAME_SUPPORT_ALL)
 			_renderer = new game::RendererDX9();
+#else
+			lastError = { GameErrors::GameInvalidParameter, "Requested DirectX9 without #defining GAME_SUPPORT_DIRECTX9 or GAME_SUPPORT ALL." };
+			return false;
 #endif
 			return false;
 		}
@@ -416,7 +427,7 @@ namespace game
 			lastError = { GameErrors::GameInvalidParameter, "Only OpenGL is implemented." };
 			return false;
 		}
-		_renderer->SetAttributes(_attributes, logger);
+		_renderer->SetAttributes(_attributes, geLogger);
 
 		// Create rendering device
 		if (!_renderer->CreateDevice(_window))
@@ -456,23 +467,23 @@ namespace game
 	{
 		switch (uMsg)
 		{
-		case WM_MOUSEMOVE: 	enginePointer->mouse.HandleMouseMove(lParam & 0xFFFF, (lParam >> 16) & 0xFFFF); return 0;
-		case WM_MOUSEWHEEL:	enginePointer->mouse.HandleMouseWheel(GET_WHEEL_DELTA_WPARAM(wParam)); return 0;
+		case WM_MOUSEMOVE: 	enginePointer->geMouse.HandleMouseMove(lParam & 0xFFFF, (lParam >> 16) & 0xFFFF); return 0;
+		case WM_MOUSEWHEEL:	enginePointer->geMouse.HandleMouseWheel(GET_WHEEL_DELTA_WPARAM(wParam)); return 0;
 			//case WM_MOUSELEAVE: ptrPGE->olc_UpdateMouseFocus(false);                                    return 0;
 			//case WM_SETFOCUS:	ptrPGE->olc_UpdateKeyFocus(true);                                       return 0;
 			//case WM_KILLFOCUS:	ptrPGE->olc_UpdateKeyFocus(false);                                      return 0;
-		case WM_LBUTTONDOWN:enginePointer->mouse.SetMouseState(0, true); return 0;
-		case WM_LBUTTONUP:	enginePointer->mouse.SetMouseState(0, false); return 0;
-		case WM_RBUTTONDOWN:enginePointer->mouse.SetMouseState(2, true); return 0;
-		case WM_RBUTTONUP:	enginePointer->mouse.SetMouseState(2, false); return 0;
-		case WM_MBUTTONDOWN:enginePointer->mouse.SetMouseState(1, true); return 0;
-		case WM_MBUTTONUP:	enginePointer->mouse.SetMouseState(1, false); return 0;
+		case WM_LBUTTONDOWN:enginePointer->geMouse.SetMouseState(0, true); return 0;
+		case WM_LBUTTONUP:	enginePointer->geMouse.SetMouseState(0, false); return 0;
+		case WM_RBUTTONDOWN:enginePointer->geMouse.SetMouseState(2, true); return 0;
+		case WM_RBUTTONUP:	enginePointer->geMouse.SetMouseState(2, false); return 0;
+		case WM_MBUTTONDOWN:enginePointer->geMouse.SetMouseState(1, true); return 0;
+		case WM_MBUTTONUP:	enginePointer->geMouse.SetMouseState(1, false); return 0;
 		case WM_SIZE: enginePointer->HandleWindowResize(lParam & 0xFFF, (lParam >> 16) & 0xFFFF); return 0;
-		case WM_KEYDOWN: enginePointer->keyboard.SetKeyState((uint8_t)wParam, true); return 0;
-		case WM_KEYUP: enginePointer->keyboard.SetKeyState((uint8_t)wParam, false); return 0;
+		case WM_KEYDOWN: enginePointer->geKeyboard.SetKeyState((uint8_t)wParam, true); return 0;
+		case WM_KEYUP: enginePointer->geKeyboard.SetKeyState((uint8_t)wParam, false); return 0;
 			//case WM_SYSKEYDOWN: ptrPGE->olc_UpdateKeyState(mapKeys[wParam], true);						return 0;
 			//case WM_SYSKEYUP:	ptrPGE->olc_UpdateKeyState(mapKeys[wParam], false);
-		case WM_CLOSE:		if (enginePointer) enginePointer->isRunning = false; return 0;
+		case WM_CLOSE:		if (enginePointer) enginePointer->geIsRunning = false; return 0;
 		case WM_DESTROY:	PostQuitMessage(0); DestroyWindow(hWnd); return 0;
 		}
 		return DefWindowProc(hWnd, uMsg, wParam, lParam);

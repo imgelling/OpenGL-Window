@@ -45,7 +45,7 @@ public:
 		// Setup pixel mode
 		if (!pixelMode.Initialize({ 320, 240 }))
 		{
-			logger->Error(game::lastError);
+			geLogger->Error(game::lastError);
 		}
 		game::Texture2dGL test;
 		if (!geLoadTexture("content/test.png", test))
@@ -61,11 +61,11 @@ public:
 	void Update(const float_t msElapsed)
 	{
 		// Handle Input
-		if (keyboard.WasKeyReleased(VK_F11))
+		if (geKeyboard.WasKeyReleased(VK_F11))
 		{
 			geToggleFullscreen();
 		}
-		if (keyboard.WasKeyReleased(VK_ESCAPE))
+		if (geKeyboard.WasKeyReleased(VK_ESCAPE))
 		{
 			geStopEngine();
 		}

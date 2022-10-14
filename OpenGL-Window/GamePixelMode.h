@@ -73,9 +73,13 @@ namespace game
 			}
 		}
 
-		// gl only
+#if defined(GAME_SUPPORT_OPENGL)
 		// Generate the display list
-		_compiledQuad = glGenLists(1);
+		if (enginePointer->_attributes.RenderingAPI == RenderAPI::OpenGL)
+		{
+			_compiledQuad = glGenLists(1);
+		}
+#endif
 
 		// Scale the texture to window size
 		_ScaleQuadToWindow();
@@ -85,17 +89,15 @@ namespace game
 
 	inline void PixelModeFixed::_UpdateFrameBuffer()
 	{
-		// gl only
-		// needs to double buffer
-		glBindTexture(GL_TEXTURE_2D, _frameBuffer[_currentBuffer].bind);
+#if defined(GAME_SUPPORT_OPENGL)
+		if (enginePointer->_attributes.RenderingAPI == RenderAPI::OpenGL)
+		{
+			glBindTexture(GL_TEXTURE_2D, _frameBuffer[_currentBuffer].bind);
 
-		// gl only
-		glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, _frameBuffer[_currentBuffer].width, _frameBuffer[_currentBuffer].height, GL_RGBA, game::systemInfo.gpuInfo.internalPixelType, (GLvoid*)_video);
-		glBindTexture(GL_TEXTURE_2D, 0);
-		
-		//// Swap texture buffer to draw to
-		//_currentBuffer++;
-		//if (_currentBuffer > 1) _currentBuffer = 0;
+			glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, _frameBuffer[_currentBuffer].width, _frameBuffer[_currentBuffer].height, GL_RGBA, game::systemInfo.gpuInfo.internalPixelType, (GLvoid*)_video);
+			glBindTexture(GL_TEXTURE_2D, 0);
+		}
+#endif
 	}
 
 	inline void PixelModeFixed::_ScaleQuadToWindow()
@@ -144,29 +146,34 @@ namespace game
 		sizeOfScaledTexture.height = ((float_t)sizeOfScaledTexture.height * 2.0f / (float_t)_windowSize.height) - 1.0f;
 		
 		// gl only
-		glNewList(_compiledQuad, GL_COMPILE);
+#if defined(GAME_SUPPORT_OPENGL)
+		if (enginePointer->_attributes.RenderingAPI == RenderAPI::OpenGL)
 		{
-			glBegin(GL_QUADS);
-			//bl
-			glColor3f(1.0f, 1.0f, 1.0f);
-			glTexCoord2f(0, 0);
-			glVertex2f(positionOfScaledTexture.x, -sizeOfScaledTexture.height);
-			//br
-			glColor3f(1.0f, 1.0f, 1.0f);
-			glTexCoord2f(1.0f, 0.0f);
-			glVertex2f(sizeOfScaledTexture.width, -sizeOfScaledTexture.height);
-			//tr
-			glColor3f(1.0f, 1.0f, 1.0f);
-			glTexCoord2f(1, 1);
-			glVertex2f(sizeOfScaledTexture.width, -positionOfScaledTexture.y);
-			// tl
-			glColor3f(1.0f, 1.0f, 1.0f);
-			glTexCoord2f(0, 1);
-			glVertex2f(positionOfScaledTexture.x, -positionOfScaledTexture.y);
+			glNewList(_compiledQuad, GL_COMPILE);
+			{
+				glBegin(GL_QUADS);
+				//bl
+				glColor3f(1.0f, 1.0f, 1.0f);
+				glTexCoord2f(0, 0);
+				glVertex2f(positionOfScaledTexture.x, -sizeOfScaledTexture.height);
+				//br
+				glColor3f(1.0f, 1.0f, 1.0f);
+				glTexCoord2f(1.0f, 0.0f);
+				glVertex2f(sizeOfScaledTexture.width, -sizeOfScaledTexture.height);
+				//tr
+				glColor3f(1.0f, 1.0f, 1.0f);
+				glTexCoord2f(1, 1);
+				glVertex2f(sizeOfScaledTexture.width, -positionOfScaledTexture.y);
+				// tl
+				glColor3f(1.0f, 1.0f, 1.0f);
+				glTexCoord2f(0, 1);
+				glVertex2f(positionOfScaledTexture.x, -positionOfScaledTexture.y);
 
-			glEnd();
+				glEnd();
+			}
+			glEndList();
 		}
-		glEndList();
+#endif
 	}
 
 	inline void PixelModeFixed::Render()
@@ -189,11 +196,16 @@ namespace game
 
 		// gl only FOR NOW.
 		// Draw the quad
-		enginePointer->geEnable(GAME_TEXTURE_2D);
-		glBindTexture(GL_TEXTURE_2D, _frameBuffer[_currentBuffer].bind); // BindTexture
-		glCallList(_compiledQuad);	// ?? defined object(_compiledQuad) ???
-		glBindTexture(GL_TEXTURE_2D, 0);  //BindTexture(0 or null) to disable texture unit
-		enginePointer->geDisable(GAME_TEXTURE_2D);
+#if defined(GAME_SUPPORT_OPENGL)
+		if (enginePointer->_attributes.RenderingAPI == RenderAPI::OpenGL)
+		{
+			enginePointer->geEnable(GAME_TEXTURE_2D);
+			glBindTexture(GL_TEXTURE_2D, _frameBuffer[_currentBuffer].bind); // BindTexture
+			glCallList(_compiledQuad);	// ?? defined object(_compiledQuad) ???
+			glBindTexture(GL_TEXTURE_2D, 0);  //BindTexture(0 or null) to disable texture unit
+			enginePointer->geDisable(GAME_TEXTURE_2D);
+		}
+#endif
 
 		_currentBuffer++;
 		if (_currentBuffer > 1) _currentBuffer = 0;
