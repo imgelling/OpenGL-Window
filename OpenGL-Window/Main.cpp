@@ -13,7 +13,7 @@ class Game : public game::Engine
 {
 
 public:
-	game::Terminal terminal; // error 6 randomly
+	game::Terminal terminal;
 	game::PixelModeFixed pixelMode;
 
 	Game(game::Logger& logger) : game::Engine(&logger)
@@ -26,9 +26,9 @@ public:
 
 		attrib.WindowTitle = "PixelMode tests";
 		attrib.GameVersion = "0.01";
-		attrib.Framelock = 0;
+		attrib.Framelock = 60;
 		attrib.VsyncOn = false;
-		attrib.DebugMode = false;
+		attrib.DebugMode = true;
 		attrib.MultiSamples = 32; // max 8 amd, 16 nvidia
 		attrib.RenderingAPI = game::RenderAPI::OpenGL;
 		SetAttributes(attrib);
@@ -41,14 +41,19 @@ public:
 
 		// Setup OpenGL
 		// This all needs to be engine calls, not opengl
-		glEnable(GL_BLEND);
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-		glEnable(GL_CULL_FACE);
+		glEnable(GL_BLEND); //Enable (#define GAME_Blend etc)
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); //BlendFunc (#define SRC, #define oneminusblah)
+		glEnable(GL_CULL_FACE); //Enable (#define GAME_CULLface, Blend etc)
 
 		// Setup pixel mode
 		if (!pixelMode.Initialize({ 320, 240 }))
 		{
 			logger->Error(game::lastError);
+		}
+		game::Texture2dGL test;
+		if (!LoadTexture("content/test.png", test))
+		{
+			std::cout << "---------------- faile\n";
 		}
 	}
 

@@ -1,12 +1,17 @@
 #pragma once
 
+#include "stb_image.h"
+#include "GameRendererBase.h"
+#include "GameShaderGL.h"
+#include "GameTexture2D.h"
+
 namespace game
 {
 	class RendererDX9 : public RendererBase
 	{
 	public:
 		RendererDX9() {};
-		bool CreateDevice(Window window) { return false; };
+		bool CreateDevice(Window& window) { return false; };
 		void DestroyDevice() {};
 		void Swap() {};
 		void HandleWindowResize(const uint32_t width, const uint32_t height) {};

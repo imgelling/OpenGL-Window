@@ -24,7 +24,7 @@ namespace game
 		uint32_t* _video;
 		Vector2i _bufferSize;
 		Vector2i _windowSize;
-		uint32_t _currentBuffer; // gl only
+		uint32_t _currentBuffer;
 		void _UpdateFrameBuffer();
 		void _ScaleQuadToWindow();
 	};
@@ -57,7 +57,6 @@ namespace game
 			return false;
 		}
 
-		// gl only
 		// Create frame buffer textures
 		for (uint32_t loop = 0; loop < 2; loop++)
 		{
@@ -189,11 +188,11 @@ namespace game
 
 		// gl only
 		// Draw the quad
-		glEnable(GL_TEXTURE_2D);
-		glBindTexture(GL_TEXTURE_2D, _frameBuffer[_currentBuffer].bind);
-		glCallList(_compiledQuad);
-		glBindTexture(GL_TEXTURE_2D, 0);
-		glDisable(GL_TEXTURE_2D);
+		glEnable(GL_TEXTURE_2D);  //Enable (#define GAME_TEXTURE2D, Blend etc)
+		glBindTexture(GL_TEXTURE_2D, _frameBuffer[_currentBuffer].bind); // BindTexture
+		glCallList(_compiledQuad);	// ?? defined object(_compiledQuad) ???
+		glBindTexture(GL_TEXTURE_2D, 0);  //BindTexture(0 or null) to disable texture unit
+		glDisable(GL_TEXTURE_2D);	// Opposite of Enable
 
 		_currentBuffer++;
 		if (_currentBuffer > 1) _currentBuffer = 0;
@@ -212,10 +211,8 @@ namespace game
 
 	inline void PixelModeFixed::PixelClip(const int32_t x, const int32_t y, const game::Color& color)
 	{
-		if (x < 0) return;
-		if (y < 0) return;
-		if (x > _bufferSize.width-1) return;
-		if (y > _bufferSize.height-1) return;
+		if (x < 0 || y < 0) return;
+		if (x > _bufferSize.width-1 || y > _bufferSize.height - 1) return;
 		_video[y * _bufferSize.width + x] = color.packed;
 	}
 }

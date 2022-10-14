@@ -3,8 +3,13 @@
 #include <gl/GL.h>
 #include <sstream>
 #include <fstream>
+#include "GameRendererDX9.h"
+#ifndef STB_IMAGE_IMPLEMENTATION
 #define STB_IMAGE_IMPLEMENTATION
+#endif
+#ifndef STBI_ONLY_PNG
 #define STBI_ONLY_PNG
+#endif
 #include "stb_image.h"
 #include "GameRendererBase.h"
 #include "GameShaderGL.h"
@@ -99,7 +104,7 @@ namespace game
 	{
 	public:
 		RendererGL();
-		bool CreateDevice(Window window);
+		bool CreateDevice(Window& window);
 		void DestroyDevice();
 		void Swap();
 		void HandleWindowResize(const uint32_t width, const uint32_t height);
@@ -381,7 +386,7 @@ namespace game
 		PostMessage(tempWindow.GetHandle(), WM_DESTROY, 0, 0);
 	}
 
-	inline bool RendererGL::CreateDevice(Window window)
+	inline bool RendererGL::CreateDevice(Window& window)
 	{
 
 		const int glContextAttributes[] = {
@@ -914,7 +919,7 @@ namespace game
 	inline bool RendererGL::LoadTexture(std::string fileName, Texture2dGL &texture)
 	{
 		//Content content;
-		void* data = nullptr;
+		uint8_t * data = nullptr;
 		int32_t width = 0;
 		int32_t height = 0;
 		int32_t componentsPerPixel = 0;
@@ -922,7 +927,7 @@ namespace game
 		// Read data
 		stbi_set_flip_vertically_on_load(true); // inverted for opengl
 		data = stbi_load(fileName.c_str(), &width, &height, &componentsPerPixel, 0);
-		if (data == NULL)
+		if (data == nullptr)
 		{
 			lastError = { GameErrors::GameContent, "Failed to load texture : " + fileName };
 			if (data) stbi_image_free(data);
@@ -945,13 +950,13 @@ namespace game
 		//GL_LINEAR_MIPMAP_LINEAR : linearly interpolates between the two closest mipmapsand samples the interpolated level via linear interpolation.
 		if (texture.filterType == TextureFilterType::Point)
 		{
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);// LINEAR_MIPMAP_LINEAR); // min
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);// GL_LINEAR); //max
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 		}
 		else if (texture.filterType == TextureFilterType::Bilinear)
 		{
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);// LINEAR_MIPMAP_LINEAR); // min
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);// GL_LINEAR); //max
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 		}
 		else if (texture.filterType == TextureFilterType::Trilinear)
 		{
