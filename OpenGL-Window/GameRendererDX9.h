@@ -1,6 +1,6 @@
 #pragma once
 
-#include "stb_image.h"
+#include "GameImageLoader.h"
 #include "GameRendererBase.h"
 #include "GameShaderGL.h"
 #include "GameTexture2D.h"

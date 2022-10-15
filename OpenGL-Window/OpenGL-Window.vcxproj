@@ -153,6 +153,7 @@
     <ClInclude Include="GameEngine.h" />
     <ClInclude Include="GameErrors.h" />
     <ClInclude Include="GameHelpers.h" />
+    <ClInclude Include="GameImageLoader.h" />
     <ClInclude Include="GameKeyboard.h" />
     <ClInclude Include="GameLogger.h" />
     <ClInclude Include="GameMouse.h" />

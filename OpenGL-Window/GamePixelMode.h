@@ -145,7 +145,7 @@ namespace game
 		sizeOfScaledTexture.width = ((float_t)sizeOfScaledTexture.width * 2.0f / (float_t)_windowSize.width) - 1.0f;
 		sizeOfScaledTexture.height = ((float_t)sizeOfScaledTexture.height * 2.0f / (float_t)_windowSize.height) - 1.0f;
 		
-		// gl only
+		// OpenGL Only
 #if defined(GAME_SUPPORT_OPENGL)
 		if (enginePointer->_attributes.RenderingAPI == RenderAPI::OpenGL)
 		{

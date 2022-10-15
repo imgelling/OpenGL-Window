@@ -3,14 +3,8 @@
 #include <gl/GL.h>
 #include <sstream>
 #include <fstream>
+#include "GameImageLoader.h"
 #include "GameRendererDX9.h"
-#ifndef STB_IMAGE_IMPLEMENTATION
-#define STB_IMAGE_IMPLEMENTATION
-#endif
-#ifndef STBI_ONLY_PNG
-#define STBI_ONLY_PNG
-#endif
-#include "stb_image.h"
 #include "GameRendererBase.h"
 #include "GameShaderGL.h"
 #include "GameTexture2D.h"
@@ -661,7 +655,7 @@ namespace game
 
 	inline void RendererGL::_ReadExtensions()
 	{
-		GLint numberOfExtensions = 0;
+		int32_t numberOfExtensions = 0;
 		std::string extensionName;
 
 		// Get the number of OpenGL extensions available
@@ -670,7 +664,7 @@ namespace game
 
 		// Write all extensions out to the log file, not stdout 
 		// and store in a vector
-		for (GLint extensionNumber = 0; extensionNumber < numberOfExtensions; extensionNumber++)
+		for (int32_t extensionNumber = 0; extensionNumber < numberOfExtensions; extensionNumber++)
 		{
 			extensionName = (char*)_glGetStringi(GL_EXTENSIONS, extensionNumber);
 			_extensionsAvailable.emplace_back(extensionName);
@@ -923,18 +917,17 @@ namespace game
 	inline bool RendererGL::LoadTexture(std::string fileName, Texture2dGL &texture)
 	{
 		//Content content;
-		uint8_t * data = nullptr;
+		void * data = nullptr;
 		int32_t width = 0;
 		int32_t height = 0;
 		int32_t componentsPerPixel = 0;
+		ImageLoader imageLoader;
 
 		// Read data
-		stbi_set_flip_vertically_on_load(true); // inverted for opengl
-		data = stbi_load(fileName.c_str(), &width, &height, &componentsPerPixel, 0);
+		data = imageLoader.Load(fileName.c_str(), width, height, componentsPerPixel, true);
 		if (data == nullptr)
 		{
 			lastError = { GameErrors::GameContent, "Failed to load texture : " + fileName };
-			if (data) stbi_image_free(data);
 			return false;
 		}
 		texture.width = width;
@@ -993,7 +986,6 @@ namespace game
 			_glGenerateMipmap(GL_TEXTURE_2D);
 		glBindTexture(GL_TEXTURE_2D, 0);
 
-		stbi_image_free(data);
 		return true;
 	}
 
@@ -1137,6 +1129,7 @@ namespace game
 	{
 		glClearColor(color.rf, color.gf, color.bf, color.af);
 	}
+	
 	inline void RendererGL::Clear(const bool color, const bool depth, const bool stencil) noexcept
 	{
 		uint32_t clearType = 0;

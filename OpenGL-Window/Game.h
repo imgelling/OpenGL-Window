@@ -38,6 +38,7 @@
 #include "GameEngine.h"
 #include "GameErrors.h"
 #include "GameHelpers.h"
+#include "GameImageLoader.h"
 #include "GameKeyboard.h"
 #include "GameLogger.h"
 #include "GameMath.h"
