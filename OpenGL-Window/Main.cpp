@@ -47,6 +47,7 @@ public:
 		{
 			geLogger->Error(game::lastError);
 		}
+
 		game::Texture2dGL test;
 		if (!geLoadTexture("content/test.png", test))
 		{

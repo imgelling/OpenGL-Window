@@ -1,14 +1,14 @@
 #pragma once
 
+#include <fstream>
 #include <gl/GL.h>
 #include <sstream>
-#include <fstream>
+#include "GameDefines.h"
 #include "GameImageLoader.h"
 #include "GameRendererDX9.h"
 #include "GameRendererBase.h"
 #include "GameShaderGL.h"
 #include "GameTexture2D.h"
-#include "GameDefines.h"
 
 namespace game
 {
@@ -298,7 +298,6 @@ namespace game
 		printf("\n\n");
 		return;
 	}
-
 
 	inline RendererGL::RendererGL()
 	{
@@ -650,9 +649,7 @@ namespace game
 
 		return true;
 	}
-
 	
-
 	inline void RendererGL::_ReadExtensions()
 	{
 		int32_t numberOfExtensions = 0;
@@ -935,6 +932,7 @@ namespace game
 		texture.oneOverWidth = 1.0f / (float_t)width;
 		texture.oneOverHeight = 1.0f / (float_t)height;
 		texture.isCopy = false;
+		texture.name = fileName;
 
 		glGenTextures(1, &texture.bind);
 		glBindTexture(GL_TEXTURE_2D, texture.bind);
@@ -1190,7 +1188,8 @@ namespace game
 			glBindTexture(GL_TEXTURE_2D, texture.bind);
 		}
 	}
-	// Undefine what we have done, if someone uses an extension loader 
+
+// Undefine what we have done, if someone uses an extension loader 
 #undef GL_TEXTURE_BASE_LEVEL 
 #undef GL_TEXTURE_MAX_LEVEL 
 #undef GL_DEBUG_SEVERITY_HIGH

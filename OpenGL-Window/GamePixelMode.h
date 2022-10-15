@@ -1,8 +1,8 @@
 #pragma once
 #include <gl/GL.h>
 #include "GameDefines.h"
-#include "GameMath.h"
 #include "GameErrors.h"
+#include "GameMath.h"
 #include "GameTexture2D.h"
 
 namespace game
