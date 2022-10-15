@@ -116,7 +116,6 @@ namespace game
 		void _GetAndLogCPUInfo();
 		void _ProcessMessages() noexcept;
 		void _Swap();
-
 	};
 
 
