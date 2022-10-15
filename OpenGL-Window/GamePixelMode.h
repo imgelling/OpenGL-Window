@@ -178,9 +178,7 @@ namespace game
 
 	inline void PixelModeFixed::Render()
 	{
-		Vector2i currentWindowSize;
-
-		currentWindowSize = enginePointer->geGetWindowSize();
+		Vector2i currentWindowSize = enginePointer->geGetWindowSize();
 
 		// If window size has changed
 		if ((currentWindowSize.width != _windowSize.width) || (currentWindowSize.height != _windowSize.height))
@@ -194,18 +192,18 @@ namespace game
 		// Copy video buffer to gpu
 		_UpdateFrameBuffer();
 
-		// gl only FOR NOW.
+
 		// Draw the quad
+		enginePointer->geEnable(GAME_TEXTURE_2D);
+		enginePointer->geBindTexture(GAME_TEXTURE_2D, _frameBuffer[_currentBuffer]);
+		// gl only FOR NOW.
 #if defined(GAME_SUPPORT_OPENGL)
 		if (enginePointer->_attributes.RenderingAPI == RenderAPI::OpenGL)
 		{
-			enginePointer->geEnable(GAME_TEXTURE_2D);
-			glBindTexture(GL_TEXTURE_2D, _frameBuffer[_currentBuffer].bind); // BindTexture
 			glCallList(_compiledQuad);	// ?? defined object(_compiledQuad) ???
-			glBindTexture(GL_TEXTURE_2D, 0);  //BindTexture(0 or null) to disable texture unit
-			enginePointer->geDisable(GAME_TEXTURE_2D);
 		}
 #endif
+		enginePointer->geDisable(GAME_TEXTURE_2D);
 
 		_currentBuffer++;
 		if (_currentBuffer > 1) _currentBuffer = 0;

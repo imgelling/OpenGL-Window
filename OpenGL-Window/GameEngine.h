@@ -84,6 +84,7 @@ namespace game
 		void geClear(const bool Color, const bool Depth, const bool Stencil) noexcept;
 		void geEnable(const uint32_t capability) noexcept;
 		void geDisable(const uint32_t capability) noexcept;
+		void geBindTexture(const uint32_t capability, const Texture2dGL& texture) noexcept;
 
 		// Window stuff
 		
@@ -113,7 +114,7 @@ namespace game
 		uint32_t _updatesPerSecond;
 		uint32_t _framesPerSecond;
 		void _GetAndLogCPUInfo();
-		void _ProcessMessages();
+		void _ProcessMessages() noexcept;
 		void _Swap();
 
 	};
@@ -223,7 +224,7 @@ namespace game
 		geIsRunning = false;
 	}
 
-	inline void Engine::_ProcessMessages()
+	inline void Engine::_ProcessMessages() noexcept
 	{
 		_window.DoMessagePump();
 	}
@@ -335,11 +336,20 @@ namespace game
 			_renderer->Enable(capability);
 		}
 	}
+	
 	inline void Engine::geDisable(const uint32_t capability) noexcept
 	{
 		if (_renderer)
 		{
 			_renderer->Disable(capability);
+		}
+	}
+
+	inline void Engine::geBindTexture(const uint32_t capability, const Texture2dGL &texture) noexcept
+	{
+		if (_renderer)
+		{
+			_renderer->BindTexture(capability, texture);
 		}
 	}
 

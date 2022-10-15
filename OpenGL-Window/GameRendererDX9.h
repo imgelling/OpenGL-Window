@@ -25,6 +25,7 @@ namespace game
 		void Clear(const bool color, const bool depth, const bool stencil) noexcept {};
 		void Enable(const uint32_t capability) noexcept {};
 		void Disable(const uint32_t capability) noexcept {};
+		void BindTexture(const uint32_t capability, const Texture2dGL& texture) noexcept {};
 
 
 	protected:

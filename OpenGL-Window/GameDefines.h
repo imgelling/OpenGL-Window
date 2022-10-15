@@ -3,7 +3,7 @@
 namespace game
 {
 #pragma region geEnable and geDisable defines
-#define GAME_BLEND		(1 << 0)
+#define GAME_BLEND  (1 << 0)
 #define GAME_CULL_FACE	(1 << 1)
 #define GAME_TEXTURE_2D (1 << 2)
 #pragma endregion
