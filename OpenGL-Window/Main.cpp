@@ -26,11 +26,11 @@ public:
 
 		attrib.WindowTitle = "PixelMode tests";
 		attrib.GameVersion = "0.01";
-		attrib.Framelock = 0;
-		attrib.VsyncOn = false;
+		attrib.Framelock = 60;
+		attrib.VsyncOn = true;
 		attrib.DebugMode = true;
-		attrib.MultiSamples = 32; // max 8 amd, 16 nvidia
-		attrib.RenderingAPI = game::RenderAPI::OpenGL;
+		attrib.MultiSamples = 8; // max 8 amd, 16 nvidia
+		attrib.RenderingAPI = game::RenderAPI::DirectX9;// :OpenGL;
 		geSetAttributes(attrib);
 	}
 
@@ -39,20 +39,20 @@ public:
 
 		geSetClearColor(game::Colors::DarkGray);
 
-		geEnable(GAME_BLEND);
+		//geEnable(GAME_BLEND);
 		geEnable(GAME_CULL_FACE); 
 
 		// Setup pixel mode
-		if (!pixelMode.Initialize({ 320, 240 }))
-		{
-			geLogger->Error(game::lastError);
-		}
+		//if (!pixelMode.Initialize({ 320, 240 }))
+		//{
+		//	geLogger->Error(game::lastError);
+		//}
 
-		game::Texture2dGL test;
-		if (!geLoadTexture("content/test.png", test))
-		{
-			std::cout << "---------------- faile\n";
-		}
+		//game::Texture2dGL test;
+		//if (!geLoadTexture("content/test.png", test))
+		//{
+		//	std::cout << "---------------- faile\n";
+		//}
 	}
 
 	void Shutdown()
@@ -76,14 +76,14 @@ public:
 	{
 		geSetWindowTitle("fps : " + std::to_string(geGetFramesPerSecond()) + " ups : " + std::to_string(geGetUpdatesPerSecond()) + " cpu : " + std::to_string(geGetCPUFrequency()) + "Mhz");
 		
-		geClear(true, true, true);
-		pixelMode.Clear(game::Colors::Black);
-		for (uint32_t i = 0; i < 256; i++)
-		{
-			pixelMode.PixelClip(i, 10, { 1.0f, 0.0f, 1.0f, 1.0f});
-		}
+		geClear(true, true, false);
+		//pixelMode.Clear(game::Colors::Black);
+		//for (uint32_t i = 0; i < 256; i++)
+		//{
+		//	pixelMode.PixelClip(i, 10, { 1.0f, 0.0f, 1.0f, 1.0f});
+		//}
 
-		pixelMode.Render();
+		//pixelMode.Render();
 	}
 };
 

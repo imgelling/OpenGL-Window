@@ -689,7 +689,6 @@ namespace game
 
 	inline void RendererGL::FillOutRendererInfo()
 	{
-		int32_t value = 0;
 		std::stringstream sStream;
 		std::string tempValue;
 

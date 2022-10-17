@@ -68,10 +68,10 @@ namespace game
 
 		// Frame and update timing 
 		
-		void geSetFrameLock(const uint32_t limit) noexcept;
 		uint32_t geGetUpdatesPerSecond() const noexcept;
 		uint32_t geGetFramesPerSecond() const noexcept;
 		uint32_t geGetCPUFrequency() const noexcept;
+		void geSetFrameLock(const uint32_t limit) noexcept;
 		
 		// Renderer specific
 		
@@ -86,15 +86,15 @@ namespace game
 		void geDisable(const uint32_t capability) noexcept;
 		void geBindTexture(const uint32_t capability, const Texture2dGL& texture) noexcept;
 
-		// Window stuff
-		
+		// Window stuff	
+
+		Vector2i geGetWindowSize() const noexcept;
 		void geSetWindowTitle(const std::string title);
 		void geToggleFullscreen();
 		void HandleWindowResize(const uint32_t width, const uint32_t height);
-		Vector2i geGetWindowSize() const noexcept;
 		
-		// Created by end user
-		
+		// Created by end user		
+
 		virtual void Update(const float_t msElapsed) = 0;
 		virtual void Render(const float_t msElapsed) = 0;
 		virtual void Initialize() = 0;
@@ -422,14 +422,13 @@ namespace game
 		}
 		else if (_attributes.RenderingAPI == RenderAPI::DirectX9)
 		{
-			lastError = { GameErrors::GameInvalidParameter, "Starting to implement" };
+			//lastError = { GameErrors::GameInvalidParameter, "Starting to implement" };
 #if defined(GAME_SUPPORT_DIRECTX9) || defined(GAME_SUPPORT_ALL)
 			_renderer = new game::RendererDX9();
 #else
 			lastError = { GameErrors::GameInvalidParameter, "Requested DirectX9 without #defining GAME_SUPPORT_DIRECTX9 or GAME_SUPPORT ALL." };
 			return false;
 #endif
-			return false;
 		}
 		else
 		{
