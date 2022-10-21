@@ -1,4 +1,5 @@
 #pragma once
+#include <d3d9.h>
 
 namespace game
 {
@@ -9,10 +10,15 @@ namespace game
 		Trilinear
 	};
 
-	class Texture2dGL
+	class Texture2D
 	{
 	public:
+#if defined(GAME_SUPPORT_OPENGL) | defined(GAME_SUPPORT_ALL)
 		uint32_t bind;
+#endif
+#if defined(GAME_SUPPORT_DIRECTX9) | defined(GAME_SUPPORT_ALL)
+		LPDIRECT3DTEXTURE9 textureInterface;
+#endif
 		std::string name;
 		uint32_t width;
 		uint32_t height;
@@ -26,7 +32,7 @@ namespace game
 		TextureFilterType filterType;
 		uint8_t anisotropyLevel;		// 1 is off, then powers of 2 up to max
 
-		Texture2dGL();
+		Texture2D();
 	private:
 	};
 
@@ -37,7 +43,7 @@ namespace game
 	// GL_LINEAR_MIPMAP_LINEAR : linearly interpolates between the two closest mipmapsand samples the interpolated level via linear interpolation.
 	// anistropic, mipmaps
 
-	inline Texture2dGL::Texture2dGL()
+	inline Texture2D::Texture2D()
 	{
 		bind = 0;
 		width = 0;

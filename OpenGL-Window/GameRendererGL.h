@@ -104,16 +104,16 @@ namespace game
 		void Swap();
 		void HandleWindowResize(const uint32_t width, const uint32_t height);
 		void FillOutRendererInfo();
-		bool CreateTexture(Texture2dGL& texture);
-		bool LoadTexture(std::string fileName, Texture2dGL &texture);
-		void UnLoadTexture(Texture2dGL& texture);
+		bool CreateTexture(Texture2D& texture);
+		bool LoadTexture(std::string fileName, Texture2D &texture);
+		void UnLoadTexture(Texture2D& texture);
 		bool LoadShader(const std::string vertex, const std::string fragment, ShaderGL& shader);
 		void UnLoadShader(ShaderGL& shader);
 		void SetClearColor(const Color& color) noexcept;
 		void Clear(const bool color, const bool depth, const bool stencil) noexcept;
 		void Enable(const uint32_t capability) noexcept;
 		void Disable(const uint32_t capability) noexcept;
-		void BindTexture(const uint32_t capability, const Texture2dGL& texture) noexcept;
+		void BindTexture(const uint32_t capability, const Texture2D& texture) noexcept;
 
 
 	protected:
@@ -844,7 +844,7 @@ namespace game
 
 	}
 	
-	inline bool RendererGL::CreateTexture(Texture2dGL& texture)
+	inline bool RendererGL::CreateTexture(Texture2D& texture)
 	{
 		texture.oneOverWidth = 1.0f / (float_t)texture.width;
 		texture.oneOverHeight = 1.0f / (float_t)texture.height;
@@ -910,7 +910,7 @@ namespace game
 		return true;
 	}
 
-	inline bool RendererGL::LoadTexture(std::string fileName, Texture2dGL &texture)
+	inline bool RendererGL::LoadTexture(std::string fileName, Texture2D &texture)
 	{
 		//Content content;
 		void * data = nullptr;
@@ -986,9 +986,21 @@ namespace game
 		return true;
 	}
 
-	inline void RendererGL::UnLoadTexture(Texture2dGL& texture)
+	inline void RendererGL::UnLoadTexture(Texture2D& texture)
 	{
 		glDeleteTextures(1, &texture.bind);
+		texture.bind = 0;
+		texture.width = 0;
+		texture.height = 0;
+		texture.oneOverWidth = 0.0f;
+		texture.oneOverHeight = 0.0f;
+		texture.componentsPerPixel = 0;
+		texture.isCopy = false;
+		texture.name = "NULL";
+		// Attributes of texture filtering
+		texture.isMipMapped = true;
+		texture.filterType = TextureFilterType::Trilinear;
+		texture.anisotropyLevel = 1;
 	}
 
 	inline std::string RendererGL::_validateShader(const uint32_t shader, const char* file) {
@@ -1180,7 +1192,7 @@ namespace game
 		}
 	}
 
-	inline void RendererGL::BindTexture(const uint32_t capability, const Texture2dGL& texture) noexcept
+	inline void RendererGL::BindTexture(const uint32_t capability, const Texture2D& texture) noexcept
 	{
 		if (capability & GAME_TEXTURE_2D)
 		{

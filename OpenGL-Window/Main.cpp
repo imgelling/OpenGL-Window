@@ -26,8 +26,8 @@ public:
 
 		attrib.WindowTitle = "PixelMode tests";
 		attrib.GameVersion = "0.01";
-		attrib.Framelock = 60;
-		attrib.VsyncOn = true;
+		attrib.Framelock = 0;
+		attrib.VsyncOn = false;
 		attrib.DebugMode = true;
 		attrib.MultiSamples = 8; // max 8 amd, 16 nvidia
 		attrib.RenderingAPI = game::RenderAPI::DirectX9;// :OpenGL;
@@ -43,10 +43,10 @@ public:
 		geEnable(GAME_CULL_FACE); 
 
 		// Setup pixel mode
-		//if (!pixelMode.Initialize({ 320, 240 }))
-		//{
-		//	geLogger->Error(game::lastError);
-		//}
+		if (!pixelMode.Initialize({ 320, 240 }))
+		{
+			geLogger->Error(game::lastError);
+		}
 
 		//game::Texture2dGL test;
 		//if (!geLoadTexture("content/test.png", test))

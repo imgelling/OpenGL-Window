@@ -12,7 +12,6 @@
 
 namespace game
 {
-	extern GameError _lastError;
 	extern SystemInfo systemInfo;
 	class RendererDX9 : public RendererBase
 	{
@@ -23,16 +22,16 @@ namespace game
 		void Swap();
 		void HandleWindowResize(const uint32_t width, const uint32_t height) {};
 		void FillOutRendererInfo();
-		bool CreateTexture(Texture2dGL& texture) { return false; };
-		bool LoadTexture(std::string fileName, Texture2dGL& texture) { return false; };
-		void UnLoadTexture(Texture2dGL& texture) {};
+		bool CreateTexture(Texture2D& texture);
+		bool LoadTexture(std::string fileName, Texture2D& texture) { return false; };
+		void UnLoadTexture(Texture2D& texture);
 		bool LoadShader(const std::string vertex, const std::string fragment, ShaderGL& shader) { return false; };
 		void UnLoadShader(ShaderGL& shader) {};
 		void SetClearColor(const Color& color) noexcept;
 		void Clear(const bool color, const bool depth, const bool stencil) noexcept;
 		void Enable(const uint32_t capability) noexcept {};
 		void Disable(const uint32_t capability) noexcept {};
-		void BindTexture(const uint32_t capability, const Texture2dGL& texture) noexcept {};
+		void BindTexture(const uint32_t capability, const Texture2D& texture) noexcept {};
 
 
 	protected:
@@ -135,6 +134,7 @@ namespace game
 		sStream << "GPU available memory : " << systemInfo.gpuInfo.freeMemory << "MB";
 		LOG(sStream);
 
+		// This should be done with all renderers
 		HINSTANCE hDXGI = LoadLibrary(L"dxgi.dll");
 		if (hDXGI != nullptr)
 		{
@@ -192,5 +192,48 @@ namespace game
 	inline void RendererDX9::Swap()
 	{
 		_d3d9Device->Present(NULL, NULL, NULL, NULL);
+	}
+
+	inline bool RendererDX9::CreateTexture(Texture2D& texture)
+	{
+		texture.oneOverWidth = 1.0f / (float_t)texture.width;
+		texture.oneOverHeight = 1.0f / (float_t)texture.height;
+		texture.isCopy = false;
+
+		// does mipmapping, need to add format also
+		_d3d9Device->CreateTexture(texture.width, texture.height, texture.isMipMapped ? 0 : 1, 0, D3DFMT_A8R8G8B8, D3DPOOL_MANAGED, &texture.textureInterface, NULL);
+		if (!texture.textureInterface)
+		{
+			lastError = { GameErrors::DirectXSpecific, "Could not create texture." };
+			return false;
+		}
+
+
+		texture.textureInterface->PreLoad();
+		
+		texture.textureInterface->Release();
+
+		return true;
+	}
+
+	inline void RendererDX9::UnLoadTexture(Texture2D& texture)
+	{
+		if (texture.textureInterface)
+		{
+			texture.textureInterface->Release();
+			texture.textureInterface = nullptr;
+		}
+		texture.bind = 0;
+		texture.width = 0;
+		texture.height = 0;
+		texture.oneOverWidth = 0.0f;
+		texture.oneOverHeight = 0.0f;
+		texture.componentsPerPixel = 0;
+		texture.isCopy = false;
+		texture.name = "NULL";
+		// Attributes of texture filtering
+		texture.isMipMapped = true;
+		texture.filterType = TextureFilterType::Trilinear;
+		texture.anisotropyLevel = 1;
 	}
 }

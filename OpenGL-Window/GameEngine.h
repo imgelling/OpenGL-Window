@@ -14,6 +14,7 @@
 #include "GameRendererGL.h"
 #pragma endregion
 #endif
+#pragma endregion
 
 #pragma region Vulkan
 #if defined(GAME_SUPPORT_VULKAN) || defined(GAME_SUPPORT_ALL)
@@ -26,6 +27,7 @@
 #include "GameRendererDX9.h"
 #endif
 #pragma endregion
+
 #include "GameTexture2D.h"
 #include "GameMath.h"
 
@@ -75,16 +77,16 @@ namespace game
 		
 		// Renderer specific
 		
-		bool geCreateTexture(Texture2dGL& texture);
-		bool geLoadTexture(const std::string fileName, Texture2dGL& texture);
-		void geUnLoadTexture(Texture2dGL& texture);
+		bool geCreateTexture(Texture2D& texture);
+		bool geLoadTexture(const std::string fileName, Texture2D& texture);
+		void geUnLoadTexture(Texture2D& texture);
 		bool geLoadShader(const std::string vertex, const std::string fragment, ShaderGL& shader);
 		void geUnLoadShader(ShaderGL& shader);
 		void geSetClearColor(const Color& color) noexcept;
 		void geClear(const bool Color, const bool Depth, const bool Stencil) noexcept;
 		void geEnable(const uint32_t capability) noexcept;
 		void geDisable(const uint32_t capability) noexcept;
-		void geBindTexture(const uint32_t capability, const Texture2dGL& texture) noexcept;
+		void geBindTexture(const uint32_t capability, const Texture2D& texture) noexcept;
 
 		// Window stuff	
 
@@ -168,10 +170,9 @@ namespace game
 			// Update cpu frequency
 			if (_cpuSpeedTimer.Elapsed() > 1000.0f)
 			{
-				__int64 cyclesEnd = __rdtsc();
-				_cpuFrequency = (uint32_t)(cyclesEnd - cyclesStart) / 1000000;
-				cyclesStart = cyclesEnd;
 				_cpuSpeedTimer.Reset();
+				_cpuFrequency = (uint32_t)((__rdtsc() - cyclesStart) / 1000000);
+				cyclesStart = __rdtsc();
 			}
 
 
@@ -291,17 +292,17 @@ namespace game
 		}
 	}
 
-	inline bool Engine::geCreateTexture(Texture2dGL& texture)
+	inline bool Engine::geCreateTexture(Texture2D& texture)
 	{
 		return _renderer->CreateTexture(texture);
 	}
 
-	inline bool Engine::geLoadTexture(const std::string fileName, Texture2dGL &texture)
+	inline bool Engine::geLoadTexture(const std::string fileName, Texture2D &texture)
 	{
 		return _renderer->LoadTexture(fileName, texture);
 	}
 
-	inline void Engine::geUnLoadTexture(Texture2dGL& texture)
+	inline void Engine::geUnLoadTexture(Texture2D& texture)
 	{
 		_renderer->UnLoadTexture(texture);
 	}
@@ -344,7 +345,7 @@ namespace game
 		}
 	}
 
-	inline void Engine::geBindTexture(const uint32_t capability, const Texture2dGL &texture) noexcept
+	inline void Engine::geBindTexture(const uint32_t capability, const Texture2D &texture) noexcept
 	{
 		if (_renderer)
 		{

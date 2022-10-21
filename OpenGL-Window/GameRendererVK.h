@@ -24,16 +24,16 @@ namespace game
 
 		void HandleWindowResize(const uint32_t width, const uint32_t height);
 		void FillOutRendererInfo();
-		bool CreateTexture(Texture2dGL& texture);
-		bool LoadTexture(std::string fileName, Texture2dGL &texture);
-		void UnLoadTexture(Texture2dGL& texture);
+		bool CreateTexture(Texture2D& texture);
+		bool LoadTexture(std::string fileName, Texture2D &texture);
+		void UnLoadTexture(Texture2D& texture);
 		bool LoadShader(const std::string vertex, const std::string fragment, ShaderGL& shader);
 		void UnLoadShader(ShaderGL& shader);
 		void SetClearColor(const Color& color) noexcept {};
 		void Clear(const bool color, const bool depth, const bool stencil) noexcept {};
 		void Enable(const uint32_t capability) noexcept {};
 		void Disable(const uint32_t capability) noexcept {};
-		void geBindTexture(const uint32_t capability, const Texture2dGL& texture) noexcept {};
+		void geBindTexture(const uint32_t capability, const Texture2D& texture) noexcept {};
 	protected:
 		void _ReadExtensions();
 
@@ -135,17 +135,17 @@ namespace game
 
 	}
 
-	inline bool RendererVK::CreateTexture(Texture2dGL& texture)
+	inline bool RendererVK::CreateTexture(Texture2D& texture)
 	{
 		return false;
 	}
 
-	inline bool RendererVK::LoadTexture(std::string fileName, Texture2dGL &texture)
+	inline bool RendererVK::LoadTexture(std::string fileName, Texture2D &texture)
 	{
 		return false;
 	}
 
-	inline void RendererVK::UnLoadTexture(Texture2dGL& texture)
+	inline void RendererVK::UnLoadTexture(Texture2D& texture)
 	{
 
 	}

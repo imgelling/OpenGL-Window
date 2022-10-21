@@ -4,10 +4,12 @@
 #include "GameErrors.h"
 #include "GameMath.h"
 #include "GameTexture2D.h"
+#include "GameEngine.h"
 
 namespace game
 {
 	extern GameError lastError;
+	extern Engine* enginePointer;
 	class PixelModeFixed
 	{
 	public:
@@ -20,7 +22,7 @@ namespace game
 		void Pixel(const int32_t x, const int32_t y, const game::Color& color);
 		void PixelClip(const int32_t x, const int32_t y, const game::Color& color);
 	private:
-		Texture2dGL _frameBuffer[2];
+		Texture2D _frameBuffer[2];
 		uint32_t _compiledQuad;
 		uint32_t* _video;
 		Vector2i _bufferSize;
@@ -41,6 +43,8 @@ namespace game
 	inline PixelModeFixed::~PixelModeFixed()
 	{
 		if (_video != nullptr) delete[] _video;
+		enginePointer->geUnLoadTexture(_frameBuffer[0]);
+		enginePointer->geUnLoadTexture(_frameBuffer[1]);
 	}
 
 	inline bool PixelModeFixed::Initialize(const Vector2i& sizeOfScreen)
