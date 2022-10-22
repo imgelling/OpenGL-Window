@@ -74,16 +74,15 @@ public:
 
 	void Render(const float_t msElapsed)
 	{
-		static bool first = true;
-		if (first)
-		{
-			first = false;
-			return;
-		}
+		static float col = 0.0f;
 		geSetWindowTitle("fps : " + std::to_string(geGetFramesPerSecond()) + " ups : " + std::to_string(geGetUpdatesPerSecond()) + " cpu : " + std::to_string(geGetCPUFrequency()) + "Mhz");
 		
+		
+		col += 0.01f;
+		if (col > 1.0f) col = 0.0f;
+		
 		geClear(true, true, false);
-		pixelMode.Clear(game::Colors::Black);
+		pixelMode.Clear(game::Colors::Blue);
 		for (uint32_t i = 0; i < 256; i++)
 		{
 			pixelMode.PixelClip(i, 10, { 1.0f, 0.0f, 1.0f, 1.0f});

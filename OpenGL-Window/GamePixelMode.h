@@ -7,7 +7,7 @@
 #include "GameEngine.h"
 
 // | D3DFVF_TEX0 for tex coords
-#define PIXELMODEFVF (D3DFVF_XYZRHW | D3DFVF_DIFFUSE)
+#define PIXELMODEFVF (D3DFVF_XYZRHW | D3DFVF_DIFFUSE | D3DFVF_TEX0)
 
 namespace game
 {
@@ -32,14 +32,19 @@ namespace game
 #if defined(GAME_SUPPORT_DIRECTX9) | defined(GAME_SUPPORT_ALL)
 		struct _CUSTOMVERTEX
 		{
-			FLOAT x, y, z , rhw;    // from the D3DFVF_XYZRHW flag
-			DWORD color;    // from the D3DFVF_DIFFUSE flag
+			FLOAT x, y, z , rhw;    
+			DWORD color;    
+			FLOAT u, v;
 		};
-		_CUSTOMVERTEX OurVertices[3] =
+		_CUSTOMVERTEX OurVertices[6] =
 		{
-			{320.0f, 50.0f, -0.5f, 1.0f, D3DCOLOR_ARGB(255,0, 0, 255),},
-			{520.0f, 400.0f, -0.5f, 1.0f, D3DCOLOR_ARGB(255,0, 255, 0),},
-			{120.0f, 400.0f, -0.5f, 1.0f, D3DCOLOR_ARGB(255,255, 0, 0),}
+			{0.0f, 0.0f, -0.5f, 1.0f, D3DCOLOR_ARGB(255,255, 255, 255), 0.0f, 0.0f},
+			{520.0f, 0.0f, -0.5f, 1.0f, D3DCOLOR_ARGB(255,255, 255, 255), 1.0f, 0.0f},
+			{0.0f, 400.0f, -0.5f, 1.0f, D3DCOLOR_ARGB(255,255, 255, 255) , 0.0f, 1.0f},
+
+			{520.0f, 0.0f, -0.5f, 1.0f, D3DCOLOR_ARGB(255,255, 255, 255), 1.0f, 0.0f},
+			{520.0f, 400.0f, -0.5f, 1.0f, D3DCOLOR_ARGB(255,255, 255, 255), 1.0f, 1.0f},
+			{0.0f, 400.0f, -0.5f, 1.0f, D3DCOLOR_ARGB(255,255, 255, 255) , 0.0f, 1.0f}
 		};
 		LPDIRECT3DVERTEXBUFFER9 v_buffer;
 		LPDIRECT3DDEVICE9 _d3d9Device;
@@ -123,7 +128,7 @@ namespace game
 		if (enginePointer->_attributes.RenderingAPI == RenderAPI::DirectX9)
 		{
 			_frameBuffer[0].textureInterface->GetDevice(&_d3d9Device);
-			_d3d9Device->CreateVertexBuffer(3 * sizeof(_CUSTOMVERTEX), 0, PIXELMODEFVF, D3DPOOL_MANAGED, &v_buffer, NULL);
+			_d3d9Device->CreateVertexBuffer(6 * sizeof(_CUSTOMVERTEX), 0, PIXELMODEFVF, D3DPOOL_MANAGED, &v_buffer, NULL);
 			if (v_buffer == nullptr)
 			{
 				lastError = { GameErrors::DirectXSpecific, "Could not create vertex buffer for PixelModeShaderless." };
@@ -147,6 +152,24 @@ namespace game
 
 			glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, _frameBuffer[_currentBuffer].width, _frameBuffer[_currentBuffer].height, GL_RGBA, game::systemInfo.gpuInfo.internalPixelType, (GLvoid*)_video);
 			glBindTexture(GL_TEXTURE_2D, 0);
+		}
+#endif
+#if defined(GAME_SUPPORT_DIRECTX9) | defined(GAME_SUPPORT_ALL)
+		if (enginePointer->_attributes.RenderingAPI == RenderAPI::DirectX9)
+		{
+			D3DLOCKED_RECT rect;
+			unsigned char* test = (unsigned char*)_video;
+			if (_frameBuffer[_currentBuffer].textureInterface->LockRect(0, &rect, 0, D3DLOCK_DISCARD) != D3D_OK)
+			{
+				std::cout << "LOCK FAILED  ---------";
+				return;
+			}
+			/*unsigned char* dest = static_cast<unsigned char*>(rect.pBits);
+			size_t size = sizeof(unsigned char) * _frameBuffer[_currentBuffer].width * _frameBuffer[_currentBuffer].height * 4;*/
+			uint32_t* dest = static_cast<uint32_t*>(rect.pBits);
+			size_t size = sizeof(uint32_t) * _frameBuffer[_currentBuffer].width * _frameBuffer[_currentBuffer].height;
+			memcpy(dest, test, size);
+			_frameBuffer[_currentBuffer].textureInterface->UnlockRect(0);
 		}
 #endif
 	}
@@ -267,9 +290,11 @@ namespace game
 		if (enginePointer->_attributes.RenderingAPI == RenderAPI::DirectX9)
 		{
 			_d3d9Device->BeginScene();
+			_d3d9Device->SetTexture(0, _frameBuffer[_currentBuffer].textureInterface);
 			_d3d9Device->SetFVF(PIXELMODEFVF);
 			_d3d9Device->SetStreamSource(0, v_buffer, 0, sizeof(_CUSTOMVERTEX));
-			_d3d9Device->DrawPrimitive(D3DPT_TRIANGLELIST, 0, 1);
+			_d3d9Device->DrawPrimitive(D3DPT_TRIANGLELIST, 0, 2);
+			_d3d9Device->SetTexture(0, nullptr);
 			_d3d9Device->EndScene();
 			_d3d9Device->Present(NULL, NULL, NULL, NULL);
 		}
