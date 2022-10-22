@@ -207,12 +207,6 @@ namespace game
 			lastError = { GameErrors::DirectXSpecific, "Could not create texture." };
 			return false;
 		}
-
-
-		texture.textureInterface->PreLoad();
-		
-		texture.textureInterface->Release();
-
 		return true;
 	}
 

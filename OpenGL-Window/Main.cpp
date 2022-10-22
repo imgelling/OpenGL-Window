@@ -40,7 +40,7 @@ public:
 		geSetClearColor(game::Colors::DarkGray);
 
 		//geEnable(GAME_BLEND);
-		geEnable(GAME_CULL_FACE); 
+		//geEnable(GAME_CULL_FACE); 
 
 		// Setup pixel mode
 		if (!pixelMode.Initialize({ 320, 240 }))
@@ -74,6 +74,12 @@ public:
 
 	void Render(const float_t msElapsed)
 	{
+		static bool first = true;
+		if (first)
+		{
+			first = false;
+			return;
+		}
 		geSetWindowTitle("fps : " + std::to_string(geGetFramesPerSecond()) + " ups : " + std::to_string(geGetUpdatesPerSecond()) + " cpu : " + std::to_string(geGetCPUFrequency()) + "Mhz");
 		
 		geClear(true, true, false);
@@ -83,7 +89,7 @@ public:
 		//	pixelMode.PixelClip(i, 10, { 1.0f, 0.0f, 1.0f, 1.0f});
 		//}
 
-		//pixelMode.Render();
+		pixelMode.Render();
 	}
 };
 

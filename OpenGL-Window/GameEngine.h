@@ -166,6 +166,7 @@ namespace game
 
 			// Do window messages
 			_ProcessMessages();
+			if (!geIsRunning) break;
 
 			// Update cpu frequency
 			if (_cpuSpeedTimer.Elapsed() > 1000.0f)

@@ -6,6 +6,9 @@
 #include "GameTexture2D.h"
 #include "GameEngine.h"
 
+// | D3DFVF_TEX0 for tex coords
+#define PIXELMODEFVF (D3DFVF_XYZRHW | D3DFVF_DIFFUSE)
+
 namespace game
 {
 	extern GameError lastError;
@@ -23,7 +26,24 @@ namespace game
 		void PixelClip(const int32_t x, const int32_t y, const game::Color& color);
 	private:
 		Texture2D _frameBuffer[2];
+#if defined(GAME_SUPPORT_OPENGL) | defined(GAME_SUPPORT_ALL)
 		uint32_t _compiledQuad;
+#endif
+#if defined(GAME_SUPPORT_DIRECTX9) | defined(GAME_SUPPORT_ALL)
+		struct _CUSTOMVERTEX
+		{
+			FLOAT x, y, z, rhw;    // from the D3DFVF_XYZRHW flag
+			DWORD color;    // from the D3DFVF_DIFFUSE flag
+		};
+		_CUSTOMVERTEX OurVertices[3] =
+		{
+		{ 400.0f, 62.5f, 0.5f, 1.0f, D3DCOLOR_XRGB(0, 0, 255), },
+		{ 650.0f, 500.0f, 0.5f, 1.0f, D3DCOLOR_XRGB(0, 255, 0), },
+		{ 150.0f, 500.0f, 0.5f, 1.0f, D3DCOLOR_XRGB(255, 0, 0), },
+		};
+		LPDIRECT3DVERTEXBUFFER9 v_buffer;
+
+#endif
 		uint32_t* _video;
 		Vector2i _bufferSize;
 		Vector2i _windowSize;
@@ -38,11 +58,18 @@ namespace game
 		_compiledQuad = 0;
 		_video = nullptr;
 		_currentBuffer = 0;
+		v_buffer = nullptr;
 	}
 
 	inline PixelModeFixed::~PixelModeFixed()
 	{
 		if (_video != nullptr) delete[] _video;
+#if defined (GAME_SUPPORT_DIRECTX9) | defined(GAME_SUPPORT_ALL)
+		if (enginePointer->_attributes.RenderingAPI == RenderAPI::DirectX9)
+		{
+			v_buffer->Release();
+		}
+#endif
 		enginePointer->geUnLoadTexture(_frameBuffer[0]);
 		enginePointer->geUnLoadTexture(_frameBuffer[1]);
 	}
@@ -77,11 +104,25 @@ namespace game
 			}
 		}
 
-#if defined(GAME_SUPPORT_OPENGL)
+#if defined(GAME_SUPPORT_OPENGL) | defined(GAME_SUPPORT_ALL)
 		// Generate the display list
 		if (enginePointer->_attributes.RenderingAPI == RenderAPI::OpenGL)
 		{
 			_compiledQuad = glGenLists(1);
+		}
+#endif
+#if defined (GAME_SUPPORT_DIRECTX9) | defined(GAME_SUPPORT_ALL)
+		if (enginePointer->_attributes.RenderingAPI == RenderAPI::DirectX9)
+		{
+			LPDIRECT3DDEVICE9 temp = nullptr;
+			_frameBuffer[0].textureInterface->GetDevice(&temp);
+			temp->CreateVertexBuffer(3 * sizeof(_CUSTOMVERTEX), 0, PIXELMODEFVF, D3DPOOL_MANAGED, &v_buffer, NULL);
+			if (v_buffer == nullptr)
+			{
+				lastError = { GameErrors::DirectXSpecific, "Could not create vertex buffer for PixelModeShaderless." };
+				return false;
+			}
+			temp->Release();
 		}
 #endif
 
@@ -93,7 +134,7 @@ namespace game
 
 	inline void PixelModeFixed::_UpdateFrameBuffer()
 	{
-#if defined(GAME_SUPPORT_OPENGL)
+#if defined(GAME_SUPPORT_OPENGL) | defined (GAME_SUPPORT_ALL)
 		if (enginePointer->_attributes.RenderingAPI == RenderAPI::OpenGL)
 		{
 			glBindTexture(GL_TEXTURE_2D, _frameBuffer[_currentBuffer].bind);
@@ -150,7 +191,7 @@ namespace game
 		sizeOfScaledTexture.height = ((float_t)sizeOfScaledTexture.height * 2.0f / (float_t)_windowSize.height) - 1.0f;
 		
 		// OpenGL Only
-#if defined(GAME_SUPPORT_OPENGL)
+#if defined(GAME_SUPPORT_OPENGL) | defined(GAME_SUPPORT_ALL)
 		if (enginePointer->_attributes.RenderingAPI == RenderAPI::OpenGL)
 		{
 			glNewList(_compiledQuad, GL_COMPILE);
@@ -178,6 +219,23 @@ namespace game
 			glEndList();
 		}
 #endif
+#if defined(GAME_SUPPORT_DIRECTX9) | defined(GAME_SUPPORT_ALL)
+		if (enginePointer->_attributes.RenderingAPI == RenderAPI::DirectX9)
+		{
+			VOID* pVoid = nullptr;    
+			//OurVertices[0].x = 0;
+			//OurVertices[0].y = 0;
+			//OurVertices[2].x = 20;
+			//OurVertices[2].y = 0;
+			//OurVertices[1].x = 0;
+			//OurVertices[1].y = 20;
+
+			v_buffer->Lock(0, 0, (void**)&pVoid, 0);
+			memcpy(pVoid, OurVertices, sizeof(OurVertices));    // copy vertices to the vertex buffer
+			v_buffer->Unlock();
+		}
+#endif
+
 	}
 
 	inline void PixelModeFixed::Render()
@@ -201,10 +259,26 @@ namespace game
 		enginePointer->geEnable(GAME_TEXTURE_2D);
 		enginePointer->geBindTexture(GAME_TEXTURE_2D, _frameBuffer[_currentBuffer]);
 		// gl only FOR NOW.
-#if defined(GAME_SUPPORT_OPENGL)
+#if defined(GAME_SUPPORT_OPENGL) | defined(GAME_SUPPORT_ALL)
 		if (enginePointer->_attributes.RenderingAPI == RenderAPI::OpenGL)
 		{
 			glCallList(_compiledQuad);	// ?? defined object(_compiledQuad) ???
+		}
+#endif
+#if defined(GAME_SUPPORT_OPENGL) | defined(GAME_SUPPORT_ALL)
+		if (enginePointer->_attributes.RenderingAPI == RenderAPI::DirectX9)
+		{
+			LPDIRECT3DDEVICE9 temp = nullptr;
+			_frameBuffer[0].textureInterface->GetDevice(&temp);
+			temp->BeginScene();
+			temp->SetFVF(PIXELMODEFVF);
+			temp->SetStreamSource(0, v_buffer, 0, sizeof(_CUSTOMVERTEX));
+			if ((temp->DrawPrimitive(D3DPT_TRIANGLELIST, 0, 1) != D3D_OK))
+			{
+				std::cout << "shit-------";
+			}
+			temp->EndScene();
+			temp->Release();
 		}
 #endif
 		enginePointer->geDisable(GAME_TEXTURE_2D);
@@ -231,3 +305,5 @@ namespace game
 		_video[y * _bufferSize.width + x] = color.packed;
 	}
 }
+
+#undef PIXELMODEFVF
