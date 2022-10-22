@@ -47,6 +47,7 @@ namespace game
 	{
 		_d3d9 = nullptr;
 		_d3d9Device = nullptr;
+
 	}
 
 	inline void RendererDX9::DestroyDevice()
@@ -217,7 +218,6 @@ namespace game
 			texture.textureInterface->Release();
 			texture.textureInterface = nullptr;
 		}
-		texture.bind = 0;
 		texture.width = 0;
 		texture.height = 0;
 		texture.oneOverWidth = 0.0f;

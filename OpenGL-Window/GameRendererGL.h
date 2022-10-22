@@ -5,7 +5,7 @@
 #include <sstream>
 #include "GameDefines.h"
 #include "GameImageLoader.h"
-#include "GameRendererDX9.h"
+//#include "GameRendererDX9.h"
 #include "GameRendererBase.h"
 #include "GameShaderGL.h"
 #include "GameTexture2D.h"

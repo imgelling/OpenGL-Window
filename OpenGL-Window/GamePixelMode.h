@@ -32,16 +32,17 @@ namespace game
 #if defined(GAME_SUPPORT_DIRECTX9) | defined(GAME_SUPPORT_ALL)
 		struct _CUSTOMVERTEX
 		{
-			FLOAT x, y, z, rhw;    // from the D3DFVF_XYZRHW flag
+			FLOAT x, y, z , rhw;    // from the D3DFVF_XYZRHW flag
 			DWORD color;    // from the D3DFVF_DIFFUSE flag
 		};
 		_CUSTOMVERTEX OurVertices[3] =
 		{
-		{ 400.0f, 62.5f, 0.5f, 1.0f, D3DCOLOR_XRGB(0, 0, 255), },
-		{ 650.0f, 500.0f, 0.5f, 1.0f, D3DCOLOR_XRGB(0, 255, 0), },
-		{ 150.0f, 500.0f, 0.5f, 1.0f, D3DCOLOR_XRGB(255, 0, 0), },
+		{ 1.0f, 1.0f, 0.5f, 1.0f, D3DCOLOR_ARGB(255, 0, 0, 255), },
+		{ 100.0f, 1.0f, 0.5f,  1.0f,D3DCOLOR_ARGB(255, 255, 0, 0), },
+		{ 100.0f, 100.0f, 0.5f, 1.0f, D3DCOLOR_ARGB(255, 0, 255, 0), },
 		};
 		LPDIRECT3DVERTEXBUFFER9 v_buffer;
+		LPDIRECT3DDEVICE9 _d3d9Device;
 
 #endif
 		uint32_t* _video;
@@ -55,10 +56,15 @@ namespace game
 	inline PixelModeFixed::PixelModeFixed()
 	{
 		// gl only
+#if defined(GAME_SUPPORT_OPENGL) | defined(GAME_SUPPORT_ALL)
 		_compiledQuad = 0;
+#endif
 		_video = nullptr;
 		_currentBuffer = 0;
+#if defined(GAME_SUPPORT_DIRECTX9) | defined(GAME_SUPPORT_ALL)
 		v_buffer = nullptr;
+		_d3d9Device = nullptr;
+#endif
 	}
 
 	inline PixelModeFixed::~PixelModeFixed()
@@ -114,15 +120,13 @@ namespace game
 #if defined (GAME_SUPPORT_DIRECTX9) | defined(GAME_SUPPORT_ALL)
 		if (enginePointer->_attributes.RenderingAPI == RenderAPI::DirectX9)
 		{
-			LPDIRECT3DDEVICE9 temp = nullptr;
-			_frameBuffer[0].textureInterface->GetDevice(&temp);
-			temp->CreateVertexBuffer(3 * sizeof(_CUSTOMVERTEX), 0, PIXELMODEFVF, D3DPOOL_MANAGED, &v_buffer, NULL);
+			_frameBuffer[0].textureInterface->GetDevice(&_d3d9Device);
+			_d3d9Device->CreateVertexBuffer(3 * sizeof(_CUSTOMVERTEX), 0, PIXELMODEFVF, D3DPOOL_MANAGED, &v_buffer, NULL);
 			if (v_buffer == nullptr)
 			{
 				lastError = { GameErrors::DirectXSpecific, "Could not create vertex buffer for PixelModeShaderless." };
 				return false;
 			}
-			temp->Release();
 		}
 #endif
 
@@ -223,13 +227,6 @@ namespace game
 		if (enginePointer->_attributes.RenderingAPI == RenderAPI::DirectX9)
 		{
 			VOID* pVoid = nullptr;    
-			//OurVertices[0].x = 0;
-			//OurVertices[0].y = 0;
-			//OurVertices[2].x = 20;
-			//OurVertices[2].y = 0;
-			//OurVertices[1].x = 0;
-			//OurVertices[1].y = 20;
-
 			v_buffer->Lock(0, 0, (void**)&pVoid, 0);
 			memcpy(pVoid, OurVertices, sizeof(OurVertices));    // copy vertices to the vertex buffer
 			v_buffer->Unlock();
@@ -258,27 +255,21 @@ namespace game
 		// Draw the quad
 		enginePointer->geEnable(GAME_TEXTURE_2D);
 		enginePointer->geBindTexture(GAME_TEXTURE_2D, _frameBuffer[_currentBuffer]);
-		// gl only FOR NOW.
 #if defined(GAME_SUPPORT_OPENGL) | defined(GAME_SUPPORT_ALL)
 		if (enginePointer->_attributes.RenderingAPI == RenderAPI::OpenGL)
 		{
-			glCallList(_compiledQuad);	// ?? defined object(_compiledQuad) ???
+			glCallList(_compiledQuad);
 		}
 #endif
-#if defined(GAME_SUPPORT_OPENGL) | defined(GAME_SUPPORT_ALL)
+#if defined(GAME_SUPPORT_DIRECTX9) | defined(GAME_SUPPORT_ALL)
 		if (enginePointer->_attributes.RenderingAPI == RenderAPI::DirectX9)
 		{
-			LPDIRECT3DDEVICE9 temp = nullptr;
-			_frameBuffer[0].textureInterface->GetDevice(&temp);
-			temp->BeginScene();
-			temp->SetFVF(PIXELMODEFVF);
-			temp->SetStreamSource(0, v_buffer, 0, sizeof(_CUSTOMVERTEX));
-			if ((temp->DrawPrimitive(D3DPT_TRIANGLELIST, 0, 1) != D3D_OK))
-			{
-				std::cout << "shit-------";
-			}
-			temp->EndScene();
-			temp->Release();
+			_d3d9Device->BeginScene();
+			_d3d9Device->SetFVF(PIXELMODEFVF);
+			_d3d9Device->SetStreamSource(0, v_buffer, 0, sizeof(_CUSTOMVERTEX));
+			_d3d9Device->DrawPrimitive(D3DPT_TRIANGLELIST, 0, 1);
+			_d3d9Device->EndScene();
+			_d3d9Device->Present(NULL, NULL, NULL, NULL);
 		}
 #endif
 		enginePointer->geDisable(GAME_TEXTURE_2D);

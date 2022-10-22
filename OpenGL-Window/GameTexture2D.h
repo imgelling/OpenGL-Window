@@ -45,7 +45,9 @@ namespace game
 
 	inline Texture2D::Texture2D()
 	{
+#if defined(GAME_SUPPORT_OPENGL) | defined(GAME_SUPPORT_ALL)
 		bind = 0;
+#endif
 		width = 0;
 		height = 0;
 		oneOverWidth = 0.0f;
