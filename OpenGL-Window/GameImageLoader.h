@@ -11,7 +11,7 @@ namespace game
 	public :
 		ImageLoader();
 		void* Load(const char* filename, int32_t& width, int32_t& height, int32_t& componentsPerPixel, bool flip);
-		void UnLoad(void* data);
+		void UnLoad();
 		~ImageLoader();
 	private:
 		void* _data = nullptr;
@@ -26,16 +26,16 @@ namespace game
 	{
 		// Invert for OpenGL
 		stbi_set_flip_vertically_on_load(flip); 
-		_data = stbi_load(fileName, &width, &height, &componentsPerPixel, 0);
+		_data = stbi_load(fileName, &width, &height, &componentsPerPixel, 4);
 		return _data;
 	}
 
-	inline void ImageLoader::UnLoad(void* data)
+	inline void ImageLoader::UnLoad()
 	{
-		if (data != nullptr)
+		if (_data != nullptr)
 		{
 			stbi_image_free(_data);
-			data = nullptr;
+			_data = nullptr;
 		}
 	}
 
