@@ -9,6 +9,7 @@
 #include "GameTexture2D.h"
 #include "GameErrors.h"
 #include "GameSystemInfo.h"
+//#include "GameEngine.h"
 
 namespace game
 {
@@ -76,6 +77,7 @@ namespace game
 		d3dpp.Flags = D3DPRESENTFLAG_DISCARD_DEPTHSTENCIL;
 		d3dpp.EnableAutoDepthStencil = true;
 		d3dpp.AutoDepthStencilFormat = D3DFMT_D24X8; // 24 bit, no stencil
+		d3dpp.BackBufferFormat = D3DFMT_A8R8G8B8;
 		if (_attributes.VsyncOn)
 		{
 			d3dpp.PresentationInterval = D3DPRESENT_INTERVAL_ONE;

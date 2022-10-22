@@ -37,9 +37,9 @@ namespace game
 		};
 		_CUSTOMVERTEX OurVertices[3] =
 		{
-		{ 1.0f, 1.0f, 0.5f, 1.0f, D3DCOLOR_ARGB(255, 0, 0, 255), },
-		{ 100.0f, 1.0f, 0.5f,  1.0f,D3DCOLOR_ARGB(255, 255, 0, 0), },
-		{ 100.0f, 100.0f, 0.5f, 1.0f, D3DCOLOR_ARGB(255, 0, 255, 0), },
+			{320.0f, 50.0f, -0.5f, 1.0f, D3DCOLOR_ARGB(255,0, 0, 255),},
+			{520.0f, 400.0f, -0.5f, 1.0f, D3DCOLOR_ARGB(255,0, 255, 0),},
+			{120.0f, 400.0f, -0.5f, 1.0f, D3DCOLOR_ARGB(255,255, 0, 0),}
 		};
 		LPDIRECT3DVERTEXBUFFER9 v_buffer;
 		LPDIRECT3DDEVICE9 _d3d9Device;
@@ -55,7 +55,6 @@ namespace game
 
 	inline PixelModeFixed::PixelModeFixed()
 	{
-		// gl only
 #if defined(GAME_SUPPORT_OPENGL) | defined(GAME_SUPPORT_ALL)
 		_compiledQuad = 0;
 #endif
@@ -73,7 +72,10 @@ namespace game
 #if defined (GAME_SUPPORT_DIRECTX9) | defined(GAME_SUPPORT_ALL)
 		if (enginePointer->_attributes.RenderingAPI == RenderAPI::DirectX9)
 		{
-			v_buffer->Release();
+			if (v_buffer)
+			{
+				v_buffer->Release();
+			}
 		}
 #endif
 		enginePointer->geUnLoadTexture(_frameBuffer[0]);

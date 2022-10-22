@@ -29,7 +29,7 @@ public:
 		attrib.Framelock = 60;
 		attrib.VsyncOn = false;
 		attrib.DebugMode = true;
-		attrib.MultiSamples = 8; // max 8 amd, 16 nvidia
+		attrib.MultiSamples = 0; // max 8 amd, 16 nvidia
 		attrib.RenderingAPI = game::RenderAPI::DirectX9;// :OpenGL;
 		geSetAttributes(attrib);
 	}
@@ -40,7 +40,7 @@ public:
 		geSetClearColor(game::Colors::DarkGray);
 
 		geEnable(GAME_BLEND);
-		//geEnable(GAME_CULL_FACE); 
+		geEnable(GAME_CULL_FACE); 
 
 		// Setup pixel mode
 		if (!pixelMode.Initialize({ 320, 240 }))
