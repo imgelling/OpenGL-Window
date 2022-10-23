@@ -38,19 +38,16 @@ namespace game
 		};
 		_CUSTOMVERTEX OurVertices[6] =
 		{
-			{0.0f, 0.0f, 0.0f, 1.0f, D3DCOLOR_ARGB(255,255, 255, 255), 0.0f, 0.0f},
-			{1280.0f, 0.0f, 0.0f, 1.0f, D3DCOLOR_ARGB(255,255, 255, 255), 1.0f, 0.0f},
-			{0.0f, 720.0f, 0.0f, 1.0f, D3DCOLOR_ARGB(255,255, 255, 255) , 0.0f, 1.0f},
+			{320.0f, 10.0f, 0.0f, 1.0f, D3DCOLOR_ARGB(255,255, 255, 255), 0.0f, 0.0f},
+			{1280.0f / 2.0f, 10.0f, 0.0f, 1.0f, D3DCOLOR_ARGB(255,255, 255, 255), 1.0f, 0.0f},
+			{320.0f, 720.0f / 2.0f + 10.0f, 0.0f, 1.0f, D3DCOLOR_ARGB(255,255, 255, 255) , 0.0f, 1.0f},
 
-			{1280.0f, 0.0f, 0.0f, 1.0f, D3DCOLOR_ARGB(255,255, 255, 255), 1.0f, 0.0f},
-			{1280.0f, 720.0f, 0.0f, 1.0f, D3DCOLOR_ARGB(255,255, 255, 255), 1.0f, 1.0f},
-			{0.0f, 720.0f, 0.0f, 1.0f, D3DCOLOR_ARGB(255,255, 255, 255) , 0.0f, 1.0f}
+			{1280.0f / 2.0f, 10.0f, 0.0f, 1.0f, D3DCOLOR_ARGB(255,255, 255, 255), 1.0f, 0.0f},
+			{1280.0f / 2.0f, 720.0f / 2.0f + 10.0f, 0.0f, 1.0f, D3DCOLOR_ARGB(255,255, 255, 255), 1.0f, 1.0f},
+			{320.0f, 720.0f / 2.0f + 10.0f, 0.0f, 1.0f, D3DCOLOR_ARGB(255,255, 255, 255) , 0.0f, 1.0f}
 		};
 		LPDIRECT3DVERTEXBUFFER9 v_buffer;
 		LPDIRECT3DDEVICE9 _d3d9Device;
-
-		//testing
-		Texture2D testtex;
 
 #endif
 		uint32_t* _video;
@@ -89,8 +86,7 @@ namespace game
 		enginePointer->geUnLoadTexture(_frameBuffer[0]);
 		enginePointer->geUnLoadTexture(_frameBuffer[1]);
 	}
-	// test
-#include "GameImageLoader.h"
+
 	inline bool PixelModeFixed::Initialize(const Vector2i& sizeOfScreen)
 	{
 		_bufferSize = sizeOfScreen;
@@ -106,7 +102,7 @@ namespace game
 			return false;
 		}
 
-		Clear(Colors::Red);
+		Clear(Colors::Black);
 
 		// Create frame buffer textures
 		for (uint32_t loop = 0; loop < 2; loop++)
@@ -145,33 +141,6 @@ namespace game
 
 		// Scale the texture to window size
 		_ScaleQuadToWindow();
-
-		ImageLoader l;
-		void* data;
-		int32_t w, h,cpp;
-		data = l.Load("content/test.png", w, h, cpp, false);
-
-		testtex.width = w;
-		testtex.height = h;
-		testtex.componentsPerPixel = cpp;
-		testtex.isMipMapped = false;
-		testtex.filterType = TextureFilterType::Point;
-		if (!enginePointer->geCreateTexture(testtex))
-		{
-			std::cout << "image not loaded" << "\n";
-		}
-		D3DLOCKED_RECT rect;
-		testtex.textureInterface->LockRect(0, &rect, 0, D3DLOCK_DISCARD);
-		unsigned char* te = (unsigned char*)rect.pBits;
-		unsigned char* dest = static_cast<unsigned char*>(rect.pBits);
-		memcpy(&dest[0], &te[0], sizeof(unsigned char) * w * h * 4);
-
-		testtex.textureInterface->UnlockRect(0);
-		l.UnLoad();
-
-
-
-
 		return true;
 	}
 
@@ -320,7 +289,7 @@ namespace game
 		if (enginePointer->_attributes.RenderingAPI == RenderAPI::DirectX9)
 		{
 			_d3d9Device->BeginScene();
-			_d3d9Device->SetTexture(0, testtex.textureInterface);// _frameBuffer[_currentBuffer].textureInterface);
+			_d3d9Device->SetTexture(0, _frameBuffer[_currentBuffer].textureInterface);
 			_d3d9Device->SetFVF(PIXELMODEFVF);
 			_d3d9Device->SetStreamSource(0, v_buffer, 0, sizeof(_CUSTOMVERTEX));
 			_d3d9Device->DrawPrimitive(D3DPT_TRIANGLELIST, 0, 2);
@@ -339,7 +308,18 @@ namespace game
 
 	inline void PixelModeFixed::Clear(const Color &color)
 	{
-		std::fill_n(_video, _bufferSize.width * _bufferSize.height, color.packed);
+#if defined(GAME_SUPPORT_DIRECTX9) | defined(GAME_SUPPORT_ALL)
+		if (enginePointer->_attributes.RenderingAPI == RenderAPI::DirectX9)
+		{
+			std::fill_n(_video, _bufferSize.width * _bufferSize.height, D3DCOLOR_ARGB(color.a, color.r, color.g, color.b));
+		}
+#endif
+#if defined(GAME_SUPPORT_OPENGL) | defined(GAME_SUPPORT_ALL)
+		if (enginePointer->_attributes.RenderingAPI == RenderAPI::OpenGL)
+		{
+			std::fill_n(_video, _bufferSize.width * _bufferSize.height, color.packed);
+		}
+#endif
 	}
 
 	inline void PixelModeFixed::Pixel(const int32_t x, const int32_t y, const game::Color& color)
@@ -351,7 +331,18 @@ namespace game
 	{
 		if (x < 0 || y < 0) return;
 		if (x > _bufferSize.width-1 || y > _bufferSize.height - 1) return;
-		_video[y * _bufferSize.width + x] = color.packed;
+#if defined(GAME_SUPPORT_DIRECTX9) | defined(GAME_SUPPORT_ALL)
+		if (enginePointer->_attributes.RenderingAPI == RenderAPI::DirectX9)
+		{
+			_video[y * _bufferSize.width + x] = D3DCOLOR_ARGB(color.a, color.r, color.g, color.b);
+		}
+#endif
+#if defined(GAME_SUPPORT_OPENGL) | defined(GAME_SUPPORT_ALL)
+		if (enginePointer->_attributes.RenderingAPI == RenderAPI::OpenGL)
+		{
+			_video[y * _bufferSize.width + x] = color.packed;
+		}
+#endif
 	}
 }
 
