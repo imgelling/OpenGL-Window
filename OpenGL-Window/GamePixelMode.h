@@ -160,11 +160,7 @@ namespace game
 		{
 			D3DLOCKED_RECT rect;
 			unsigned char* test = (unsigned char*)_video;
-			if (_frameBuffer[_currentBuffer].textureInterface->LockRect(0, &rect, 0, D3DLOCK_DISCARD) != D3D_OK)
-			{
-				std::cout << "LOCK FAILED  ---------";
-				return;
-			}
+			_frameBuffer[_currentBuffer].textureInterface->LockRect(0, &rect, 0, D3DLOCK_DISCARD);
 			unsigned char* dest = static_cast<unsigned char*>(rect.pBits);
 			size_t size = sizeof(unsigned char) * _frameBuffer[_currentBuffer].width * _frameBuffer[_currentBuffer].height;
 			memcpy(dest, &test[0], size * 4);
@@ -275,7 +271,6 @@ namespace game
 		// Copy video buffer to gpu
 		_UpdateFrameBuffer();
 
-
 		// Draw the quad
 		enginePointer->geEnable(GAME_TEXTURE_2D);
 		enginePointer->geBindTexture(GAME_TEXTURE_2D, _frameBuffer[_currentBuffer]);
@@ -324,7 +319,18 @@ namespace game
 
 	inline void PixelModeFixed::Pixel(const int32_t x, const int32_t y, const game::Color& color)
 	{
-		_video[y * _bufferSize.width + x] = color.packed;
+#if defined(GAME_SUPPORT_DIRECTX9) | defined(GAME_SUPPORT_ALL)
+		if (enginePointer->_attributes.RenderingAPI == RenderAPI::DirectX9)
+		{
+			_video[y * _bufferSize.width + x] = D3DCOLOR_ARGB(color.a, color.r, color.g, color.b);
+		}
+#endif
+#if defined(GAME_SUPPORT_OPENGL) | defined(GAME_SUPPORT_ALL)
+		if (enginePointer->_attributes.RenderingAPI == RenderAPI::OpenGL)
+		{
+			_video[y * _bufferSize.width + x] = color.packed;
+		}
+#endif
 	}
 
 	inline void PixelModeFixed::PixelClip(const int32_t x, const int32_t y, const game::Color& color)
