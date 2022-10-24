@@ -7,7 +7,7 @@
 #include "GameEngine.h"
 
 // | D3DFVF_TEX0 for tex coords
-#define PIXELMODEFVF (D3DFVF_XYZRHW | D3DFVF_DIFFUSE | D3DFVF_TEX0)
+#define PIXELMODEFVF (D3DFVF_XYZRHW | D3DFVF_DIFFUSE | D3DFVF_TEX1)
 
 namespace game
 {
@@ -38,13 +38,13 @@ namespace game
 		};
 		_CUSTOMVERTEX OurVertices[6] =
 		{
-			{320.0f, 10.0f, 0.0f, 1.0f, D3DCOLOR_ARGB(255,255, 255, 255), 0.0f, 0.0f},
-			{1280.0f / 2.0f, 10.0f, 0.0f, 1.0f, D3DCOLOR_ARGB(255,255, 255, 255), 1.0f, 0.0f},
-			{320.0f, 720.0f / 2.0f + 10.0f, 0.0f, 1.0f, D3DCOLOR_ARGB(255,255, 255, 255) , 0.0f, 1.0f},
+			{0.0f, 0.0f, 0.0f, 1.0f, D3DCOLOR_ARGB(255,255, 255, 255), 0.0f, 0.0f},
+			{1280.0f, 0.0f, 0.0f, 1.0f, D3DCOLOR_ARGB(255,255, 255, 255), 1.0f, 0.0f},
+			{0.0f, 720.0f, 0.0f, 1.0f, D3DCOLOR_ARGB(255,255, 255, 255) , 0.0f, 1.0f},
 
-			{1280.0f / 2.0f, 10.0f, 0.0f, 1.0f, D3DCOLOR_ARGB(255,255, 255, 255), 1.0f, 0.0f},
-			{1280.0f / 2.0f, 720.0f / 2.0f + 10.0f, 0.0f, 1.0f, D3DCOLOR_ARGB(255,255, 255, 255), 1.0f, 1.0f},
-			{320.0f, 720.0f / 2.0f + 10.0f, 0.0f, 1.0f, D3DCOLOR_ARGB(255,255, 255, 255) , 0.0f, 1.0f}
+			{1280.0f, 0.0f, 0.0f, 1.0f, D3DCOLOR_ARGB(255,255, 255, 255), 1.0f, 0.0f},
+			{1280.0f, 720.0f, 0.0f, 1.0f, D3DCOLOR_ARGB(255,255, 255, 255), 1.0f, 1.0f},
+			{0.0f, 720.0f, 0.0f, 1.0f, D3DCOLOR_ARGB(255,255, 255, 255) , 0.0f, 1.0f}
 		};
 		LPDIRECT3DVERTEXBUFFER9 v_buffer;
 		LPDIRECT3DDEVICE9 _d3d9Device;
@@ -160,7 +160,7 @@ namespace game
 		{
 			D3DLOCKED_RECT rect;
 			unsigned char* test = (unsigned char*)_video;
-			_frameBuffer[_currentBuffer].textureInterface->LockRect(0, &rect, 0, D3DLOCK_DISCARD);
+			_frameBuffer[_currentBuffer].textureInterface->LockRect(0, &rect, 0, 0);
 			unsigned char* dest = static_cast<unsigned char*>(rect.pBits);
 			size_t size = sizeof(unsigned char) * _frameBuffer[_currentBuffer].width * _frameBuffer[_currentBuffer].height;
 			memcpy(dest, &test[0], size * 4);

@@ -83,7 +83,7 @@ public:
 		
 		geClear(true, true, false);
 		pixelMode.Clear(game::Colors::Blue);
-		for (uint32_t i = 0; i < 1680; i++)
+		for (uint32_t i = 0; i < 100; i++)
 		{
 			pixelMode.PixelClip(i, 0, game::Colors::Pink);
 		}
