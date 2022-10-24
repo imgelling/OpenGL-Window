@@ -162,8 +162,7 @@ namespace game
 			unsigned char* test = (unsigned char*)_video;
 			_frameBuffer[_currentBuffer].textureInterface->LockRect(0, &rect, 0, 0);
 			unsigned char* dest = static_cast<unsigned char*>(rect.pBits);
-			size_t size = sizeof(unsigned char) * _frameBuffer[_currentBuffer].width * _frameBuffer[_currentBuffer].height;
-			memcpy(dest, &test[0], size * 4);
+			memcpy(dest, &test[0], sizeof(unsigned char) * _frameBuffer[_currentBuffer].width * _frameBuffer[_currentBuffer].height * 4);
 			_frameBuffer[_currentBuffer].textureInterface->UnlockRect(0);
 		}
 #endif
@@ -283,12 +282,17 @@ namespace game
 #if defined(GAME_SUPPORT_DIRECTX9) | defined(GAME_SUPPORT_ALL)
 		if (enginePointer->_attributes.RenderingAPI == RenderAPI::DirectX9)
 		{
+			DWORD oldFVF = 0;
 			_d3d9Device->BeginScene();
+
 			_d3d9Device->SetTexture(0, _frameBuffer[_currentBuffer].textureInterface);
+			_d3d9Device->GetFVF(&oldFVF); // save current fvf
 			_d3d9Device->SetFVF(PIXELMODEFVF);
 			_d3d9Device->SetStreamSource(0, v_buffer, 0, sizeof(_CUSTOMVERTEX));
 			_d3d9Device->DrawPrimitive(D3DPT_TRIANGLELIST, 0, 2);
-			_d3d9Device->SetTexture(0, nullptr);
+			_d3d9Device->SetFVF(oldFVF);  // reset to old fvf
+			_d3d9Device->SetTexture(0, nullptr); // need to put back old texture if one is there
+
 			_d3d9Device->EndScene();
 			_d3d9Device->Present(NULL, NULL, NULL, NULL);
 		}
