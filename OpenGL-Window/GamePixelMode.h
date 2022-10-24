@@ -36,15 +36,19 @@ namespace game
 			DWORD color;    
 			FLOAT u, v;
 		};
+		// offset of -0.5f in x and y seems to fix texture issues in dx9
+		// may need to actually modify uv values by -0.5f/width, -0.5f/height
+		// TRY just position first!!! before uv
+		// opengl still broken
 		_CUSTOMVERTEX OurVertices[6] =
 		{
-			{0.0f, 0.0f, 0.0f, 1.0f, D3DCOLOR_ARGB(255,255, 255, 255), 0.0f, 0.0f},
-			{1280.0f, 0.0f, 0.0f, 1.0f, D3DCOLOR_ARGB(255,255, 255, 255), 1.0f, 0.0f},
-			{0.0f, 720.0f, 0.0f, 1.0f, D3DCOLOR_ARGB(255,255, 255, 255) , 0.0f, 1.0f},
+			{-0.5f, -0.5f, 0.0f, 1.0f, D3DCOLOR_ARGB(255,255, 255, 255), 0.0f, 0.0f},
+			{1279.5f, -0.5f, 0.0f, 1.0f, D3DCOLOR_ARGB(255,255, 255, 255), 1.0f, 0.0f},
+			{-0.5f, 719.5f, 0.0f, 1.0f, D3DCOLOR_ARGB(255,255, 255, 255) , 0.0f, 1.0f},
 
-			{1280.0f, 0.0f, 0.0f, 1.0f, D3DCOLOR_ARGB(255,255, 255, 255), 1.0f, 0.0f},
-			{1280.0f, 720.0f, 0.0f, 1.0f, D3DCOLOR_ARGB(255,255, 255, 255), 1.0f, 1.0f},
-			{0.0f, 720.0f, 0.0f, 1.0f, D3DCOLOR_ARGB(255,255, 255, 255) , 0.0f, 1.0f}
+			{1279.5f, -0.5f, 0.0f, 1.0f, D3DCOLOR_ARGB(255,255, 255, 255), 1.0f, 0.0f},
+			{1279.5f, 719.5f, 0.0f, 1.0f, D3DCOLOR_ARGB(255,255, 255, 255), 1.0f, 1.0f},
+			{-0.5f, 719.5f, 0.0f, 1.0f, D3DCOLOR_ARGB(255,255, 255, 255) , 0.0f, 1.0f}
 		};
 		LPDIRECT3DVERTEXBUFFER9 v_buffer;
 		LPDIRECT3DDEVICE9 _d3d9Device;
@@ -162,7 +166,7 @@ namespace game
 			unsigned char* test = (unsigned char*)_video;
 			_frameBuffer[_currentBuffer].textureInterface->LockRect(0, &rect, 0, 0);
 			unsigned char* dest = static_cast<unsigned char*>(rect.pBits);
-			memcpy(dest, &test[0], sizeof(unsigned char) * _frameBuffer[_currentBuffer].width * _frameBuffer[_currentBuffer].height * 4);
+			memcpy(dest, test, sizeof(unsigned char) * _frameBuffer[_currentBuffer].width * _frameBuffer[_currentBuffer].height * 4);
 			_frameBuffer[_currentBuffer].textureInterface->UnlockRect(0);
 		}
 #endif

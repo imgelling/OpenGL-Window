@@ -30,14 +30,15 @@ public:
 		attrib.VsyncOn = false;
 		attrib.DebugMode = true;
 		attrib.MultiSamples = 0; // max 8 amd, 16 nvidia
-		attrib.RenderingAPI = game::RenderAPI::DirectX9;// :OpenGL;
+		//attrib.RenderingAPI = game::RenderAPI::DirectX9;// :OpenGL;
+		attrib.RenderingAPI = game::RenderAPI::OpenGL;
 		geSetAttributes(attrib);
 	}
 
 	void LoadContent()
 	{
 
-		geSetClearColor(game::Colors::DarkGray);
+		geSetClearColor(game::Colors::White);
 
 		geEnable(GAME_BLEND);
 		geEnable(GAME_CULL_FACE); 
@@ -83,13 +84,13 @@ public:
 		
 		geClear(true, true, false);
 		pixelMode.Clear(game::Colors::Blue);
-		for (uint32_t i = 0; i < 319; i++)
+		for (uint32_t i = 0; i < 320; i++)
+		{
+			pixelMode.PixelClip(i, 239, game::Colors::Pink);
+		}
+		for (uint32_t i = 0; i < 320; i++)
 		{
 			pixelMode.PixelClip(i, 0, game::Colors::Pink);
-		}
-		for (uint32_t i = 0; i < 319; i++)
-		{
-			pixelMode.PixelClip(i, 2, game::Colors::Pink);
 		}
 
 		pixelMode.Render();
