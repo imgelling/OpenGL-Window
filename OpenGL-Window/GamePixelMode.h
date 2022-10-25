@@ -207,18 +207,25 @@ namespace game
 		sizeOfScaledTexture.width = positionOfScaledTexture.x + (_frameBuffer[_currentBuffer].width * scale.x);
 		sizeOfScaledTexture.height = positionOfScaledTexture.y + (_frameBuffer[_currentBuffer].height * scale.y);
 
-		// Homoginize the scaled rect to -1 to 1 range using
-		// position.x = position.x * 2.0 / width - 1.0
-		// position.y = position.y * 2.0 / height - 1.0;
-		positionOfScaledTexture.x = (positionOfScaledTexture.x * 2.0f / (float_t)_windowSize.width) - 1.0f;
-		positionOfScaledTexture.y = (positionOfScaledTexture.y * 2.0f / (float_t)_windowSize.height) - 1.0f;
-		sizeOfScaledTexture.width = ((float_t)sizeOfScaledTexture.width * 2.0f / (float_t)_windowSize.width) - 1.0f;
-		sizeOfScaledTexture.height = ((float_t)sizeOfScaledTexture.height * 2.0f / (float_t)_windowSize.height) - 1.0f;
-		
+		// texturing issue fix
+		positionOfScaledTexture.x -= _frameBuffer[_currentBuffer].oneOverWidth;
+		positionOfScaledTexture.y -= _frameBuffer[_currentBuffer].oneOverHeight;
+		sizeOfScaledTexture.width -= _frameBuffer[_currentBuffer].oneOverWidth;
+		sizeOfScaledTexture.height -= _frameBuffer[_currentBuffer].oneOverHeight;
+
 		// OpenGL Only
 #if defined(GAME_SUPPORT_OPENGL) | defined(GAME_SUPPORT_ALL)
 		if (enginePointer->_attributes.RenderingAPI == RenderAPI::OpenGL)
 		{
+			// Homoginize the scaled rect to -1 to 1 range using
+			// position.x = position.x * 2.0 / width - 1.0
+			// position.y = position.y * 2.0 / height - 1.0;
+			positionOfScaledTexture.x = (positionOfScaledTexture.x * 2.0f / (float_t)_windowSize.width) - 1.0f;
+			positionOfScaledTexture.y = (positionOfScaledTexture.y * 2.0f / (float_t)_windowSize.height) - 1.0f;
+			sizeOfScaledTexture.width = ((float_t)sizeOfScaledTexture.width * 2.0f / (float_t)_windowSize.width) - 1.0f;
+			sizeOfScaledTexture.height = ((float_t)sizeOfScaledTexture.height * 2.0f / (float_t)_windowSize.height) - 1.0f;
+
+
 			//positionOfScaledTexture.x -= _frameBuffer[_currentBuffer].oneOverWidth;
 			//positionOfScaledTexture.y -= _frameBuffer[_currentBuffer].oneOverHeight;
 			//sizeOfScaledTexture.x -= _frameBuffer[_currentBuffer].oneOverWidth;
@@ -257,6 +264,22 @@ namespace game
 				OurVertices[i].x -= _frameBuffer[_currentBuffer].oneOverWidth;
 				OurVertices[i].y -= _frameBuffer[_currentBuffer].oneOverHeight;
 			}
+			
+			//OurVertices[0].x = positionOfScaledTexture.x;
+			//OurVertices[0].y = positionOfScaledTexture.y;
+			//OurVertices[1].x = sizeOfScaledTexture.x;
+			//OurVertices[1].y = positionOfScaledTexture.y;
+			//OurVertices[2].x = positionOfScaledTexture.x;
+			//OurVertices[2].y = sizeOfScaledTexture.y;
+
+			//OurVertices[3].x = sizeOfScaledTexture.x;
+			//OurVertices[3].y = positionOfScaledTexture.y;
+			//OurVertices[4].x = sizeOfScaledTexture.x;
+			//OurVertices[4].y = sizeOfScaledTexture.y;
+			//OurVertices[5].x = positionOfScaledTexture.x;
+			//OurVertices[5].y = sizeOfScaledTexture.y;
+
+
 			v_buffer->Lock(0, 0, (void**)&pVoid, 0);
 			memcpy(pVoid, OurVertices, sizeof(OurVertices));    // copy vertices to the vertex buffer
 			v_buffer->Unlock();

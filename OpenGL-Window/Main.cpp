@@ -13,7 +13,6 @@ class Game : public game::Engine
 {
 
 public:
-	game::Terminal terminal;
 	game::PixelModeFixed pixelMode;
 
 	Game(game::Logger& logger) : game::Engine(&logger)
@@ -30,7 +29,7 @@ public:
 		attrib.VsyncOn = false;
 		attrib.DebugMode = false;
 		attrib.MultiSamples = 0; // max 8 amd, 16 nvidia
-		attrib.RenderingAPI = game::RenderAPI::DirectX9; // significantly faster in pixelmode
+		attrib.RenderingAPI = game::RenderAPI::DirectX9; // pixelmode multisample screws it up
 		//attrib.RenderingAPI = game::RenderAPI::OpenGL;
 		geSetAttributes(attrib);
 	}
@@ -38,7 +37,7 @@ public:
 	void LoadContent()
 	{
 
-		geSetClearColor(game::Colors::White);
+		geSetClearColor(game::Colors::Red);
 
 		geEnable(GAME_BLEND);
 		geEnable(GAME_CULL_FACE); 
