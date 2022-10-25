@@ -6,7 +6,7 @@
 #include "GameTexture2D.h"
 #include "GameEngine.h"
 
-// | D3DFVF_TEX0 for tex coords
+// | D3DFVF_TEX0 for tex coords WRONG!! need TEX1
 #define PIXELMODEFVF (D3DFVF_XYZRHW | D3DFVF_DIFFUSE | D3DFVF_TEX1)
 
 namespace game
@@ -36,19 +36,17 @@ namespace game
 			DWORD color;    
 			FLOAT u, v;
 		};
-		// offset of -0.5f in x and y seems to fix texture issues in dx9
-		// may need to actually modify uv values by -0.5f/width, -0.5f/height
-		// TRY just position first!!! before uv
-		// opengl still broken
+		// modify pos values by -0.5f/width, -0.5f/height works dx9
+		// opengl still broken (nvidia it works)
 		_CUSTOMVERTEX OurVertices[6] =
 		{
-			{-0.5f, -0.5f, 0.0f, 1.0f, D3DCOLOR_ARGB(255,255, 255, 255), 0.0f, 0.0f},
-			{1279.5f, -0.5f, 0.0f, 1.0f, D3DCOLOR_ARGB(255,255, 255, 255), 1.0f, 0.0f},
-			{-0.5f, 719.5f, 0.0f, 1.0f, D3DCOLOR_ARGB(255,255, 255, 255) , 0.0f, 1.0f},
+			{0.0f, 0.0f, 0.0f, 1.0f, D3DCOLOR_ARGB(255,255, 255, 255), 0.0f, 0.0f},
+			{1280.0f, 0.0f, 0.0f, 1.0f, D3DCOLOR_ARGB(255,255, 255, 255), 1.0f, 0.0f},
+			{0.0f, 720.0f, 0.0f, 1.0f, D3DCOLOR_ARGB(255,255, 255, 255) , 0.0f, 1.0f},
 
-			{1279.5f, -0.5f, 0.0f, 1.0f, D3DCOLOR_ARGB(255,255, 255, 255), 1.0f, 0.0f},
-			{1279.5f, 719.5f, 0.0f, 1.0f, D3DCOLOR_ARGB(255,255, 255, 255), 1.0f, 1.0f},
-			{-0.5f, 719.5f, 0.0f, 1.0f, D3DCOLOR_ARGB(255,255, 255, 255) , 0.0f, 1.0f}
+			{1280.0f, 0.0f, 0.0f, 1.0f, D3DCOLOR_ARGB(255,255, 255, 255), 1.0f, 0.0f},
+			{1280.0f, 720.0f, 0.0f, 1.0f, D3DCOLOR_ARGB(255,255, 255, 255), 1.0f, 1.0f},
+			{0.0f, 720.0f, 0.0f, 1.0f, D3DCOLOR_ARGB(255,255, 255, 255) , 0.0f, 1.0f}
 		};
 		LPDIRECT3DVERTEXBUFFER9 v_buffer;
 		LPDIRECT3DDEVICE9 _d3d9Device;
@@ -221,6 +219,10 @@ namespace game
 #if defined(GAME_SUPPORT_OPENGL) | defined(GAME_SUPPORT_ALL)
 		if (enginePointer->_attributes.RenderingAPI == RenderAPI::OpenGL)
 		{
+			//positionOfScaledTexture.x -= _frameBuffer[_currentBuffer].oneOverWidth;
+			//positionOfScaledTexture.y -= _frameBuffer[_currentBuffer].oneOverHeight;
+			//sizeOfScaledTexture.x -= _frameBuffer[_currentBuffer].oneOverWidth;
+			//sizeOfScaledTexture.y -= _frameBuffer[_currentBuffer].oneOverHeight;
 			glNewList(_compiledQuad, GL_COMPILE);
 			{
 				glBegin(GL_QUADS);
@@ -250,6 +252,11 @@ namespace game
 		if (enginePointer->_attributes.RenderingAPI == RenderAPI::DirectX9)
 		{
 			VOID* pVoid = nullptr;    
+			for (int i = 0; i < 6; i++)
+			{
+				OurVertices[i].x -= _frameBuffer[_currentBuffer].oneOverWidth;
+				OurVertices[i].y -= _frameBuffer[_currentBuffer].oneOverHeight;
+			}
 			v_buffer->Lock(0, 0, (void**)&pVoid, 0);
 			memcpy(pVoid, OurVertices, sizeof(OurVertices));    // copy vertices to the vertex buffer
 			v_buffer->Unlock();

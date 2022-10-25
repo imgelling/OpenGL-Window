@@ -4,7 +4,7 @@
 
 
 // Engine header
-//#define GAME_USE_DEDICATED_GPU
+#define GAME_USE_DEDICATED_GPU
 #define GAME_SUPPORT_DIRECTX9
 #define GAME_SUPPORT_OPENGL
 #include "Game.h"
@@ -30,8 +30,8 @@ public:
 		attrib.VsyncOn = false;
 		attrib.DebugMode = true;
 		attrib.MultiSamples = 0; // max 8 amd, 16 nvidia
-		//attrib.RenderingAPI = game::RenderAPI::DirectX9;// :OpenGL;
-		attrib.RenderingAPI = game::RenderAPI::OpenGL;
+		attrib.RenderingAPI = game::RenderAPI::DirectX9;
+		//attrib.RenderingAPI = game::RenderAPI::OpenGL;
 		geSetAttributes(attrib);
 	}
 
