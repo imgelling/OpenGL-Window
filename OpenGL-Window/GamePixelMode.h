@@ -305,7 +305,6 @@ namespace game
 			_d3d9Device->SetTexture(0, nullptr); // need to put back old texture if one is there
 
 			_d3d9Device->EndScene();
-			_d3d9Device->Present(NULL, NULL, NULL, NULL);
 		}
 		
 #endif
