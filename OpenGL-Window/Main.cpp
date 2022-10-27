@@ -4,7 +4,7 @@
 
 
 // Engine header
-//#define GAME_USE_DEDICATED_GPU
+#define GAME_USE_DEDICATED_GPU
 #define GAME_SUPPORT_DIRECTX9
 #define GAME_SUPPORT_OPENGL
 #include "Game.h"
@@ -26,10 +26,10 @@ public:
 		attrib.WindowTitle = "PixelMode tests";
 		attrib.GameVersion = "0.01";
 		attrib.Framelock = 0;  
-		attrib.VsyncOn = false;
+		attrib.VsyncOn = true;
 		attrib.DebugMode = false;
-		attrib.MultiSamples = 0; // max 8 amd, 16 nvidia
-		attrib.RenderingAPI = game::RenderAPI::DirectX9; // pixelmode multisample screws it up
+		attrib.MultiSamples = 8; // max 8 amd, 16 nvidia
+		attrib.RenderingAPI = game::RenderAPI::DirectX9; 
 		//attrib.RenderingAPI = game::RenderAPI::OpenGL;
 		geSetAttributes(attrib);
 	}

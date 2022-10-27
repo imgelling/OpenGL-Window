@@ -1,5 +1,10 @@
 #pragma once
+#if defined(GAME_SUPPORT_OPENGL) | defined(GAME_SUPPORT_ALL)
 #include <gl/GL.h>
+#endif
+#if defined(GAME_SUPPORT_DIRECTX9) | defined(GAME_SUPPORT_ALL)
+#include <d3d9.h>
+#endif
 #include "GameDefines.h"
 #include "GameErrors.h"
 #include "GameMath.h"
@@ -32,9 +37,9 @@ namespace game
 #if defined(GAME_SUPPORT_DIRECTX9) | defined(GAME_SUPPORT_ALL)
 		struct _CUSTOMVERTEX
 		{
-			FLOAT x, y, z, rhw;    
-			DWORD color;    
-			FLOAT u, v;
+			float_t x, y, z, rhw;    
+			uint32_t color;    
+			float_t u, v;
 		};
 		// modify pos values by -0.5f/width, -0.5f/height works dx9
 		// opengl still broken (nvidia it works)
@@ -50,7 +55,6 @@ namespace game
 		};
 		LPDIRECT3DVERTEXBUFFER9 v_buffer;
 		LPDIRECT3DDEVICE9 _d3d9Device;
-
 #endif
 		uint32_t* _video;
 		Vector2i _bufferSize;
@@ -305,33 +309,61 @@ namespace game
 		_UpdateFrameBuffer();
 
 		// Draw the quad
+#if defined(GAME_SUPPORT_OPENGL) | defined(GAME_SUPPORT_ALL)
 		enginePointer->geEnable(GAME_TEXTURE_2D);
 		enginePointer->geBindTexture(GAME_TEXTURE_2D, _frameBuffer[_currentBuffer]);
-#if defined(GAME_SUPPORT_OPENGL) | defined(GAME_SUPPORT_ALL)
 		if (enginePointer->_attributes.RenderingAPI == RenderAPI::OpenGL)
 		{
+			if (enginePointer->_attributes.MultiSamples > 1)
+			{
+				glDisable(0x809D); // 0x809D is GL_MULTISAMPLE
+			}
 			glCallList(_compiledQuad);
+			if (enginePointer->_attributes.MultiSamples > 1)
+			{
+				glEnable(0x809D);
+			}
 		}
+		enginePointer->geDisable(GAME_TEXTURE_2D);
 #endif
 #if defined(GAME_SUPPORT_DIRECTX9) | defined(GAME_SUPPORT_ALL)
 		if (enginePointer->_attributes.RenderingAPI == RenderAPI::DirectX9)
 		{
 			DWORD oldFVF = 0;
+			IDirect3DBaseTexture9* activeTexture = 0;
 			_d3d9Device->BeginScene();
+			// Save current state
+			_d3d9Device->GetFVF(&oldFVF); 
+			_d3d9Device->GetTexture(0, &activeTexture);
+
+			// Disable multisampling if enabled
+			if (enginePointer->_attributes.MultiSamples > 1)
+			{
+				_d3d9Device->SetRenderState(D3DRS_MULTISAMPLEANTIALIAS, FALSE);
+			}
 
 			_d3d9Device->SetTexture(0, _frameBuffer[_currentBuffer].textureInterface);
-			_d3d9Device->GetFVF(&oldFVF); // save current fvf
 			_d3d9Device->SetFVF(PIXELMODEFVF);
 			_d3d9Device->SetStreamSource(0, v_buffer, 0, sizeof(_CUSTOMVERTEX));
 			_d3d9Device->DrawPrimitive(D3DPT_TRIANGLELIST, 0, 2);
-			_d3d9Device->SetFVF(oldFVF);  // reset to old fvf
-			_d3d9Device->SetTexture(0, nullptr); // need to put back old texture if one is there
+
+			// Restore previous state
+			_d3d9Device->SetFVF(oldFVF);  
+			_d3d9Device->SetTexture(0, activeTexture); 
+			if (activeTexture)
+			{
+				activeTexture->Release();
+			}
+			// Renable multisampling if it was enabled
+			if (enginePointer->_attributes.MultiSamples > 1)
+			{
+				_d3d9Device->SetRenderState(D3DRS_MULTISAMPLEANTIALIAS, TRUE);
+			}
 
 			_d3d9Device->EndScene();
 		}
 		
 #endif
-		enginePointer->geDisable(GAME_TEXTURE_2D);
 
 		_currentBuffer++;
 		if (_currentBuffer > 1) _currentBuffer = 0;
