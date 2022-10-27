@@ -239,19 +239,23 @@ namespace game
 				glBegin(GL_QUADS);
 				//bl
 				glColor3f(1.0f, 1.0f, 1.0f);
-				glTexCoord2f(0, 0);
+				//glTexCoord2f(0, 0);
+				glTexCoord2f(0, 1);
 				glVertex2f(positionOfScaledTexture.x, -sizeOfScaledTexture.height);
 				//br
 				glColor3f(1.0f, 1.0f, 1.0f);
-				glTexCoord2f(1.0f, 0.0f);
+				//glTexCoord2f(1.0f, 0.0f);
+				glTexCoord2f(1, 1);
 				glVertex2f(sizeOfScaledTexture.width, -sizeOfScaledTexture.height);
 				//tr
 				glColor3f(1.0f, 1.0f, 1.0f);
-				glTexCoord2f(1, 1);
+				//glTexCoord2f(1, 1);
+				glTexCoord2f(1.0f, 0.0f);
 				glVertex2f(sizeOfScaledTexture.width, -positionOfScaledTexture.y);
 				// tl
 				glColor3f(1.0f, 1.0f, 1.0f);
-				glTexCoord2f(0, 1);
+				//glTexCoord2f(0, 1);
+				glTexCoord2f(0, 0);
 				glVertex2f(positionOfScaledTexture.x, -positionOfScaledTexture.y);
 
 				glEnd();

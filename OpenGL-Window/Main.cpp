@@ -4,7 +4,7 @@
 
 
 // Engine header
-#define GAME_USE_DEDICATED_GPU
+//#define GAME_USE_DEDICATED_GPU
 #define GAME_SUPPORT_DIRECTX9
 #define GAME_SUPPORT_OPENGL
 #include "Game.h"
@@ -83,11 +83,11 @@ public:
 		
 		geClear(true, true, false);
 		pixelMode.Clear(game::Colors::Blue);
-		for (uint32_t i = 0; i < 320; i++)
-		{
-			pixelMode.PixelClip(i, 239, game::Colors::Pink);
-		}
-		for (uint32_t i = 0; i < 320; i++)
+		//for (uint32_t i = 0; i < 320; i++)
+		//{
+		//	pixelMode.PixelClip(i, 239, game::Colors::Pink);
+		//}
+		for (uint32_t i = 0; i < 120; i++)
 		{
 			pixelMode.PixelClip(i, 0, game::Colors::Pink);
 		}
