@@ -41,8 +41,6 @@ namespace game
 			uint32_t color;    
 			float_t u, v;
 		};
-		// modify pos values by -0.5f/width, -0.5f/height works dx9
-		// opengl still broken (nvidia it works)
 		_CUSTOMVERTEX OurVertices[6] =
 		{
 			{0.0f, 0.0f, 0.0f, 1.0f, D3DCOLOR_ARGB(255,255, 255, 255), 0.0f, 0.0f},
@@ -266,17 +264,17 @@ namespace game
 			
 			OurVertices[0].x = positionOfScaledTexture.x;
 			OurVertices[0].y = positionOfScaledTexture.y;
-			OurVertices[1].x = sizeOfScaledTexture.height;
+			OurVertices[1].x = sizeOfScaledTexture.width;
 			OurVertices[1].y = positionOfScaledTexture.y;
 			OurVertices[2].x = positionOfScaledTexture.x;
 			OurVertices[2].y = sizeOfScaledTexture.height;
 
-			OurVertices[3].x = sizeOfScaledTexture.x;
+			OurVertices[3].x = sizeOfScaledTexture.width;
 			OurVertices[3].y = positionOfScaledTexture.y;
-			OurVertices[4].x = sizeOfScaledTexture.x;
-			OurVertices[4].y = sizeOfScaledTexture.y;
+			OurVertices[4].x = sizeOfScaledTexture.width;
+			OurVertices[4].y = sizeOfScaledTexture.height;
 			OurVertices[5].x = positionOfScaledTexture.x;
-			OurVertices[5].y = sizeOfScaledTexture.y;
+			OurVertices[5].y = sizeOfScaledTexture.height;
 
 			for (int i = 0; i < 6; i++)
 			{
