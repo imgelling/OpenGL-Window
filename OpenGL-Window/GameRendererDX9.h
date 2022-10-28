@@ -53,7 +53,7 @@ namespace game
 
 	inline void RendererDX9::HandleWindowResize(const uint32_t width, const uint32_t height)
 	{
-		D3DVIEWPORT9 view { 0, 0, width, height, 0.01f, 1.0f};
+		D3DVIEWPORT9 view { 0, 0, width, height, 0.0f, 1.0f};
 
 		_d3d9Device->SetViewport(&view);
 	}
@@ -110,7 +110,10 @@ namespace game
 		{
 			lastError = { GameErrors::DirectXSpecific, "Create Device failed." };
 			return false;
-		}		
+		}
+		D3DVIEWPORT9 view{ 0, 0, _attributes.WindowWidth, _attributes.WindowHeight, 0.0f, 1.0f };
+
+		_d3d9Device->SetViewport(&view);
 		return true;
 	}
 

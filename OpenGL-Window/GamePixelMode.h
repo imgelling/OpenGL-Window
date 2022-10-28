@@ -41,6 +41,8 @@ namespace game
 			uint32_t color;    
 			float_t u, v;
 		};
+		// modify pos values by -0.5f/width, -0.5f/height works dx9
+		// opengl still broken (nvidia it works)
 		_CUSTOMVERTEX OurVertices[6] =
 		{
 			{0.0f, 0.0f, 0.0f, 1.0f, D3DCOLOR_ARGB(255,255, 255, 255), 0.0f, 0.0f},
@@ -261,7 +263,6 @@ namespace game
 		{
 			VOID* pVoid = nullptr;  
 
-			
 			OurVertices[0].x = positionOfScaledTexture.x;
 			OurVertices[0].y = positionOfScaledTexture.y;
 			OurVertices[1].x = sizeOfScaledTexture.width;
@@ -275,12 +276,6 @@ namespace game
 			OurVertices[4].y = sizeOfScaledTexture.height;
 			OurVertices[5].x = positionOfScaledTexture.x;
 			OurVertices[5].y = sizeOfScaledTexture.height;
-
-			for (int i = 0; i < 6; i++)
-			{
-				OurVertices[i].x -= _frameBuffer[_currentBuffer].oneOverWidth;
-				OurVertices[i].y -= _frameBuffer[_currentBuffer].oneOverHeight;
-			}
 
 			v_buffer->Lock(0, 0, (void**)&pVoid, 0);
 			memcpy(pVoid, OurVertices, sizeof(OurVertices));    // copy vertices to the vertex buffer
