@@ -101,7 +101,7 @@ namespace game
 		_windowSize = enginePointer->geGetWindowSize();
 
 		// Create video buffer
-		_video = new uint32_t[_bufferSize.width * _bufferSize.height];
+		_video = new uint32_t[(uint32_t)_bufferSize.width * (uint32_t)_bufferSize.height];
 		if (_video == nullptr)
 		{
 			lastError = { GameErrors::GameRenderer, "Could not allocate RAM for PixelModeShaderless video buffer." };
