@@ -229,11 +229,6 @@ namespace game
 			sizeOfScaledTexture.width = ((float_t)sizeOfScaledTexture.width * 2.0f / (float_t)_windowSize.width) - 1.0f;
 			sizeOfScaledTexture.height = ((float_t)sizeOfScaledTexture.height * 2.0f / (float_t)_windowSize.height) - 1.0f;
 
-
-			//positionOfScaledTexture.x -= _frameBuffer[_currentBuffer].oneOverWidth;
-			//positionOfScaledTexture.y -= _frameBuffer[_currentBuffer].oneOverHeight;
-			//sizeOfScaledTexture.x -= _frameBuffer[_currentBuffer].oneOverWidth;
-			//sizeOfScaledTexture.y -= _frameBuffer[_currentBuffer].oneOverHeight;
 			glNewList(_compiledQuad, GL_COMPILE);
 			{
 				glBegin(GL_QUADS);
@@ -266,27 +261,28 @@ namespace game
 #if defined(GAME_SUPPORT_DIRECTX9) | defined(GAME_SUPPORT_ALL)
 		if (enginePointer->_attributes.RenderingAPI == RenderAPI::DirectX9)
 		{
-			VOID* pVoid = nullptr;    
+			VOID* pVoid = nullptr;  
+
+			
+			OurVertices[0].x = positionOfScaledTexture.x;
+			OurVertices[0].y = positionOfScaledTexture.y;
+			OurVertices[1].x = sizeOfScaledTexture.height;
+			OurVertices[1].y = positionOfScaledTexture.y;
+			OurVertices[2].x = positionOfScaledTexture.x;
+			OurVertices[2].y = sizeOfScaledTexture.height;
+
+			OurVertices[3].x = sizeOfScaledTexture.x;
+			OurVertices[3].y = positionOfScaledTexture.y;
+			OurVertices[4].x = sizeOfScaledTexture.x;
+			OurVertices[4].y = sizeOfScaledTexture.y;
+			OurVertices[5].x = positionOfScaledTexture.x;
+			OurVertices[5].y = sizeOfScaledTexture.y;
+
 			for (int i = 0; i < 6; i++)
 			{
 				OurVertices[i].x -= _frameBuffer[_currentBuffer].oneOverWidth;
 				OurVertices[i].y -= _frameBuffer[_currentBuffer].oneOverHeight;
 			}
-			
-			//OurVertices[0].x = positionOfScaledTexture.x;
-			//OurVertices[0].y = positionOfScaledTexture.y;
-			//OurVertices[1].x = sizeOfScaledTexture.x;
-			//OurVertices[1].y = positionOfScaledTexture.y;
-			//OurVertices[2].x = positionOfScaledTexture.x;
-			//OurVertices[2].y = sizeOfScaledTexture.y;
-
-			//OurVertices[3].x = sizeOfScaledTexture.x;
-			//OurVertices[3].y = positionOfScaledTexture.y;
-			//OurVertices[4].x = sizeOfScaledTexture.x;
-			//OurVertices[4].y = sizeOfScaledTexture.y;
-			//OurVertices[5].x = positionOfScaledTexture.x;
-			//OurVertices[5].y = sizeOfScaledTexture.y;
-
 
 			v_buffer->Lock(0, 0, (void**)&pVoid, 0);
 			memcpy(pVoid, OurVertices, sizeof(OurVertices));    // copy vertices to the vertex buffer
@@ -314,10 +310,10 @@ namespace game
 
 		// Draw the quad
 #if defined(GAME_SUPPORT_OPENGL) | defined(GAME_SUPPORT_ALL)
-		enginePointer->geEnable(GAME_TEXTURE_2D);
-		enginePointer->geBindTexture(GAME_TEXTURE_2D, _frameBuffer[_currentBuffer]);
 		if (enginePointer->_attributes.RenderingAPI == RenderAPI::OpenGL)
 		{
+			enginePointer->geEnable(GAME_TEXTURE_2D);
+			enginePointer->geBindTexture(GAME_TEXTURE_2D, _frameBuffer[_currentBuffer]);
 			if (enginePointer->_attributes.MultiSamples > 1)
 			{
 				glDisable(0x809D); // 0x809D is GL_MULTISAMPLE
@@ -327,8 +323,8 @@ namespace game
 			{
 				glEnable(0x809D);
 			}
+			enginePointer->geDisable(GAME_TEXTURE_2D);
 		}
-		enginePointer->geDisable(GAME_TEXTURE_2D);
 #endif
 #if defined(GAME_SUPPORT_DIRECTX9) | defined(GAME_SUPPORT_ALL)
 		if (enginePointer->_attributes.RenderingAPI == RenderAPI::DirectX9)
@@ -349,7 +345,7 @@ namespace game
 			_d3d9Device->SetTexture(0, _frameBuffer[_currentBuffer].textureInterface);
 			_d3d9Device->SetFVF(PIXELMODEFVF);
 			_d3d9Device->SetStreamSource(0, v_buffer, 0, sizeof(_CUSTOMVERTEX));
-			_d3d9Device->DrawPrimitive(D3DPT_TRIANGLELIST, 0, 2);
+			_d3d9Device->DrawPrimitive(D3DPT_TRIANGLELIST, 0, 1);
 
 			// Restore previous state
 			_d3d9Device->SetFVF(oldFVF);  

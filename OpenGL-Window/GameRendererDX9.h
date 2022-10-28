@@ -21,7 +21,7 @@ namespace game
 		bool CreateDevice(Window& window);
 		void DestroyDevice();
 		void Swap();
-		void HandleWindowResize(const uint32_t width, const uint32_t height) {};
+		void HandleWindowResize(const uint32_t width, const uint32_t height);
 		void FillOutRendererInfo();
 		bool CreateTexture(Texture2D& texture);
 		bool LoadTexture(std::string fileName, Texture2D& texture) { return false; };
@@ -51,6 +51,12 @@ namespace game
 
 	}
 
+	inline void RendererDX9::HandleWindowResize(const uint32_t width, const uint32_t height)
+	{
+		D3DVIEWPORT9 view { 0, 0, width, height, 0.01f, 1.0f};
+
+		_d3d9Device->SetViewport(&view);
+	}
 	inline void RendererDX9::DestroyDevice()
 	{
 		if (_d3d9Device)
