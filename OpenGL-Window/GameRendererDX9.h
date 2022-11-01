@@ -54,8 +54,11 @@ namespace game
 	inline void RendererDX9::HandleWindowResize(const uint32_t width, const uint32_t height)
 	{
 		D3DVIEWPORT9 view { 0, 0, width, height, 0.0f, 1.0f};
-
-		_d3d9Device->SetViewport(&view);
+		Clear(true, true, true);
+		if (_d3d9Device->SetViewport(&view) != D3D_OK)
+		{
+			std::cout << "viewport";
+		}
 	}
 	inline void RendererDX9::DestroyDevice()
 	{
@@ -175,6 +178,7 @@ namespace game
 			hr = pDXGIFactory->EnumAdapters(0, &pAdapter);
 			DXGI_ADAPTER_DESC desc{ 0 };
 			pAdapter->GetDesc(&desc);
+
 			std::cout << "DedicatedVideoMemory = " << desc.DedicatedVideoMemory / 1024 / 1024 << "MB\n";
 
 			pAdapter->Release();

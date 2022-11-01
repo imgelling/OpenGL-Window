@@ -25,7 +25,7 @@ public:
 
 		attrib.WindowTitle = "PixelMode tests";
 		attrib.GameVersion = "0.01";
-		attrib.Framelock = 0;  
+		attrib.Framelock = 60;  
 		attrib.VsyncOn = false;
 		attrib.DebugMode = false;
 		attrib.MultiSamples = 8; // max 8 amd, 16 nvidia

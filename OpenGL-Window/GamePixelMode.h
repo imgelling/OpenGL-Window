@@ -211,16 +211,15 @@ namespace game
 		sizeOfScaledTexture.width = positionOfScaledTexture.x + (_frameBuffer[_currentBuffer].width * scale.x);
 		sizeOfScaledTexture.height = positionOfScaledTexture.y + (_frameBuffer[_currentBuffer].height * scale.y);
 
-		// texturing issue fix
-		positionOfScaledTexture.x -= _frameBuffer[_currentBuffer].oneOverWidth;
-		positionOfScaledTexture.y -= _frameBuffer[_currentBuffer].oneOverHeight;
-		sizeOfScaledTexture.width -= _frameBuffer[_currentBuffer].oneOverWidth;
-		sizeOfScaledTexture.height -= _frameBuffer[_currentBuffer].oneOverHeight;
 
-		// OpenGL Only
 #if defined(GAME_SUPPORT_OPENGL) | defined(GAME_SUPPORT_ALL)
 		if (enginePointer->_attributes.RenderingAPI == RenderAPI::OpenGL)
 		{
+			// Pixel offset fix
+			positionOfScaledTexture.x -= _frameBuffer[_currentBuffer].oneOverWidth;
+			positionOfScaledTexture.y -= _frameBuffer[_currentBuffer].oneOverHeight;
+			sizeOfScaledTexture.width -= _frameBuffer[_currentBuffer].oneOverWidth;
+			sizeOfScaledTexture.height -= _frameBuffer[_currentBuffer].oneOverHeight;
 			// Homoginize the scaled rect to -1 to 1 range using
 			// position.x = position.x * 2.0 / width - 1.0
 			// position.y = position.y * 2.0 / height - 1.0;
@@ -262,6 +261,11 @@ namespace game
 		if (enginePointer->_attributes.RenderingAPI == RenderAPI::DirectX9)
 		{
 			VOID* pVoid = nullptr;  
+			// Pixel offset fix
+			positionOfScaledTexture.x -= 0.5f;
+			positionOfScaledTexture.y -= 0.5f;
+			sizeOfScaledTexture.width -= 0.5f;
+			sizeOfScaledTexture.height -= 0.5f;
 
 			OurVertices[0].x = positionOfScaledTexture.x;
 			OurVertices[0].y = positionOfScaledTexture.y;
