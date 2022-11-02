@@ -24,7 +24,7 @@ namespace game
 		void HandleWindowResize(const uint32_t width, const uint32_t height);
 		void FillOutRendererInfo();
 		bool CreateTexture(Texture2D& texture);
-		bool LoadTexture(std::string fileName, Texture2D& texture) { return false; };
+		bool LoadTexture(std::string fileName, Texture2D& texture);
 		void UnLoadTexture(Texture2D& texture);
 		bool LoadShader(const std::string vertex, const std::string fragment, ShaderGL& shader) { return false; };
 		void UnLoadShader(ShaderGL& shader) {};
@@ -221,6 +221,22 @@ namespace game
 		if (!texture.textureInterface)
 		{
 			lastError = { GameErrors::DirectXSpecific, "Could not create texture." };
+			return false;
+		}
+		return true;
+	}
+
+	inline bool RendererDX9::LoadTexture(std::string fileName, Texture2D& texture)
+	{
+		texture.oneOverWidth = 1.0f / (float_t)texture.width;
+		texture.oneOverHeight = 1.0f / (float_t)texture.height;
+		texture.isCopy = false;
+
+		// does mipmapping, need to add format also
+		_d3d9Device->CreateTexture(texture.width, texture.height, texture.isMipMapped ? 0 : 1, 0, D3DFMT_A8R8G8B8, D3DPOOL_MANAGED, &texture.textureInterface, NULL);
+		if (!texture.textureInterface)
+		{
+			lastError = { GameErrors::DirectXSpecific, "Could not create texture, \"" + fileName + "\""};
 			return false;
 		}
 		return true;

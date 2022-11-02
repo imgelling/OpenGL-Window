@@ -126,7 +126,6 @@ namespace game
 		}
 
 #if defined(GAME_SUPPORT_OPENGL) | defined(GAME_SUPPORT_ALL)
-		// Generate the display list
 		if (enginePointer->_attributes.RenderingAPI == RenderAPI::OpenGL)
 		{
 			_compiledQuad = glGenLists(1);
@@ -144,6 +143,13 @@ namespace game
 			}
 		}
 #endif
+
+		OurVertices[1].x = (float_t)enginePointer->_attributes.WindowWidth;
+		OurVertices[2].y = (float_t)enginePointer->_attributes.WindowHeight;
+		OurVertices[3].x = (float_t)enginePointer->_attributes.WindowWidth;
+		OurVertices[4].x = (float_t)enginePointer->_attributes.WindowWidth;
+		OurVertices[4].y = (float_t)enginePointer->_attributes.WindowHeight;
+		OurVertices[5].y = (float_t)enginePointer->_attributes.WindowHeight;
 
 		// Scale the texture to window size
 		_ScaleQuadToWindow();
