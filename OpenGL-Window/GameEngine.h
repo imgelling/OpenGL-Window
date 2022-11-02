@@ -135,8 +135,12 @@ namespace game
 
 	inline Engine::~Engine()
 	{
-		if (_renderer) _renderer->DestroyDevice();
-		delete _renderer;
+		if (_renderer)
+		{
+
+			_renderer->DestroyDevice();
+			delete _renderer;
+		}
 	}
 
 	inline void Engine::geStartEngine()
@@ -295,27 +299,45 @@ namespace game
 
 	inline bool Engine::geCreateTexture(Texture2D& texture)
 	{
-		return _renderer->CreateTexture(texture);
+		if (_renderer)
+		{
+			return _renderer->CreateTexture(texture);
+		}
+		return false;
 	}
 
 	inline bool Engine::geLoadTexture(const std::string fileName, Texture2D &texture)
 	{
-		return _renderer->LoadTexture(fileName, texture);
+		if (_renderer)
+		{
+			return _renderer->LoadTexture(fileName, texture);
+		}
+		return false;
 	}
 
 	inline void Engine::geUnLoadTexture(Texture2D& texture)
 	{
-		_renderer->UnLoadTexture(texture);
+		if (_renderer)
+		{
+			_renderer->UnLoadTexture(texture);
+		}
 	}
 
 	inline bool Engine::geLoadShader(const std::string vertex, const std::string fragment, ShaderGL& shader)
 	{
-		return _renderer->LoadShader(vertex, fragment, shader);
+		if (_renderer)
+		{
+			return _renderer->LoadShader(vertex, fragment, shader);
+		}
+		return false;
 	}
 
 	inline void Engine::geUnLoadShader(ShaderGL& shader)
 	{
-		_renderer->UnLoadShader(shader);
+		if (_renderer)
+		{
+			_renderer->UnLoadShader(shader);
+		}
 	}
 
 	inline void Engine::geSetWindowTitle(const std::string title)
