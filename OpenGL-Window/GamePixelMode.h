@@ -43,7 +43,7 @@ namespace game
 		};
 		// modify pos values by -0.5f/width, -0.5f/height works dx9
 		// opengl still broken (nvidia it works)
-		_CUSTOMVERTEX OurVertices[6] =
+		_CUSTOMVERTEX _triangleVertices[6] =
 		{
 			{0.0f, 0.0f, 0.0f, 1.0f, D3DCOLOR_ARGB(255,255, 255, 255), 0.0f, 0.0f},
 			{1280.0f, 0.0f, 0.0f, 1.0f, D3DCOLOR_ARGB(255,255, 255, 255), 1.0f, 0.0f},
@@ -53,7 +53,7 @@ namespace game
 			{1280.0f, 720.0f, 0.0f, 1.0f, D3DCOLOR_ARGB(255,255, 255, 255), 1.0f, 1.0f},
 			{0.0f, 720.0f, 0.0f, 1.0f, D3DCOLOR_ARGB(255,255, 255, 255) , 0.0f, 1.0f}
 		};
-		LPDIRECT3DVERTEXBUFFER9 v_buffer;
+		LPDIRECT3DVERTEXBUFFER9 _vertexBuffer;
 		LPDIRECT3DDEVICE9 _d3d9Device;
 #endif
 		uint32_t* _video;
@@ -72,7 +72,7 @@ namespace game
 		_video = nullptr;
 		_currentBuffer = 0;
 #if defined(GAME_SUPPORT_DIRECTX9) | defined(GAME_SUPPORT_ALL)
-		v_buffer = nullptr;
+		_vertexBuffer = nullptr;
 		_d3d9Device = nullptr;
 #endif
 	}
@@ -83,9 +83,9 @@ namespace game
 #if defined (GAME_SUPPORT_DIRECTX9) | defined(GAME_SUPPORT_ALL)
 		if (enginePointer->_attributes.RenderingAPI == RenderAPI::DirectX9)
 		{
-			if (v_buffer)
+			if (_vertexBuffer)
 			{
-				v_buffer->Release();
+				_vertexBuffer->Release();
 			}
 		}
 #endif
@@ -135,8 +135,8 @@ namespace game
 		if (enginePointer->_attributes.RenderingAPI == RenderAPI::DirectX9)
 		{
 			_frameBuffer[0].textureInterface->GetDevice(&_d3d9Device);
-			_d3d9Device->CreateVertexBuffer(6 * sizeof(_CUSTOMVERTEX), 0, PIXELMODEFVF, D3DPOOL_MANAGED, &v_buffer, NULL);
-			if (v_buffer == nullptr)
+			_d3d9Device->CreateVertexBuffer(6 * sizeof(_CUSTOMVERTEX), 0, PIXELMODEFVF, D3DPOOL_MANAGED, &_vertexBuffer, NULL);
+			if (_vertexBuffer == nullptr)
 			{
 				lastError = { GameErrors::DirectXSpecific, "Could not create vertex buffer for PixelModeShaderless." };
 				return false;
@@ -144,12 +144,12 @@ namespace game
 		}
 #endif
 
-		OurVertices[1].x = (float_t)enginePointer->_attributes.WindowWidth;
-		OurVertices[2].y = (float_t)enginePointer->_attributes.WindowHeight;
-		OurVertices[3].x = (float_t)enginePointer->_attributes.WindowWidth;
-		OurVertices[4].x = (float_t)enginePointer->_attributes.WindowWidth;
-		OurVertices[4].y = (float_t)enginePointer->_attributes.WindowHeight;
-		OurVertices[5].y = (float_t)enginePointer->_attributes.WindowHeight;
+		_triangleVertices[1].x = (float_t)enginePointer->_attributes.WindowWidth;
+		_triangleVertices[2].y = (float_t)enginePointer->_attributes.WindowHeight;
+		_triangleVertices[3].x = (float_t)enginePointer->_attributes.WindowWidth;
+		_triangleVertices[4].x = (float_t)enginePointer->_attributes.WindowWidth;
+		_triangleVertices[4].y = (float_t)enginePointer->_attributes.WindowHeight;
+		_triangleVertices[5].y = (float_t)enginePointer->_attributes.WindowHeight;
 
 		// Scale the texture to window size
 		_ScaleQuadToWindow();
@@ -226,9 +226,8 @@ namespace game
 			positionOfScaledTexture.y -= _frameBuffer[_currentBuffer].oneOverHeight;
 			sizeOfScaledTexture.width -= _frameBuffer[_currentBuffer].oneOverWidth;
 			sizeOfScaledTexture.height -= _frameBuffer[_currentBuffer].oneOverHeight;
+
 			// Homoginize the scaled rect to -1 to 1 range using
-			// position.x = position.x * 2.0 / width - 1.0
-			// position.y = position.y * 2.0 / height - 1.0;
 			positionOfScaledTexture.x = (positionOfScaledTexture.x * 2.0f / (float_t)_windowSize.width) - 1.0f;
 			positionOfScaledTexture.y = (positionOfScaledTexture.y * 2.0f / (float_t)_windowSize.height) - 1.0f;
 			sizeOfScaledTexture.width = ((float_t)sizeOfScaledTexture.width * 2.0f / (float_t)_windowSize.width) - 1.0f;
@@ -239,22 +238,18 @@ namespace game
 				glBegin(GL_QUADS);
 				//bl
 				glColor3f(1.0f, 1.0f, 1.0f);
-				//glTexCoord2f(0, 0);
 				glTexCoord2f(0, 1);
 				glVertex2f(positionOfScaledTexture.x, -sizeOfScaledTexture.height);
 				//br
 				glColor3f(1.0f, 1.0f, 1.0f);
-				//glTexCoord2f(1.0f, 0.0f);
 				glTexCoord2f(1, 1);
 				glVertex2f(sizeOfScaledTexture.width, -sizeOfScaledTexture.height);
 				//tr
 				glColor3f(1.0f, 1.0f, 1.0f);
-				//glTexCoord2f(1, 1);
 				glTexCoord2f(1.0f, 0.0f);
 				glVertex2f(sizeOfScaledTexture.width, -positionOfScaledTexture.y);
 				// tl
 				glColor3f(1.0f, 1.0f, 1.0f);
-				//glTexCoord2f(0, 1);
 				glTexCoord2f(0, 0);
 				glVertex2f(positionOfScaledTexture.x, -positionOfScaledTexture.y);
 
@@ -269,32 +264,35 @@ namespace game
 			VOID* pVoid = nullptr;  
 
 			// Pixel offset fix
-			//positionOfScaledTexture.x -= 0.5f;
-			//positionOfScaledTexture.y -= 0.5f;
-			//sizeOfScaledTexture.width -= 0.5f;
-			//sizeOfScaledTexture.height -= 0.5f;
 			positionOfScaledTexture.x -= _frameBuffer[_currentBuffer].oneOverWidth;
 			positionOfScaledTexture.y -= _frameBuffer[_currentBuffer].oneOverHeight;
 			sizeOfScaledTexture.width -= _frameBuffer[_currentBuffer].oneOverWidth;
 			sizeOfScaledTexture.height -= _frameBuffer[_currentBuffer].oneOverHeight;
 
-			OurVertices[0].x = positionOfScaledTexture.x;
-			OurVertices[0].y = positionOfScaledTexture.y;
-			OurVertices[1].x = sizeOfScaledTexture.width;
-			OurVertices[1].y = positionOfScaledTexture.y;
-			OurVertices[2].x = positionOfScaledTexture.x;
-			OurVertices[2].y = sizeOfScaledTexture.height;
+			// tl
+			_triangleVertices[0].x = positionOfScaledTexture.x;
+			_triangleVertices[0].y = positionOfScaledTexture.y;
+			// tr
+			_triangleVertices[1].x = sizeOfScaledTexture.width;
+			_triangleVertices[1].y = positionOfScaledTexture.y;
+			// bl
+			_triangleVertices[2].x = positionOfScaledTexture.x;
+			_triangleVertices[2].y = sizeOfScaledTexture.height;
 
-			OurVertices[3].x = sizeOfScaledTexture.width;
-			OurVertices[3].y = positionOfScaledTexture.y;
-			OurVertices[4].x = sizeOfScaledTexture.width;
-			OurVertices[4].y = sizeOfScaledTexture.height;
-			OurVertices[5].x = positionOfScaledTexture.x;
-			OurVertices[5].y = sizeOfScaledTexture.height;
+			// tr
+			_triangleVertices[3].x = sizeOfScaledTexture.width;
+			_triangleVertices[3].y = positionOfScaledTexture.y;
+			// br
+			_triangleVertices[4].x = sizeOfScaledTexture.width;
+			_triangleVertices[4].y = sizeOfScaledTexture.height;
+			// bl
+			_triangleVertices[5].x = positionOfScaledTexture.x;
+			_triangleVertices[5].y = sizeOfScaledTexture.height;
 
-			v_buffer->Lock(0, 0, (void**)&pVoid, 0);
-			memcpy(pVoid, OurVertices, sizeof(OurVertices));    // copy vertices to the vertex buffer
-			v_buffer->Unlock();
+			// Copy vertices to the vertex buffer
+			_vertexBuffer->Lock(0, 0, (void**)&pVoid, 0);
+			memcpy(pVoid, _triangleVertices, sizeof(_triangleVertices));
+			_vertexBuffer->Unlock();
 		}
 #endif
 
@@ -352,7 +350,7 @@ namespace game
 
 			_d3d9Device->SetTexture(0, _frameBuffer[_currentBuffer].textureInterface);
 			_d3d9Device->SetFVF(PIXELMODEFVF);
-			_d3d9Device->SetStreamSource(0, v_buffer, 0, sizeof(_CUSTOMVERTEX));
+			_d3d9Device->SetStreamSource(0, _vertexBuffer, 0, sizeof(_CUSTOMVERTEX));
 			_d3d9Device->DrawPrimitive(D3DPT_TRIANGLELIST, 0, 2);
 
 			// Restore previous state
