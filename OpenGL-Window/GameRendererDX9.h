@@ -41,6 +41,8 @@ namespace game
 		LPDIRECT3D9 _d3d9;
 		LPDIRECT3DDEVICE9 _d3d9Device;
 		Color _clearColor;
+		D3DPRESENT_PARAMETERS _d3dpp = { 0 };
+
 
 	};
 
@@ -55,11 +57,15 @@ namespace game
 	{
 		D3DVIEWPORT9 view { 0, 0, width, height, 0.0f, 1.0f};
 		Clear(true, true, true);
+		_d3dpp.BackBufferWidth = width;
+		_d3dpp.BackBufferHeight = height;
+		_d3d9Device->Reset(&_d3dpp);
 		if (_d3d9Device->SetViewport(&view) != D3D_OK)
 		{
 			std::cout << "viewport";
 		}
 	}
+
 	inline void RendererDX9::DestroyDevice()
 	{
 		if (_d3d9Device)
@@ -107,7 +113,7 @@ namespace game
 			d3dpp.MultiSampleType = (D3DMULTISAMPLE_TYPE)_attributes.MultiSamples;
 			d3dpp.MultiSampleQuality = multiSamplingQuality - 1;
 		}
-
+		_d3dpp = d3dpp;
 		// Create the device
 		if (FAILED(_d3d9->CreateDevice(D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, window.GetHandle(), D3DCREATE_HARDWARE_VERTEXPROCESSING, &d3dpp, &_d3d9Device)))
 		{

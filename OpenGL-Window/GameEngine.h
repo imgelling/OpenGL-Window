@@ -486,12 +486,12 @@ namespace game
 
 	inline void Engine::HandleWindowResize(const uint32_t width, const uint32_t height)
 	{
+		_attributes.WindowWidth = width;
+		_attributes.WindowHeight = height;
 		if (_renderer)
 		{
 			_renderer->HandleWindowResize(width, height);
 		}
-		_attributes.WindowWidth = width;
-		_attributes.WindowHeight = height;
 	}
 
 	// Needs to be in engine.h because of cyclic dependency by using enginePointer.

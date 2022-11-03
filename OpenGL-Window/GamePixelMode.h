@@ -267,11 +267,16 @@ namespace game
 		if (enginePointer->_attributes.RenderingAPI == RenderAPI::DirectX9)
 		{
 			VOID* pVoid = nullptr;  
+
 			// Pixel offset fix
-			positionOfScaledTexture.x -= 0.5f;
-			positionOfScaledTexture.y -= 0.5f;
-			sizeOfScaledTexture.width -= 0.5f;
-			sizeOfScaledTexture.height -= 0.5f;
+			//positionOfScaledTexture.x -= 0.5f;
+			//positionOfScaledTexture.y -= 0.5f;
+			//sizeOfScaledTexture.width -= 0.5f;
+			//sizeOfScaledTexture.height -= 0.5f;
+			positionOfScaledTexture.x -= _frameBuffer[_currentBuffer].oneOverWidth;
+			positionOfScaledTexture.y -= _frameBuffer[_currentBuffer].oneOverHeight;
+			sizeOfScaledTexture.width -= _frameBuffer[_currentBuffer].oneOverWidth;
+			sizeOfScaledTexture.height -= _frameBuffer[_currentBuffer].oneOverHeight;
 
 			OurVertices[0].x = positionOfScaledTexture.x;
 			OurVertices[0].y = positionOfScaledTexture.y;
@@ -348,7 +353,7 @@ namespace game
 			_d3d9Device->SetTexture(0, _frameBuffer[_currentBuffer].textureInterface);
 			_d3d9Device->SetFVF(PIXELMODEFVF);
 			_d3d9Device->SetStreamSource(0, v_buffer, 0, sizeof(_CUSTOMVERTEX));
-			_d3d9Device->DrawPrimitive(D3DPT_TRIANGLELIST, 0, 1);
+			_d3d9Device->DrawPrimitive(D3DPT_TRIANGLELIST, 0, 2);
 
 			// Restore previous state
 			_d3d9Device->SetFVF(oldFVF);  
