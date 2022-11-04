@@ -92,5 +92,8 @@
     <ClInclude Include="GameImageLoader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="GameSpriteBatch.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

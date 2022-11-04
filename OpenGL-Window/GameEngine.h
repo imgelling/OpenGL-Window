@@ -52,7 +52,8 @@ namespace game
 	
 	class Engine
 	{
-		friend class PixelModeFixed;
+		friend class PixelMode;
+		friend class SpriteBatch;
 	public:
 		Keyboard geKeyboard;
 		Mouse geMouse;

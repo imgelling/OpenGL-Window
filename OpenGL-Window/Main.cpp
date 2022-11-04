@@ -13,7 +13,7 @@ class Game : public game::Engine
 {
 
 public:
-	game::PixelModeFixed pixelMode;
+	game::PixelMode pixelMode;
 
 	Game(game::Logger& logger) : game::Engine(&logger)
 	{

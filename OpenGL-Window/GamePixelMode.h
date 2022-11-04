@@ -15,11 +15,11 @@ namespace game
 {
 	extern GameError lastError;
 	extern Engine* enginePointer;
-	class PixelModeFixed
+	class PixelMode
 	{
 	public:
-		PixelModeFixed();
-		~PixelModeFixed();
+		PixelMode();
+		~PixelMode();
 
 		bool Initialize(const Vector2i& sizeOfScreen);
 		void Render();
@@ -32,17 +32,15 @@ namespace game
 		uint32_t _compiledQuad;
 #endif
 #if defined(GAME_SUPPORT_DIRECTX9) | defined(GAME_SUPPORT_ALL)
-		struct _CUSTOMVERTEX
+		struct _vertex
 		{
 			float_t x, y, z, rhw;    
 			uint32_t color;    
 			float_t u, v;
 		};
-		// modify pos values by -0.5f/width, -0.5f/height works dx9
-		// opengl still broken (nvidia it works)
-		_CUSTOMVERTEX _triangleVertices[6] =
+		_vertex _triangleVertices[6] =
 		{
-			{0.0f, 0.0f, 0.0f, 1.0f, D3DCOLOR_ARGB(255,255, 255, 255), 0.0f, 0.0f},
+			{0.0f, 0.0f, -1.0f, 1.0f, D3DCOLOR_ARGB(255,255, 255, 255), 0.0f, 0.0f},
 			{0.0f, 0.0f, 0.0f, 1.0f, D3DCOLOR_ARGB(255,255, 255, 255), 1.0f, 0.0f},
 			{0.0f, 0.0f, 0.0f, 1.0f, D3DCOLOR_ARGB(255,255, 255, 255) , 0.0f, 1.0f},
 
@@ -61,7 +59,7 @@ namespace game
 		void _ScaleQuadToWindow();
 	};
 
-	inline PixelModeFixed::PixelModeFixed()
+	inline PixelMode::PixelMode()
 	{
 #if defined(GAME_SUPPORT_OPENGL) | defined(GAME_SUPPORT_ALL)
 		_compiledQuad = 0;
@@ -74,7 +72,7 @@ namespace game
 #endif
 	}
 
-	inline PixelModeFixed::~PixelModeFixed()
+	inline PixelMode::~PixelMode()
 	{
 		if (_video != nullptr) delete[] _video;
 #if defined (GAME_SUPPORT_DIRECTX9) | defined(GAME_SUPPORT_ALL)
@@ -90,7 +88,7 @@ namespace game
 		enginePointer->geUnLoadTexture(_frameBuffer[1]);
 	}
 
-	inline bool PixelModeFixed::Initialize(const Vector2i& sizeOfScreen)
+	inline bool PixelMode::Initialize(const Vector2i& sizeOfScreen)
 	{
 		_bufferSize = sizeOfScreen;
 
@@ -101,7 +99,7 @@ namespace game
 		_video = new uint32_t[(uint32_t)_bufferSize.width * (uint32_t)_bufferSize.height];
 		if (_video == nullptr)
 		{
-			lastError = { GameErrors::GameRenderer, "Could not allocate RAM for PixelModeShaderless video buffer." };
+			lastError = { GameErrors::GameRenderer, "Could not allocate RAM for PixelMode video buffer." };
 			return false;
 		}
 
@@ -117,7 +115,7 @@ namespace game
 			_frameBuffer[loop].isMipMapped = false;
 			if (!enginePointer->geCreateTexture(_frameBuffer[loop]))
 			{
-				lastError = { GameErrors::GameRenderer, "Could not create textures for PixelModeShaderless frame buffers." };
+				lastError = { GameErrors::GameRenderer, "Could not create textures for PixelMode frame buffers." };
 				return false;
 			}
 		}
@@ -132,10 +130,10 @@ namespace game
 		if (enginePointer->_attributes.RenderingAPI == RenderAPI::DirectX9)
 		{
 			_frameBuffer[0].textureInterface->GetDevice(&_d3d9Device);
-			_d3d9Device->CreateVertexBuffer(6 * sizeof(_CUSTOMVERTEX), 0, (D3DFVF_XYZRHW | D3DFVF_DIFFUSE | D3DFVF_TEX1), D3DPOOL_MANAGED, &_vertexBuffer, NULL);
+			_d3d9Device->CreateVertexBuffer(6 * sizeof(_vertex), 0, (D3DFVF_XYZRHW | D3DFVF_DIFFUSE | D3DFVF_TEX1), D3DPOOL_MANAGED, &_vertexBuffer, NULL);
 			if (_vertexBuffer == nullptr)
 			{
-				lastError = { GameErrors::DirectXSpecific, "Could not create vertex buffer for PixelModeShaderless." };
+				lastError = { GameErrors::DirectXSpecific, "Could not create vertex buffer for PixelMode." };
 				return false;
 			}
 		}
@@ -146,7 +144,7 @@ namespace game
 		return true;
 	}
 
-	inline void PixelModeFixed::_UpdateFrameBuffer()
+	inline void PixelMode::_UpdateFrameBuffer()
 	{
 #if defined(GAME_SUPPORT_OPENGL) | defined (GAME_SUPPORT_ALL)
 		if (enginePointer->_attributes.RenderingAPI == RenderAPI::OpenGL)
@@ -170,7 +168,7 @@ namespace game
 #endif
 	}
 
-	inline void PixelModeFixed::_ScaleQuadToWindow()
+	inline void PixelMode::_ScaleQuadToWindow()
 	{
 
 		game::Vector2f positionOfScaledTexture;
@@ -288,7 +286,7 @@ namespace game
 
 	}
 
-	inline void PixelModeFixed::Render()
+	inline void PixelMode::Render()
 	{
 		Vector2i currentWindowSize = enginePointer->geGetWindowSize();
 
@@ -340,7 +338,7 @@ namespace game
 
 			_d3d9Device->SetTexture(0, _frameBuffer[_currentBuffer].textureInterface);
 			_d3d9Device->SetFVF((D3DFVF_XYZRHW | D3DFVF_DIFFUSE | D3DFVF_TEX1));
-			_d3d9Device->SetStreamSource(0, _vertexBuffer, 0, sizeof(_CUSTOMVERTEX));
+			_d3d9Device->SetStreamSource(0, _vertexBuffer, 0, sizeof(_vertex));
 			_d3d9Device->DrawPrimitive(D3DPT_TRIANGLELIST, 0, 2);
 
 			// Restore previous state
@@ -350,6 +348,7 @@ namespace game
 			{
 				activeTexture->Release();
 			}
+
 			// Renable multisampling if it was enabled
 			if (enginePointer->_attributes.MultiSamples > 1)
 			{
@@ -366,7 +365,7 @@ namespace game
 
 	}
 
-	inline void PixelModeFixed::Clear(const Color &color)
+	inline void PixelMode::Clear(const Color &color)
 	{
 #if defined(GAME_SUPPORT_DIRECTX9) | defined(GAME_SUPPORT_ALL)
 		if (enginePointer->_attributes.RenderingAPI == RenderAPI::DirectX9)
@@ -382,7 +381,7 @@ namespace game
 #endif
 	}
 
-	inline void PixelModeFixed::Pixel(const int32_t x, const int32_t y, const game::Color& color)
+	inline void PixelMode::Pixel(const int32_t x, const int32_t y, const game::Color& color)
 	{
 #if defined(GAME_SUPPORT_DIRECTX9) | defined(GAME_SUPPORT_ALL)
 		if (enginePointer->_attributes.RenderingAPI == RenderAPI::DirectX9)
@@ -398,7 +397,7 @@ namespace game
 #endif
 	}
 
-	inline void PixelModeFixed::PixelClip(const int32_t x, const int32_t y, const game::Color& color)
+	inline void PixelMode::PixelClip(const int32_t x, const int32_t y, const game::Color& color)
 	{
 		if (x < 0 || y < 0) return;
 		if (x > _bufferSize.width-1 || y > _bufferSize.height - 1) return;

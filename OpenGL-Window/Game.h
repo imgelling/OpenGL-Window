@@ -47,6 +47,7 @@
 #include "GamePixelMode.h"
 #include "GameRendererBase.h"
 #include "GameShaderGL.h"
+#include "GameSpriteBatch.h"
 #include "GameSystemInfo.h"
 #include "GameTerminal.h"
 #include "GameTexture2D.h"
