@@ -914,7 +914,7 @@ namespace game
 	inline bool RendererGL::LoadTexture(std::string fileName, Texture2D &texture)
 	{
 		//Content content;
-		void * data = nullptr;
+		void* data = nullptr;
 		int32_t width = 0;
 		int32_t height = 0;
 		int32_t componentsPerPixel = 0;

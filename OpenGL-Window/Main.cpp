@@ -37,7 +37,7 @@ public:
 	void LoadContent()
 	{
 
-		geSetClearColor(game::Colors::Red);
+		geSetClearColor(game::Colors::DarkGray);
 
 		geEnable(GAME_BLEND);
 		geEnable(GAME_CULL_FACE); 
@@ -47,12 +47,6 @@ public:
 		{
 			geLogger->Error(game::lastError);
 		}
-
-		//game::Texture2dGL test;
-		//if (!geLoadTexture("content/test.png", test))
-		//{
-		//	std::cout << "---------------- faile\n";
-		//}
 	}
 
 	void Shutdown()

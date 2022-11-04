@@ -9,7 +9,7 @@
 #include "GameTexture2D.h"
 #include "GameErrors.h"
 #include "GameSystemInfo.h"
-//#include "GameEngine.h"
+#include "GameImageLoader.h"
 
 namespace game
 {
@@ -229,22 +229,47 @@ namespace game
 			lastError = { GameErrors::DirectXSpecific, "Could not create texture." };
 			return false;
 		}
+
 		return true;
 	}
 
 	inline bool RendererDX9::LoadTexture(std::string fileName, Texture2D& texture)
 	{
+		ImageLoader loader;
+		void* data = nullptr;
+		int32_t width = 0;
+		int32_t height = 0;
+		int32_t componentsPerPixel = 0;
+		D3DLOCKED_RECT lockedRectangle = { 0 };
+		HRESULT hResult;
+		
+		data = loader.Load(fileName.c_str(), width, height, componentsPerPixel, false);
+		if (data == nullptr)
+		{
+			lastError = { GameErrors::GameContent, "Failed to load texture : " + fileName };
+			return false;
+		}
+
+		texture.width = width;
+		texture.height = height;
 		texture.oneOverWidth = 1.0f / (float_t)texture.width;
 		texture.oneOverHeight = 1.0f / (float_t)texture.height;
 		texture.isCopy = false;
+		texture.name = fileName;
 
-		// does mipmapping, need to add format also
-		_d3d9Device->CreateTexture(texture.width, texture.height, texture.isMipMapped ? 0 : 1, 0, D3DFMT_A8R8G8B8, D3DPOOL_MANAGED, &texture.textureInterface, NULL);
-		if (!texture.textureInterface)
+		// Create texture memory
+		hResult = _d3d9Device->CreateTexture(texture.width, texture.height, texture.isMipMapped ? 0 : 1, 0, D3DFMT_A8R8G8B8, D3DPOOL_MANAGED, &texture.textureInterface, NULL);
+		if (hResult != D3D_OK)
 		{
 			lastError = { GameErrors::DirectXSpecific, "Could not create texture, \"" + fileName + "\""};
-			return false;
 		}
+
+		// Copy texture data to the memory
+		texture.textureInterface->LockRect(0, &lockedRectangle, 0, 0);
+		unsigned char* dest = static_cast<unsigned char*>(lockedRectangle.pBits);
+		memcpy(dest, data, sizeof(unsigned char) * texture.width * texture.height * 4);
+		texture.textureInterface->UnlockRect(0);
+
 		return true;
 	}
 

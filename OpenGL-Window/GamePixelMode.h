@@ -11,9 +11,6 @@
 #include "GameTexture2D.h"
 #include "GameEngine.h"
 
-// | D3DFVF_TEX0 for tex coords WRONG!! need TEX1
-#define PIXELMODEFVF (D3DFVF_XYZRHW | D3DFVF_DIFFUSE | D3DFVF_TEX1)
-
 namespace game
 {
 	extern GameError lastError;
@@ -46,12 +43,12 @@ namespace game
 		_CUSTOMVERTEX _triangleVertices[6] =
 		{
 			{0.0f, 0.0f, 0.0f, 1.0f, D3DCOLOR_ARGB(255,255, 255, 255), 0.0f, 0.0f},
-			{1280.0f, 0.0f, 0.0f, 1.0f, D3DCOLOR_ARGB(255,255, 255, 255), 1.0f, 0.0f},
-			{0.0f, 720.0f, 0.0f, 1.0f, D3DCOLOR_ARGB(255,255, 255, 255) , 0.0f, 1.0f},
+			{0.0f, 0.0f, 0.0f, 1.0f, D3DCOLOR_ARGB(255,255, 255, 255), 1.0f, 0.0f},
+			{0.0f, 0.0f, 0.0f, 1.0f, D3DCOLOR_ARGB(255,255, 255, 255) , 0.0f, 1.0f},
 
-			{1280.0f, 0.0f, 0.0f, 1.0f, D3DCOLOR_ARGB(255,255, 255, 255), 1.0f, 0.0f},
-			{1280.0f, 720.0f, 0.0f, 1.0f, D3DCOLOR_ARGB(255,255, 255, 255), 1.0f, 1.0f},
-			{0.0f, 720.0f, 0.0f, 1.0f, D3DCOLOR_ARGB(255,255, 255, 255) , 0.0f, 1.0f}
+			{0.0f, 0.0f, 0.0f, 1.0f, D3DCOLOR_ARGB(255,255, 255, 255), 1.0f, 0.0f},
+			{0.0f, 0.0f, 0.0f, 1.0f, D3DCOLOR_ARGB(255,255, 255, 255), 1.0f, 1.0f},
+			{0.0f, 0.0f, 0.0f, 1.0f, D3DCOLOR_ARGB(255,255, 255, 255) , 0.0f, 1.0f}
 		};
 		LPDIRECT3DVERTEXBUFFER9 _vertexBuffer;
 		LPDIRECT3DDEVICE9 _d3d9Device;
@@ -135,7 +132,7 @@ namespace game
 		if (enginePointer->_attributes.RenderingAPI == RenderAPI::DirectX9)
 		{
 			_frameBuffer[0].textureInterface->GetDevice(&_d3d9Device);
-			_d3d9Device->CreateVertexBuffer(6 * sizeof(_CUSTOMVERTEX), 0, PIXELMODEFVF, D3DPOOL_MANAGED, &_vertexBuffer, NULL);
+			_d3d9Device->CreateVertexBuffer(6 * sizeof(_CUSTOMVERTEX), 0, (D3DFVF_XYZRHW | D3DFVF_DIFFUSE | D3DFVF_TEX1), D3DPOOL_MANAGED, &_vertexBuffer, NULL);
 			if (_vertexBuffer == nullptr)
 			{
 				lastError = { GameErrors::DirectXSpecific, "Could not create vertex buffer for PixelModeShaderless." };
@@ -143,13 +140,6 @@ namespace game
 			}
 		}
 #endif
-
-		_triangleVertices[1].x = (float_t)enginePointer->_attributes.WindowWidth;
-		_triangleVertices[2].y = (float_t)enginePointer->_attributes.WindowHeight;
-		_triangleVertices[3].x = (float_t)enginePointer->_attributes.WindowWidth;
-		_triangleVertices[4].x = (float_t)enginePointer->_attributes.WindowWidth;
-		_triangleVertices[4].y = (float_t)enginePointer->_attributes.WindowHeight;
-		_triangleVertices[5].y = (float_t)enginePointer->_attributes.WindowHeight;
 
 		// Scale the texture to window size
 		_ScaleQuadToWindow();
@@ -349,7 +339,7 @@ namespace game
 			}
 
 			_d3d9Device->SetTexture(0, _frameBuffer[_currentBuffer].textureInterface);
-			_d3d9Device->SetFVF(PIXELMODEFVF);
+			_d3d9Device->SetFVF((D3DFVF_XYZRHW | D3DFVF_DIFFUSE | D3DFVF_TEX1));
 			_d3d9Device->SetStreamSource(0, _vertexBuffer, 0, sizeof(_CUSTOMVERTEX));
 			_d3d9Device->DrawPrimitive(D3DPT_TRIANGLELIST, 0, 2);
 
