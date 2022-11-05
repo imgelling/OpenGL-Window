@@ -76,7 +76,7 @@ namespace game
 
 	inline void SpriteBatch::_Enable2D()
 	{
-#if defined(GAME_OPENGL)
+#if defined(GAME_SUPPORT_OPENGL) | defined(GAME_SUPPORT_ALL)
 		if (enginePointer->_attributes.RenderingAPI == RenderAPI::OpenGL)
 		{
 			float Right = (float)enginePointer->geGetWindowSize().width;
@@ -95,12 +95,6 @@ namespace game
 			orthoganalMatrix[3][1] = (Bottom + Top) / (Bottom - Top);
 
 			orthoganalMatrix[3][2] = (Far + Near) / (Near - Far);
-		}
-#endif
-#if defined(GAME_DIRECTX9) | defined(GAME_SUPPORT_ALL)
-		if (enginePointer->_attributes.RenderingAPI == RenderAPI::DirectX9)
-		{
-
 		}
 #endif
 	}
