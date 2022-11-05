@@ -1,5 +1,7 @@
 #pragma once
+#if defined(GAME_SUPPORT_DIRECTX9) | defined(GAME_SUPPORT_ALL)
 #include <d3d9.h>
+#endif
 
 namespace game
 {
@@ -13,10 +15,10 @@ namespace game
 	class Texture2D
 	{
 	public:
-#if defined(GAME_SUPPORT_OPENGL) | defined(GAME_SUPPORT_ALL)
+#if defined(GAME_OPENGL)
 		uint32_t bind;
 #endif
-#if defined(GAME_SUPPORT_DIRECTX9) | defined(GAME_SUPPORT_ALL)
+#if defined(GAME_SUPPORT_DIRECTX9) || defined(GAME_SUPPORT_ALL) // this breaks shit if I shorten it, don't know why
 		LPDIRECT3DTEXTURE9 textureInterface;
 #endif
 		std::string name;
@@ -45,7 +47,7 @@ namespace game
 
 	inline Texture2D::Texture2D()
 	{
-#if defined(GAME_SUPPORT_OPENGL) | defined(GAME_SUPPORT_ALL)
+#if defined(GAME_OPENGL)
 		bind = 0;
 #endif
 		width = 0;

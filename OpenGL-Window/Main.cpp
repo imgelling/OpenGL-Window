@@ -6,7 +6,7 @@
 // Engine header
 //#define GAME_USE_DEDICATED_GPU
 #define GAME_SUPPORT_DIRECTX9
-#define GAME_SUPPORT_OPENGL
+//#define GAME_SUPPORT_OPENGL
 #include "Game.h"
 
 class Game : public game::Engine
