@@ -6,11 +6,8 @@
 #include "GameEngine.h"
 #include "GameTexture2D.h"
 
-
-
 namespace game
 {
-	
 	class RendererVK : public RendererBase
 	{
 	public:

@@ -9,25 +9,24 @@
 #include "GameSystemInfo.h"
 #include "GameDefines.h"
 
-#pragma region Opengl
-#if defined(GAME_SUPPORT_OPENGL) || defined(GAME_SUPPORT_ALL)
-#include "GameRendererGL.h"
-#pragma endregion
-#endif
-#pragma endregion
 
 #pragma region Vulkan
-#if defined(GAME_SUPPORT_VULKAN) || defined(GAME_SUPPORT_ALL)
+#if defined(GAME_SUPPORT_VULKAN) //GAME_VULKAN)
 #include "GameRendererVK.h"
 #endif
 #pragma endregion
 
 #pragma region DirectX9
-#if defined(GAME_SUPPORT_DIRECTX9) || defined(GAME_SUPPORT_ALL)
+#if defined(GAME_DIRECTX9)
 #include "GameRendererDX9.h"
 #endif
 #pragma endregion
 
+#pragma region Opengl
+#if defined(GAME_SUPPORT_OPENGL) || defined(GAME_SUPPORT_ALL)
+#include "GameRendererGL.h"
+#endif
+#pragma endregion
 #include "GameTexture2D.h"
 #include "GameMath.h"
 

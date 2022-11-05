@@ -1,35 +1,33 @@
 #pragma once
 
+#pragma region Vulkan
+#if defined(GAME_SUPPORT_VULKAN) || defined(GAME_SUPPORT_ALL)
+#define GAME_VULKAN
+#include "vulkan/vulkan.hpp"
+#pragma comment(lib, "vulkan-1.lib")
+#include "GameRendererVK.h"
+#endif
+#pragma endregion
+
+// DX9 has to be first because GAME_DIRECTX9 will undefine for some reason
+#if defined(GAME_SUPPORT_DIRECTX9) || defined(GAME_SUPPORT_ALL)
+#define GAME_DIRECTX9
+#include <d3d9.h>
+#pragma comment (lib, "d3d9.lib")
+#include "GameRendererDX9.h"
+#endif
+
 #pragma region Opengl
 #if defined(GAME_SUPPORT_OPENGL) || defined(GAME_SUPPORT_ALL)
+#define GAME_OPENGL
 #include <gl/GL.h>
-#include <gl/GLU.h>
-#pragma region WindowsOnly
 #pragma comment(lib, "opengl32.lib")
 #include "GameRendererGL.h"
 #pragma endregion
-#pragma endregion
 #endif
 
-#pragma region Vulkan
-#if defined(GAME_SUPPORT_VULKAN) || defined(GAME_SUPPORT_ALL)
-#include "vulkan/vulkan.hpp"
-#pragma region WindowsOnly
-#pragma comment(lib, "vulkan-1.lib")
-#include "GameRendererVK.h"
-#pragma endregion
-#endif
-#pragma endregion
 
-#pragma region DirectX9
-#if defined(GAME_SUPPORT_DIRECTX9) || defined(GAME_SUPPORT_ALL)
-#include <d3d9.h>
-#pragma region WindowsOnly
-#pragma comment (lib, "d3d9.lib")
-#include "GameRendererDX9.h"
-#pragma endregion
-#endif
-#pragma endregion
+
 
 #pragma region Engine
 #include "GameAttributes.h"
