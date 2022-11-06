@@ -1,5 +1,6 @@
 #pragma once
-#if defined(GAME_DIRECTX9)
+#include "Game.h"
+#ifdef GAME_DIRECTX9
 #include <d3d9.h>
 #endif
 
@@ -15,10 +16,10 @@ namespace game
 	class Texture2D
 	{
 	public:
-#if defined(GAME_SUPPORT_OPENGL) || defined(GAME_SUPPORT_ALL)
+#if defined(GAME_OPENGL)
 		uint32_t bind;
 #endif
-#if defined(GAME_SUPPORT_DIRECTX9) || defined(GAME_SUPPORT_ALL)
+#if defined(GAME_DIRECTX9)
 		LPDIRECT3DTEXTURE9 textureInterface;
 #endif
 		std::string name;

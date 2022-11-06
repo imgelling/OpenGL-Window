@@ -3,7 +3,6 @@
 #include <vulkan/vulkan.h>
 #include <vector>
 #include "GameRendererBase.h"
-#include "GameEngine.h"
 #include "GameTexture2D.h"
 
 namespace game

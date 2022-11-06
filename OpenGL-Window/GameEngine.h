@@ -9,7 +9,6 @@
 #include "GameSystemInfo.h"
 #include "GameDefines.h"
 
-
 #pragma region Vulkan
 #if defined(GAME_SUPPORT_VULKAN) || defined(GAME_SUPPORT_ALL)
 #include "GameRendererVK.h"
@@ -17,7 +16,7 @@
 #pragma endregion
 
 #pragma region DirectX9
-#if defined(GAME_DIRECTX9)
+#if defined(GAME_SUPPORT_DIRECTX9) || defined(GAME_SUPPORT_ALL)
 #include "GameRendererDX9.h"
 #endif
 #pragma endregion
@@ -27,6 +26,8 @@
 #include "GameRendererGL.h"
 #endif
 #pragma endregion
+
+
 #include "GameTexture2D.h"
 #include "GameMath.h"
 
@@ -436,8 +437,8 @@ namespace game
 		else if (_attributes.RenderingAPI == RenderAPI::Vulkan)
 		{
 			lastError = { GameErrors::GameInvalidParameter, "Only OpenGL is implemented." };
-#if defined(GAME_SUPPORT_VULKAN) || defined(GAME_SUPPORT_ALL)
-			_renderer = new game::RendererVK();
+#if defined(GAME_VULKAN)
+			_renderer = new game::RendererVK;
 #else
 			lastError = { GameErrors::GameInvalidParameter, "Requested Vulkan without #defining GAME_SUPPORT_VULKAN or GAME_SUPPORT ALL." };
 			return false;
@@ -447,7 +448,7 @@ namespace game
 		else if (_attributes.RenderingAPI == RenderAPI::DirectX9)
 		{
 			//lastError = { GameErrors::GameInvalidParameter, "Starting to implement" };
-#if defined(GAME_SUPPORT_DIRECTX9) || defined(GAME_SUPPORT_ALL)
+#if defined(GAME_DIRECTX9)
 			_renderer = new game::RendererDX9();
 #else
 			lastError = { GameErrors::GameInvalidParameter, "Requested DirectX9 without #defining GAME_SUPPORT_DIRECTX9 or GAME_SUPPORT ALL." };

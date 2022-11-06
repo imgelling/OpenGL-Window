@@ -1,4 +1,6 @@
 #pragma once
+#include <string>
+#include <vector>
 #include "GameWindow.h"
 #include "GameAttributes.h"
 #include "GameSystemInfo.h"
@@ -7,12 +9,9 @@
 #include "GameShaderGL.h"
 #include "GameColor.h"
 
-#include <string>
-#include <vector>
 
 namespace game
 {
-	extern GameError lastError;
 	class RendererBase
 	{
 	public:

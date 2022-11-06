@@ -1,8 +1,21 @@
 #pragma once
 
+
+#if defined(GAME_SUPPORT_OPENGL) || defined(GAME_SUPPORT_ALL)
+#define GAME_OPENGL
+#endif
+
+#if defined(GAME_SUPPORT_DIRECTX9) || defined(GAME_SUPPORT_ALL)
+#define GAME_DIRECTX9
+#endif
+
+#if defined(GAME_SUPPORT_VULKAN) || defined(GAME_SUPPORT_ALL)
+#define GAME_VULKAN
+#endif
+
 // just not working
 #pragma region Vulkan
-#if defined(GAME_SUPPORT_VULKAN) || defined(GAME_SUPPORT_ALL)
+#if defined(GAME_VULKAN)
 #define GAME_VULKAN
 #include "vulkan/vulkan.hpp"
 #pragma comment(lib, "vulkan-1.lib")
@@ -10,35 +23,21 @@
 #endif
 #pragma endregion
 
-// DX9 has to be first because GAME_DIRECTX9 will undefine for some reason
-#if defined(GAME_SUPPORT_DIRECTX9) || defined(GAME_SUPPORT_ALL)
-#define GAME_DIRECTX9
-#include <d3d9.h>
-#pragma comment (lib, "d3d9.lib")
-#include "GameRendererDX9.h"
-#endif
-
-#pragma region Opengl
-#if defined(GAME_SUPPORT_OPENGL) || defined(GAME_SUPPORT_ALL)
-#define GAME_OPENGL
+#pragma region OpenGL
+#if defined(GAME_OPENGL)
 #include <gl/GL.h>
 #pragma comment(lib, "opengl32.lib")
 #include "GameRendererGL.h"
 #pragma endregion
 #endif
 
-#if defined(GAME_SUPPORT_DIRECTX9) || defined(GAME_SUPPORT_ALL)
-#define GAME_DIRECTX9
+#pragma region DirectX9
+#if defined(GAME_DIRECTX9)
+#include <d3d9.h>
+#pragma comment (lib, "d3d9.lib")
+#include "GameRendererDX9.h"
 #endif
-
-#if defined(GAME_SUPPORT_VULKAN) || defined(GAME_SUPPORT_ALL)
-#define GAME_VULKAN
-#endif
-
-#if defined(GAME_SUPPORT_OPENGL) || defined(GAME_SUPPORT_ALL)
-#define GAME_OPENGL
-#endif
-
+#pragma endregion
 
 #pragma region Engine
 #include "GameAttributes.h"

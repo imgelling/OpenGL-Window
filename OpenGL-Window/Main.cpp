@@ -7,7 +7,7 @@
 //#define GAME_USE_DEDICATED_GPU
 #define GAME_SUPPORT_DIRECTX9
 #define GAME_SUPPORT_OPENGL
-//#define GAME_SUPPORT_VULKAN  // renderervk not found
+//#define GAME_SUPPORT_VULKAN 
 //#define GAME_SUPPORT_ALL
 #include "Game.h"
 
