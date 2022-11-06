@@ -11,7 +11,7 @@
 
 
 #pragma region Vulkan
-#if defined(GAME_SUPPORT_VULKAN) //GAME_VULKAN)
+#if defined(GAME_SUPPORT_VULKAN) || defined(GAME_SUPPORT_ALL)
 #include "GameRendererVK.h"
 #endif
 #pragma endregion

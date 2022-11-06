@@ -7,7 +7,7 @@
 //#define GAME_USE_DEDICATED_GPU
 #define GAME_SUPPORT_DIRECTX9
 #define GAME_SUPPORT_OPENGL
-//#define GAME_SUPPORT_VULKAN
+//#define GAME_SUPPORT_VULKAN  // renderervk not found
 //#define GAME_SUPPORT_ALL
 #include "Game.h"
 
@@ -32,7 +32,7 @@ public:
 		attrib.DebugMode = false;
 		attrib.MultiSamples = 8; // max 8 amd, 16 nvidia
 		attrib.RenderingAPI = game::RenderAPI::DirectX9; 
-		attrib.RenderingAPI = game::RenderAPI::OpenGL;
+		//attrib.RenderingAPI = game::RenderAPI::OpenGL;
 		geSetAttributes(attrib);
 	}
 

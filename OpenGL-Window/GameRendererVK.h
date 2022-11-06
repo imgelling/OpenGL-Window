@@ -11,7 +11,7 @@ namespace game
 	class RendererVK : public RendererBase
 	{
 	public:
-		bool CreateDevice(Window window);
+		bool CreateDevice(Window& window);
 
 		void DestroyDevice();
 
@@ -30,7 +30,7 @@ namespace game
 		void Clear(const bool color, const bool depth, const bool stencil) noexcept {};
 		void Enable(const uint32_t capability) noexcept {};
 		void Disable(const uint32_t capability) noexcept {};
-		void geBindTexture(const uint32_t capability, const Texture2D& texture) noexcept {};
+		void BindTexture(const uint32_t capability, const Texture2D& texture) noexcept {};
 	protected:
 		void _ReadExtensions();
 
@@ -39,7 +39,7 @@ namespace game
 		bool _enableValidationLayers = false;
 	};
 
-	inline bool RendererVK::CreateDevice(Window window)
+	inline bool RendererVK::CreateDevice(Window& window)
 	{
 		// Enable Validation Layers if debug mode was wanted
 		if (_attributes.DebugMode)

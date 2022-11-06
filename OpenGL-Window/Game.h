@@ -1,5 +1,6 @@
 #pragma once
 
+// just not working
 #pragma region Vulkan
 #if defined(GAME_SUPPORT_VULKAN) || defined(GAME_SUPPORT_ALL)
 #define GAME_VULKAN
@@ -26,7 +27,17 @@
 #pragma endregion
 #endif
 
+#if defined(GAME_SUPPORT_DIRECTX9) || defined(GAME_SUPPORT_ALL)
+#define GAME_DIRECTX9
+#endif
 
+#if defined(GAME_SUPPORT_VULKAN) || defined(GAME_SUPPORT_ALL)
+#define GAME_VULKAN
+#endif
+
+#if defined(GAME_SUPPORT_OPENGL) || defined(GAME_SUPPORT_ALL)
+#define GAME_OPENGL
+#endif
 
 
 #pragma region Engine
