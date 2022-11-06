@@ -1,8 +1,8 @@
 #pragma once
-#if defined(GAME_SUPPORT_OPENGL) || defined(GAME_SUPPORT_ALL)
+#if defined(GAME_OPENGL)
 #include <gl/GL.h>
 #endif
-#if defined(GAME_SUPPORT_DIRECTX9) || defined(GAME_SUPPORT_ALL)
+#if defined(GAME_DIRECTX9)
 #include <d3d9.h>
 #endif
 #include "GameDefines.h"
@@ -26,17 +26,17 @@ namespace game
 	private:
 		void _Enable2D();
 		void _Disable2D();
-#if defined(GAME_SUPPORT_OPENGL) || defined(GAME_SUPPORT_ALL)
+#if defined(GAME_OPENGL)
 		float_t orthoganalMatrix[4][4] = { 0.0f };
 #endif
-#if defined(GAME_SUPPORT_DIRECTX9) || defined(GAME_SUPPORT_ALL)
+#if defined(GAME_DIRECTX9)
 			
 #endif
 	};
 
 	inline SpriteBatch::SpriteBatch()
 	{
-#if defined(GAME_SUPPORT_OPENGL) || defined(GAME_SUPPORT_ALL)
+#if defined(GAME_OPENGL)
 		if (enginePointer->_attributes.RenderingAPI == RenderAPI::OpenGL)
 		{
 			// Set identity
@@ -46,7 +46,7 @@ namespace game
 			orthoganalMatrix[3][3] = 1.0f;
 		}
 #endif
-#if defined(GAME_SUPPORT_DIRECTX9) || defined(GAME_SUPPORT_ALL)
+#if defined(GAME_DIRECTX9)
 		if (enginePointer->_attributes.RenderingAPI == RenderAPI::DirectX9)
 		{
 
@@ -76,7 +76,7 @@ namespace game
 
 	inline void SpriteBatch::_Enable2D()
 	{
-#if defined(GAME_SUPPORT_OPENGL) || defined(GAME_SUPPORT_ALL)
+#if defined(GAME_OPENGL)
 		if (enginePointer->_attributes.RenderingAPI == RenderAPI::OpenGL)
 		{
 			float Right = (float)enginePointer->geGetWindowSize().width;

@@ -10,19 +10,19 @@
 #include "GameDefines.h"
 
 #pragma region Vulkan
-#if defined(GAME_SUPPORT_VULKAN) || defined(GAME_SUPPORT_ALL)
+#if defined(GAME_VULKAN)
 #include "GameRendererVK.h"
 #endif
 #pragma endregion
 
 #pragma region DirectX9
-#if defined(GAME_SUPPORT_DIRECTX9) || defined(GAME_SUPPORT_ALL)
+#if defined(GAME_DIRECTX9)
 #include "GameRendererDX9.h"
 #endif
 #pragma endregion
 
 #pragma region Opengl
-#if defined(GAME_SUPPORT_OPENGL) || defined(GAME_SUPPORT_ALL)
+#if defined(GAME_OPENGL)
 #include "GameRendererGL.h"
 #endif
 #pragma endregion
@@ -427,7 +427,7 @@ namespace game
 		// Set the renderer
 		if (_attributes.RenderingAPI == RenderAPI::OpenGL)
 		{
-#if defined(GAME_SUPPORT_OPENGL) || defined(GAME_SUPPORT_ALL)
+#if defined(GAME_OPENGL)
 			_renderer = new game::RendererGL();
 #else
 			lastError = { GameErrors::GameInvalidParameter, "Requested OpenGL without #defining GAME_SUPPORT_OPENGL or GAME_SUPPORT ALL." };

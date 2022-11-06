@@ -1,8 +1,8 @@
 #pragma once
-#if defined(GAME_SUPPORT_OPENGL) || defined(GAME_SUPPORT_ALL)
+#if defined(GAME_OPENGL)
 #include <gl/GL.h>
 #endif
-#if defined(GAME_SUPPORT_DIRECTX9) || defined(GAME_SUPPORT_ALL)
+#if defined(GAME_DIRECTX9)
 #include <d3d9.h>
 #endif
 #include "GameDefines.h"
@@ -28,10 +28,10 @@ namespace game
 		void PixelClip(const int32_t x, const int32_t y, const game::Color& color);
 	private:
 		Texture2D _frameBuffer[2];
-#if defined(GAME_SUPPORT_OPENGL) || defined(GAME_SUPPORT_ALL)
+#if defined(GAME_OPENGL)
 		uint32_t _compiledQuad;
 #endif
-#if defined(GAME_SUPPORT_DIRECTX9) || defined(GAME_SUPPORT_ALL)
+#if defined(GAME_DIRECTX9)
 		struct _vertex
 		{
 			float_t x, y, z, rhw;    
@@ -61,12 +61,12 @@ namespace game
 
 	inline PixelMode::PixelMode()
 	{
-#if defined(GAME_SUPPORT_OPENGL) || defined(GAME_SUPPORT_ALL)
+#if defined(GAME_OPENGL)
 		_compiledQuad = 0;
 #endif
 		_video = nullptr;
 		_currentBuffer = 0;
-#if defined(GAME_SUPPORT_DIRECTX9) || defined(GAME_SUPPORT_ALL)
+#if defined(GAME_DIRECTX9)
 		_vertexBuffer = nullptr;
 		_d3d9Device = nullptr;
 #endif
@@ -75,7 +75,7 @@ namespace game
 	inline PixelMode::~PixelMode()
 	{
 		if (_video != nullptr) delete[] _video;
-#if defined (GAME_SUPPORT_DIRECTX9) || defined(GAME_SUPPORT_ALL)
+#if defined (GAME_DIRECTX9)
 		if (enginePointer->_attributes.RenderingAPI == RenderAPI::DirectX9)
 		{
 			if (_vertexBuffer)
@@ -120,13 +120,13 @@ namespace game
 			}
 		}
 
-#if defined(GAME_SUPPORT_OPENGL) || defined(GAME_SUPPORT_ALL)
+#if defined(GAME_OPENGL)
 		if (enginePointer->_attributes.RenderingAPI == RenderAPI::OpenGL)
 		{
 			_compiledQuad = glGenLists(1);
 		}
 #endif
-#if defined (GAME_SUPPORT_DIRECTX9) || defined(GAME_SUPPORT_ALL)
+#if defined (GAME_DIRECTX9)
 		if (enginePointer->_attributes.RenderingAPI == RenderAPI::DirectX9)
 		{
 			_frameBuffer[0].textureInterface->GetDevice(&_d3d9Device);
@@ -146,7 +146,7 @@ namespace game
 
 	inline void PixelMode::_UpdateFrameBuffer()
 	{
-#if defined(GAME_SUPPORT_OPENGL) || defined (GAME_SUPPORT_ALL)
+#if defined(GAME_OPENGL)
 		if (enginePointer->_attributes.RenderingAPI == RenderAPI::OpenGL)
 		{
 			glBindTexture(GL_TEXTURE_2D, _frameBuffer[_currentBuffer].bind);
@@ -155,7 +155,7 @@ namespace game
 			glBindTexture(GL_TEXTURE_2D, 0);
 		}
 #endif
-#if defined(GAME_SUPPORT_DIRECTX9) || defined(GAME_SUPPORT_ALL)
+#if defined(GAME_DIRECTX9)
 		if (enginePointer->_attributes.RenderingAPI == RenderAPI::DirectX9)
 		{
 			D3DLOCKED_RECT rect;
@@ -206,7 +206,7 @@ namespace game
 		sizeOfScaledTexture.height = positionOfScaledTexture.y + (_frameBuffer[_currentBuffer].height * scale.y);
 
 
-#if defined(GAME_SUPPORT_OPENGL) || defined(GAME_SUPPORT_ALL)
+#if defined(GAME_OPENGL)
 		if (enginePointer->_attributes.RenderingAPI == RenderAPI::OpenGL)
 		{
 			// Pixel offset fix
@@ -246,7 +246,7 @@ namespace game
 			glEndList();
 		}
 #endif
-#if defined(GAME_SUPPORT_DIRECTX9) || defined(GAME_SUPPORT_ALL)
+#if defined(GAME_DIRECTX9)
 		if (enginePointer->_attributes.RenderingAPI == RenderAPI::DirectX9)
 		{
 			VOID* pVoid = nullptr;  
@@ -303,7 +303,7 @@ namespace game
 		_UpdateFrameBuffer();
 
 		// Draw the quad
-#if defined(GAME_SUPPORT_OPENGL) || defined(GAME_SUPPORT_ALL)
+#if defined(GAME_OPENGL)
 		if (enginePointer->_attributes.RenderingAPI == RenderAPI::OpenGL)
 		{
 			enginePointer->geEnable(GAME_TEXTURE_2D);
@@ -320,7 +320,7 @@ namespace game
 			enginePointer->geDisable(GAME_TEXTURE_2D);
 		}
 #endif
-#if defined(GAME_SUPPORT_DIRECTX9) || defined(GAME_SUPPORT_ALL)
+#if defined(GAME_DIRECTX9)
 		if (enginePointer->_attributes.RenderingAPI == RenderAPI::DirectX9)
 		{
 			DWORD oldFVF = 0;
@@ -367,13 +367,13 @@ namespace game
 
 	inline void PixelMode::Clear(const Color &color)
 	{
-#if defined(GAME_SUPPORT_DIRECTX9) || defined(GAME_SUPPORT_ALL)
+#if defined(GAME_DIRECTX9)
 		if (enginePointer->_attributes.RenderingAPI == RenderAPI::DirectX9)
 		{
 			std::fill_n(_video, _bufferSize.width * _bufferSize.height, D3DCOLOR_ARGB(color.a, color.r, color.g, color.b));
 		}
 #endif
-#if defined(GAME_SUPPORT_OPENGL) || defined(GAME_SUPPORT_ALL)
+#if defined(GAME_OPENGL)
 		if (enginePointer->_attributes.RenderingAPI == RenderAPI::OpenGL)
 		{
 			std::fill_n(_video, _bufferSize.width * _bufferSize.height, color.packed);
@@ -383,13 +383,13 @@ namespace game
 
 	inline void PixelMode::Pixel(const int32_t x, const int32_t y, const game::Color& color)
 	{
-#if defined(GAME_SUPPORT_DIRECTX9) || defined(GAME_SUPPORT_ALL)
+#if defined(GAME_DIRECTX9)
 		if (enginePointer->_attributes.RenderingAPI == RenderAPI::DirectX9)
 		{
 			_video[y * _bufferSize.width + x] = D3DCOLOR_ARGB(color.a, color.r, color.g, color.b);
 		}
 #endif
-#if defined(GAME_SUPPORT_OPENGL) || defined(GAME_SUPPORT_ALL)
+#if defined(GAME_OPENGL)
 		if (enginePointer->_attributes.RenderingAPI == RenderAPI::OpenGL)
 		{
 			_video[y * _bufferSize.width + x] = color.packed;
@@ -401,13 +401,13 @@ namespace game
 	{
 		if (x < 0 || y < 0) return;
 		if (x > _bufferSize.width-1 || y > _bufferSize.height - 1) return;
-#if defined(GAME_SUPPORT_DIRECTX9) || defined(GAME_SUPPORT_ALL)
+#if defined(GAME_DIRECTX9)
 		if (enginePointer->_attributes.RenderingAPI == RenderAPI::DirectX9)
 		{
 			_video[y * _bufferSize.width + x] = D3DCOLOR_ARGB(color.a, color.r, color.g, color.b);
 		}
 #endif
-#if defined(GAME_SUPPORT_OPENGL) || defined(GAME_SUPPORT_ALL)
+#if defined(GAME_OPENGL)
 		if (enginePointer->_attributes.RenderingAPI == RenderAPI::OpenGL)
 		{
 			_video[y * _bufferSize.width + x] = color.packed;

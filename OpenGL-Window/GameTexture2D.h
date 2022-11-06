@@ -48,8 +48,11 @@ namespace game
 
 	inline Texture2D::Texture2D()
 	{
-#if defined(GAME_SUPPORT_OPENGL) || defined(GAME_SUPPORT_ALL)
+#if defined(GAME_OPENGL)
 		bind = 0;
+#endif
+#if defined(GAME_DIRECTX9)
+		textureInterface = nullptr;
 #endif
 		width = 0;
 		height = 0;
