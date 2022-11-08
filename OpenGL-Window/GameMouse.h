@@ -1,6 +1,4 @@
 #pragma once
-#include <stdint.h>
-#include <Windows.h>
 #include "GameMath.h"
 
 namespace game

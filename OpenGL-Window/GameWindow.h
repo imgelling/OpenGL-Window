@@ -1,10 +1,10 @@
 #pragma once
-#include <Windows.h>
 #include <string>
+#include <Windows.h>
 
-#include "GameHelpers.h"
 #include "GameAttributes.h"
 #include "GameErrors.h"
+#include "GameHelpers.h"
 
 
 namespace game

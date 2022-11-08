@@ -1,10 +1,10 @@
 #pragma once
-#include <string>
-#include <sstream>
-#include <thread>
 #include <intrin.h>
 #include <psapi.h>
 #include <powerbase.h>
+#include <sstream>
+#include <string>
+#include <thread>
 #include <windows.h>
 
 #pragma comment(lib, "Powrprof.lib")

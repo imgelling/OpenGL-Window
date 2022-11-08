@@ -1,13 +1,14 @@
 #pragma once
 #include <string>
 #include <vector>
-#include "GameWindow.h"
+
 #include "GameAttributes.h"
-#include "GameSystemInfo.h"
-#include "GameLogger.h"
-#include "GameTexture2D.h"
-#include "GameShaderGL.h"
 #include "GameColor.h"
+#include "GameLogger.h"
+#include "GameShaderGL.h"
+#include "GameSystemInfo.h"
+#include "GameTexture2D.h"
+#include "GameWindow.h"
 
 
 namespace game

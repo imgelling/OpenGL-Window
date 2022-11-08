@@ -1,7 +1,8 @@
 #pragma once
 
-#include <vulkan/vulkan.h>
 #include <vector>
+#include <vulkan/vulkan.h>
+
 #include "GameRendererBase.h"
 #include "GameTexture2D.h"
 

@@ -1,5 +1,4 @@
 #pragma once
-#include "Game.h"
 #ifdef GAME_DIRECTX9
 #include <d3d9.h>
 #endif

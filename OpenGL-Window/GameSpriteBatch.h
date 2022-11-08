@@ -5,11 +5,12 @@
 #if defined(GAME_DIRECTX9)
 #include <d3d9.h>
 #endif
+
 #include "GameDefines.h"
+#include "GameEngine.h"
 #include "GameErrors.h"
 #include "GameMath.h"
 #include "GameTexture2D.h"
-#include "GameEngine.h"
 
 namespace game
 {
@@ -27,7 +28,7 @@ namespace game
 		void _Enable2D();
 		void _Disable2D();
 #if defined(GAME_OPENGL)
-		float_t orthoganalMatrix[4][4] = { 0.0f };
+		float_t orthogonalMatrix[4][4] = { 0.0f };
 #endif
 #if defined(GAME_DIRECTX9)
 			
@@ -40,10 +41,10 @@ namespace game
 		if (enginePointer->_attributes.RenderingAPI == RenderAPI::OpenGL)
 		{
 			// Set identity
-			orthoganalMatrix[0][0] = 1.0f;
-			orthoganalMatrix[1][1] = 1.0f;
-			orthoganalMatrix[2][2] = 1.0f;
-			orthoganalMatrix[3][3] = 1.0f;
+			orthogonalMatrix[0][0] = 1.0f;
+			orthogonalMatrix[1][1] = 1.0f;
+			orthogonalMatrix[2][2] = 1.0f;
+			orthogonalMatrix[3][3] = 1.0f;
 		}
 #endif
 #if defined(GAME_DIRECTX9)
@@ -86,15 +87,15 @@ namespace game
 			float Near = -1.0f;
 			float Far = 1.0f;
 
-			orthoganalMatrix[0][0] = 2.0f / (Right - Left);
+			orthogonalMatrix[0][0] = 2.0f / (Right - Left);
 
-			orthoganalMatrix[1][1] = 2.0f / (Top - Bottom);
-			orthoganalMatrix[2][2] = 2.0f / (Near - Far);
+			orthogonalMatrix[1][1] = 2.0f / (Top - Bottom);
+			orthogonalMatrix[2][2] = 2.0f / (Near - Far);
 
-			orthoganalMatrix[3][0] = (Left + Right) / (Left - Right);
-			orthoganalMatrix[3][1] = (Bottom + Top) / (Bottom - Top);
+			orthogonalMatrix[3][0] = (Left + Right) / (Left - Right);
+			orthogonalMatrix[3][1] = (Bottom + Top) / (Bottom - Top);
 
-			orthoganalMatrix[3][2] = (Far + Near) / (Near - Far);
+			orthogonalMatrix[3][2] = (Far + Near) / (Near - Far);
 		}
 #endif
 	}

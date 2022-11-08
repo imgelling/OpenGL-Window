@@ -3,13 +3,13 @@
 #include <d3d9.h>
 #include <dxgi.h>
 #pragma comment(lib, "dxgi.lib")
+
+#include "GameErrors.h"
 #include "GameImageLoader.h"
 #include "GameRendererBase.h"
 #include "GameShaderGL.h"
-#include "GameTexture2D.h"
-#include "GameErrors.h"
 #include "GameSystemInfo.h"
-#include "GameImageLoader.h"
+#include "GameTexture2D.h"
 
 namespace game
 {

@@ -7,9 +7,9 @@
 #endif
 #include "GameDefines.h"
 #include "GameErrors.h"
+#include "GameEngine.h"
 #include "GameMath.h"
 #include "GameTexture2D.h"
-#include "GameEngine.h"
 
 namespace game
 {

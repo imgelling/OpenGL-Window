@@ -1,13 +1,13 @@
 #pragma once
 
-#include "GameRendererBase.h"
 #include "GameAttributes.h"
-#include "GameTimer.h"
-#include "GameLogger.h"
+#include "GameDefines.h"
+#include "GameRendererBase.h"
 #include "GameKeyboard.h"
+#include "GameLogger.h"
 #include "GameMouse.h"
 #include "GameSystemInfo.h"
-#include "GameDefines.h"
+#include "GameTimer.h"
 
 #pragma region Vulkan
 #if defined(GAME_VULKAN)
