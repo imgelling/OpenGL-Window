@@ -16,6 +16,7 @@ namespace game
 {
 	extern GameError lastError;
 	extern Engine* enginePointer;
+
 	class SpriteBatch
 	{
 	public:
@@ -31,7 +32,15 @@ namespace game
 		float_t orthogonalMatrix[4][4] = { 0.0f };
 #endif
 #if defined(GAME_DIRECTX9)
-			
+		//(D3DFVF_XYZRHW | D3DFVF_DIFFUSE | D3DFVF_TEX1)
+		struct _vertex
+		{
+			float_t x, y, z, rhw;
+			uint32_t color;
+			float_t u, v;
+		};
+		LPDIRECT3DVERTEXBUFFER9 _vertexBuffer;
+		LPDIRECT3DDEVICE9 _d3d9Device;
 #endif
 	};
 
@@ -50,19 +59,50 @@ namespace game
 #if defined(GAME_DIRECTX9)
 		if (enginePointer->_attributes.RenderingAPI == RenderAPI::DirectX9)
 		{
-
+			_vertexBuffer = nullptr;
+			_d3d9Device = nullptr;
 		}
 #endif
 	}
 
 	inline SpriteBatch::~SpriteBatch()
 	{
+#if defined(GAME_OPENGL)
+		if (enginePointer->_attributes.RenderingAPI == RenderAPI::OpenGL)
+		{
 
+		}
+#endif
+#if defined (GAME_DIRECTX9)
+		if (enginePointer->_attributes.RenderingAPI == RenderAPI::DirectX9)
+		{
+			if (_vertexBuffer)
+			{
+				_vertexBuffer->Release();
+				_vertexBuffer = nullptr;
+			}
+			if (_d3d9Device)
+			{
+				_d3d9Device->Release();
+				_d3d9Device = nullptr;
+			}
+		}
+#endif
 	}
 
 	inline void SpriteBatch::Initialize()
 	{
+#if defined(GAME_OPENGL)
+		if (enginePointer->_attributes.RenderingAPI == RenderAPI::OpenGL)
+		{
 
+		}
+#endif
+#if defined (GAME_DIRECTX9)
+		if (enginePointer->_attributes.RenderingAPI == RenderAPI::DirectX9)
+		{
+		}
+#endif
 	}
 
 	inline void SpriteBatch::Begin()

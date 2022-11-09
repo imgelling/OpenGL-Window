@@ -81,6 +81,12 @@ namespace game
 			if (_vertexBuffer)
 			{
 				_vertexBuffer->Release();
+				_vertexBuffer = nullptr;
+			}
+			if (_d3d9Device)
+			{
+				_d3d9Device->Release();
+				_d3d9Device = nullptr;
 			}
 		}
 #endif

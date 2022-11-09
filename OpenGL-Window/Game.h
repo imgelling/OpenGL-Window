@@ -13,7 +13,7 @@
 #define GAME_VULKAN
 #endif
 
-// just not working
+
 #pragma region Vulkan
 #if defined(GAME_VULKAN)
 #define GAME_VULKAN
