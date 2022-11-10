@@ -59,6 +59,9 @@ namespace game
 		Mouse geMouse;
 		Logger* geLogger;
 		bool geIsRunning;
+#if defined(GAME_DIRECTX9)
+		LPDIRECT3DDEVICE9 d3d9Device;
+#endif
 
 		// Engine setup
 
@@ -121,7 +124,6 @@ namespace game
 		void _Swap();
 	};
 
-
 	inline Engine::Engine(Logger* logger)
 	{
 		geIsRunning = false;
@@ -132,6 +134,9 @@ namespace game
 		_framesPerSecond = 0;
 		_cpuFrequency = 0;
 		this->geLogger = logger;
+#if defined(GAME_DIRECTX9)
+		d3d9Device = nullptr;
+#endif
 	}
 
 	inline Engine::~Engine()
@@ -142,6 +147,12 @@ namespace game
 			_renderer->DestroyDevice();
 			delete _renderer;
 		}
+#if defined(GAME_DIRECTX9)
+		if (d3d9Device)
+		{
+			d3d9Device->Release();
+		}
+#endif
 	}
 
 	inline void Engine::geStartEngine()
@@ -157,6 +168,16 @@ namespace game
 		__int64 cyclesStart = __rdtsc();
 
 		geIsRunning = true;
+
+#if defined(GAME_DIRECTX9)
+		if (_attributes.RenderingAPI == RenderAPI::DirectX9)
+		{
+			if (_renderer)
+			{
+				dynamic_cast<RendererDX9*>(_renderer)->GetDevice(d3d9Device);
+			}
+		}
+#endif
 
 		// Reset the timers
 		_renderTimer.Reset();

@@ -8,7 +8,6 @@
 #define GAME_SUPPORT_DIRECTX9
 #define GAME_SUPPORT_OPENGL
 //#define GAME_SUPPORT_VULKAN 
-//#define GAME_SUPPORT_ALL
 #include "Game.h"
 
 class Game : public game::Engine
@@ -16,6 +15,7 @@ class Game : public game::Engine
 
 public:
 	game::PixelMode pixelMode;
+	game::Attributes attributes;
 
 	Game(game::Logger& logger) : game::Engine(&logger)
 	{
@@ -23,17 +23,16 @@ public:
 
 	void Initialize()
 	{
-		game::Attributes attrib;
-
-		attrib.WindowTitle = "PixelMode tests";
-		attrib.GameVersion = "0.01";
-		attrib.Framelock = 60;  
-		attrib.VsyncOn = false;
-		attrib.DebugMode = false;
-		attrib.MultiSamples = 8; // max 8 amd, 16 nvidia
-		attrib.RenderingAPI = game::RenderAPI::DirectX9; 
-		//attrib.RenderingAPI = game::RenderAPI::OpenGL;
-		geSetAttributes(attrib);
+		attributes.WindowTitle = "PixelMode tests";
+		attributes.GameVersion = "0.01";
+		attributes.Framelock = 60;  
+		attributes.VsyncOn = false;
+		attributes.DebugMode = false;
+		attributes.MultiSamples = 8; // max 8 amd, 16 nvidia
+		attributes.RenderingAPI = game::RenderAPI::DirectX9; 
+		//attributes.RenderingAPI = game::RenderAPI::OpenGL;
+		
+		geSetAttributes(attributes);
 	}
 
 	void LoadContent()
@@ -74,6 +73,13 @@ public:
 		
 	
 		geClear(true, true, false);
+#if defined(GAME_DIRECTX9)
+		if (attributes.RenderingAPI == game::RenderAPI::DirectX9)
+		{
+			d3d9Device->Clear(0, NULL, D3DCLEAR_TARGET, D3DCOLOR_XRGB(255, 255, 255), 1.0f, 0);
+		}
+#endif
+
 		pixelMode.Clear(game::Colors::Blue);
 		for (uint32_t i = 0; i < 320; i++)
 		{

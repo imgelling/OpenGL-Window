@@ -33,6 +33,7 @@ namespace game
 		void Enable(const uint32_t capability) noexcept {};
 		void Disable(const uint32_t capability) noexcept {};
 		void BindTexture(const uint32_t capability, const Texture2D& texture) noexcept {};
+		void GetDevice(LPDIRECT3DDEVICE9& device);
 
 
 	protected:
@@ -51,6 +52,16 @@ namespace game
 		_d3d9 = nullptr;
 		_d3d9Device = nullptr;
 
+	}
+
+	inline void RendererDX9::GetDevice(LPDIRECT3DDEVICE9& device)
+	{
+		Texture2D temp;
+		temp.width = 10;
+		temp.height = 10;
+		CreateTexture(temp);
+		temp.textureInterface->GetDevice(&device);
+		UnLoadTexture(temp);
 	}
 
 	inline void RendererDX9::HandleWindowResize(const uint32_t width, const uint32_t height)

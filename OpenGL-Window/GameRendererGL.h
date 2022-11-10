@@ -111,7 +111,6 @@ namespace game
 		void Disable(const uint32_t capability) noexcept;
 		void BindTexture(const uint32_t capability, const Texture2D& texture) noexcept;
 
-
 	protected:
 		void _ReadExtensions();
 
