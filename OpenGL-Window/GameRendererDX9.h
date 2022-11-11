@@ -2,7 +2,7 @@
 
 #include <d3d9.h>
 #include <dxgi.h>
-#pragma comment(lib, "dxgi.lib")
+#pragma comment(lib, "dxgi.lib") // for gpu memory
 
 #include "GameErrors.h"
 #include "GameImageLoader.h"
@@ -112,7 +112,7 @@ namespace game
 		{
 			if (FAILED(_d3d9->CheckDeviceMultiSampleType(D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, D3DFMT_A8R8G8B8, !_attributes.WindowFullscreen, (D3DMULTISAMPLE_TYPE)_attributes.MultiSamples, &multiSamplingQuality)))
 			{
-				lastError = { GameErrors::DirectXSpecific, "Device does not support " + std::to_string(_attributes.MultiSamples) + "x multisampling."};
+				lastError = { GameErrors::GameDirectX9Specific, "Device does not support " + std::to_string(_attributes.MultiSamples) + "x multisampling."};
 				return false;
 			}
 			d3dpp.MultiSampleType = (D3DMULTISAMPLE_TYPE)_attributes.MultiSamples;
@@ -122,7 +122,7 @@ namespace game
 		// Create the device
 		if (FAILED(_d3d9->CreateDevice(D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, window.GetHandle(), D3DCREATE_HARDWARE_VERTEXPROCESSING, &d3dpp, &_d3d9Device)))
 		{
-			lastError = { GameErrors::DirectXSpecific, "Create Device failed." };
+			lastError = { GameErrors::GameDirectX9Specific, "Create Device failed." };
 			return false;
 		}
 		D3DVIEWPORT9 view{ 0, 0, _attributes.WindowWidth, _attributes.WindowHeight, 0.0f, 1.0f };
@@ -218,7 +218,7 @@ namespace game
 		_d3d9Device->CreateTexture(texture.width, texture.height, texture.isMipMapped ? 0 : 1, 0, D3DFMT_A8R8G8B8, D3DPOOL_MANAGED, &texture.textureInterface, NULL);
 		if (!texture.textureInterface)
 		{
-			lastError = { GameErrors::DirectXSpecific, "Could not create texture." };
+			lastError = { GameErrors::GameDirectX9Specific, "Could not create texture." };
 			return false;
 		}
 
@@ -253,7 +253,7 @@ namespace game
 		hResult = _d3d9Device->CreateTexture(texture.width, texture.height, texture.isMipMapped ? 0 : 1, 0, D3DFMT_A8R8G8B8, D3DPOOL_MANAGED, &texture.textureInterface, NULL);
 		if (hResult != D3D_OK)
 		{
-			lastError = { GameErrors::DirectXSpecific, "Could not create texture, \"" + fileName + "\""};
+			lastError = { GameErrors::GameDirectX9Specific, "Could not create texture, \"" + fileName + "\""};
 		}
 
 		// Copy texture data to the memory

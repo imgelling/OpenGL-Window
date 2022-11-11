@@ -14,7 +14,8 @@ namespace game
 		GameWindowsSpecific,
 		GameOpenGLSpecific,
 		GameVulkanSpecific,
-		DirectXSpecific,
+		GameDirectX9Specific,
+		GameDirectX11Specific,
 		GameContent
 	};
 	
@@ -23,7 +24,6 @@ namespace game
 		GameErrors lastErrorType = GameErrors::None;
 		std::string lastErrorString = "None";
 		explicit operator bool() const;
-		//friend std::ostream& operator<< (std::ostream& stream, const game::GameError error);
 		friend std::ostream& operator<< (std::ostream& _stream, const GameError error)
 		{
 			uint32_t errID = (uint32_t)error.lastErrorType;
@@ -36,7 +36,8 @@ namespace game
 			case (uint32_t)GameErrors::GameOpenGLSpecific: _stream << "GameErrorOpenGLSpecific"; break;
 			case (uint32_t)GameErrors::GameVulkanSpecific: _stream << "GameErrorVulkanSpecific"; break;
 			case (uint32_t)GameErrors::GameRenderer: _stream << "GameRenderer"; break;
-			case (uint32_t)GameErrors::DirectXSpecific: _stream << "GameDirectXSpecific"; break;
+			case (uint32_t)GameErrors::GameDirectX9Specific: _stream << "GameDirectX9Specific"; break;
+			case (uint32_t)GameErrors::GameDirectX11Specific: _stream << "GameDirectX11Specific"; break;
 			case (uint32_t)GameErrors::GameContent: _stream << "GameContent"; break;
 			default: _stream << "GameErrorUnknown"; break;
 			}

@@ -5,9 +5,10 @@
 
 // Engine header
 //#define GAME_USE_DEDICATED_GPU
-#define GAME_SUPPORT_DIRECTX9
-#define GAME_SUPPORT_OPENGL
-#define GAME_SUPPORT_VULKAN 
+//#define GAME_SUPPORT_DIRECTX9
+#define GAME_SUPPORT_DIRECTX11
+//#define GAME_SUPPORT_OPENGL
+//#define GAME_SUPPORT_VULKAN 
 #include "Game.h"
 
 class Game : public game::Engine
@@ -28,10 +29,11 @@ public:
 		attributes.GameVersion = "0.01";
 		attributes.Framelock = 60;  
 		attributes.VsyncOn = false;
-		attributes.DebugMode = false;
+		attributes.DebugMode = true;
 		attributes.MultiSamples = 8; // max 8 amd, 16 nvidia
 		attributes.RenderingAPI = game::RenderAPI::DirectX9; 
 		//attributes.RenderingAPI = game::RenderAPI::OpenGL;
+		attributes.RenderingAPI = game::RenderAPI::DirectX11;
 		
 		geSetAttributes(attributes);
 	}
@@ -87,7 +89,7 @@ public:
 #if defined (GAME_DIRECTX9)
 		if (geIsUsing(GAME_DIRECTX9))
 		{
-			d3d9Device->Clear(0, NULL, D3DCLEAR_TARGET, D3DCOLOR_XRGB(0, 0, 0), 1.0f, 0);
+			d3d9Device->Clear(0, NULL, D3DCLEAR_TARGET, D3DCOLOR_XRGB(64, 64, 64), 1.0f, 0);
 		}
 #endif
 

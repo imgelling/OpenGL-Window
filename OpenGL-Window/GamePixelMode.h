@@ -139,7 +139,7 @@ namespace game
 			_d3d9Device->CreateVertexBuffer(6 * sizeof(_vertex), 0, (D3DFVF_XYZRHW | D3DFVF_DIFFUSE | D3DFVF_TEX1), D3DPOOL_MANAGED, &_vertexBuffer, NULL);
 			if (_vertexBuffer == nullptr)
 			{
-				lastError = { GameErrors::DirectXSpecific, "Could not create vertex buffer for PixelMode." };
+				lastError = { GameErrors::GameDirectX9Specific, "Could not create vertex buffer for PixelMode." };
 				return false;
 			}
 		}

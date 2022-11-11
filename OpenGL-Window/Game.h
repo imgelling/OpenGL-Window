@@ -9,10 +9,13 @@
 #define GAME_DIRECTX9 2
 #endif
 
+#if defined(GAME_SUPPORT_DIRECTX11) || defined(GAME_SUPPORT_ALL)
+#define GAME_DIRECTX11 4
+#endif
+
 #if defined(GAME_SUPPORT_VULKAN) || defined(GAME_SUPPORT_ALL)
 #define GAME_VULKAN 3
 #endif
-
 
 #pragma region Vulkan
 #if defined(GAME_VULKAN)
@@ -35,6 +38,14 @@
 #include <d3d9.h>
 #pragma comment (lib, "d3d9.lib")
 #include "GameRendererDX9.h"
+#endif
+#pragma endregion
+
+#pragma region DirectX11
+#if defined(GAME_DIRECTX11)
+#include <d3d11.h>
+#pragma comment (lib, "d3d11.lib")
+#include "GameRendererDX11.h"
 #endif
 #pragma endregion
 

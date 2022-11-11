@@ -27,6 +27,11 @@
 #endif
 #pragma endregion
 
+#pragma region DirectX11
+#if defined(GAME_DIRECTX11)
+#include "GameRendererDX11.h"
+#endif
+#pragma endregion
 
 #include "GameTexture2D.h"
 #include "GameMath.h"
@@ -135,7 +140,6 @@ namespace game
 	{
 		if (_renderer)
 		{
-
 			_renderer->DestroyDevice();
 			delete _renderer;
 		}
@@ -431,11 +435,19 @@ namespace game
 		}
 		else if (_attributes.RenderingAPI == RenderAPI::DirectX9)
 		{
-			//lastError = { GameErrors::GameInvalidParameter, "Starting to implement" };
 #if defined(GAME_DIRECTX9)
 			_renderer = new game::RendererDX9();
 #else
 			lastError = { GameErrors::GameInvalidParameter, "Requested DirectX9 without #defining GAME_SUPPORT_DIRECTX9 or GAME_SUPPORT ALL." };
+			return false;
+#endif
+		}
+		else if (_attributes.RenderingAPI == RenderAPI::DirectX11)
+		{
+#if defined(GAME_DIRECTX11)
+			_renderer = new game::RendererDX11();
+#else
+			lastError = { GameErrors::GameInvalidParameter, "Requested DirectX11 without #defining GAME_SUPPORT_DIRECTX11 or GAME_SUPPORT ALL." };
 			return false;
 #endif
 		}
