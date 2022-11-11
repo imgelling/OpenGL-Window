@@ -15,7 +15,6 @@ class Game : public game::Engine
 
 public:
 	game::PixelMode pixelMode;
-	game::Attributes attributes;
 
 	Game(game::Logger& logger) : game::Engine(&logger)
 	{
@@ -23,6 +22,8 @@ public:
 
 	void Initialize()
 	{
+		game::Attributes attributes;
+		
 		attributes.WindowTitle = "PixelMode tests";
 		attributes.GameVersion = "0.01";
 		attributes.Framelock = 60;  
@@ -86,7 +87,7 @@ public:
 #if defined (GAME_DIRECTX9)
 		if (geIsUsing(GAME_DIRECTX9))
 		{
-			d3d9Device->Clear(0, NULL, D3DCLEAR_TARGET, D3DCOLOR_XRGB(255, 255, 255), 1.0f, 0);
+			d3d9Device->Clear(0, NULL, D3DCLEAR_TARGET, D3DCOLOR_XRGB(0, 0, 0), 1.0f, 0);
 		}
 #endif
 

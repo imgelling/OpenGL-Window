@@ -61,6 +61,7 @@ namespace game
 	{
 		D3DVIEWPORT9 view { 0, 0, width, height, 0.0f, 1.0f};
 		_d3d9Device->Clear(0, NULL, D3DCLEAR_TARGET, D3DCOLOR_XRGB(_clearColor.r, _clearColor.g, _clearColor.b), 1.0f, 0);
+		if (!width && !height) return;
 		_d3dpp.BackBufferWidth = width;
 		_d3dpp.BackBufferHeight = height;
 		_d3d9Device->Reset(&_d3dpp);

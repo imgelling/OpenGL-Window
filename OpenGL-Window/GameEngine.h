@@ -31,10 +31,6 @@
 #include "GameTexture2D.h"
 #include "GameMath.h"
 
-
-
-
-
 namespace game
 {
 	// Makes computer choose dedicated over integrated gpus
