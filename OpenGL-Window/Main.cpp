@@ -30,7 +30,7 @@ public:
 		attributes.DebugMode = false;
 		attributes.MultiSamples = 8; // max 8 amd, 16 nvidia
 		attributes.RenderingAPI = game::RenderAPI::DirectX9; 
-		attributes.RenderingAPI = game::RenderAPI::OpenGL;
+		//attributes.RenderingAPI = game::RenderAPI::OpenGL;
 		
 		geSetAttributes(attributes);
 	}

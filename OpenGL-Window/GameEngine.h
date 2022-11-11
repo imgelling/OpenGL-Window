@@ -43,7 +43,7 @@ namespace game
 	{
 		__declspec(dllexport) DWORD NvOptimusEnablement = 0x00000001;
 		__declspec(dllexport) int AmdPowerXpressRequestHighPerformance = 1;
-	} // can be slower for some reason
+	}
 #endif
 
 	class Engine;
@@ -86,11 +86,6 @@ namespace game
 		void geUnLoadTexture(Texture2D& texture);
 		bool geLoadShader(const std::string vertex, const std::string fragment, ShaderGL& shader);
 		void geUnLoadShader(ShaderGL& shader);
-		//void geSetClearColor(const Color& color) noexcept;
-		//void geClear(const bool Color, const bool Depth, const bool Stencil) noexcept;
-		//void geEnable(const uint32_t capability) noexcept;
-		//void geDisable(const uint32_t capability) noexcept;
-		//void geBindTexture(const uint32_t capability, const Texture2D& texture) noexcept;
 		bool geIsUsing(const uint32_t renderer);
 
 		// Window stuff	
@@ -488,7 +483,6 @@ namespace game
 		}
 	}
 
-	// Needs to be in engine.h because of cyclic dependency by using enginePointer.
 	inline LRESULT CALLBACK Window::_WindowEventProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	{
 		switch (uMsg)
