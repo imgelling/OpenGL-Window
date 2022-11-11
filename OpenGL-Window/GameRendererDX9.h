@@ -28,14 +28,7 @@ namespace game
 		void UnLoadTexture(Texture2D& texture);
 		bool LoadShader(const std::string vertex, const std::string fragment, ShaderGL& shader) { return false; };
 		void UnLoadShader(ShaderGL& shader) {};
-		void SetClearColor(const Color& color) noexcept;
-		void Clear(const bool color, const bool depth, const bool stencil) noexcept;
-		void Enable(const uint32_t capability) noexcept {};
-		void Disable(const uint32_t capability) noexcept {};
-		void BindTexture(const uint32_t capability, const Texture2D& texture) noexcept {};
 		void GetDevice(LPDIRECT3DDEVICE9& device);
-
-
 	protected:
 		void _ReadExtensions() {};
 	private:
@@ -67,7 +60,7 @@ namespace game
 	inline void RendererDX9::HandleWindowResize(const uint32_t width, const uint32_t height)
 	{
 		D3DVIEWPORT9 view { 0, 0, width, height, 0.0f, 1.0f};
-		Clear(true, true, true);
+		_d3d9Device->Clear(0, NULL, D3DCLEAR_TARGET, D3DCOLOR_XRGB(_clearColor.r, _clearColor.g, _clearColor.b), 1.0f, 0);
 		_d3dpp.BackBufferWidth = width;
 		_d3dpp.BackBufferHeight = height;
 		_d3d9Device->Reset(&_d3dpp);
@@ -208,20 +201,7 @@ namespace game
 		D3DCAPS9 caps;
 		_d3d9Device->GetDeviceCaps(&caps);
 	}
-
-	inline void RendererDX9::Clear(const bool color, const bool depth, const bool stencil) noexcept
-	{
-		if (color)
-		{
-			_d3d9Device->Clear(0, NULL, D3DCLEAR_TARGET, D3DCOLOR_XRGB(_clearColor.r, _clearColor.g, _clearColor.b), 1.0f, 0);
-		}
-	}
-
-	inline void RendererDX9::SetClearColor(const Color& color) noexcept
-	{
-		_clearColor.Set(color.rf, color.gf, color.bf, color.af);
-	}
-
+		
 	inline void RendererDX9::Swap()
 	{
 		_d3d9Device->Present(NULL, NULL, NULL, NULL);

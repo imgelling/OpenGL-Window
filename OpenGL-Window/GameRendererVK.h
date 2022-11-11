@@ -26,11 +26,6 @@ namespace game
 		void UnLoadTexture(Texture2D& texture);
 		bool LoadShader(const std::string vertex, const std::string fragment, ShaderGL& shader);
 		void UnLoadShader(ShaderGL& shader);
-		void SetClearColor(const Color& color) noexcept {};
-		void Clear(const bool color, const bool depth, const bool stencil) noexcept {};
-		void Enable(const uint32_t capability) noexcept {};
-		void Disable(const uint32_t capability) noexcept {};
-		void BindTexture(const uint32_t capability, const Texture2D& texture) noexcept {};
 	protected:
 		void _ReadExtensions();
 

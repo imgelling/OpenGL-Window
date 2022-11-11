@@ -312,8 +312,10 @@ namespace game
 #if defined(GAME_OPENGL)
 		if (enginePointer->_attributes.RenderingAPI == RenderAPI::OpenGL)
 		{
-			enginePointer->geEnable(GAME_TEXTURE_2D);
-			enginePointer->geBindTexture(GAME_TEXTURE_2D, _frameBuffer[_currentBuffer]);
+			//enginePointer->geEnable(GAME_TEXTURE_2D);
+			glEnable(GL_TEXTURE_2D);
+			glBindTexture(GL_TEXTURE_2D, _frameBuffer[_currentBuffer].bind);
+			//enginePointer->geBindTexture(GAME_TEXTURE_2D, _frameBuffer[_currentBuffer]);
 			if (enginePointer->_attributes.MultiSamples > 1)
 			{
 				glDisable(0x809D); // 0x809D is GL_MULTISAMPLE
@@ -323,7 +325,8 @@ namespace game
 			{
 				glEnable(0x809D);
 			}
-			enginePointer->geDisable(GAME_TEXTURE_2D);
+			//enginePointer->geDisable(GAME_TEXTURE_2D);
+			glDisable(GL_TEXTURE_2D);
 		}
 #endif
 #if defined(GAME_DIRECTX9)

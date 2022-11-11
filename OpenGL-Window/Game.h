@@ -2,21 +2,20 @@
 
 
 #if defined(GAME_SUPPORT_OPENGL) || defined(GAME_SUPPORT_ALL)
-#define GAME_OPENGL
+#define GAME_OPENGL 1
 #endif
 
 #if defined(GAME_SUPPORT_DIRECTX9) || defined(GAME_SUPPORT_ALL)
-#define GAME_DIRECTX9
+#define GAME_DIRECTX9 2
 #endif
 
 #if defined(GAME_SUPPORT_VULKAN) || defined(GAME_SUPPORT_ALL)
-#define GAME_VULKAN
+#define GAME_VULKAN 3
 #endif
 
 
 #pragma region Vulkan
 #if defined(GAME_VULKAN)
-#define GAME_VULKAN
 #include "vulkan/vulkan.hpp"
 #pragma comment(lib, "vulkan-1.lib")
 #include "GameRendererVK.h"

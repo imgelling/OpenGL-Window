@@ -105,12 +105,6 @@ namespace game
 		void UnLoadTexture(Texture2D& texture);
 		bool LoadShader(const std::string vertex, const std::string fragment, ShaderGL& shader);
 		void UnLoadShader(ShaderGL& shader);
-		void SetClearColor(const Color& color) noexcept;
-		void Clear(const bool color, const bool depth, const bool stencil) noexcept;
-		void Enable(const uint32_t capability) noexcept;
-		void Disable(const uint32_t capability) noexcept;
-		void BindTexture(const uint32_t capability, const Texture2D& texture) noexcept;
-
 	protected:
 		void _ReadExtensions();
 
@@ -679,7 +673,7 @@ namespace game
 
 	inline void RendererGL::HandleWindowResize(const uint32_t width, const uint32_t height)
 	{
-		Clear(true, true, true);
+		glClear(GL_COLOR_BUFFER_BIT);
 		glViewport(0, 0, width, height);
 	}
 
@@ -1128,72 +1122,6 @@ namespace game
 		shader.shaderId = 0;
 		shader.fragmentId = 0;
 		shader.vertexId = 0;
-	}
-
-	inline void RendererGL::SetClearColor(const Color& color) noexcept
-	{
-		glClearColor(color.rf, color.gf, color.bf, color.af);
-	}
-	
-	inline void RendererGL::Clear(const bool color, const bool depth, const bool stencil) noexcept
-	{
-		uint32_t clearType = 0;
-		if (color) clearType |= GL_COLOR_BUFFER_BIT;
-		if (depth) clearType |= GL_DEPTH_BUFFER_BIT;
-		if (stencil) clearType |= GL_STENCIL_BUFFER_BIT;
-		glClear(clearType);
-	}
-
-	inline void RendererGL::Enable(const uint32_t capability) noexcept
-	{
-		if (capability & GAME_TEXTURE_2D)
-		{
-			glEnable(GL_TEXTURE_2D);
-			return;
-		}
-
-		if (capability & GAME_BLEND)
-		{
-			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); // needs its own
-			glEnable(GL_BLEND);
-			return;
-		}
-
-		if (capability & GAME_CULL_FACE)
-		{
-			glEnable(GL_CULL_FACE);
-			return;
-		}
-	}
-
-	inline void RendererGL::Disable(const uint32_t capability) noexcept
-	{
-		if (capability & GAME_TEXTURE_2D)
-		{
-			glDisable(GL_TEXTURE_2D);
-			return;
-		}
-
-		if (capability & GAME_BLEND)
-		{
-			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-			glDisable(GL_BLEND);
-			return;
-		}
-
-		if (capability & GAME_CULL_FACE)
-		{
-			glDisable(GL_CULL_FACE);
-			return;
-		}
-	}
-
-	inline void RendererGL::BindTexture(const uint32_t capability, const Texture2D& texture) noexcept
-	{
-		if (capability & GAME_TEXTURE_2D)
-		{
-			glBindTexture(GL_TEXTURE_2D, texture.bind);
-		}
 	}
 
 //// Undefine what we have done, if someone uses an extension loader 

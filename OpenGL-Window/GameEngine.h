@@ -86,11 +86,12 @@ namespace game
 		void geUnLoadTexture(Texture2D& texture);
 		bool geLoadShader(const std::string vertex, const std::string fragment, ShaderGL& shader);
 		void geUnLoadShader(ShaderGL& shader);
-		void geSetClearColor(const Color& color) noexcept;
-		void geClear(const bool Color, const bool Depth, const bool Stencil) noexcept;
-		void geEnable(const uint32_t capability) noexcept;
-		void geDisable(const uint32_t capability) noexcept;
-		void geBindTexture(const uint32_t capability, const Texture2D& texture) noexcept;
+		//void geSetClearColor(const Color& color) noexcept;
+		//void geClear(const bool Color, const bool Depth, const bool Stencil) noexcept;
+		//void geEnable(const uint32_t capability) noexcept;
+		//void geDisable(const uint32_t capability) noexcept;
+		//void geBindTexture(const uint32_t capability, const Texture2D& texture) noexcept;
+		bool geIsUsing(const uint32_t renderer);
 
 		// Window stuff	
 
@@ -155,6 +156,17 @@ namespace game
 #endif
 	}
 
+	inline bool Engine::geIsUsing(const uint32_t renderer)
+	{
+		if ((renderer == 1) && (_attributes.RenderingAPI == RenderAPI::OpenGL))
+			return true;
+		if ((renderer == 2) && (_attributes.RenderingAPI == RenderAPI::DirectX9))
+			return true;
+		if ((renderer == 3) && (_attributes.RenderingAPI == RenderAPI::Vulkan))
+			return true;
+		return false;
+	}
+
 	inline void Engine::geStartEngine()
 	{
 		// Storage of time
@@ -170,7 +182,7 @@ namespace game
 		geIsRunning = true;
 
 #if defined(GAME_DIRECTX9)
-		if (_attributes.RenderingAPI == RenderAPI::DirectX9)
+		if (geIsUsing(GAME_DIRECTX9))
 		{
 			if (_renderer)
 			{
@@ -303,22 +315,6 @@ namespace game
 		return { (int)_attributes.WindowWidth, (int)_attributes.WindowHeight};
 	}
 
-	inline void Engine::geSetClearColor(const Color &color) noexcept
-	{
-		if (_renderer)
-		{
-			_renderer->SetClearColor(color);
-		}
-	}
-	
-	inline void Engine::geClear(const bool color, const bool depth, const bool stencil) noexcept
-	{
-		if (_renderer)
-		{
-			_renderer->Clear(color, depth, stencil);
-		}
-	}
-
 	inline bool Engine::geCreateTexture(Texture2D& texture)
 	{
 		if (_renderer)
@@ -372,30 +368,6 @@ namespace game
 	{
 		_window.ToggleFullScreen();
 		_attributes.WindowFullscreen = !_attributes.WindowFullscreen;
-	}
-
-	inline void Engine::geEnable(const uint32_t capability) noexcept
-	{
-		if (_renderer)
-		{
-			_renderer->Enable(capability);
-		}
-	}
-	
-	inline void Engine::geDisable(const uint32_t capability) noexcept
-	{
-		if (_renderer)
-		{
-			_renderer->Disable(capability);
-		}
-	}
-
-	inline void Engine::geBindTexture(const uint32_t capability, const Texture2D &texture) noexcept
-	{
-		if (_renderer)
-		{
-			_renderer->BindTexture(capability, texture);
-		}
 	}
 
 	inline void Engine::_GetAndLogCPUInfo()

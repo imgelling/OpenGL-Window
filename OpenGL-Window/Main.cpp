@@ -7,7 +7,7 @@
 //#define GAME_USE_DEDICATED_GPU
 #define GAME_SUPPORT_DIRECTX9
 #define GAME_SUPPORT_OPENGL
-//#define GAME_SUPPORT_VULKAN 
+#define GAME_SUPPORT_VULKAN 
 #include "Game.h"
 
 class Game : public game::Engine
@@ -30,18 +30,22 @@ public:
 		attributes.DebugMode = false;
 		attributes.MultiSamples = 8; // max 8 amd, 16 nvidia
 		attributes.RenderingAPI = game::RenderAPI::DirectX9; 
-		//attributes.RenderingAPI = game::RenderAPI::OpenGL;
+		attributes.RenderingAPI = game::RenderAPI::OpenGL;
 		
 		geSetAttributes(attributes);
 	}
 
 	void LoadContent()
 	{
-
-		geSetClearColor(game::Colors::DarkGray);
-
-		geEnable(GAME_BLEND);
-		geEnable(GAME_CULL_FACE); 
+#if defined (GAME_OPENGL)
+		if (geIsUsing(GAME_OPENGL))
+		{
+			glClearColor(0.25f, 0.25f, 0.25f, 1.0f);
+			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+			glEnable(GL_BLEND);
+			glEnable(GL_CULL_FACE);
+		}
+#endif
 
 		// Setup pixel mode
 		if (!pixelMode.Initialize({ 320, 240 }))
@@ -72,9 +76,15 @@ public:
 		geSetWindowTitle("fps : " + std::to_string(geGetFramesPerSecond()) + " ups : " + std::to_string(geGetUpdatesPerSecond()) + " cpu : " + std::to_string(geGetCPUFrequency()) + "Mhz");
 		
 	
-		geClear(true, true, false);
-#if defined(GAME_DIRECTX9)
-		if (attributes.RenderingAPI == game::RenderAPI::DirectX9)
+#if defined (GAME_OPENGL)
+		if (geIsUsing(GAME_OPENGL))
+		{
+			glClear(GL_COLOR_BUFFER_BIT);
+		}
+#endif
+
+#if defined (GAME_DIRECTX9)
+		if (geIsUsing(GAME_DIRECTX9))
 		{
 			d3d9Device->Clear(0, NULL, D3DCLEAR_TARGET, D3DCOLOR_XRGB(255, 255, 255), 1.0f, 0);
 		}
