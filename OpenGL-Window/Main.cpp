@@ -4,11 +4,11 @@
 
 
 // Engine header
-//#define GAME_USE_DEDICATED_GPU
-//#define GAME_SUPPORT_DIRECTX9
+#define GAME_USE_DEDICATED_GPU
+#define GAME_SUPPORT_DIRECTX9
 #define GAME_SUPPORT_DIRECTX11
-//#define GAME_SUPPORT_OPENGL
-//#define GAME_SUPPORT_VULKAN 
+#define GAME_SUPPORT_OPENGL
+#define GAME_SUPPORT_VULKAN 
 #include "Game.h"
 
 class Game : public game::Engine
@@ -90,6 +90,14 @@ public:
 		if (geIsUsing(GAME_DIRECTX9))
 		{
 			d3d9Device->Clear(0, NULL, D3DCLEAR_TARGET, D3DCOLOR_XRGB(64, 64, 64), 1.0f, 0);
+		}
+#endif
+
+#if defined(GAME_DIRECTX11)
+		if (geIsUsing(GAME_DIRECTX11))
+		{
+			float color[4] = { 0.25f, 0.25f, 0.25f, 1.0f };
+			d3d11Context->ClearRenderTargetView(d3d11RenderTarget, color);
 		}
 #endif
 

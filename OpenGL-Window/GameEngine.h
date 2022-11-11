@@ -63,6 +63,11 @@ namespace game
 #if defined(GAME_DIRECTX9)
 		LPDIRECT3DDEVICE9 d3d9Device;
 #endif
+#if defined(GAME_DIRECTX11)
+		ID3D11DeviceContext* d3d11Context;
+		ID3D11RenderTargetView* d3d11RenderTarget;
+		ID3D11Device* d3d11Device;
+#endif
 
 		// Engine setup
 
@@ -134,6 +139,11 @@ namespace game
 #if defined(GAME_DIRECTX9)
 		d3d9Device = nullptr;
 #endif
+#if defined(GAME_DIRECTX11)
+		d3d11Context = nullptr;
+		d3d11RenderTarget = nullptr;
+		d3d11Device = nullptr;
+#endif
 	}
 
 	inline Engine::~Engine()
@@ -149,6 +159,20 @@ namespace game
 			d3d9Device->Release();
 		}
 #endif
+#if defined(GAME_DIRECTX11)
+		if (d3d11RenderTarget)
+		{
+			d3d11RenderTarget->Release();
+		}
+		if (d3d11Context)
+		{
+			d3d11Context->Release();
+		}
+		if (d3d11Device)
+		{
+			d3d11Device->Release();
+		}
+#endif
 	}
 
 	inline bool Engine::geIsUsing(const uint32_t renderer)
@@ -158,6 +182,8 @@ namespace game
 		if ((renderer == 2) && (_attributes.RenderingAPI == RenderAPI::DirectX9))
 			return true;
 		if ((renderer == 3) && (_attributes.RenderingAPI == RenderAPI::Vulkan))
+			return true;
+		if ((renderer == 4) && (_attributes.RenderingAPI == RenderAPI::DirectX11))
 			return true;
 		return false;
 	}
@@ -182,6 +208,16 @@ namespace game
 			if (_renderer)
 			{
 				dynamic_cast<RendererDX9*>(_renderer)->GetDevice(d3d9Device);
+			}
+		}
+#endif
+
+#if defined(GAME_DIRECTX11)
+		if (geIsUsing(GAME_DIRECTX11))
+		{
+			if (_renderer)
+			{
+				dynamic_cast<RendererDX11*>(_renderer)->GetDevice(d3d11Device, d3d11Context, d3d11RenderTarget);
 			}
 		}
 #endif

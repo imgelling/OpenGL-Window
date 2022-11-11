@@ -53,15 +53,17 @@ namespace game
 		temp.width = 10;
 		temp.height = 10;
 		CreateTexture(temp);
-		temp.textureInterface->GetDevice(&device);
+		temp.textureInterface9->GetDevice(&device);
 		UnLoadTexture(temp);
 	}
 
 	inline void RendererDX9::HandleWindowResize(const uint32_t width, const uint32_t height)
 	{
 		D3DVIEWPORT9 view { 0, 0, width, height, 0.0f, 1.0f};
-		_d3d9Device->Clear(0, NULL, D3DCLEAR_TARGET, D3DCOLOR_XRGB(_clearColor.r, _clearColor.g, _clearColor.b), 1.0f, 0);
+		
 		if (!width && !height) return;
+
+		_d3d9Device->Clear(0, NULL, D3DCLEAR_TARGET, D3DCOLOR_XRGB(_clearColor.r, _clearColor.g, _clearColor.b), 1.0f, 0);
 		_d3dpp.BackBufferWidth = width;
 		_d3dpp.BackBufferHeight = height;
 		_d3d9Device->Reset(&_d3dpp);
@@ -215,8 +217,8 @@ namespace game
 		texture.isCopy = false;
 
 		// does mipmapping, need to add format also
-		_d3d9Device->CreateTexture(texture.width, texture.height, texture.isMipMapped ? 0 : 1, 0, D3DFMT_A8R8G8B8, D3DPOOL_MANAGED, &texture.textureInterface, NULL);
-		if (!texture.textureInterface)
+		_d3d9Device->CreateTexture(texture.width, texture.height, texture.isMipMapped ? 0 : 1, 0, D3DFMT_A8R8G8B8, D3DPOOL_MANAGED, &texture.textureInterface9, NULL);
+		if (!texture.textureInterface9)
 		{
 			lastError = { GameErrors::GameDirectX9Specific, "Could not create texture." };
 			return false;
@@ -250,27 +252,27 @@ namespace game
 		texture.name = fileName;
 
 		// Create texture memory
-		hResult = _d3d9Device->CreateTexture(texture.width, texture.height, texture.isMipMapped ? 0 : 1, 0, D3DFMT_A8R8G8B8, D3DPOOL_MANAGED, &texture.textureInterface, NULL);
+		hResult = _d3d9Device->CreateTexture(texture.width, texture.height, texture.isMipMapped ? 0 : 1, 0, D3DFMT_A8R8G8B8, D3DPOOL_MANAGED, &texture.textureInterface9, NULL);
 		if (hResult != D3D_OK)
 		{
 			lastError = { GameErrors::GameDirectX9Specific, "Could not create texture, \"" + fileName + "\""};
 		}
 
 		// Copy texture data to the memory
-		texture.textureInterface->LockRect(0, &lockedRectangle, 0, 0);
+		texture.textureInterface9->LockRect(0, &lockedRectangle, 0, 0);
 		unsigned char* dest = static_cast<unsigned char*>(lockedRectangle.pBits);
 		memcpy(dest, data, sizeof(unsigned char) * texture.width * texture.height * 4);
-		texture.textureInterface->UnlockRect(0);
+		texture.textureInterface9->UnlockRect(0);
 
 		return true;
 	}
 
 	inline void RendererDX9::UnLoadTexture(Texture2D& texture)
 	{
-		if (texture.textureInterface)
+		if (texture.textureInterface9)
 		{
-			texture.textureInterface->Release();
-			texture.textureInterface = nullptr;
+			texture.textureInterface9->Release();
+			texture.textureInterface9 = nullptr;
 		}
 		texture.width = 0;
 		texture.height = 0;

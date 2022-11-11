@@ -135,7 +135,7 @@ namespace game
 #if defined (GAME_DIRECTX9)
 		if (enginePointer->_attributes.RenderingAPI == RenderAPI::DirectX9)
 		{
-			_frameBuffer[0].textureInterface->GetDevice(&_d3d9Device);
+			_frameBuffer[0].textureInterface9->GetDevice(&_d3d9Device);
 			_d3d9Device->CreateVertexBuffer(6 * sizeof(_vertex), 0, (D3DFVF_XYZRHW | D3DFVF_DIFFUSE | D3DFVF_TEX1), D3DPOOL_MANAGED, &_vertexBuffer, NULL);
 			if (_vertexBuffer == nullptr)
 			{
@@ -166,10 +166,10 @@ namespace game
 		{
 			D3DLOCKED_RECT rect;
 			unsigned char* test = (unsigned char*)_video;
-			_frameBuffer[_currentBuffer].textureInterface->LockRect(0, &rect, 0, 0);
+			_frameBuffer[_currentBuffer].textureInterface9->LockRect(0, &rect, 0, 0);
 			unsigned char* dest = static_cast<unsigned char*>(rect.pBits);
 			memcpy(dest, test, sizeof(unsigned char) * _frameBuffer[_currentBuffer].width * _frameBuffer[_currentBuffer].height * 4);
-			_frameBuffer[_currentBuffer].textureInterface->UnlockRect(0);
+			_frameBuffer[_currentBuffer].textureInterface9->UnlockRect(0);
 		}
 #endif
 	}
@@ -345,7 +345,7 @@ namespace game
 				_d3d9Device->SetRenderState(D3DRS_MULTISAMPLEANTIALIAS, FALSE);
 			}
 
-			_d3d9Device->SetTexture(0, _frameBuffer[_currentBuffer].textureInterface);
+			_d3d9Device->SetTexture(0, _frameBuffer[_currentBuffer].textureInterface9);
 			_d3d9Device->SetFVF((D3DFVF_XYZRHW | D3DFVF_DIFFUSE | D3DFVF_TEX1));
 			_d3d9Device->SetStreamSource(0, _vertexBuffer, 0, sizeof(_vertex));
 			_d3d9Device->DrawPrimitive(D3DPT_TRIANGLELIST, 0, 2);

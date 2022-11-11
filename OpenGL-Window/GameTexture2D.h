@@ -1,9 +1,13 @@
 #pragma once
-#ifdef GAME_DIRECTX9
+#include "GameDefines.h"
+#if defined(GAME_DIRECTX9)
 #include <d3d9.h>
 #endif
+#if defined(GAME_DIRECTX11)
+#include <d3d11.h>
+#endif
 
-namespace game
+namespace game 
 {
 	enum class TextureFilterType
 	{
@@ -19,7 +23,10 @@ namespace game
 		uint32_t bind;
 #endif
 #if defined(GAME_DIRECTX9)
-		LPDIRECT3DTEXTURE9 textureInterface;
+		LPDIRECT3DTEXTURE9 textureInterface9;
+#endif
+#if defined(GAME_DIRECTX11)
+		ID3D11Texture2D* textureInterface11;
 #endif
 		std::string name;
 		uint32_t width;
@@ -51,7 +58,10 @@ namespace game
 		bind = 0;
 #endif
 #if defined(GAME_DIRECTX9)
-		textureInterface = nullptr;
+		textureInterface9 = nullptr;
+#endif
+#if defined(GAME_DIRECTX11)
+		textureInterface11 = nullptr;
 #endif
 		width = 0;
 		height = 0;
