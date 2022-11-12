@@ -90,8 +90,8 @@ namespace game
 		bool geCreateTexture(Texture2D& texture);
 		bool geLoadTexture(const std::string fileName, Texture2D& texture);
 		void geUnLoadTexture(Texture2D& texture);
-		bool geLoadShader(const std::string vertex, const std::string fragment, ShaderGL& shader);
-		void geUnLoadShader(ShaderGL& shader);
+		bool geLoadShader(const std::string vertex, const std::string fragment, Shader& shader);
+		void geUnLoadShader(Shader& shader);
 		bool geIsUsing(const uint32_t renderer);
 
 		// Window stuff	
@@ -372,7 +372,7 @@ namespace game
 		}
 	}
 
-	inline bool Engine::geLoadShader(const std::string vertex, const std::string fragment, ShaderGL& shader)
+	inline bool Engine::geLoadShader(const std::string vertex, const std::string fragment, Shader& shader)
 	{
 		if (_renderer)
 		{
@@ -381,7 +381,7 @@ namespace game
 		return false;
 	}
 
-	inline void Engine::geUnLoadShader(ShaderGL& shader)
+	inline void Engine::geUnLoadShader(Shader& shader)
 	{
 		if (_renderer)
 		{

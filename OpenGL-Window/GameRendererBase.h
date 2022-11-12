@@ -5,7 +5,7 @@
 #include "GameAttributes.h"
 #include "GameColor.h"
 #include "GameLogger.h"
-#include "GameShaderGL.h"
+#include "GameShader.h"
 #include "GameSystemInfo.h"
 #include "GameTexture2D.h"
 #include "GameWindow.h"
@@ -25,8 +25,8 @@ namespace game
 		virtual bool CreateTexture(Texture2D& texture) = 0;
 		virtual bool LoadTexture(std::string fileName, Texture2D& texture) = 0;
 		virtual void UnLoadTexture(Texture2D& texture) = 0;
-		virtual bool LoadShader(const std::string vertex, const std::string fragment, ShaderGL& shader) = 0;
-		virtual void UnLoadShader(ShaderGL& shader) = 0;
+		virtual bool LoadShader(const std::string vertex, const std::string fragment, Shader& shader) = 0;
+		virtual void UnLoadShader(Shader& shader) = 0;
 	protected:
 		Attributes _attributes;
 		std::vector<std::string> _extensionsAvailable;

@@ -49,7 +49,7 @@
 #include "GamePerformanceTimer.h"
 #include "GamePixelMode.h"
 #include "GameRendererBase.h"
-#include "GameShaderGL.h"
+#include "GameShader.h"
 #include "GameSpriteBatch.h"
 #include "GameSystemInfo.h"
 #include "GameTerminal.h"

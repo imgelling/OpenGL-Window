@@ -1,10 +1,11 @@
 #pragma once
 #include <d3d11.h>
-
+#include <d3dcompiler.h>
+#include "GameDefines.h"
 #include "GameErrors.h"
 #include "GameImageLoader.h"
 #include "GameRendererBase.h"
-#include "GameShaderGL.h"
+#include "GameShader.h"
 #include "GameSystemInfo.h"
 #include "GameTexture2D.h"
 
@@ -23,8 +24,8 @@ namespace game
 		bool CreateTexture(Texture2D& texture);
 		bool LoadTexture(std::string fileName, Texture2D& texture) { return false; }
 		void UnLoadTexture(Texture2D& texture);
-		bool LoadShader(const std::string vertex, const std::string fragment, ShaderGL& shader) { return false; };
-		void UnLoadShader(ShaderGL& shader) {};
+		bool LoadShader(const std::string vertex, const std::string fragment, Shader& shader) { return false; };
+		void UnLoadShader(Shader& shader) {};
 		void GetDevice(ID3D11Device*& device, ID3D11DeviceContext*& context, ID3D11RenderTargetView*& target);
 	protected:
 		void _ReadExtensions() {};
@@ -170,6 +171,7 @@ namespace game
 			lastError = { GameErrors::GameDirectX11Specific, "Could not create texture." };
 			return false;
 		}
+		
 
 		return true;
 	}

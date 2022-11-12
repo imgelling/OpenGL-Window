@@ -24,8 +24,8 @@ namespace game
 		bool CreateTexture(Texture2D& texture);
 		bool LoadTexture(std::string fileName, Texture2D &texture);
 		void UnLoadTexture(Texture2D& texture);
-		bool LoadShader(const std::string vertex, const std::string fragment, ShaderGL& shader);
-		void UnLoadShader(ShaderGL& shader);
+		bool LoadShader(const std::string vertex, const std::string fragment, Shader& shader);
+		void UnLoadShader(Shader& shader);
 	protected:
 		void _ReadExtensions();
 
@@ -142,12 +142,12 @@ namespace game
 
 	}
 
-	inline bool RendererVK::LoadShader(const std::string vertex, const std::string fragment, ShaderGL& shader)
+	inline bool RendererVK::LoadShader(const std::string vertex, const std::string fragment, Shader& shader)
 	{
 		return false;
 	}
 	
-	inline void RendererVK::UnLoadShader(ShaderGL& shader)
+	inline void RendererVK::UnLoadShader(Shader& shader)
 	{
 
 	}

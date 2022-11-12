@@ -1,8 +1,3 @@
-
-#include <windows.h>
-#include <iostream>
-
-
 // Engine header
 #define GAME_USE_DEDICATED_GPU
 #define GAME_SUPPORT_DIRECTX9

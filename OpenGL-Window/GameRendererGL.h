@@ -7,7 +7,7 @@
 #include "GameDefines.h"
 #include "GameImageLoader.h"
 #include "GameRendererBase.h"
-#include "GameShaderGL.h"
+#include "GameShader.h"
 #include "GameTexture2D.h"
 
 namespace game
@@ -103,8 +103,8 @@ namespace game
 		bool CreateTexture(Texture2D& texture);
 		bool LoadTexture(std::string fileName, Texture2D &texture);
 		void UnLoadTexture(Texture2D& texture);
-		bool LoadShader(const std::string vertex, const std::string fragment, ShaderGL& shader);
-		void UnLoadShader(ShaderGL& shader);
+		bool LoadShader(const std::string vertex, const std::string fragment, Shader& shader);
+		void UnLoadShader(Shader& shader);
 	protected:
 		void _ReadExtensions();
 
@@ -1028,7 +1028,7 @@ namespace game
 		return err.str();
 	}
 
-	inline bool RendererGL::LoadShader(const std::string vertex, const std::string fragment, ShaderGL &shader)
+	inline bool RendererGL::LoadShader(const std::string vertex, const std::string fragment, Shader &shader)
 	{
 		std::ifstream file;
 		std::string vertexFile;
@@ -1110,7 +1110,7 @@ namespace game
 		return true;
 	}
 
-	inline void RendererGL::UnLoadShader(ShaderGL& shader)
+	inline void RendererGL::UnLoadShader(Shader& shader)
 	{
 		_glDetachShader(shader.shaderId, shader.fragmentId);
 		_glDetachShader(shader.shaderId, shader.vertexId);

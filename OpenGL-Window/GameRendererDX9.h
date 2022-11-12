@@ -7,7 +7,7 @@
 #include "GameErrors.h"
 #include "GameImageLoader.h"
 #include "GameRendererBase.h"
-#include "GameShaderGL.h"
+#include "GameShader.h"
 #include "GameSystemInfo.h"
 #include "GameTexture2D.h"
 
@@ -26,8 +26,8 @@ namespace game
 		bool CreateTexture(Texture2D& texture);
 		bool LoadTexture(std::string fileName, Texture2D& texture);
 		void UnLoadTexture(Texture2D& texture);
-		bool LoadShader(const std::string vertex, const std::string fragment, ShaderGL& shader) { return false; };
-		void UnLoadShader(ShaderGL& shader) {};
+		bool LoadShader(const std::string vertex, const std::string fragment, Shader& shader) { return false; };
+		void UnLoadShader(Shader& shader) {};
 		void GetDevice(LPDIRECT3DDEVICE9& device);
 	protected:
 		void _ReadExtensions() {};
@@ -49,12 +49,8 @@ namespace game
 
 	inline void RendererDX9::GetDevice(LPDIRECT3DDEVICE9& device)
 	{
-		Texture2D temp;
-		temp.width = 10;
-		temp.height = 10;
-		CreateTexture(temp);
-		temp.textureInterface9->GetDevice(&device);
-		UnLoadTexture(temp);
+		_d3d9Device->AddRef();
+		device = _d3d9Device;
 	}
 
 	inline void RendererDX9::HandleWindowResize(const uint32_t width, const uint32_t height)

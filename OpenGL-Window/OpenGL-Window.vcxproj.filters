@@ -74,7 +74,7 @@
     <ClInclude Include="GameTexture2D.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="GameShaderGL.h">
+    <ClInclude Include="GameShader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="GamePixelMode.h">
