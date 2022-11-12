@@ -49,7 +49,6 @@ namespace game
 			{0.0f, 0.0f, 0.0f, 1.0f, D3DCOLOR_ARGB(255,255, 255, 255) , 0.0f, 1.0f}
 		};
 		LPDIRECT3DVERTEXBUFFER9 _vertexBuffer;
-		LPDIRECT3DDEVICE9 _d3d9Device;
 #endif
 		uint32_t* _video;
 		Vector2i _bufferSize;
@@ -68,7 +67,6 @@ namespace game
 		_currentBuffer = 0;
 #if defined(GAME_DIRECTX9)
 		_vertexBuffer = nullptr;
-		_d3d9Device = nullptr;
 #endif
 	}
 
@@ -82,11 +80,6 @@ namespace game
 			{
 				_vertexBuffer->Release();
 				_vertexBuffer = nullptr;
-			}
-			if (_d3d9Device)
-			{
-				_d3d9Device->Release();
-				_d3d9Device = nullptr;
 			}
 		}
 #endif
@@ -133,15 +126,20 @@ namespace game
 		}
 #endif
 #if defined (GAME_DIRECTX9)
-		if (enginePointer->_attributes.RenderingAPI == RenderAPI::DirectX9)
+		if (enginePointer->geIsUsing(GAME_DIRECTX9))
 		{
-			_frameBuffer[0].textureInterface9->GetDevice(&_d3d9Device);
-			_d3d9Device->CreateVertexBuffer(6 * sizeof(_vertex), 0, (D3DFVF_XYZRHW | D3DFVF_DIFFUSE | D3DFVF_TEX1), D3DPOOL_MANAGED, &_vertexBuffer, NULL);
+			enginePointer->d3d9Device->CreateVertexBuffer(6 * sizeof(_vertex), 0, (D3DFVF_XYZRHW | D3DFVF_DIFFUSE | D3DFVF_TEX1), D3DPOOL_MANAGED, &_vertexBuffer, NULL);
 			if (_vertexBuffer == nullptr)
 			{
 				lastError = { GameErrors::GameDirectX9Specific, "Could not create vertex buffer for PixelMode." };
 				return false;
 			}
+		}
+#endif
+#if defined (GAME_DIRECTX9)
+		if (enginePointer->geIsUsing(GAME_DIRECTX11))
+		{
+			//enginePointer->d3d11Device->CreateBuffer()
 		}
 #endif
 
@@ -312,10 +310,8 @@ namespace game
 #if defined(GAME_OPENGL)
 		if (enginePointer->_attributes.RenderingAPI == RenderAPI::OpenGL)
 		{
-			//enginePointer->geEnable(GAME_TEXTURE_2D);
 			glEnable(GL_TEXTURE_2D);
 			glBindTexture(GL_TEXTURE_2D, _frameBuffer[_currentBuffer].bind);
-			//enginePointer->geBindTexture(GAME_TEXTURE_2D, _frameBuffer[_currentBuffer]);
 			if (enginePointer->_attributes.MultiSamples > 1)
 			{
 				glDisable(0x809D); // 0x809D is GL_MULTISAMPLE
@@ -325,7 +321,6 @@ namespace game
 			{
 				glEnable(0x809D);
 			}
-			//enginePointer->geDisable(GAME_TEXTURE_2D);
 			glDisable(GL_TEXTURE_2D);
 		}
 #endif
@@ -334,25 +329,25 @@ namespace game
 		{
 			DWORD oldFVF = 0;
 			IDirect3DBaseTexture9* activeTexture = 0;
-			_d3d9Device->BeginScene();
+			enginePointer->d3d9Device->BeginScene();
 			// Save current state
-			_d3d9Device->GetFVF(&oldFVF); 
-			_d3d9Device->GetTexture(0, &activeTexture);
+			enginePointer->d3d9Device->GetFVF(&oldFVF);
+			enginePointer->d3d9Device->GetTexture(0, &activeTexture);
 
 			// Disable multisampling if enabled
 			if (enginePointer->_attributes.MultiSamples > 1)
 			{
-				_d3d9Device->SetRenderState(D3DRS_MULTISAMPLEANTIALIAS, FALSE);
+				enginePointer->d3d9Device->SetRenderState(D3DRS_MULTISAMPLEANTIALIAS, FALSE);
 			}
 
-			_d3d9Device->SetTexture(0, _frameBuffer[_currentBuffer].textureInterface9);
-			_d3d9Device->SetFVF((D3DFVF_XYZRHW | D3DFVF_DIFFUSE | D3DFVF_TEX1));
-			_d3d9Device->SetStreamSource(0, _vertexBuffer, 0, sizeof(_vertex));
-			_d3d9Device->DrawPrimitive(D3DPT_TRIANGLELIST, 0, 2);
+			enginePointer->d3d9Device->SetTexture(0, _frameBuffer[_currentBuffer].textureInterface9);
+			enginePointer->d3d9Device->SetFVF((D3DFVF_XYZRHW | D3DFVF_DIFFUSE | D3DFVF_TEX1));
+			enginePointer->d3d9Device->SetStreamSource(0, _vertexBuffer, 0, sizeof(_vertex));
+			enginePointer->d3d9Device->DrawPrimitive(D3DPT_TRIANGLELIST, 0, 2);
 
 			// Restore previous state
-			_d3d9Device->SetFVF(oldFVF);  
-			_d3d9Device->SetTexture(0, activeTexture); 
+			enginePointer->d3d9Device->SetFVF(oldFVF);
+			enginePointer->d3d9Device->SetTexture(0, activeTexture);
 			if (activeTexture)
 			{
 				activeTexture->Release();
@@ -361,10 +356,10 @@ namespace game
 			// Renable multisampling if it was enabled
 			if (enginePointer->_attributes.MultiSamples > 1)
 			{
-				_d3d9Device->SetRenderState(D3DRS_MULTISAMPLEANTIALIAS, TRUE);
+				enginePointer->d3d9Device->SetRenderState(D3DRS_MULTISAMPLEANTIALIAS, TRUE);
 			}
 
-			_d3d9Device->EndScene();
+			enginePointer->d3d9Device->EndScene();
 		}
 		
 #endif

@@ -202,26 +202,6 @@ namespace game
 
 		geIsRunning = true;
 
-#if defined(GAME_DIRECTX9)
-		if (geIsUsing(GAME_DIRECTX9))
-		{
-			if (_renderer)
-			{
-				dynamic_cast<RendererDX9*>(_renderer)->GetDevice(d3d9Device);
-			}
-		}
-#endif
-
-#if defined(GAME_DIRECTX11)
-		if (geIsUsing(GAME_DIRECTX11))
-		{
-			if (_renderer)
-			{
-				dynamic_cast<RendererDX11*>(_renderer)->GetDevice(d3d11Device, d3d11Context, d3d11RenderTarget);
-			}
-		}
-#endif
-
 		// Reset the timers
 		_renderTimer.Reset();
 		_frameLockTimer.Reset();
@@ -502,6 +482,26 @@ namespace game
 		}
 
 		_renderer->FillOutRendererInfo();
+
+#if defined(GAME_DIRECTX9)
+		if (geIsUsing(GAME_DIRECTX9))
+		{
+			if (_renderer)
+			{
+				dynamic_cast<RendererDX9*>(_renderer)->GetDevice(d3d9Device);
+			}
+		}
+#endif
+
+#if defined(GAME_DIRECTX11)
+		if (geIsUsing(GAME_DIRECTX11))
+		{
+			if (_renderer)
+			{
+				dynamic_cast<RendererDX11*>(_renderer)->GetDevice(d3d11Device, d3d11Context, d3d11RenderTarget);
+			}
+		}
+#endif
 
 		// Load user content
 		LoadContent();

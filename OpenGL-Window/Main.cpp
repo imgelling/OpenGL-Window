@@ -1,5 +1,5 @@
 // Engine header
-#define GAME_USE_DEDICATED_GPU
+//#define GAME_USE_DEDICATED_GPU
 #define GAME_SUPPORT_DIRECTX9
 #define GAME_SUPPORT_DIRECTX11
 #define GAME_SUPPORT_OPENGL
@@ -28,7 +28,7 @@ public:
 		attributes.MultiSamples = 8; // max 8 amd, 16 nvidia
 		attributes.RenderingAPI = game::RenderAPI::DirectX9; 
 		//attributes.RenderingAPI = game::RenderAPI::OpenGL;
-		attributes.RenderingAPI = game::RenderAPI::DirectX11;
+		//attributes.RenderingAPI = game::RenderAPI::DirectX11;
 		
 		geSetAttributes(attributes);
 	}
