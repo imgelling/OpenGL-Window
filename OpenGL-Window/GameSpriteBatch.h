@@ -47,8 +47,6 @@ namespace game
 		};
 		LPDIRECT3DVERTEXBUFFER9 _vertexBuffer;
 		_spriteVertex* _spriteVertices;
-		DWORD oldFVF = 0;
-		IDirect3DBaseTexture9* activeTexture = 0;
 #endif
 #if defined (GAME_DIRECTX11)
 #endif
@@ -148,15 +146,6 @@ namespace game
 #if defined (GAME_DIRECTX9)
 		if (enginePointer->geIsUsing(GAME_DIRECTX9))
 		{
-			// Save current state
-			enginePointer->d3d9Device->GetFVF(&oldFVF);
-			enginePointer->d3d9Device->GetTexture(0, &activeTexture);
-
-			// Disable multisampling if enabled
-			if (enginePointer->_attributes.MultiSamples > 1)
-			{
-				enginePointer->d3d9Device->SetRenderState(D3DRS_MULTISAMPLEANTIALIAS, FALSE);
-			}
 		}
 #endif
 
@@ -171,18 +160,8 @@ namespace game
 
 
 #if defined (GAME_DIRECTX9)
-		// Restore previous state
-		enginePointer->d3d9Device->SetFVF(oldFVF);
-		enginePointer->d3d9Device->SetTexture(0, activeTexture);
-		if (activeTexture)
+		if (enginePointer->geIsUsing(GAME_DIRECTX9))
 		{
-			activeTexture->Release();
-		}
-
-		// Renable multisampling if it was enabled
-		if (enginePointer->_attributes.MultiSamples > 1)
-		{
-			enginePointer->d3d9Device->SetRenderState(D3DRS_MULTISAMPLEANTIALIAS, TRUE);
 		}
 #endif
 	}
@@ -198,6 +177,8 @@ namespace game
 		if (enginePointer->geIsUsing(GAME_DIRECTX9))
 		{
 			VOID* pVoid = nullptr;
+			DWORD oldFVF = 0;
+			IDirect3DBaseTexture9* activeTexture = 0;
 
 			// Send sprite vertices to gpu
 			if (_vertexBuffer->Lock(0, 0, (void**)&pVoid, 0) != D3D_OK)
@@ -207,6 +188,16 @@ namespace game
 			memcpy(pVoid, &_spriteVertices[0], sizeof(_spriteVertex) * 6 * _maxSprites);
 			_vertexBuffer->Unlock();
 
+			// Save current state
+			enginePointer->d3d9Device->GetFVF(&oldFVF);
+			enginePointer->d3d9Device->GetTexture(0, &activeTexture);
+
+			// Disable multisampling if enabled
+			if (enginePointer->_attributes.MultiSamples > 1)
+			{
+				enginePointer->d3d9Device->SetRenderState(D3DRS_MULTISAMPLEANTIALIAS, FALSE);
+			}
+
 			// Draw the sprites
 			enginePointer->d3d9Device->SetTexture(0, _currentTexture.textureInterface9);
 			enginePointer->d3d9Device->SetFVF((D3DFVF_XYZRHW | D3DFVF_DIFFUSE | D3DFVF_TEX1));
@@ -214,6 +205,20 @@ namespace game
 			if (enginePointer->d3d9Device->DrawPrimitive(D3DPT_TRIANGLELIST, 0, _numberOfSpritesUsed * 2) != D3D_OK)
 			{
 				std::cout << "DRAW PIM\n";
+			}
+
+			// Restore previous state
+			enginePointer->d3d9Device->SetFVF(oldFVF);
+			enginePointer->d3d9Device->SetTexture(0, activeTexture);
+			if (activeTexture)
+			{
+				activeTexture->Release();
+			}
+
+			// Renable multisampling if it was enabled
+			if (enginePointer->_attributes.MultiSamples > 1)
+			{
+				enginePointer->d3d9Device->SetRenderState(D3DRS_MULTISAMPLEANTIALIAS, TRUE);
 			}
 
 
@@ -231,7 +236,7 @@ namespace game
 
 		if (texture.textureInterface9 != _currentTexture.textureInterface9)
 		{
-			//Render();
+			Render();
 			_currentTexture = texture;
 		}
 
