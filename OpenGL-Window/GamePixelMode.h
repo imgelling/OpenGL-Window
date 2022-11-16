@@ -38,7 +38,7 @@ namespace game
 			uint32_t color;    
 			float_t u, v;
 		};
-		_vertex _triangleVertices[6] =
+		_vertex _QuadVertices[6] =
 		{
 			{0.0f, 0.0f, 0.0f, 1.0f, D3DCOLOR_ARGB(255,255, 255, 255), 0.0f, 0.0f},
 			{0.0f, 0.0f, 0.0f, 1.0f, D3DCOLOR_ARGB(255,255, 255, 255), 1.0f, 0.0f},
@@ -136,7 +136,7 @@ namespace game
 			}
 		}
 #endif
-#if defined (GAME_DIRECTX9)
+#if defined (GAME_DIRECTX11)
 		if (enginePointer->geIsUsing(GAME_DIRECTX11))
 		{
 			//enginePointer->d3d11Device->CreateBuffer()
@@ -262,28 +262,28 @@ namespace game
 			sizeOfScaledTexture.height -= _frameBuffer[_currentBuffer].oneOverHeight;
 
 			// tl
-			_triangleVertices[0].x = positionOfScaledTexture.x;
-			_triangleVertices[0].y = positionOfScaledTexture.y;
+			_QuadVertices[0].x = positionOfScaledTexture.x;
+			_QuadVertices[0].y = positionOfScaledTexture.y;
 			// tr
-			_triangleVertices[1].x = sizeOfScaledTexture.width;
-			_triangleVertices[1].y = positionOfScaledTexture.y;
+			_QuadVertices[1].x = sizeOfScaledTexture.width;
+			_QuadVertices[1].y = positionOfScaledTexture.y;
 			// bl
-			_triangleVertices[2].x = positionOfScaledTexture.x;
-			_triangleVertices[2].y = sizeOfScaledTexture.height;
+			_QuadVertices[2].x = positionOfScaledTexture.x;
+			_QuadVertices[2].y = sizeOfScaledTexture.height;
 
 			// tr
-			_triangleVertices[3].x = sizeOfScaledTexture.width;
-			_triangleVertices[3].y = positionOfScaledTexture.y;
+			_QuadVertices[3].x = sizeOfScaledTexture.width;
+			_QuadVertices[3].y = positionOfScaledTexture.y;
 			// br
-			_triangleVertices[4].x = sizeOfScaledTexture.width;
-			_triangleVertices[4].y = sizeOfScaledTexture.height;
+			_QuadVertices[4].x = sizeOfScaledTexture.width;
+			_QuadVertices[4].y = sizeOfScaledTexture.height;
 			// bl
-			_triangleVertices[5].x = positionOfScaledTexture.x;
-			_triangleVertices[5].y = sizeOfScaledTexture.height;
+			_QuadVertices[5].x = positionOfScaledTexture.x;
+			_QuadVertices[5].y = sizeOfScaledTexture.height;
 
 			// Copy vertices to the vertex buffer
 			_vertexBuffer->Lock(0, 0, (void**)&pVoid, 0);
-			memcpy(pVoid, _triangleVertices, sizeof(_triangleVertices));
+			memcpy(pVoid, _QuadVertices, sizeof(_QuadVertices));
 			_vertexBuffer->Unlock();
 		}
 #endif

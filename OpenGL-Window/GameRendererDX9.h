@@ -257,7 +257,10 @@ namespace game
 		// Copy texture data to the memory
 		texture.textureInterface9->LockRect(0, &lockedRectangle, 0, 0);
 		unsigned char* dest = static_cast<unsigned char*>(lockedRectangle.pBits);
-		memcpy(dest, data, sizeof(unsigned char) * texture.width * texture.height * 4);
+		if (dest != NULL)
+		{
+			memcpy(dest, data, sizeof(unsigned char) * texture.width * texture.height * 4);
+		}
 		texture.textureInterface9->UnlockRect(0);
 
 		return true;

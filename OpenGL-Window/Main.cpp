@@ -1,9 +1,9 @@
 // Engine header
 //#define GAME_USE_DEDICATED_GPU
 #define GAME_SUPPORT_DIRECTX9
-#define GAME_SUPPORT_DIRECTX11
-#define GAME_SUPPORT_OPENGL
-#define GAME_SUPPORT_VULKAN 
+//#define GAME_SUPPORT_DIRECTX11
+//#define GAME_SUPPORT_OPENGL
+//#define GAME_SUPPORT_VULKAN 
 #include "Game.h"
 
 class Game : public game::Engine
@@ -11,6 +11,8 @@ class Game : public game::Engine
 
 public:
 	game::PixelMode pixelMode;
+	game::SpriteBatch spriteBatch;
+	game::Texture2D spriteTexture;
 
 	Game(game::Logger& logger) : game::Engine(&logger)
 	{
@@ -44,9 +46,20 @@ public:
 			glEnable(GL_CULL_FACE);
 		}
 #endif
+		// Load sprite texture
+		if (!geLoadTexture("Content/test.png", spriteTexture))
+		{
+			geLogger->Error(game::lastError);
+		}
 
 		// Setup pixel mode
 		if (!pixelMode.Initialize({ 320, 240 }))
+		{
+			geLogger->Error(game::lastError);
+		}
+
+		// Setup sprite batch
+		if (!spriteBatch.Initialize())
 		{
 			geLogger->Error(game::lastError);
 		}
@@ -107,6 +120,9 @@ public:
 		}
 
 		pixelMode.Render();
+		spriteBatch.Begin();
+		spriteBatch.Draw(spriteTexture, 10, 10);
+		spriteBatch.End();
 	}
 };
 
