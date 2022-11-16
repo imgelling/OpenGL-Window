@@ -37,8 +37,6 @@ namespace game
 		float_t orthogonalMatrix[4][4] = { 0.0f };
 #endif
 #if defined(GAME_DIRECTX9)
-		//(D3DFVF_XYZRHW | D3DFVF_DIFFUSE | D3DFVF_TEX1)
-
 		struct _spriteVertex
 		{
 			float_t x, y, z, rhw;
