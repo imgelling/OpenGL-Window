@@ -28,7 +28,7 @@ namespace game
 		void Draw(const Texture2D &texture, const uint32_t x, const uint32_t y);
 		void End();
 	private:
-		static constexpr uint32_t _maxSprites = 6; // low for testing
+		static constexpr uint32_t _maxSprites = 1024;
 		uint32_t _numberOfSpritesUsed;
 		Texture2D _currentTexture;
 		void _Enable2D();
@@ -38,6 +38,7 @@ namespace game
 #endif
 #if defined(GAME_DIRECTX9)
 		//(D3DFVF_XYZRHW | D3DFVF_DIFFUSE | D3DFVF_TEX1)
+
 		struct _spriteVertex
 		{
 			float_t x, y, z, rhw;
@@ -46,6 +47,8 @@ namespace game
 		};
 		LPDIRECT3DVERTEXBUFFER9 _vertexBuffer;
 		_spriteVertex* _spriteVertices;
+		DWORD oldFVF = 0;
+		IDirect3DBaseTexture9* activeTexture = 0;
 #endif
 #if defined (GAME_DIRECTX11)
 #endif
@@ -118,7 +121,11 @@ namespace game
 			for (uint32_t vertex = 0; vertex < _maxSprites * 6; vertex++)
 			{
 				_spriteVertices[vertex].rhw = 1.0f;
+				_spriteVertices[vertex].x = 0.0f;
+				_spriteVertices[vertex].y = 0.0f;
 				_spriteVertices[vertex].z = 0.0f;
+				_spriteVertices[vertex].u = 0.0f;
+				_spriteVertices[vertex].v = 0.0f;
 				_spriteVertices[vertex].color = D3DCOLOR_ARGB(255, 255, 255, 255);
 			}
 
@@ -138,6 +145,20 @@ namespace game
 
 	inline void SpriteBatch::Begin()
 	{
+#if defined (GAME_DIRECTX9)
+		if (enginePointer->geIsUsing(GAME_DIRECTX9))
+		{
+			// Save current state
+			enginePointer->d3d9Device->GetFVF(&oldFVF);
+			enginePointer->d3d9Device->GetTexture(0, &activeTexture);
+
+			// Disable multisampling if enabled
+			if (enginePointer->_attributes.MultiSamples > 1)
+			{
+				enginePointer->d3d9Device->SetRenderState(D3DRS_MULTISAMPLEANTIALIAS, FALSE);
+			}
+		}
+#endif
 
 	}
 
@@ -147,6 +168,23 @@ namespace game
 		{
 			Render();
 		}
+
+
+#if defined (GAME_DIRECTX9)
+		// Restore previous state
+		enginePointer->d3d9Device->SetFVF(oldFVF);
+		enginePointer->d3d9Device->SetTexture(0, activeTexture);
+		if (activeTexture)
+		{
+			activeTexture->Release();
+		}
+
+		// Renable multisampling if it was enabled
+		if (enginePointer->_attributes.MultiSamples > 1)
+		{
+			enginePointer->d3d9Device->SetRenderState(D3DRS_MULTISAMPLEANTIALIAS, TRUE);
+		}
+#endif
 	}
 
 	inline void SpriteBatch::Render()
@@ -162,48 +200,26 @@ namespace game
 			VOID* pVoid = nullptr;
 
 			// Send sprite vertices to gpu
-			_vertexBuffer->Lock(0, 0, (void**)&pVoid, 0);
-			memcpy(pVoid, _spriteVertices, sizeof(_spriteVertex) * 6 * _maxSprites);
+			if (_vertexBuffer->Lock(0, 0, (void**)&pVoid, 0) != D3D_OK)
+			{
+				std::cout << "LOCK\n";
+			}
+			memcpy(pVoid, &_spriteVertices[0], sizeof(_spriteVertex) * 6 * _maxSprites);
 			_vertexBuffer->Unlock();
 
 			// Draw the sprites
-			DWORD oldFVF = 0;
-			IDirect3DBaseTexture9* activeTexture = 0;
-			enginePointer->d3d9Device->BeginScene();
-			// Save current state
-			enginePointer->d3d9Device->GetFVF(&oldFVF);
-			enginePointer->d3d9Device->GetTexture(0, &activeTexture);
-
-			// Disable multisampling if enabled
-			if (enginePointer->_attributes.MultiSamples > 1)
-			{
-				enginePointer->d3d9Device->SetRenderState(D3DRS_MULTISAMPLEANTIALIAS, FALSE);
-			}
-
 			enginePointer->d3d9Device->SetTexture(0, _currentTexture.textureInterface9);
 			enginePointer->d3d9Device->SetFVF((D3DFVF_XYZRHW | D3DFVF_DIFFUSE | D3DFVF_TEX1));
 			enginePointer->d3d9Device->SetStreamSource(0, _vertexBuffer, 0, sizeof(_spriteVertex));
-			enginePointer->d3d9Device->DrawPrimitive(D3DPT_TRIANGLELIST, 0, _numberOfSpritesUsed * 2);
-
-			// Restore previous state
-			enginePointer->d3d9Device->SetFVF(oldFVF);
-			enginePointer->d3d9Device->SetTexture(0, activeTexture);
-			if (activeTexture)
+			if (enginePointer->d3d9Device->DrawPrimitive(D3DPT_TRIANGLELIST, 0, _numberOfSpritesUsed * 2) != D3D_OK)
 			{
-				activeTexture->Release();
+				std::cout << "DRAW PIM\n";
 			}
 
-			// Renable multisampling if it was enabled
-			if (enginePointer->_attributes.MultiSamples > 1)
-			{
-				enginePointer->d3d9Device->SetRenderState(D3DRS_MULTISAMPLEANTIALIAS, TRUE);
-			}
 
-			enginePointer->d3d9Device->EndScene();
 		}
-
-		_numberOfSpritesUsed = 0;
 #endif
+		_numberOfSpritesUsed = 0;
 	}
 
 	inline void SpriteBatch::Draw(const Texture2D& texture, const uint32_t x, const uint32_t y)
@@ -215,14 +231,14 @@ namespace game
 
 		if (texture.textureInterface9 != _currentTexture.textureInterface9)
 		{
-			Render();
+			//Render();
 			_currentTexture = texture;
 		}
 
 #if defined(GAME_DIRECTX9)
-		_spriteVertex* access = &_spriteVertices[_numberOfSpritesUsed];
 		if (enginePointer->geIsUsing(GAME_DIRECTX9))
 		{
+			_spriteVertex* access = &_spriteVertices[_numberOfSpritesUsed * 6];
 			// Top left
 			access->x = (float_t)x;
 			access->y = (float_t)y;
@@ -263,6 +279,7 @@ namespace game
 			access->y = (float_t)y + (float_t)texture.height;
 			access->u = 0.0f;
 			access->v = 1.0f;
+			access++;
 		}
 #endif
 

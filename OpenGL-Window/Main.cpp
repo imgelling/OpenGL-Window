@@ -98,6 +98,7 @@ public:
 		if (geIsUsing(GAME_DIRECTX9))
 		{
 			d3d9Device->Clear(0, NULL, D3DCLEAR_TARGET, D3DCOLOR_XRGB(64, 64, 64), 1.0f, 0);
+			d3d9Device->BeginScene();
 		}
 #endif
 
@@ -121,8 +122,16 @@ public:
 
 		pixelMode.Render();
 		spriteBatch.Begin();
-		spriteBatch.Draw(spriteTexture, 10, 10);
+		for (int i = 0; i < 40; i++)
+			spriteBatch.Draw(spriteTexture, 10+(i * 100), 10);
 		spriteBatch.End();
+
+#if defined(GAME_DIRECTX9)
+		if (geIsUsing(GAME_DIRECTX9))
+		{
+			d3d9Device->EndScene();
+		}
+#endif
 	}
 };
 

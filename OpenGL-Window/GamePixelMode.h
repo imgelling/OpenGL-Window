@@ -329,7 +329,7 @@ namespace game
 		{
 			DWORD oldFVF = 0;
 			IDirect3DBaseTexture9* activeTexture = 0;
-			enginePointer->d3d9Device->BeginScene();
+			//enginePointer->d3d9Device->BeginScene();
 			// Save current state
 			enginePointer->d3d9Device->GetFVF(&oldFVF);
 			enginePointer->d3d9Device->GetTexture(0, &activeTexture);
@@ -359,7 +359,7 @@ namespace game
 				enginePointer->d3d9Device->SetRenderState(D3DRS_MULTISAMPLEANTIALIAS, TRUE);
 			}
 
-			enginePointer->d3d9Device->EndScene();
+			//enginePointer->d3d9Device->EndScene();
 		}
 		
 #endif
