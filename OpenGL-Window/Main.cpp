@@ -24,7 +24,7 @@ public:
 		
 		attributes.WindowTitle = "PixelMode tests";
 		attributes.GameVersion = "0.01";
-		attributes.Framelock = 60;  
+		attributes.Framelock = 0;  
 		attributes.VsyncOn = false;
 		attributes.DebugMode = true;
 		attributes.MultiSamples = 8; // max 8 amd, 16 nvidia
@@ -123,7 +123,7 @@ public:
 		pixelMode.Render();
 		spriteBatch.Begin();
 		for (int i = 0; i < 40; i++)
-			spriteBatch.Draw(spriteTexture, 10+(i * 100), 10);
+			spriteBatch.Draw(spriteTexture, { 10 + (i * 100), 10 });
 		spriteBatch.End();
 
 #if defined(GAME_DIRECTX9)

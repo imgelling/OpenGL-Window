@@ -51,6 +51,7 @@
 #include "GameRendererBase.h"
 #include "GameShader.h"
 #include "GameSpriteBatch.h"
+#include "GameSpriteSheet.h"
 #include "GameSystemInfo.h"
 #include "GameTerminal.h"
 #include "GameTexture2D.h"

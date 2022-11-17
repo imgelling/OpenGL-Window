@@ -25,7 +25,11 @@ namespace game
 		bool Initialize();
 		void Begin();
 		void Render();
+		// Will draw entire texture to location x,y
 		void Draw(const Texture2D &texture, const uint32_t x, const uint32_t y);
+		void Draw(const Texture2D& texture, const Pointi& position);
+		// Will draw a specified rectangle portion of a texture to location x,y
+		void Draw(const Texture2D& texture, const uint32_t x, const uint32_t y, Recti portion) {};
 		void End();
 	private:
 		static constexpr uint32_t _maxSprites = 1024;
@@ -45,6 +49,9 @@ namespace game
 		};
 		LPDIRECT3DVERTEXBUFFER9 _vertexBuffer;
 		_spriteVertex* _spriteVertices;
+		DWORD _savedFVF;
+		DWORD _savedBlending;
+		IDirect3DBaseTexture9* _savedTexture;
 #endif
 #if defined (GAME_DIRECTX11)
 #endif
@@ -65,8 +72,11 @@ namespace game
 #if defined(GAME_DIRECTX9)
 		if (enginePointer->geIsUsing(GAME_DIRECTX9))
 		{
+			_savedFVF = 0;
 			_vertexBuffer = nullptr;
 			_spriteVertices = nullptr;
+			_savedBlending = 0;
+			_savedTexture = nullptr;
 		}
 #endif
 #if defined (GAME_DIRECTX11)
@@ -144,6 +154,16 @@ namespace game
 #if defined (GAME_DIRECTX9)
 		if (enginePointer->geIsUsing(GAME_DIRECTX9))
 		{
+			// Save current state
+			enginePointer->d3d9Device->GetFVF(&_savedFVF);
+			enginePointer->d3d9Device->GetTexture(0, &_savedTexture);
+			enginePointer->d3d9Device->GetRenderState(D3DRS_ALPHABLENDENABLE, &_savedBlending);
+
+			// Disable multisampling if enabled
+			if (enginePointer->_attributes.MultiSamples > 1)
+			{
+				enginePointer->d3d9Device->SetRenderState(D3DRS_MULTISAMPLEANTIALIAS, FALSE);
+			}
 		}
 #endif
 
@@ -160,6 +180,21 @@ namespace game
 #if defined (GAME_DIRECTX9)
 		if (enginePointer->geIsUsing(GAME_DIRECTX9))
 		{
+
+			// Restore previous state
+			enginePointer->d3d9Device->SetFVF(_savedFVF);
+			enginePointer->d3d9Device->SetTexture(0, _savedTexture);
+			enginePointer->d3d9Device->SetRenderState(D3DRS_ALPHABLENDENABLE, _savedBlending);
+			if (_savedTexture)
+			{
+				_savedTexture->Release();
+			}
+
+			// Renable multisampling if it was enabled
+			if (enginePointer->_attributes.MultiSamples > 1)
+			{
+				enginePointer->d3d9Device->SetRenderState(D3DRS_MULTISAMPLEANTIALIAS, TRUE);
+			}
 		}
 #endif
 	}
@@ -175,54 +210,26 @@ namespace game
 		if (enginePointer->geIsUsing(GAME_DIRECTX9))
 		{
 			VOID* pVoid = nullptr;
-			DWORD oldFVF = 0;
-			IDirect3DBaseTexture9* activeTexture = 0;
+
 
 			// Send sprite vertices to gpu
-			if (_vertexBuffer->Lock(0, 0, (void**)&pVoid, 0) != D3D_OK)
-			{
-				std::cout << "LOCK\n";
-			}
+			_vertexBuffer->Lock(0, 0, (void**)&pVoid, 0);
 			memcpy(pVoid, &_spriteVertices[0], sizeof(_spriteVertex) * 6 * _maxSprites);
 			_vertexBuffer->Unlock();
-
-			// Save current state
-			enginePointer->d3d9Device->GetFVF(&oldFVF);
-			enginePointer->d3d9Device->GetTexture(0, &activeTexture);
-
-			// Disable multisampling if enabled
-			if (enginePointer->_attributes.MultiSamples > 1)
-			{
-				enginePointer->d3d9Device->SetRenderState(D3DRS_MULTISAMPLEANTIALIAS, FALSE);
-			}
 
 			// Draw the sprites
 			enginePointer->d3d9Device->SetTexture(0, _currentTexture.textureInterface9);
 			enginePointer->d3d9Device->SetFVF((D3DFVF_XYZRHW | D3DFVF_DIFFUSE | D3DFVF_TEX1));
 			enginePointer->d3d9Device->SetStreamSource(0, _vertexBuffer, 0, sizeof(_spriteVertex));
-			if (enginePointer->d3d9Device->DrawPrimitive(D3DPT_TRIANGLELIST, 0, _numberOfSpritesUsed * 2) != D3D_OK)
-			{
-				std::cout << "DRAW PIM\n";
-			}
-
-			// Restore previous state
-			enginePointer->d3d9Device->SetFVF(oldFVF);
-			enginePointer->d3d9Device->SetTexture(0, activeTexture);
-			if (activeTexture)
-			{
-				activeTexture->Release();
-			}
-
-			// Renable multisampling if it was enabled
-			if (enginePointer->_attributes.MultiSamples > 1)
-			{
-				enginePointer->d3d9Device->SetRenderState(D3DRS_MULTISAMPLEANTIALIAS, TRUE);
-			}
-
-
+			enginePointer->d3d9Device->DrawPrimitive(D3DPT_TRIANGLELIST, 0, _numberOfSpritesUsed * 2);
 		}
 #endif
 		_numberOfSpritesUsed = 0;
+	}
+
+	inline void SpriteBatch::Draw(const Texture2D& texture, const Pointi& position)
+	{
+		Draw(texture, position.x, position.y);
 	}
 
 	inline void SpriteBatch::Draw(const Texture2D& texture, const uint32_t x, const uint32_t y)

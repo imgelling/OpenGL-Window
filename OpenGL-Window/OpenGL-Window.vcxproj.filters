@@ -98,5 +98,8 @@
     <ClInclude Include="GameRendererDX11.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="GameSpriteSheet.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

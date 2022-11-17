@@ -164,6 +164,7 @@
     <ClInclude Include="GameRendererGL.h" />
     <ClInclude Include="GameRendererVK.h" />
     <ClInclude Include="GameSpriteBatch.h" />
+    <ClInclude Include="GameSpriteSheet.h" />
     <ClInclude Include="GameSystemInfo.h" />
     <ClInclude Include="GameTerminal.h" />
     <ClInclude Include="GameTexture2D.h" />
