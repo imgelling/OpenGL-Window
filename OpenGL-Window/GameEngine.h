@@ -177,14 +177,22 @@ namespace game
 
 	inline bool Engine::geIsUsing(const uint32_t renderer)
 	{
+#if defined(GAME_OPENGL)
 		if ((renderer == 1) && (_attributes.RenderingAPI == RenderAPI::OpenGL))
 			return true;
+#endif
+#if defined(GAME_DIRECTX9)
 		if ((renderer == 2) && (_attributes.RenderingAPI == RenderAPI::DirectX9))
 			return true;
+#endif
+#if defined(GAME_VULKAN)
 		if ((renderer == 3) && (_attributes.RenderingAPI == RenderAPI::Vulkan))
 			return true;
+#endif
+#if defined(GAME_DIRECTX11)
 		if ((renderer == 4) && (_attributes.RenderingAPI == RenderAPI::DirectX11))
 			return true;
+#endif
 		return false;
 	}
 
