@@ -101,5 +101,8 @@
     <ClInclude Include="GameSpriteSheet.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="GameSpriteFont.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

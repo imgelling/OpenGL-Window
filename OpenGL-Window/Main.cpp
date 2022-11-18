@@ -1,8 +1,8 @@
 // Engine header
 #define GAME_USE_DEDICATED_GPU
-#define GAME_SUPPORT_DIRECTX9
+//#define GAME_SUPPORT_DIRECTX9
 //#define GAME_SUPPORT_DIRECTX11
-//#define GAME_SUPPORT_OPENGL
+#define GAME_SUPPORT_OPENGL
 //#define GAME_SUPPORT_VULKAN 
 #include "Game.h"
 
@@ -13,6 +13,7 @@ public:
 	game::PixelMode pixelMode;
 	game::SpriteBatch spriteBatch;
 	game::Texture2D spriteTexture;
+	game::SpriteFont spriteFont;
 
 	Game(game::Logger& logger) : game::Engine(&logger)
 	{
@@ -63,6 +64,16 @@ public:
 		{
 			geLogger->Error(game::lastError);
 		}
+
+		game::Texture2D test;
+		if (!geLoadTexture("Content/new.png", test))
+		{
+			geLogger->Error(game::lastError);
+		}
+		if (!spriteFont.Load("Content/new", test))
+		{
+			geLogger->Error(game::lastError);
+		}
 	}
 
 	void Shutdown()
@@ -101,8 +112,10 @@ public:
 		pixelMode.Render();
 
 		spriteBatch.Begin();
-		for (int i = 0; i < 40; i++)
-			spriteBatch.Draw(spriteTexture, { 10 + (i * 100), 10 });
+		//for (int i = 0; i < 40; i++)
+			//spriteBatch.Draw(spriteTexture, { 10 + (i * 100), 10 });
+
+		spriteBatch.DrawString(spriteFont, "THIS IS A TEST OF THE BROADCASTING SYSTEM", 10, 200, game::Colors::Red);
 		
 		spriteBatch.End();
 

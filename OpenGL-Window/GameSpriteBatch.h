@@ -10,6 +10,7 @@
 #include "GameEngine.h"
 #include "GameErrors.h"
 #include "GameMath.h"
+#include "GameSpriteFont.h"
 #include "GameTexture2D.h"
 
 namespace game
@@ -29,7 +30,8 @@ namespace game
 		void Draw(const Texture2D &texture, const uint32_t x, const uint32_t y);
 		void Draw(const Texture2D& texture, const Pointi& position);
 		// Will draw a specified rectangle portion of a texture to location x,y
-		void Draw(const Texture2D& texture, const uint32_t x, const uint32_t y, Recti portion) {};
+		void Draw(const Texture2D& texture, const Recti& destination, const Recti& portion, const Color& color);
+		void DrawString(SpriteFont font, std::string Str, int x, int y, Color color);
 		void End();
 	private:
 		static constexpr uint32_t _maxSprites = 1024;
@@ -57,10 +59,12 @@ namespace game
 #endif
 	};
 
+
+
 	inline SpriteBatch::SpriteBatch()
 	{
 #if defined(GAME_OPENGL)
-		if (enginePointer->geIsUsing(GAME_OPENGL)
+		if (enginePointer->geIsUsing(GAME_OPENGL))
 		{
 			// Set identity
 			orthogonalMatrix[0][0] = 1.0f;
@@ -164,6 +168,9 @@ namespace game
 			{
 				enginePointer->d3d9Device->SetRenderState(D3DRS_MULTISAMPLEANTIALIAS, FALSE);
 			}
+
+			enginePointer->d3d9Device->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
+			enginePointer->d3d9Device->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCCOLOR);
 		}
 #endif
 
@@ -295,6 +302,105 @@ namespace game
 
 		_numberOfSpritesUsed++;
 	}
+
+	inline void SpriteBatch::Draw(const Texture2D& texture, const Recti& destination, const Recti& portion, const Color& color)
+	{
+		if (_numberOfSpritesUsed + 1 > _maxSprites)
+		{
+			Render();
+		}
+
+		if (texture.textureInterface9 != _currentTexture.textureInterface9)
+		{
+			Render();
+			_currentTexture = texture;
+		}
+
+#if defined(GAME_DIRECTX9)
+		if (enginePointer->geIsUsing(GAME_DIRECTX9))
+		{
+			_spriteVertex* access = &_spriteVertices[_numberOfSpritesUsed * 6];
+			// Top left
+			access->x = (float_t)destination.x - texture.oneOverWidth;
+			access->y = (float_t)destination.y - texture.oneOverHeight;
+			access->u = (float_t)portion.x * texture.oneOverWidth;// 0.0f;
+			access->v = (float_t)portion.y * texture.oneOverHeight;// 0.0f;
+			access->color = D3DCOLOR_ARGB(color.a, color.r, color.g, color.b);
+			access++;
+
+			// Top right
+			access->x = (float_t)destination.right - texture.oneOverWidth;
+			access->y = (float_t)destination.y - texture.oneOverHeight;
+			access->u = (float_t)portion.right * texture.oneOverWidth;// 1.0f;
+			access->v = (float_t)portion.y * texture.oneOverHeight;
+			access->color = D3DCOLOR_ARGB(color.a, color.r, color.g, color.b);
+			access++;
+
+			// Bottom left
+			access->x = (float_t)destination.x - texture.oneOverWidth;
+			access->y = (float_t)destination.bottom - texture.oneOverHeight;
+			access->u = (float_t)portion.x * texture.oneOverWidth;
+			access->v = (float_t)portion.bottom * texture.oneOverHeight;
+			access->color = D3DCOLOR_ARGB(color.a, color.r, color.g, color.b);
+			access++;
+
+			// Top right
+			access->x = (float_t)destination.right - texture.oneOverWidth;
+			access->y = (float_t)destination.y - texture.oneOverHeight;
+			access->u = (float_t)portion.right * texture.oneOverWidth;// 1.0f;
+			access->v = (float_t)portion.y * texture.oneOverHeight;
+			access->color = D3DCOLOR_ARGB(color.a, color.r, color.g, color.b);
+			access++;
+
+			// Bottom right
+			access->x = (float_t)destination.right - texture.oneOverWidth;
+			access->y = (float_t)destination.bottom - texture.oneOverHeight;
+			access->u = (float_t)portion.right * texture.oneOverWidth;
+			access->v = (float_t)portion.bottom * texture.oneOverHeight;
+			access->color = D3DCOLOR_ARGB(color.a, color.r, color.g, color.b);
+			access++;
+
+			// Bottom left
+			access->x = (float_t)destination.x - texture.oneOverWidth;
+			access->y = (float_t)destination.bottom - texture.oneOverHeight;
+			access->u = (float_t)portion.x * texture.oneOverWidth;
+			access->v = (float_t)portion.bottom * texture.oneOverHeight;
+			access->color = D3DCOLOR_ARGB(color.a, color.r, color.g, color.b);
+	}
+#endif
+
+		_numberOfSpritesUsed++;
+	}
+	
+	void SpriteBatch::DrawString(SpriteFont font, std::string Str, int x, int y, Color color)
+	{
+		int CurX = x;
+		int CurY = y;
+		int Width, Height;
+		Recti src, dest;
+		short ch;
+
+		for (unsigned int i = 0; i < Str.size(); ++i)
+		{
+			ch = Str[i];
+			Width = font._characterSet.chars[ch].width;
+			Height = font._characterSet.chars[ch].height;
+
+			src.left = font._characterSet.chars[ch].x;
+			src.top = font._characterSet.chars[ch].y;
+			src.right = src.left + Width;
+			src.bottom = (src.top + Height);
+
+			dest.left = CurX + font._characterSet.chars[ch].xOffset;
+			dest.top = CurY + font._characterSet.chars[ch].yOffset;
+			dest.right = Width + dest.left;
+			dest.bottom = Height + dest.top;
+
+			Draw(font.Texture(), dest, src, color);
+
+			CurX += font._characterSet.chars[ch].xAdvance;
+	}
+}
 
 	inline void SpriteBatch::_Enable2D()
 	{

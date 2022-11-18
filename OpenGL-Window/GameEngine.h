@@ -437,7 +437,7 @@ namespace game
 		}
 
 		// Set the renderer
-		if (_attributes.RenderingAPI == RenderAPI::OpenGL)
+		if (geIsUsing(GAME_OPENGL))
 		{
 #if defined(GAME_OPENGL)
 			_renderer = new game::RendererGL();
