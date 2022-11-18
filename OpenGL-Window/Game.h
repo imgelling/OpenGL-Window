@@ -1,14 +1,8 @@
 #pragma once
 
+#include <Windows.h>
 #include "GameDefines.h"
 
-#pragma region OpenGL
-#if defined(GAME_OPENGL)
-#include <gl/GL.h>
-#pragma comment(lib, "opengl32.lib")
-#include "GameRendererGL.h"
-#pragma endregion
-#endif
 
 #pragma region Vulkan
 #if defined(GAME_VULKAN)
@@ -18,6 +12,13 @@
 #endif
 #pragma endregion
 
+#pragma region OpenGL
+#if defined(GAME_OPENGL)
+#include <gl/GL.h>
+#pragma comment(lib, "opengl32.lib")
+#include "GameRendererGL.h"
+#pragma endregion
+#endif
 
 #pragma region DirectX9
 #if defined(GAME_DIRECTX9)

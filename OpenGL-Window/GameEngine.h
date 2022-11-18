@@ -1,7 +1,6 @@
 #pragma once
 
 #include "GameAttributes.h"
-#include "GameDefines.h"
 #include "GameRendererBase.h"
 #include "GameKeyboard.h"
 #include "GameLogger.h"
@@ -437,7 +436,7 @@ namespace game
 		}
 
 		// Set the renderer
-		if (geIsUsing(GAME_OPENGL))
+		if (_attributes.RenderingAPI == RenderAPI::OpenGL)
 		{
 #if defined(GAME_OPENGL)
 			_renderer = new game::RendererGL();
@@ -448,7 +447,7 @@ namespace game
 		}
 		else if (_attributes.RenderingAPI == RenderAPI::Vulkan)
 		{
-			lastError = { GameErrors::GameInvalidParameter, "Only OpenGL is implemented." };
+			lastError = { GameErrors::GameInvalidParameter, "Not implemented." };
 #if defined(GAME_VULKAN)
 			_renderer = new game::RendererVK;
 #else

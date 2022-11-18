@@ -5,7 +5,6 @@
 #if defined(GAME_DIRECTX9)
 #include <d3d9.h>
 #endif
-#include "GameDefines.h"
 #include "GameErrors.h"
 #include "GameEngine.h"
 #include "GameMath.h"

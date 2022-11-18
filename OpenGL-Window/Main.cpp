@@ -1,8 +1,8 @@
 // Engine header
-#define GAME_USE_DEDICATED_GPU
-//#define GAME_SUPPORT_DIRECTX9
+//#define GAME_USE_DEDICATED_GPU
+#define GAME_SUPPORT_DIRECTX9
 //#define GAME_SUPPORT_DIRECTX11
-#define GAME_SUPPORT_OPENGL
+//#define GAME_SUPPORT_OPENGL
 //#define GAME_SUPPORT_VULKAN 
 #include "Game.h"
 

@@ -1,5 +1,4 @@
 #pragma once
-#include "GameDefines.h"
 namespace game
 {
 	class Shader

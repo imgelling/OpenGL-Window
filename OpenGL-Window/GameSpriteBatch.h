@@ -6,7 +6,6 @@
 #include <d3d9.h>
 #endif
 
-#include "GameDefines.h"
 #include "GameEngine.h"
 #include "GameErrors.h"
 #include "GameMath.h"
@@ -151,6 +150,7 @@ namespace game
 #endif
 #if defined (GAME_DIRECTX11)
 #endif
+		return true;
 	}
 
 	inline void SpriteBatch::Begin()
@@ -246,13 +246,13 @@ namespace game
 			Render();
 		}
 
+#if defined(GAME_DIRECTX9)
+
 		if (texture.textureInterface9 != _currentTexture.textureInterface9)
 		{
 			Render();
 			_currentTexture = texture;
 		}
-
-#if defined(GAME_DIRECTX9)
 		if (enginePointer->geIsUsing(GAME_DIRECTX9))
 		{
 			_spriteVertex* access = &_spriteVertices[_numberOfSpritesUsed * 6];
@@ -310,13 +310,13 @@ namespace game
 			Render();
 		}
 
+
+#if defined(GAME_DIRECTX9)
 		if (texture.textureInterface9 != _currentTexture.textureInterface9)
 		{
 			Render();
 			_currentTexture = texture;
 		}
-
-#if defined(GAME_DIRECTX9)
 		if (enginePointer->geIsUsing(GAME_DIRECTX9))
 		{
 			_spriteVertex* access = &_spriteVertices[_numberOfSpritesUsed * 6];

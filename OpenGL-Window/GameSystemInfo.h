@@ -5,7 +5,6 @@
 #include <sstream>
 #include <string>
 #include <thread>
-#include <windows.h>
 
 #pragma comment(lib, "Powrprof.lib")
 
