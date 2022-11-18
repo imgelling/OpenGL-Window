@@ -26,7 +26,7 @@ public:
 		attributes.GameVersion = "0.01";
 		attributes.Framelock = 0;  
 		attributes.VsyncOn = false;
-		attributes.DebugMode = true;
+		attributes.DebugMode = false;
 		attributes.MultiSamples = 8; // max 8 amd, 16 nvidia
 		attributes.RenderingAPI = game::RenderAPI::DirectX9; 
 		//attributes.RenderingAPI = game::RenderAPI::OpenGL;
@@ -86,7 +86,37 @@ public:
 	{
 		geSetWindowTitle("fps : " + std::to_string(geGetFramesPerSecond()) + " ups : " + std::to_string(geGetUpdatesPerSecond()) + " cpu : " + std::to_string(geGetCPUFrequency()) + "Mhz");
 		
-	
+		Clear();
+
+		pixelMode.Clear(game::Colors::Blue);
+		for (uint32_t i = 0; i < 320; i++)
+		{
+			pixelMode.PixelClip(i, 239, game::Colors::Pink);
+		}
+		for (uint32_t i = 0; i < 320; i++)
+		{
+			pixelMode.PixelClip(i, 0, game::Colors::Pink);
+		}
+
+		pixelMode.Render();
+
+		spriteBatch.Begin();
+		for (int i = 0; i < 40; i++)
+			spriteBatch.Draw(spriteTexture, { 10 + (i * 100), 10 });
+		
+		spriteBatch.End();
+
+#if defined(GAME_DIRECTX9)
+		if (geIsUsing(GAME_DIRECTX9))
+		{
+			d3d9Device->EndScene();
+		}
+#endif
+	}
+
+	// Clears the screen and does beginscene for dx9
+	void Clear()
+	{
 #if defined (GAME_OPENGL)
 		if (geIsUsing(GAME_OPENGL))
 		{
@@ -107,29 +137,6 @@ public:
 		{
 			float color[4] = { 0.25f, 0.25f, 0.25f, 1.0f };
 			d3d11Context->ClearRenderTargetView(d3d11RenderTarget, color);
-		}
-#endif
-
-		pixelMode.Clear(game::Colors::Blue);
-		for (uint32_t i = 0; i < 320; i++)
-		{
-			pixelMode.PixelClip(i, 239, game::Colors::Pink);
-		}
-		for (uint32_t i = 0; i < 320; i++)
-		{
-			pixelMode.PixelClip(i, 0, game::Colors::Pink);
-		}
-
-		pixelMode.Render();
-		spriteBatch.Begin();
-		for (int i = 0; i < 40; i++)
-			spriteBatch.Draw(spriteTexture, { 10 + (i * 100), 10 });
-		spriteBatch.End();
-
-#if defined(GAME_DIRECTX9)
-		if (geIsUsing(GAME_DIRECTX9))
-		{
-			d3d9Device->EndScene();
 		}
 #endif
 	}
