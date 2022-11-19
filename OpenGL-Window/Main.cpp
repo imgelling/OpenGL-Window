@@ -27,7 +27,7 @@ public:
 		attributes.GameVersion = "0.01";
 		attributes.Framelock = 0;  
 		attributes.VsyncOn = false;
-		attributes.DebugMode = false;
+		attributes.DebugMode = true;
 		attributes.MultiSamples = 8; // max 8 amd, 16 nvidia
 		attributes.RenderingAPI = game::RenderAPI::DirectX9; 
 		//attributes.RenderingAPI = game::RenderAPI::OpenGL;
@@ -38,15 +38,9 @@ public:
 
 	void LoadContent()
 	{
-#if defined (GAME_OPENGL)
-		if (geIsUsing(GAME_OPENGL))
-		{
-			glClearColor(0.25f, 0.25f, 0.25f, 1.0f);
-			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-			glEnable(GL_BLEND);
-			glEnable(GL_CULL_FACE);
-		}
-#endif
+		// Setup renderer(s)
+		Setup();
+
 		// Load sprite texture
 		if (!geLoadTexture("Content/test.png", spriteTexture))
 		{
@@ -95,8 +89,6 @@ public:
 
 	void Render(const float_t msElapsed)
 	{
-		geSetWindowTitle("fps : " + std::to_string(geGetFramesPerSecond()) + " ups : " + std::to_string(geGetUpdatesPerSecond()) + " cpu : " + std::to_string(geGetCPUFrequency()) + "Mhz");
-		
 		Clear();
 
 		pixelMode.Clear(game::Colors::Blue);
@@ -112,10 +104,10 @@ public:
 		pixelMode.Render();
 
 		spriteBatch.Begin();
-		//for (int i = 0; i < 40; i++)
-			//spriteBatch.Draw(spriteTexture, { 10 + (i * 100), 10 });
+		for (int i = 0; i < 40; i++)
+			spriteBatch.Draw(spriteTexture, { 10 + (i * 100), 10 }, game::Colors::White);
 
-		spriteBatch.DrawString(spriteFont, "THIS IS A TEST OF THE BROADCASTING SYSTEM", 10, 200, game::Colors::Red);
+		spriteBatch.DrawString(spriteFont, "fps : " + std::to_string(geGetFramesPerSecond()) + " ups : " + std::to_string(geGetUpdatesPerSecond()) + " cpu : " + std::to_string(geGetCPUFrequency()) + "Mhz", 10, 200, game::Colors::Red);
 		
 		spriteBatch.End();
 
@@ -150,6 +142,19 @@ public:
 		{
 			float color[4] = { 0.25f, 0.25f, 0.25f, 1.0f };
 			d3d11Context->ClearRenderTargetView(d3d11RenderTarget, color);
+		}
+#endif
+	}
+
+	void Setup()
+	{
+#if defined (GAME_OPENGL)
+		if (geIsUsing(GAME_OPENGL))
+		{
+			glClearColor(0.25f, 0.25f, 0.25f, 1.0f);
+			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+			glEnable(GL_BLEND);
+			glEnable(GL_CULL_FACE);
 		}
 #endif
 	}

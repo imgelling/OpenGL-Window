@@ -26,8 +26,8 @@ namespace game
 		void Begin();
 		void Render();
 		// Will draw entire texture to location x,y
-		void Draw(const Texture2D &texture, const uint32_t x, const uint32_t y);
-		void Draw(const Texture2D& texture, const Pointi& position);
+		void Draw(const Texture2D &texture, const uint32_t x, const uint32_t y, const Color color);
+		void Draw(const Texture2D& texture, const Pointi& position, const Color color);
 		// Will draw a specified rectangle portion of a texture to location x,y
 		void Draw(const Texture2D& texture, const Recti& destination, const Recti& portion, const Color& color);
 		void DrawString(SpriteFont font, std::string Str, int x, int y, Color color);
@@ -234,12 +234,12 @@ namespace game
 		_numberOfSpritesUsed = 0;
 	}
 
-	inline void SpriteBatch::Draw(const Texture2D& texture, const Pointi& position)
+	inline void SpriteBatch::Draw(const Texture2D& texture, const Pointi& position, const Color color)
 	{
-		Draw(texture, position.x, position.y);
+		Draw(texture, position.x, position.y, color);
 	}
 
-	inline void SpriteBatch::Draw(const Texture2D& texture, const uint32_t x, const uint32_t y)
+	inline void SpriteBatch::Draw(const Texture2D& texture, const uint32_t x, const uint32_t y, const Color color)
 	{
 		if (_numberOfSpritesUsed + 1 > _maxSprites)
 		{
@@ -261,6 +261,7 @@ namespace game
 			access->y = (float_t)y;
 			access->u = 0.0f;
 			access->v = 0.0f;
+			access->color = D3DCOLOR_ARGB(color.a, color.r, color.g, color.b);
 			access++;
 
 			// Top right
@@ -268,6 +269,7 @@ namespace game
 			access->y = (float_t)y;
 			access->u = 1.0f;
 			access->v = 0.0f;
+			access->color = D3DCOLOR_ARGB(color.a, color.r, color.g, color.b);
 			access++;
 
 			// Bottom left
@@ -275,6 +277,7 @@ namespace game
 			access->y = (float_t)y + (float_t)texture.height;
 			access->u = 0.0f;
 			access->v = 1.0f;
+			access->color = D3DCOLOR_ARGB(color.a, color.r, color.g, color.b);
 			access++;
 
 			// Top right
@@ -282,6 +285,7 @@ namespace game
 			access->y = (float_t)y;
 			access->u = 1.0f;
 			access->v = 0.0f;
+			access->color = D3DCOLOR_ARGB(color.a, color.r, color.g, color.b);
 			access++;
 
 			// Bottom right
@@ -289,6 +293,7 @@ namespace game
 			access->y = (float_t)y + (float_t)texture.height;
 			access->u = 1.0f;
 			access->v = 1.0f;
+			access->color = D3DCOLOR_ARGB(color.a, color.r, color.g, color.b);
 			access++;
 
 			// Bottom left
@@ -296,6 +301,7 @@ namespace game
 			access->y = (float_t)y + (float_t)texture.height;
 			access->u = 0.0f;
 			access->v = 1.0f;
+			access->color = D3DCOLOR_ARGB(color.a, color.r, color.g, color.b);
 			access++;
 		}
 #endif
