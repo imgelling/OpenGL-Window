@@ -1,10 +1,13 @@
 #pragma once
 
+#include "GameEngine.h"
 #include "GameErrors.h"
+#include "GameImageLoader.h"
 #include "GameTexture2D.h"
 
 namespace game
 {
+	extern Engine* enginePointer;
 	struct FontDescriptor
 	{
 		unsigned short x, y;
@@ -36,8 +39,9 @@ namespace game
 	{
 	public:
 		SpriteFont();
+		~SpriteFont();
 		uint32_t Length(std::string text);
-		bool Load(const std::string filename, const Texture2D& text);
+		bool Load(const std::string filename, const std::string& texture);
 		void UnLoad();
 		Texture2D Texture();
 		Charset _characterSet;
@@ -52,15 +56,24 @@ namespace game
 
 	}
 
-	inline bool SpriteFont::Load(const std::string filename, const Texture2D& text)
+	inline SpriteFont::~SpriteFont()
 	{
-		_texture = text;
+		UnLoad();
+	}
+
+	inline bool SpriteFont::Load(const std::string filename, const std::string& texture)
+	{
+		if (!enginePointer->geLoadTexture(texture, _texture))
+		{
+			return false;
+		}
+
 		std::string Line;
 		std::string Read, Key, Value;
 		std::size_t i;
 		std::ifstream Stream;
 
-		std::string file = filename + ".fnt";
+		std::string file = filename;
 
 		Stream.open(file.c_str());
 		while (!Stream.eof())
@@ -144,7 +157,7 @@ namespace game
 
 	inline void SpriteFont::UnLoad()
 	{
-
+		enginePointer->geUnLoadTexture(_texture);
 	}
 
 	inline uint32_t SpriteFont::Length(std::string text)

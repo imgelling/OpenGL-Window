@@ -30,7 +30,7 @@ namespace game
 		void Draw(const Texture2D& texture, const Pointi& position, const Color color);
 		// Will draw a specified rectangle portion of a texture to location x,y
 		void Draw(const Texture2D& texture, const Recti& destination, const Recti& portion, const Color& color);
-		void DrawString(SpriteFont font, std::string Str, int x, int y, Color color);
+		void DrawString(SpriteFont &font, const std::string &Str, const int x, const int y, const Color& color);
 		void End();
 	private:
 		static constexpr uint32_t _maxSprites = 1024;
@@ -378,7 +378,7 @@ namespace game
 		_numberOfSpritesUsed++;
 	}
 	
-	void SpriteBatch::DrawString(SpriteFont font, std::string Str, int x, int y, Color color)
+	void SpriteBatch::DrawString(SpriteFont &font, const std::string& Str, const int x, const int y, const Color& color)
 	{
 		int CurX = x;
 		int CurY = y;

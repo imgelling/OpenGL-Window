@@ -1,9 +1,10 @@
 // Engine header
 //#define GAME_USE_DEDICATED_GPU
-#define GAME_SUPPORT_DIRECTX9
+//#define GAME_SUPPORT_DIRECTX9
 //#define GAME_SUPPORT_DIRECTX11
 //#define GAME_SUPPORT_OPENGL
 //#define GAME_SUPPORT_VULKAN 
+#define GAME_SUPPORT_ALL
 #include "Game.h"
 
 class Game : public game::Engine
@@ -28,7 +29,7 @@ public:
 		attributes.Framelock = 0;  
 		attributes.VsyncOn = false;
 		attributes.DebugMode = true;
-		attributes.MultiSamples = 8; // max 8 amd, 16 nvidia
+		attributes.MultiSamples = 8;
 		attributes.RenderingAPI = game::RenderAPI::DirectX9; 
 		//attributes.RenderingAPI = game::RenderAPI::OpenGL;
 		//attributes.RenderingAPI = game::RenderAPI::DirectX11;
@@ -59,12 +60,7 @@ public:
 			geLogger->Error(game::lastError);
 		}
 
-		game::Texture2D test;
-		if (!geLoadTexture("Content/new.png", test))
-		{
-			geLogger->Error(game::lastError);
-		}
-		if (!spriteFont.Load("Content/new", test))
+		if (!spriteFont.Load("Content/new.fnt", "Content/new.png"))
 		{
 			geLogger->Error(game::lastError);
 		}
