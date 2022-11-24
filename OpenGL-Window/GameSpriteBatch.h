@@ -39,7 +39,7 @@ namespace game
 		void _Enable2D();
 		void _Disable2D();
 #if defined(GAME_OPENGL)
-		float_t orthogonalMatrix[4][4] = { 0.0f };
+		//float_t orthogonalMatrix[4][4] = { 0.0f };
 #endif
 #if defined(GAME_DIRECTX9)
 		struct _spriteVertex
@@ -63,14 +63,14 @@ namespace game
 	inline SpriteBatch::SpriteBatch()
 	{
 #if defined(GAME_OPENGL)
-		if (enginePointer->geIsUsing(GAME_OPENGL))
-		{
-			// Set identity
-			orthogonalMatrix[0][0] = 1.0f;
-			orthogonalMatrix[1][1] = 1.0f;
-			orthogonalMatrix[2][2] = 1.0f;
-			orthogonalMatrix[3][3] = 1.0f;
-		}
+		//if (enginePointer->geIsUsing(GAME_OPENGL))
+		//{
+		//	// Set identity
+		//	orthogonalMatrix[0][0] = 1.0f;
+		//	orthogonalMatrix[1][1] = 1.0f;
+		//	orthogonalMatrix[2][2] = 1.0f;
+		//	orthogonalMatrix[3][3] = 1.0f;
+		//}
 #endif
 #if defined(GAME_DIRECTX9)
 		if (enginePointer->geIsUsing(GAME_DIRECTX9))
@@ -413,22 +413,22 @@ namespace game
 #if defined(GAME_OPENGL)
 		if (enginePointer->_attributes.RenderingAPI == RenderAPI::OpenGL)
 		{
-			float Right = (float)enginePointer->geGetWindowSize().width;
-			float Left = 0.0;
-			float Top = 0.0f;
-			float Bottom = (float)enginePointer->geGetWindowSize().height;
-			float Near = -1.0f;
-			float Far = 1.0f;
+			//float Right = (float)enginePointer->geGetWindowSize().width;
+			//float Left = 0.0;
+			//float Top = 0.0f;
+			//float Bottom = (float)enginePointer->geGetWindowSize().height;
+			//float Near = -1.0f;
+			//float Far = 1.0f;
 
-			orthogonalMatrix[0][0] = 2.0f / (Right - Left);
+			//orthogonalMatrix[0][0] = 2.0f / (Right - Left);
 
-			orthogonalMatrix[1][1] = 2.0f / (Top - Bottom);
-			orthogonalMatrix[2][2] = 2.0f / (Near - Far);
+			//orthogonalMatrix[1][1] = 2.0f / (Top - Bottom);
+			//orthogonalMatrix[2][2] = 2.0f / (Near - Far);
 
-			orthogonalMatrix[3][0] = (Left + Right) / (Left - Right);
-			orthogonalMatrix[3][1] = (Bottom + Top) / (Bottom - Top);
+			//orthogonalMatrix[3][0] = (Left + Right) / (Left - Right);
+			//orthogonalMatrix[3][1] = (Bottom + Top) / (Bottom - Top);
 
-			orthogonalMatrix[3][2] = (Far + Near) / (Near - Far);
+			//orthogonalMatrix[3][2] = (Far + Near) / (Near - Far);
 		}
 #endif
 #if defined (GAME_DIRECTX9)
