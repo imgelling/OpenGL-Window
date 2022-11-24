@@ -44,7 +44,7 @@ namespace game
 		uint32_t Length(std::string text);
 		bool Load(const std::string filename, const std::string& texture);
 		void UnLoad();
-		Texture2D Texture();
+		Texture2D Texture() const;
 		Charset _characterSet;
 
 
@@ -62,7 +62,7 @@ namespace game
 		UnLoad();
 	}
 
-	inline bool SpriteFont::Load(const std::string filename, const std::string& texture)
+	inline bool SpriteFont::Load(const std::string fileName, const std::string& texture)
 	{
 
 		std::string line;
@@ -77,12 +77,13 @@ namespace game
 			return false;
 		}
 
-		stream.open(filename.c_str(), std::ios::_Nocreate);
+		stream.open(fileName.c_str(), std::ios::_Nocreate);
 		if (!stream.is_open())
 		{
-			lastError = { GameErrors::GameContent, "Could not load \"" + filename + "\" for SpriteFont." };
+			lastError = { GameErrors::GameContent, "Could not load \"" + fileName + "\" for SpriteFont." };
 			return false;
 		}
+
 		while (!stream.eof())
 		{
 			std::stringstream lineStream;
@@ -126,6 +127,7 @@ namespace game
 					if (CharID > 255)
 					{
 						stream.close();
+						lastError = { GameErrors::GameContent, "File error in \"" + fileName + "\"." };
 						return false;
 					}
 					std::stringstream Converter;
@@ -172,7 +174,7 @@ namespace game
 
 	}
 
-	inline Texture2D SpriteFont::Texture()
+	inline Texture2D SpriteFont::Texture() const
 	{
 		return _texture;
 	}
