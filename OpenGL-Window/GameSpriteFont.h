@@ -65,10 +65,10 @@ namespace game
 	inline bool SpriteFont::Load(const std::string filename, const std::string& texture)
 	{
 
-		std::string Line;
-		std::string Read, Key, Value;
-//		std::size_t i;
-		std::ifstream Stream;
+		std::string line;
+		std::string read, key, value;
+		std::size_t index;
+		std::ifstream stream;
 
 		_texture.filterType = TextureFilterType::Point;
 		if (!enginePointer->geLoadTexture(texture, _texture))
@@ -77,87 +77,87 @@ namespace game
 			return false;
 		}
 
-		Stream.open(filename.c_str(), std::ios::_Nocreate);
-		if (!Stream.is_open())
+		stream.open(filename.c_str(), std::ios::_Nocreate);
+		if (!stream.is_open())
 		{
 			lastError = { GameErrors::GameContent, "Could not load \"" + filename + "\" for SpriteFont." };
 			return false;
 		}
-		while (!Stream.eof())
+		while (!stream.eof())
 		{
-			std::stringstream LineStream;
-			getline(Stream, Line);
-			LineStream << Line;
+			std::stringstream lineStream;
+			getline(stream, line);
+			lineStream << line;
 
 			//read the line's type
-			LineStream >> Read;
-			if (Read == "common")
+			lineStream >> read;
+			if (read == "common")
 			{
 				//this holds common data
-				while (!LineStream.eof())
+				while (!lineStream.eof())
 				{
 					std::stringstream Converter;
-					LineStream >> Read;
-					i = Read.find('=');
-					Key = Read.substr(0, i);
-					Value = Read.substr(i + 1);
+					lineStream >> read;
+					index = read.find('=');
+					key = read.substr(0, index);
+					value = read.substr(index + 1);
 
 					//assign the correct value
-					Converter << Value;
-					if (Key == "lineHeight")
+					Converter << value;
+					if (key == "lineHeight")
 						Converter >> _characterSet.lineHeight;
-					else if (Key == "base")
+					else if (key == "base")
 						Converter >> _characterSet.base;
-					else if (Key == "scaleW")
+					else if (key == "scaleW")
 						Converter >> _characterSet.width;
-					else if (Key == "scaleH")
+					else if (key == "scaleH")
 						Converter >> _characterSet.height;
-					else if (Key == "pages")
+					else if (key == "pages")
 						Converter >> _characterSet.pages;
 				}
 			}
-			else if (Read == "char")
+			else if (read == "char")
 			{
 				//this is data for a specific char
 				unsigned short CharID = 0;
 
-				while (!LineStream.eof())
+				while (!lineStream.eof())
 				{
 					if (CharID > 255)
 					{
-						Stream.close();
+						stream.close();
 						return false;
 					}
 					std::stringstream Converter;
-					LineStream >> Read;
-					i = Read.find('=');
-					Key = Read.substr(0, i);
-					Value = Read.substr(i + 1);
+					lineStream >> read;
+					index = read.find('=');
+					key = read.substr(0, index);
+					value = read.substr(index + 1);
 
 					//assign the correct value
-					Converter << Value;
-					if (Key == "id")
+					Converter << value;
+					if (key == "id")
 						Converter >> CharID;
-					else if (Key == "x")
+					else if (key == "x")
 						Converter >> _characterSet.chars[CharID].x;
-					else if (Key == "y")
+					else if (key == "y")
 						Converter >> _characterSet.chars[CharID].y;
-					else if (Key == "width")
+					else if (key == "width")
 						Converter >> _characterSet.chars[CharID].width;
-					else if (Key == "height")
+					else if (key == "height")
 						Converter >> _characterSet.chars[CharID].height;
-					else if (Key == "xoffset")
+					else if (key == "xoffset")
 						Converter >> _characterSet.chars[CharID].xOffset;
-					else if (Key == "yoffset")
+					else if (key == "yoffset")
 						Converter >> _characterSet.chars[CharID].yOffset;
-					else if (Key == "xadvance")
+					else if (key == "xadvance")
 						Converter >> _characterSet.chars[CharID].xAdvance;
-					else if (Key == "page")
+					else if (key == "page")
 						Converter >> _characterSet.chars[CharID].page;
 				}
 			}
 		}
-		Stream.close();
+		stream.close();
 
 		return true;
 	}
