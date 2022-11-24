@@ -8,6 +8,7 @@
 namespace game
 {
 	extern Engine* enginePointer;
+	extern GameError lastError;
 	struct FontDescriptor
 	{
 		unsigned short x, y;
@@ -63,19 +64,25 @@ namespace game
 
 	inline bool SpriteFont::Load(const std::string filename, const std::string& texture)
 	{
-		if (!enginePointer->geLoadTexture(texture, _texture))
-		{
-			return false;
-		}
 
 		std::string Line;
 		std::string Read, Key, Value;
-		std::size_t i;
+//		std::size_t i;
 		std::ifstream Stream;
 
-		std::string file = filename;
+		_texture.filterType = TextureFilterType::Point;
+		if (!enginePointer->geLoadTexture(texture, _texture))
+		{
+			lastError = { GameErrors::GameContent, "Could not load \"" + texture + "\" for SpriteFont." };
+			return false;
+		}
 
-		Stream.open(file.c_str());
+		Stream.open(filename.c_str(), std::ios::_Nocreate);
+		if (!Stream.is_open())
+		{
+			lastError = { GameErrors::GameContent, "Could not load \"" + filename + "\" for SpriteFont." };
+			return false;
+		}
 		while (!Stream.eof())
 		{
 			std::stringstream LineStream;

@@ -85,6 +85,7 @@ public:
 
 	void Render(const float_t msElapsed)
 	{
+		// Api dependent methods in this
 		Clear();
 
 		pixelMode.Clear(game::Colors::Blue);
