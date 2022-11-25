@@ -910,7 +910,7 @@ namespace game
 		ImageLoader imageLoader;
 
 		// Read data
-		data = imageLoader.Load(fileName.c_str(), width, height, componentsPerPixel, false);
+		data = imageLoader.Load(fileName.c_str(), width, height, componentsPerPixel, true);
 		if (data == nullptr)
 		{
 			lastError = { GameErrors::GameContent, "Failed to load texture : " + fileName };

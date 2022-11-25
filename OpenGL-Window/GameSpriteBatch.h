@@ -46,7 +46,7 @@ namespace game
 		};
 		_spriteVertex* _spriteVertices;
 #if defined(GAME_OPENGL)
-		//float_t orthogonalMatrix[4][4] = { 0.0f };
+
 #endif
 #if defined(GAME_DIRECTX9)
 		LPDIRECT3DVERTEXBUFFER9 _vertexBuffer;
@@ -172,7 +172,7 @@ namespace game
 			}
 
 			enginePointer->d3d9Device->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
-			enginePointer->d3d9Device->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCCOLOR);
+			enginePointer->d3d9Device->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
 		}
 #endif
 
@@ -268,7 +268,7 @@ namespace game
 				float_t b = (access->color >> 16 & 255) / 255.0f;
 				float_t a = (access->color >> 24 & 255) / 255.0f;
 				// bl
-				glTexCoord2f(access->u, access->v);
+				glTexCoord2f(access->u, 1.0f-access->v);
 				glColor4f(r, g, b, a);
 				access->x = (access->x * 2.0f / (float_t)windowSize.width) - 1.0f;
 				access->y = (access->y * 2.0f / (float_t)windowSize.height) - 1.0f;
@@ -277,7 +277,7 @@ namespace game
 				access++;
 
 				// br
-				glTexCoord2f(access->u, access->v);
+				glTexCoord2f(access->u, 1.0f - access->v);
 				glColor4f(r, g, b, a);
 				access->x = (access->x * 2.0f / (float_t)windowSize.width) - 1.0f;
 				access->y = (access->y * 2.0f / (float_t)windowSize.height) - 1.0f;
@@ -286,7 +286,7 @@ namespace game
 				access++;
 
 				// tr
-				glTexCoord2f(access->u, access->v);
+				glTexCoord2f(access->u, 1.0f - access->v);
 				glColor4f(r, g, b, a);
 				access->x = (access->x * 2.0f / (float_t)windowSize.width) - 1.0f;
 				access->y = (access->y * 2.0f / (float_t)windowSize.height) - 1.0f;
@@ -295,7 +295,7 @@ namespace game
 				access++;
 
 				// bl
-				glTexCoord2f(access->u, access->v);
+				glTexCoord2f(access->u, 1.0f - access->v);
 				glColor4f(r, g, b, a);
 				access->x = (access->x * 2.0f / (float_t)windowSize.width) - 1.0f;
 				access->y = (access->y * 2.0f / (float_t)windowSize.height) - 1.0f;
@@ -450,7 +450,7 @@ namespace game
 			}
 			_spriteVertex* access = &_spriteVertices[_numberOfSpritesUsed * 4];
 
-			// bl
+			// Bottom left
 			access->x = (float_t)destination.x - texture.oneOverWidth;
 			access->y = (float_t)destination.bottom - texture.oneOverHeight;
 			access->u = (float_t)portion.x * texture.oneOverWidth;
@@ -458,7 +458,7 @@ namespace game
 			access->color = color.packed;
 			access++;
 
-			// br
+			// Bottom right
 			access->x = (float_t)destination.right - texture.oneOverWidth;
 			access->y = (float_t)destination.bottom - texture.oneOverHeight;
 			access->u = (float_t)portion.right * texture.oneOverWidth;
@@ -466,7 +466,7 @@ namespace game
 			access->color = color.packed;
 			access++;
 
-			// tr
+			// Top right
 			access->x = (float_t)destination.right - texture.oneOverWidth;
 			access->y = (float_t)destination.y - texture.oneOverHeight;
 			access->u = (float_t)portion.right * texture.oneOverWidth;
@@ -474,7 +474,7 @@ namespace game
 			access->color = color.packed;
 			access++;
 
-			// tl
+			// Top left
 			access->x = (float_t)destination.x - texture.oneOverWidth;
 			access->y = (float_t)destination.y - texture.oneOverHeight;
 			access->u = (float_t)portion.x * texture.oneOverWidth;
@@ -579,25 +579,6 @@ namespace game
 	inline void SpriteBatch::_Enable2D()
 	{
 #if defined(GAME_OPENGL)
-		if (enginePointer->_attributes.RenderingAPI == RenderAPI::OpenGL)
-		{
-			//float Right = (float)enginePointer->geGetWindowSize().width;
-			//float Left = 0.0;
-			//float Top = 0.0f;
-			//float Bottom = (float)enginePointer->geGetWindowSize().height;
-			//float Near = -1.0f;
-			//float Far = 1.0f;
-
-			//orthogonalMatrix[0][0] = 2.0f / (Right - Left);
-
-			//orthogonalMatrix[1][1] = 2.0f / (Top - Bottom);
-			//orthogonalMatrix[2][2] = 2.0f / (Near - Far);
-
-			//orthogonalMatrix[3][0] = (Left + Right) / (Left - Right);
-			//orthogonalMatrix[3][1] = (Bottom + Top) / (Bottom - Top);
-
-			//orthogonalMatrix[3][2] = (Far + Near) / (Near - Far);
-		}
 #endif
 #if defined (GAME_DIRECTX9)
 #endif
