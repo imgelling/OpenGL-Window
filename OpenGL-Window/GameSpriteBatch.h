@@ -257,13 +257,9 @@ namespace game
 			_spriteVertex *access = &_spriteVertices[0];
 
 			glBegin(GL_QUADS);
-			// Pixel offset fix
-			//positionOfScaledTexture.x -= _frameBuffer[_currentBuffer].oneOverWidth;
-			//positionOfScaledTexture.y -= _frameBuffer[_currentBuffer].oneOverHeight;
-			//sizeOfScaledTexture.width -= _frameBuffer[_currentBuffer].oneOverWidth;
-			//sizeOfScaledTexture.height -= _frameBuffer[_currentBuffer].oneOverHeight;
-			float pixelFixX = 1.0f + (1.0f / windowSize.width);
-			float pixelFixY = 1.0f + (1.0f / windowSize.height);
+
+			float pixelOffsetFixX = 1.0f + (1.0f / windowSize.width);
+			float pixelOffsetFixY = 1.0f + (1.0f / windowSize.height);
 
 			for (uint32_t i = 0; i < _numberOfSpritesUsed; i++)
 			{
@@ -271,38 +267,39 @@ namespace game
 				g = (access->color >> 8 & 255) / 255.0f;
 				b = (access->color >> 16 & 255) / 255.0f;
 				a = (access->color >> 24 & 255) / 255.0f;
-				// bl
+
+				// Bottom left
 				glTexCoord2f(access->u, 1.0f-access->v);
 				glColor4f(r, g, b, a);
-				access->x = (access->x * 2.0f / (float_t)windowSize.width) - pixelFixX;
-				access->y = (access->y * 2.0f / (float_t)windowSize.height) - pixelFixY;
+				access->x = (access->x * 2.0f / (float_t)windowSize.width) - pixelOffsetFixX;
+				access->y = (access->y * 2.0f / (float_t)windowSize.height) - pixelOffsetFixY;
 				access->y *= -1.0f;
 				glVertex2f(access->x, access->y);
 				access++;
 
-				// br
+				// Bottom right
 				glTexCoord2f(access->u, 1.0f - access->v);
 				glColor4f(r, g, b, a);
-				access->x = (access->x * 2.0f / (float_t)windowSize.width) - pixelFixX;
-				access->y = (access->y * 2.0f / (float_t)windowSize.height) - pixelFixY;
+				access->x = (access->x * 2.0f / (float_t)windowSize.width) - pixelOffsetFixX;
+				access->y = (access->y * 2.0f / (float_t)windowSize.height) - pixelOffsetFixY;
 				access->y *= -1.0f;
 				glVertex2f(access->x, access->y);
 				access++;
 
-				// tr
+				// Top right
 				glTexCoord2f(access->u, 1.0f - access->v);
 				glColor4f(r, g, b, a);
-				access->x = (access->x * 2.0f / (float_t)windowSize.width) - pixelFixX;
-				access->y = (access->y * 2.0f / (float_t)windowSize.height) - pixelFixY;
+				access->x = (access->x * 2.0f / (float_t)windowSize.width) - pixelOffsetFixX;
+				access->y = (access->y * 2.0f / (float_t)windowSize.height) - pixelOffsetFixY;
 				access->y *= -1.0f;
 				glVertex2f(access->x, access->y);
 				access++;
 
-				// bl
+				// Bottom left
 				glTexCoord2f(access->u, 1.0f - access->v);
 				glColor4f(r, g, b, a);
-				access->x = (access->x * 2.0f / (float_t)windowSize.width) - pixelFixX;
-				access->y = (access->y * 2.0f / (float_t)windowSize.height) - pixelFixY;
+				access->x = (access->x * 2.0f / (float_t)windowSize.width) - pixelOffsetFixX;
+				access->y = (access->y * 2.0f / (float_t)windowSize.height) - pixelOffsetFixY;
 				access->y *= -1.0f;
 				glVertex2f(access->x, access->y);
 				access++;

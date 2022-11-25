@@ -31,13 +31,13 @@ namespace game
 		uint32_t _compiledQuad;
 #endif
 #if defined(GAME_DIRECTX9)
-		struct _vertex
+		struct _vertex9
 		{
 			float_t x, y, z, rhw;    
 			uint32_t color;    
 			float_t u, v;
 		};
-		_vertex _QuadVertices[6] =
+		_vertex9 _QuadVertices9[6] =
 		{
 			{0.0f, 0.0f, 0.0f, 1.0f, D3DCOLOR_ARGB(255,255, 255, 255), 0.0f, 0.0f},
 			{0.0f, 0.0f, 0.0f, 1.0f, D3DCOLOR_ARGB(255,255, 255, 255), 1.0f, 0.0f},
@@ -47,7 +47,10 @@ namespace game
 			{0.0f, 0.0f, 0.0f, 1.0f, D3DCOLOR_ARGB(255,255, 255, 255), 1.0f, 1.0f},
 			{0.0f, 0.0f, 0.0f, 1.0f, D3DCOLOR_ARGB(255,255, 255, 255) , 0.0f, 1.0f}
 		};
-		LPDIRECT3DVERTEXBUFFER9 _vertexBuffer;
+		LPDIRECT3DVERTEXBUFFER9 _vertexBuffer9;
+#endif
+#if defined(GAME_DIRECTX11)
+
 #endif
 		uint32_t* _video;
 		Vector2i _bufferSize;
@@ -59,13 +62,16 @@ namespace game
 
 	inline PixelMode::PixelMode()
 	{
+		_video = nullptr;
+		_currentBuffer = 0;
 #if defined(GAME_OPENGL)
 		_compiledQuad = 0;
 #endif
-		_video = nullptr;
-		_currentBuffer = 0;
 #if defined(GAME_DIRECTX9)
-		_vertexBuffer = nullptr;
+		_vertexBuffer9 = nullptr;
+#endif
+#if defined(GAME_DIRECTX11)
+
 #endif
 	}
 
@@ -75,10 +81,10 @@ namespace game
 #if defined (GAME_DIRECTX9)
 		if (enginePointer->_attributes.RenderingAPI == RenderAPI::DirectX9)
 		{
-			if (_vertexBuffer)
+			if (_vertexBuffer9)
 			{
-				_vertexBuffer->Release();
-				_vertexBuffer = nullptr;
+				_vertexBuffer9->Release();
+				_vertexBuffer9 = nullptr;
 			}
 		}
 #endif
@@ -127,8 +133,8 @@ namespace game
 #if defined (GAME_DIRECTX9)
 		if (enginePointer->geIsUsing(GAME_DIRECTX9))
 		{
-			enginePointer->d3d9Device->CreateVertexBuffer(6 * sizeof(_vertex), 0, (D3DFVF_XYZRHW | D3DFVF_DIFFUSE | D3DFVF_TEX1), D3DPOOL_MANAGED, &_vertexBuffer, NULL);
-			if (_vertexBuffer == nullptr)
+			enginePointer->d3d9Device->CreateVertexBuffer(6 * sizeof(_vertex9), 0, (D3DFVF_XYZRHW | D3DFVF_DIFFUSE | D3DFVF_TEX1), D3DPOOL_MANAGED, &_vertexBuffer9, NULL);
+			if (_vertexBuffer9 == nullptr)
 			{
 				lastError = { GameErrors::GameDirectX9Specific, "Could not create vertex buffer for PixelMode." };
 				return false;
@@ -261,29 +267,29 @@ namespace game
 			sizeOfScaledTexture.height -= _frameBuffer[_currentBuffer].oneOverHeight;
 
 			// tl
-			_QuadVertices[0].x = positionOfScaledTexture.x;
-			_QuadVertices[0].y = positionOfScaledTexture.y;
+			_QuadVertices9[0].x = positionOfScaledTexture.x;
+			_QuadVertices9[0].y = positionOfScaledTexture.y;
 			// tr
-			_QuadVertices[1].x = sizeOfScaledTexture.width;
-			_QuadVertices[1].y = positionOfScaledTexture.y;
+			_QuadVertices9[1].x = sizeOfScaledTexture.width;
+			_QuadVertices9[1].y = positionOfScaledTexture.y;
 			// bl
-			_QuadVertices[2].x = positionOfScaledTexture.x;
-			_QuadVertices[2].y = sizeOfScaledTexture.height;
+			_QuadVertices9[2].x = positionOfScaledTexture.x;
+			_QuadVertices9[2].y = sizeOfScaledTexture.height;
 
 			// tr
-			_QuadVertices[3].x = sizeOfScaledTexture.width;
-			_QuadVertices[3].y = positionOfScaledTexture.y;
+			_QuadVertices9[3].x = sizeOfScaledTexture.width;
+			_QuadVertices9[3].y = positionOfScaledTexture.y;
 			// br
-			_QuadVertices[4].x = sizeOfScaledTexture.width;
-			_QuadVertices[4].y = sizeOfScaledTexture.height;
+			_QuadVertices9[4].x = sizeOfScaledTexture.width;
+			_QuadVertices9[4].y = sizeOfScaledTexture.height;
 			// bl
-			_QuadVertices[5].x = positionOfScaledTexture.x;
-			_QuadVertices[5].y = sizeOfScaledTexture.height;
+			_QuadVertices9[5].x = positionOfScaledTexture.x;
+			_QuadVertices9[5].y = sizeOfScaledTexture.height;
 
 			// Copy vertices to the vertex buffer
-			_vertexBuffer->Lock(0, 0, (void**)&pVoid, 0);
-			memcpy(pVoid, _QuadVertices, sizeof(_QuadVertices));
-			_vertexBuffer->Unlock();
+			_vertexBuffer9->Lock(0, 0, (void**)&pVoid, 0);
+			memcpy(pVoid, _QuadVertices9, sizeof(_QuadVertices9));
+			_vertexBuffer9->Unlock();
 		}
 #endif
 
@@ -341,7 +347,7 @@ namespace game
 
 			enginePointer->d3d9Device->SetTexture(0, _frameBuffer[_currentBuffer].textureInterface9);
 			enginePointer->d3d9Device->SetFVF((D3DFVF_XYZRHW | D3DFVF_DIFFUSE | D3DFVF_TEX1));
-			enginePointer->d3d9Device->SetStreamSource(0, _vertexBuffer, 0, sizeof(_vertex));
+			enginePointer->d3d9Device->SetStreamSource(0, _vertexBuffer9, 0, sizeof(_vertex9));
 			enginePointer->d3d9Device->DrawPrimitive(D3DPT_TRIANGLELIST, 0, 2);
 
 			// Restore previous state
