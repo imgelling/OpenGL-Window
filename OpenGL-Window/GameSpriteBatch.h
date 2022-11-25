@@ -251,27 +251,31 @@ namespace game
 #if defined(GAME_OPENGL)
 		if (enginePointer->geIsUsing(GAME_OPENGL))
 		{
+			float_t r, g, b, a = 0.0f;
 			Vector2i windowSize = enginePointer->geGetWindowSize();
 			glBindTexture(GL_TEXTURE_2D, _currentTexture.bind);
+			_spriteVertex *access = &_spriteVertices[0];
+
 			glBegin(GL_QUADS);
 			// Pixel offset fix
 			//positionOfScaledTexture.x -= _frameBuffer[_currentBuffer].oneOverWidth;
 			//positionOfScaledTexture.y -= _frameBuffer[_currentBuffer].oneOverHeight;
 			//sizeOfScaledTexture.width -= _frameBuffer[_currentBuffer].oneOverWidth;
 			//sizeOfScaledTexture.height -= _frameBuffer[_currentBuffer].oneOverHeight;
+			float pixelFixX = 1.0f + (1.0f / windowSize.width);
+			float pixelFixY = 1.0f + (1.0f / windowSize.height);
 
-			_spriteVertex *access = &_spriteVertices[0];
 			for (uint32_t i = 0; i < _numberOfSpritesUsed; i++)
 			{
-				float_t r = (access->color & 255) / 255.0f;
-				float_t g = (access->color >> 8 & 255) / 255.0f;
-				float_t b = (access->color >> 16 & 255) / 255.0f;
-				float_t a = (access->color >> 24 & 255) / 255.0f;
+				r = (access->color & 255) / 255.0f;
+				g = (access->color >> 8 & 255) / 255.0f;
+				b = (access->color >> 16 & 255) / 255.0f;
+				a = (access->color >> 24 & 255) / 255.0f;
 				// bl
 				glTexCoord2f(access->u, 1.0f-access->v);
 				glColor4f(r, g, b, a);
-				access->x = (access->x * 2.0f / (float_t)windowSize.width) - 1.0f;
-				access->y = (access->y * 2.0f / (float_t)windowSize.height) - 1.0f;
+				access->x = (access->x * 2.0f / (float_t)windowSize.width) - pixelFixX;
+				access->y = (access->y * 2.0f / (float_t)windowSize.height) - pixelFixY;
 				access->y *= -1.0f;
 				glVertex2f(access->x, access->y);
 				access++;
@@ -279,8 +283,8 @@ namespace game
 				// br
 				glTexCoord2f(access->u, 1.0f - access->v);
 				glColor4f(r, g, b, a);
-				access->x = (access->x * 2.0f / (float_t)windowSize.width) - 1.0f;
-				access->y = (access->y * 2.0f / (float_t)windowSize.height) - 1.0f;
+				access->x = (access->x * 2.0f / (float_t)windowSize.width) - pixelFixX;
+				access->y = (access->y * 2.0f / (float_t)windowSize.height) - pixelFixY;
 				access->y *= -1.0f;
 				glVertex2f(access->x, access->y);
 				access++;
@@ -288,8 +292,8 @@ namespace game
 				// tr
 				glTexCoord2f(access->u, 1.0f - access->v);
 				glColor4f(r, g, b, a);
-				access->x = (access->x * 2.0f / (float_t)windowSize.width) - 1.0f;
-				access->y = (access->y * 2.0f / (float_t)windowSize.height) - 1.0f;
+				access->x = (access->x * 2.0f / (float_t)windowSize.width) - pixelFixX;
+				access->y = (access->y * 2.0f / (float_t)windowSize.height) - pixelFixY;
 				access->y *= -1.0f;
 				glVertex2f(access->x, access->y);
 				access++;
@@ -297,8 +301,8 @@ namespace game
 				// bl
 				glTexCoord2f(access->u, 1.0f - access->v);
 				glColor4f(r, g, b, a);
-				access->x = (access->x * 2.0f / (float_t)windowSize.width) - 1.0f;
-				access->y = (access->y * 2.0f / (float_t)windowSize.height) - 1.0f;
+				access->x = (access->x * 2.0f / (float_t)windowSize.width) - pixelFixX;
+				access->y = (access->y * 2.0f / (float_t)windowSize.height) - pixelFixY;
 				access->y *= -1.0f;
 				glVertex2f(access->x, access->y);
 				access++;
