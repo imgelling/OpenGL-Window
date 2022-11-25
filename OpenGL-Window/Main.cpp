@@ -31,7 +31,7 @@ public:
 		attributes.DebugMode = true;
 		attributes.MultiSamples = 8;
 		attributes.RenderingAPI = game::RenderAPI::DirectX9; 
-		//attributes.RenderingAPI = game::RenderAPI::OpenGL;
+		attributes.RenderingAPI = game::RenderAPI::OpenGL;
 		//attributes.RenderingAPI = game::RenderAPI::DirectX11;
 		
 		geSetAttributes(attributes);
@@ -101,10 +101,10 @@ public:
 		pixelMode.Render();
 
 		spriteBatch.Begin();
-		for (int i = 0; i < 40; i++)
+		for (int i = 0; i < 1; i++)
 			spriteBatch.Draw(spriteTexture, { 10 + (i * 100), 10 }, game::Colors::White);
 
-		spriteBatch.DrawString(spriteFont, "fps : " + std::to_string(geGetFramesPerSecond()) + " ups : " + std::to_string(geGetUpdatesPerSecond()) + " cpu : " + std::to_string(geGetCPUFrequency()) + "Mhz", 10, 200, game::Colors::Red);
+		//spriteBatch.DrawString(spriteFont, "fps : " + std::to_string(geGetFramesPerSecond()) + " ups : " + std::to_string(geGetUpdatesPerSecond()) + " cpu : " + std::to_string(geGetCPUFrequency()) + "Mhz", 10, 200, game::Colors::Red);
 		
 		spriteBatch.End();
 
