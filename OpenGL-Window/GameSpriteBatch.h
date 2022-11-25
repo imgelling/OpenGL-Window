@@ -260,16 +260,16 @@ namespace game
 			//sizeOfScaledTexture.width -= _frameBuffer[_currentBuffer].oneOverWidth;
 			//sizeOfScaledTexture.height -= _frameBuffer[_currentBuffer].oneOverHeight;
 
-			//// Homoginize the scaled rect to -1 to 1 range using
-			//positionOfScaledTexture.x = (positionOfScaledTexture.x * 2.0f / (float_t)_windowSize.width) - 1.0f;
-			//positionOfScaledTexture.y = (positionOfScaledTexture.y * 2.0f / (float_t)_windowSize.height) - 1.0f;
-			//sizeOfScaledTexture.width = ((float_t)sizeOfScaledTexture.width * 2.0f / (float_t)_windowSize.width) - 1.0f;
-			//sizeOfScaledTexture.height = ((float_t)sizeOfScaledTexture.height * 2.0f / (float_t)_windowSize.height) - 1.0f;
 			_spriteVertex *access = &_spriteVertices[0];
 			for (uint32_t i = 0; i < _numberOfSpritesUsed; i++)
 			{
+				float_t r = (access->color & 255) / 255.0f;
+				float_t g = (access->color >> 8 & 255) / 255.0f;
+				float_t b = (access->color >> 16 & 255) / 255.0f;
+				float_t a = (access->color >> 24 & 255) / 255.0f;
 				// bl
 				glTexCoord2f(access->u, access->v);
+				glColor4f(r, g, b, a);
 				access->x = (access->x * 2.0f / (float_t)windowSize.width) - 1.0f;
 				access->y = (access->y * 2.0f / (float_t)windowSize.height) - 1.0f;
 				access->y *= -1.0f;
@@ -278,7 +278,7 @@ namespace game
 
 				// br
 				glTexCoord2f(access->u, access->v);
-				//glColor4f()
+				glColor4f(r, g, b, a);
 				access->x = (access->x * 2.0f / (float_t)windowSize.width) - 1.0f;
 				access->y = (access->y * 2.0f / (float_t)windowSize.height) - 1.0f;
 				access->y *= -1.0f;
@@ -287,7 +287,7 @@ namespace game
 
 				// tr
 				glTexCoord2f(access->u, access->v);
-				//glColor4f()
+				glColor4f(r, g, b, a);
 				access->x = (access->x * 2.0f / (float_t)windowSize.width) - 1.0f;
 				access->y = (access->y * 2.0f / (float_t)windowSize.height) - 1.0f;
 				access->y *= -1.0f;
@@ -296,7 +296,7 @@ namespace game
 
 				// bl
 				glTexCoord2f(access->u, access->v);
-				//glColor4f()
+				glColor4f(r, g, b, a);
 				access->x = (access->x * 2.0f / (float_t)windowSize.width) - 1.0f;
 				access->y = (access->y * 2.0f / (float_t)windowSize.height) - 1.0f;
 				access->y *= -1.0f;
@@ -340,7 +340,7 @@ namespace game
 			access->y = (float_t)y + (float_t)texture.height;
 			access->u = 0.0f;
 			access->v = 1.0f;
-			access->color = D3DCOLOR_ARGB(color.a, color.r, color.g, color.b);
+			access->color = color.packed;
 			access++;
 
 			// br
@@ -348,7 +348,7 @@ namespace game
 			access->y = (float_t)y + (float_t)texture.height;
 			access->u = 1.0f;
 			access->v = 1.0f;
-			access->color = D3DCOLOR_ARGB(color.a, color.r, color.g, color.b);
+			access->color = color.packed;
 			access++;
 
 			// tr
@@ -356,7 +356,7 @@ namespace game
 			access->y = (float_t)y;
 			access->u = 1.0f;
 			access->v = 0.0f;
-			access->color = D3DCOLOR_ARGB(color.a, color.r, color.g, color.b);
+			access->color = color.packed;
 			access++;
 
 			// tl
@@ -364,7 +364,7 @@ namespace game
 			access->y = (float_t)y;
 			access->u = 0.0f;
 			access->v = 0.0f;
-			access->color = D3DCOLOR_ARGB(color.a, color.r, color.g, color.b);
+			access->color = color.packed;
 			access++;
 
 		}
@@ -455,7 +455,7 @@ namespace game
 			access->y = (float_t)destination.bottom - texture.oneOverHeight;
 			access->u = (float_t)portion.x * texture.oneOverWidth;
 			access->v = (float_t)portion.bottom * texture.oneOverHeight;
-			access->color = D3DCOLOR_ARGB(color.a, color.r, color.g, color.b);
+			access->color = color.packed;
 			access++;
 
 			// br
@@ -463,23 +463,23 @@ namespace game
 			access->y = (float_t)destination.bottom - texture.oneOverHeight;
 			access->u = (float_t)portion.right * texture.oneOverWidth;
 			access->v = (float_t)portion.bottom * texture.oneOverHeight;
-			access->color = D3DCOLOR_ARGB(color.a, color.r, color.g, color.b);
+			access->color = color.packed;
 			access++;
 
 			// tr
 			access->x = (float_t)destination.right - texture.oneOverWidth;
 			access->y = (float_t)destination.y - texture.oneOverHeight;
-			access->u = (float_t)portion.right * texture.oneOverWidth;// 1.0f;
+			access->u = (float_t)portion.right * texture.oneOverWidth;
 			access->v = (float_t)portion.y * texture.oneOverHeight;
-			access->color = D3DCOLOR_ARGB(color.a, color.r, color.g, color.b);
+			access->color = color.packed;
 			access++;
 
 			// tl
 			access->x = (float_t)destination.x - texture.oneOverWidth;
 			access->y = (float_t)destination.y - texture.oneOverHeight;
-			access->u = (float_t)portion.x * texture.oneOverWidth;// 0.0f;
-			access->v = (float_t)portion.y * texture.oneOverHeight;// 0.0f;
-			access->color = D3DCOLOR_ARGB(color.a, color.r, color.g, color.b);
+			access->u = (float_t)portion.x * texture.oneOverWidth;
+			access->v = (float_t)portion.y * texture.oneOverHeight;
+			access->color = color.packed;
 			access++;
 		}
 #endif
@@ -497,8 +497,8 @@ namespace game
 			// Top left
 			access->x = (float_t)destination.x - texture.oneOverWidth;
 			access->y = (float_t)destination.y - texture.oneOverHeight;
-			access->u = (float_t)portion.x * texture.oneOverWidth;// 0.0f;
-			access->v = (float_t)portion.y * texture.oneOverHeight;// 0.0f;
+			access->u = (float_t)portion.x * texture.oneOverWidth;
+			access->v = (float_t)portion.y * texture.oneOverHeight;
 			access->color = D3DCOLOR_ARGB(color.a, color.r, color.g, color.b);
 			access++;
 
