@@ -79,7 +79,7 @@ namespace game
 	{
 		if (_video != nullptr) delete[] _video;
 #if defined (GAME_DIRECTX9)
-		if (enginePointer->_attributes.RenderingAPI == RenderAPI::DirectX9)
+		if (enginePointer->geIsUsing(GAME_DIRECTX9))
 		{
 			if (_vertexBuffer9)
 			{
@@ -125,7 +125,7 @@ namespace game
 		}
 
 #if defined(GAME_OPENGL)
-		if (enginePointer->_attributes.RenderingAPI == RenderAPI::OpenGL)
+		if (enginePointer->geIsUsing(GAME_OPENGL))
 		{
 			_compiledQuad = glGenLists(1);
 		}
@@ -156,7 +156,7 @@ namespace game
 	inline void PixelMode::_UpdateFrameBuffer()
 	{
 #if defined(GAME_OPENGL)
-		if (enginePointer->_attributes.RenderingAPI == RenderAPI::OpenGL)
+		if (enginePointer->geIsUsing(GAME_OPENGL))
 		{
 			glBindTexture(GL_TEXTURE_2D, _frameBuffer[_currentBuffer].bind);
 
@@ -165,7 +165,7 @@ namespace game
 		}
 #endif
 #if defined(GAME_DIRECTX9)
-		if (enginePointer->_attributes.RenderingAPI == RenderAPI::DirectX9)
+		if (enginePointer->geIsUsing(GAME_DIRECTX9))
 		{
 			D3DLOCKED_RECT rect;
 			unsigned char* test = (unsigned char*)_video;
@@ -173,6 +173,16 @@ namespace game
 			unsigned char* dest = static_cast<unsigned char*>(rect.pBits);
 			memcpy(dest, test, sizeof(unsigned char) * _frameBuffer[_currentBuffer].width * _frameBuffer[_currentBuffer].height * 4);
 			_frameBuffer[_currentBuffer].textureInterface9->UnlockRect(0);
+		}
+#endif
+#if defined(GAME_DIRECTX11)
+		if (enginePointer->geIsUsing(GAME_DIRECTX11))
+		{
+			D3D11_MAPPED_SUBRESOURCE data;// = nullptr;
+			HRESULT hr;
+			hr = enginePointer->d3d11Context->Map(_frameBuffer[_currentBuffer].textureInterface11, 0, D3D11_MAP_WRITE_DISCARD, 0, &data);
+			memcpy(data.pData, (unsigned char*)_video, sizeof(unsigned char) * _frameBuffer[_currentBuffer].width * _frameBuffer[_currentBuffer].height * 4);
+			enginePointer->d3d11Context->Unmap(_frameBuffer[_currentBuffer].textureInterface11, 0);
 		}
 #endif
 	}
@@ -216,7 +226,7 @@ namespace game
 
 
 #if defined(GAME_OPENGL)
-		if (enginePointer->_attributes.RenderingAPI == RenderAPI::OpenGL)
+		if (enginePointer->geIsUsing(GAME_OPENGL))
 		{
 			// Pixel offset fix
 			positionOfScaledTexture.x -= _frameBuffer[_currentBuffer].oneOverWidth;
@@ -256,7 +266,7 @@ namespace game
 		}
 #endif
 #if defined(GAME_DIRECTX9)
-		if (enginePointer->_attributes.RenderingAPI == RenderAPI::DirectX9)
+		if (enginePointer->geIsUsing(GAME_DIRECTX9))
 		{
 			VOID* pVoid = nullptr;  
 
@@ -313,7 +323,7 @@ namespace game
 
 		// Draw the quad
 #if defined(GAME_OPENGL)
-		if (enginePointer->_attributes.RenderingAPI == RenderAPI::OpenGL)
+		if (enginePointer->geIsUsing(GAME_OPENGL))
 		{
 			glEnable(GL_TEXTURE_2D);
 			glBindTexture(GL_TEXTURE_2D, _frameBuffer[_currentBuffer].bind);
@@ -330,7 +340,7 @@ namespace game
 		}
 #endif
 #if defined(GAME_DIRECTX9)
-		if (enginePointer->_attributes.RenderingAPI == RenderAPI::DirectX9)
+		if (enginePointer->geIsUsing(GAME_DIRECTX9))
 		{
 			DWORD oldFVF = 0;
 			IDirect3DBaseTexture9* activeTexture = 0;
@@ -377,13 +387,13 @@ namespace game
 	inline void PixelMode::Clear(const Color &color)
 	{
 #if defined(GAME_DIRECTX9)
-		if (enginePointer->_attributes.RenderingAPI == RenderAPI::DirectX9)
+		if (enginePointer->geIsUsing(GAME_DIRECTX9))
 		{
 			std::fill_n(_video, _bufferSize.width * _bufferSize.height, D3DCOLOR_ARGB(color.a, color.r, color.g, color.b));
 		}
 #endif
 #if defined(GAME_OPENGL)
-		if (enginePointer->_attributes.RenderingAPI == RenderAPI::OpenGL)
+		if (enginePointer->geIsUsing(GAME_OPENGL))
 		{
 			std::fill_n(_video, _bufferSize.width * _bufferSize.height, color.packed);
 		}
@@ -393,13 +403,13 @@ namespace game
 	inline void PixelMode::Pixel(const int32_t x, const int32_t y, const game::Color& color)
 	{
 #if defined(GAME_DIRECTX9)
-		if (enginePointer->_attributes.RenderingAPI == RenderAPI::DirectX9)
+		if (enginePointer->geIsUsing(GAME_DIRECTX9))
 		{
 			_video[y * _bufferSize.width + x] = D3DCOLOR_ARGB(color.a, color.r, color.g, color.b);
 		}
 #endif
 #if defined(GAME_OPENGL)
-		if (enginePointer->_attributes.RenderingAPI == RenderAPI::OpenGL)
+		if (enginePointer->geIsUsing(GAME_OPENGL))
 		{
 			_video[y * _bufferSize.width + x] = color.packed;
 		}
@@ -411,13 +421,13 @@ namespace game
 		if (x < 0 || y < 0) return;
 		if (x > _bufferSize.width-1 || y > _bufferSize.height - 1) return;
 #if defined(GAME_DIRECTX9)
-		if (enginePointer->_attributes.RenderingAPI == RenderAPI::DirectX9)
+		if (enginePointer->geIsUsing(GAME_DIRECTX9))
 		{
 			_video[y * _bufferSize.width + x] = D3DCOLOR_ARGB(color.a, color.r, color.g, color.b);
 		}
 #endif
 #if defined(GAME_OPENGL)
-		if (enginePointer->_attributes.RenderingAPI == RenderAPI::OpenGL)
+		if (enginePointer->geIsUsing(GAME_OPENGL))
 		{
 			_video[y * _bufferSize.width + x] = color.packed;
 		}

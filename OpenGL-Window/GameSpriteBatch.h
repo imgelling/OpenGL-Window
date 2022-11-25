@@ -87,7 +87,7 @@ namespace game
 	inline SpriteBatch::~SpriteBatch()
 	{
 #if defined(GAME_OPENGL)
-		if (enginePointer->_attributes.RenderingAPI == RenderAPI::OpenGL)
+		if (enginePointer->geIsUsing(GAME_OPENGL))
 		{
 
 		}
@@ -132,7 +132,7 @@ namespace game
 			}
 		}
 #if defined(GAME_OPENGL)
-		if (enginePointer->_attributes.RenderingAPI == RenderAPI::OpenGL)
+		if (enginePointer->geIsRunning(GAME_OPENGL))
 		{
 
 		}
