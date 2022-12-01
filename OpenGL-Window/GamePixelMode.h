@@ -10,6 +10,11 @@
 #include "GameMath.h"
 #include "GameTexture2D.h"
 
+// Just a test to make sure defines are working
+#if defined(GAME_USE_SHADERS)
+#define USING_SHADERS
+#endif
+
 namespace game
 {
 	extern GameError lastError;
@@ -27,7 +32,7 @@ namespace game
 		void PixelClip(const int32_t x, const int32_t y, const game::Color& color);
 	private:
 		Texture2D _frameBuffer[2];
-#if defined(GAME_OPENGL)
+#if defined(GAME_OPENGL) & !defined(GAME_USE_SHADERS)
 		uint32_t _compiledQuad;
 #endif
 #if defined(GAME_DIRECTX9)
@@ -64,7 +69,7 @@ namespace game
 	{
 		_video = nullptr;
 		_currentBuffer = 0;
-#if defined(GAME_OPENGL)
+#if defined(GAME_OPENGL) & !defined(GAME_USE_SHADERS)
 		_compiledQuad = 0;
 #endif
 #if defined(GAME_DIRECTX9)
@@ -124,7 +129,7 @@ namespace game
 			}
 		}
 
-#if defined(GAME_OPENGL)
+#if defined(GAME_OPENGL) & !defined(GAME_USE_SHADERS)
 		if (enginePointer->geIsUsing(GAME_OPENGL))
 		{
 			_compiledQuad = glGenLists(1);
@@ -225,7 +230,7 @@ namespace game
 		sizeOfScaledTexture.height = positionOfScaledTexture.y + (_frameBuffer[_currentBuffer].height * scale.y);
 
 
-#if defined(GAME_OPENGL)
+#if defined(GAME_OPENGL) & !defined(GAME_USE_SHADERS)
 		if (enginePointer->geIsUsing(GAME_OPENGL))
 		{
 			// Pixel offset fix
@@ -322,7 +327,7 @@ namespace game
 		_UpdateFrameBuffer();
 
 		// Draw the quad
-#if defined(GAME_OPENGL)
+#if defined(GAME_OPENGL) & !defined(GAME_USE_SHADERS)
 		if (enginePointer->geIsUsing(GAME_OPENGL))
 		{
 			glEnable(GL_TEXTURE_2D);

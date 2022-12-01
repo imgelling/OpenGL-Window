@@ -70,13 +70,11 @@ namespace game
 		}
 #endif
 #if defined(GAME_DIRECTX9)
-		if (enginePointer->geIsUsing(GAME_DIRECTX9))
-		{
-			_vertexBuffer = nullptr;
-			_savedFVF = 0;
-			_savedBlending = 0;
-			_savedTexture = nullptr;
-		}
+
+		_vertexBuffer = nullptr;
+		_savedFVF = 0;
+		_savedBlending = 0;
+		_savedTexture = nullptr;
 #endif
 #if defined (GAME_DIRECTX11)
 #endif
@@ -132,7 +130,7 @@ namespace game
 			}
 		}
 #if defined(GAME_OPENGL)
-		if (enginePointer->geIsRunning(GAME_OPENGL))
+		if (enginePointer->geIsUsing(GAME_OPENGL))
 		{
 
 		}
@@ -204,6 +202,7 @@ namespace game
 			if (_savedTexture)
 			{
 				_savedTexture->Release();
+				_savedTexture = nullptr;
 			}
 
 			// Renable multisampling if it was enabled
@@ -253,20 +252,23 @@ namespace game
 		{
 			float_t r, g, b, a = 0.0f;
 			Vector2i windowSize = enginePointer->geGetWindowSize();
+			
 			glBindTexture(GL_TEXTURE_2D, _currentTexture.bind);
+			
 			_spriteVertex *access = &_spriteVertices[0];
-
-			glBegin(GL_QUADS);
 
 			float pixelOffsetFixX = 1.0f + (1.0f / windowSize.width);
 			float pixelOffsetFixY = 1.0f + (1.0f / windowSize.height);
+			
+			glBegin(GL_QUADS);
 
-			for (uint32_t i = 0; i < _numberOfSpritesUsed; i++)
+
+			for (uint32_t i = 0; i < _numberOfSpritesUsed; i++, access++)
 			{
-				r = (access->color & 255) / 255.0f;
-				g = (access->color >> 8 & 255) / 255.0f;
-				b = (access->color >> 16 & 255) / 255.0f;
-				a = (access->color >> 24 & 255) / 255.0f;
+				r = (access->color & 0xff) / 255.0f;
+				g = (access->color >> 8 & 0xff) / 255.0f;
+				b = (access->color >> 16 & 0xff) / 255.0f;
+				a = (access->color >> 24 & 0xff) / 255.0f;
 
 				// Bottom left
 				glTexCoord2f(access->u, 1.0f-access->v);
@@ -302,12 +304,12 @@ namespace game
 				access->y = (access->y * 2.0f / (float_t)windowSize.height) - pixelOffsetFixY;
 				access->y *= -1.0f;
 				glVertex2f(access->x, access->y);
-				access++;
+				//access++;
 			}
 
 
 			glEnd();
-			glBindTexture(GL_TEXTURE_2D, 0);
+			//glBindTexture(GL_TEXTURE_2D, 0);
 
 		}
 #endif

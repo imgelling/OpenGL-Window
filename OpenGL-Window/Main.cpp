@@ -1,9 +1,12 @@
 // Engine header
-//#define GAME_USE_DEDICATED_GPU
+#define GAME_USE_DEDICATED_GPU
+//#define GAME_USE_SHADERS
 //#define GAME_SUPPORT_DIRECTX9
 //#define GAME_SUPPORT_DIRECTX11
 //#define GAME_SUPPORT_OPENGL
 //#define GAME_SUPPORT_VULKAN 
+
+// need to force GAME_USE_SHADERS with dx12/vulkan and maybe dx11 maybe
 #define GAME_SUPPORT_ALL
 #include "Game.h"
 
@@ -32,7 +35,7 @@ public:
 		attributes.MultiSamples = 8;
 		attributes.RenderingAPI = game::RenderAPI::DirectX9; 
 		attributes.RenderingAPI = game::RenderAPI::OpenGL;
-		attributes.RenderingAPI = game::RenderAPI::DirectX11;
+		//attributes.RenderingAPI = game::RenderAPI::DirectX11;
 		
 		geSetAttributes(attributes);
 	}
@@ -95,7 +98,7 @@ public:
 		}
 		for (uint32_t i = 0; i < 320; i++)
 		{
-			//pixelMode.PixelClip(i, 0, game::Colors::Pink);
+			pixelMode.PixelClip(i, 0, game::Colors::Pink);
 		}
 
 		pixelMode.Render();
