@@ -229,15 +229,15 @@ namespace game
 		sizeOfScaledTexture.width = positionOfScaledTexture.x + (_frameBuffer[_currentBuffer].width * scale.x);
 		sizeOfScaledTexture.height = positionOfScaledTexture.y + (_frameBuffer[_currentBuffer].height * scale.y);
 
+		// Pixel offset fix
+		positionOfScaledTexture.x -= _frameBuffer[_currentBuffer].oneOverWidth;
+		positionOfScaledTexture.y -= _frameBuffer[_currentBuffer].oneOverHeight;
+		sizeOfScaledTexture.width -= _frameBuffer[_currentBuffer].oneOverWidth;
+		sizeOfScaledTexture.height -= _frameBuffer[_currentBuffer].oneOverHeight;
 
 #if defined(GAME_OPENGL) & !defined(GAME_USE_SHADERS)
 		if (enginePointer->geIsUsing(GAME_OPENGL))
 		{
-			// Pixel offset fix
-			positionOfScaledTexture.x -= _frameBuffer[_currentBuffer].oneOverWidth;
-			positionOfScaledTexture.y -= _frameBuffer[_currentBuffer].oneOverHeight;
-			sizeOfScaledTexture.width -= _frameBuffer[_currentBuffer].oneOverWidth;
-			sizeOfScaledTexture.height -= _frameBuffer[_currentBuffer].oneOverHeight;
 
 			// Homoginize the scaled rect to -1 to 1 range using
 			positionOfScaledTexture.x = (positionOfScaledTexture.x * 2.0f / (float_t)_windowSize.width) - 1.0f;
@@ -274,12 +274,6 @@ namespace game
 		if (enginePointer->geIsUsing(GAME_DIRECTX9))
 		{
 			VOID* pVoid = nullptr;  
-
-			// Pixel offset fix
-			positionOfScaledTexture.x -= _frameBuffer[_currentBuffer].oneOverWidth;
-			positionOfScaledTexture.y -= _frameBuffer[_currentBuffer].oneOverHeight;
-			sizeOfScaledTexture.width -= _frameBuffer[_currentBuffer].oneOverWidth;
-			sizeOfScaledTexture.height -= _frameBuffer[_currentBuffer].oneOverHeight;
 
 			// tl
 			_QuadVertices9[0].x = positionOfScaledTexture.x;

@@ -86,9 +86,6 @@
     <ClInclude Include="GameRendererDX9.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="GameDefines.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="GameImageLoader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
