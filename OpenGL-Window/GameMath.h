@@ -98,4 +98,5 @@ namespace game
 	typedef Rect<float> Rectf;
 	typedef Rect<double> Rectd;
 #pragma endregion
+
 }

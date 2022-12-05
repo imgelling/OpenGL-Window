@@ -108,6 +108,9 @@ namespace game
 		virtual void LoadContent() = 0;
 		virtual void Shutdown() = 0;
 
+		// Tools
+		void geLogLastError();
+
 	private:
 		float_t _frameTime;
 		Attributes _attributes;
@@ -532,6 +535,11 @@ namespace game
 		{
 			_renderer->HandleWindowResize(width, height);
 		}
+	}
+
+	inline void Engine::geLogLastError()
+	{
+		geLogger->Error(lastError);
 	}
 
 	inline LRESULT CALLBACK Window::_WindowEventProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)

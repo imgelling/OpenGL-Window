@@ -30,6 +30,8 @@ namespace game
 		void Clear(const Color &color);
 		void Pixel(const int32_t x, const int32_t y, const game::Color& color);
 		void PixelClip(const int32_t x, const int32_t y, const game::Color& color);
+		void Line(const int32_t x1, const int32_t y1, const int32_t x2, const int32_t y2, const Color color);
+		void LineClip(int32_t x1, int32_t y1,  int32_t x2,  int32_t y2, const Color color);
 	private:
 		Texture2D _frameBuffer[2];
 #if defined(GAME_OPENGL) & !defined(GAME_USE_SHADERS)
@@ -46,11 +48,11 @@ namespace game
 		{
 			{0.0f, 0.0f, 0.0f, 1.0f, D3DCOLOR_ARGB(255,255, 255, 255), 0.0f, 0.0f},
 			{0.0f, 0.0f, 0.0f, 1.0f, D3DCOLOR_ARGB(255,255, 255, 255), 1.0f, 0.0f},
-			{0.0f, 0.0f, 0.0f, 1.0f, D3DCOLOR_ARGB(255,255, 255, 255) , 0.0f, 1.0f},
+			{0.0f, 0.0f, 0.0f, 1.0f, D3DCOLOR_ARGB(255,255, 255, 255), 0.0f, 1.0f},
 
 			{0.0f, 0.0f, 0.0f, 1.0f, D3DCOLOR_ARGB(255,255, 255, 255), 1.0f, 0.0f},
 			{0.0f, 0.0f, 0.0f, 1.0f, D3DCOLOR_ARGB(255,255, 255, 255), 1.0f, 1.0f},
-			{0.0f, 0.0f, 0.0f, 1.0f, D3DCOLOR_ARGB(255,255, 255, 255) , 0.0f, 1.0f}
+			{0.0f, 0.0f, 0.0f, 1.0f, D3DCOLOR_ARGB(255,255, 255, 255), 0.0f, 1.0f}
 		};
 		LPDIRECT3DVERTEXBUFFER9 _vertexBuffer9;
 #endif
@@ -431,6 +433,151 @@ namespace game
 			_video[y * _bufferSize.width + x] = color.packed;
 		}
 #endif
+	}
+
+	inline void PixelMode::Line(const int32_t x1, const int32_t y1, const int32_t x2, const int32_t y2, const Color color)
+	{
+		uint32_t x = 0, y = 0;
+		uint32_t dx = 0, dy = 0;
+		uint32_t xIncrement = 0, yIncrement = 0;
+		uint32_t balance = 0;
+
+
+		if (x2 >= x1)
+		{
+			dx = x2 - x1;
+			xIncrement = 1;
+		}
+		else
+		{
+			dx = x1 - x2;
+			xIncrement = -1;
+		}
+
+		if (y2 >= y1)
+		{
+			dy = y2 - y1;
+			yIncrement = 1;
+		}
+		else
+		{
+			dy = y1 - y2;
+			yIncrement = -1;
+		}
+
+		x = x1;
+		y = y1;
+
+		if (dx >= dy)
+		{
+			dy <<= 1;
+			balance = dy - dx;
+			dx <<= 1;
+
+			while (x != x2)
+			{
+				Pixel(x, y, color);
+				if (balance >= 0)
+				{
+					y += yIncrement;
+					balance -= dx;
+				}
+				balance += dy;
+				x += xIncrement;
+			} 
+			Pixel(x, y, color);
+		}
+		else
+		{
+			dx <<= 1;
+			balance = dx - dy;
+			dy <<= 1;
+
+			while (y != y2)
+			{
+				Pixel(x, y, color);
+				if (balance >= 0)
+				{
+					x += xIncrement;
+					balance -= dy;
+				}
+				balance += dx;
+				y += yIncrement;
+			} 
+			Pixel(x, y, color);
+		}
+	}
+
+	inline void PixelMode::LineClip(int32_t x1, int32_t y1, int32_t x2, int32_t y2, const Color color)
+	{
+		uint32_t x = 0, y = 0;
+		uint32_t dx = 0, dy = 0;
+		uint32_t xIncrement = 0, yIncrement = 0;
+		uint32_t balance = 0;
+
+		if (x2 >= x1)
+		{
+			dx = x2 - x1;
+			xIncrement = 1;
+		}
+		else
+		{
+			dx = x1 - x2;
+			xIncrement = -1;
+		}
+
+		if (y2 >= y1)
+		{
+			dy = y2 - y1;
+			yIncrement = 1;
+		}
+		else
+		{
+			dy = y1 - y2;
+			yIncrement = -1;
+		}
+
+		x = x1;
+		y = y1;
+
+		if (dx >= dy)
+		{
+			dy <<= 1;
+			balance = dy - dx;
+			dx <<= 1;
+
+			while (x != x2)
+			{
+				PixelClip(x, y, color);
+				if (balance >= 0)
+				{
+					y += yIncrement;
+					balance -= dx;
+				}
+				balance += dy;
+				x += xIncrement;
+			}
+			PixelClip(x, y, color);
+		}
+		else
+		{
+			dx <<= 1;
+			balance = dx - dy;
+			dy <<= 1;
+
+			while (y != y2)
+			{
+				PixelClip(x, y, color);
+				if (balance >= 0)
+				{
+					x += xIncrement;
+					balance -= dy;
+				}
+				balance += dx;
+				y += yIncrement;
+			}
+			PixelClip(x, y, color);
+		}
 	}
 }
 

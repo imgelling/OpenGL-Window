@@ -23,6 +23,8 @@ public:
 	{
 	}
 
+
+
 	void Initialize()
 	{
 		game::Attributes attributes;
@@ -34,7 +36,7 @@ public:
 		attributes.DebugMode = true;
 		attributes.MultiSamples = 8;
 		attributes.RenderingAPI = game::RenderAPI::DirectX9; 
-		attributes.RenderingAPI = game::RenderAPI::OpenGL;
+		//attributes.RenderingAPI = game::RenderAPI::OpenGL;
 		//attributes.RenderingAPI = game::RenderAPI::DirectX11;
 		
 		geSetAttributes(attributes);
@@ -48,24 +50,24 @@ public:
 		// Load sprite texture
 		if (!geLoadTexture("Content/test.png", spriteTexture))
 		{
-			geLogger->Error(game::lastError);
+			geLogLastError();
 		}
 
 		// Setup pixel mode
 		if (!pixelMode.Initialize({ 320, 240 }))
 		{
-			geLogger->Error(game::lastError);
+			geLogLastError();
 		}
 
 		// Setup sprite batch
 		if (!spriteBatch.Initialize())
 		{
-			geLogger->Error(game::lastError);
+			geLogLastError();
 		}
 
 		if (!spriteFont.Load("Content/new.fnt", "Content/new.png"))
 		{
-			geLogger->Error(game::lastError);
+			geLogLastError();
 		}
 	}
 
@@ -91,6 +93,13 @@ public:
 		// Api dependent methods in this
 		Clear();
 
+#if defined (GAME_DIRECTX9)
+		if (geIsUsing(GAME_DIRECTX9))
+		{
+			d3d9Device->BeginScene();
+		}
+#endif
+
 		pixelMode.Clear(game::Colors::Blue);
 		for (uint32_t i = 0; i < 320; i++)
 		{
@@ -100,6 +109,7 @@ public:
 		{
 			pixelMode.PixelClip(i, 0, game::Colors::Pink);
 		}
+		pixelMode.LineClip(-10, -100, 400, 300, game::Colors::Pink);
 
 		pixelMode.Render();
 
@@ -108,7 +118,7 @@ public:
 			spriteBatch.Draw(spriteTexture, { 10 + (i * 100), 10 }, game::Colors::White);
 
 		spriteBatch.DrawString(spriteFont, "fps : " + std::to_string(geGetFramesPerSecond()) + " ups : " + std::to_string(geGetUpdatesPerSecond()) + " cpu : " + std::to_string(geGetCPUFrequency()) + "Mhz", 10, 200, game::Colors::Red);
-		
+		spriteBatch.DrawString(spriteFont, "Window Size: " + std::to_string(geGetWindowSize().width) + "x" + std::to_string(geGetWindowSize().height), 10, 220, game::Colors::Red);
 		spriteBatch.End();
 
 #if defined(GAME_DIRECTX9)
@@ -133,7 +143,6 @@ public:
 		if (geIsUsing(GAME_DIRECTX9))
 		{
 			d3d9Device->Clear(0, NULL, D3DCLEAR_TARGET, D3DCOLOR_XRGB(64, 64, 64), 1.0f, 0);
-			d3d9Device->BeginScene();
 		}
 #endif
 
@@ -168,7 +177,7 @@ int main()
 	// Create the needed bits for the engine
 	if (!engine.geCreate())
 	{
-		logger.Error(game::lastError);
+		engine.geLogLastError();
 		return EXIT_FAILURE;
 	}
 
