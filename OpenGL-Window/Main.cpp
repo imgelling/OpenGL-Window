@@ -101,15 +101,14 @@ public:
 #endif
 
 		pixelMode.Clear(game::Colors::Blue);
-		for (uint32_t i = 0; i < 320; i++)
-		{
-			pixelMode.PixelClip(i, 239, game::Colors::Pink);
-		}
-		for (uint32_t i = 0; i < 320; i++)
-		{
-			pixelMode.PixelClip(i, 0, game::Colors::Pink);
-		}
-		pixelMode.LineClip(-10, -100, 400, 300, game::Colors::Pink);
+
+		// Top and bottom
+		pixelMode.LineClip(0, 0, 319, 0, game::Colors::Pink);
+		pixelMode.LineClip(0, 239, 319, 239, game::Colors::Pink);
+
+		// Left and right
+		pixelMode.LineClip(0, 0, 0, 239, game::Colors::Pink);
+		pixelMode.LineClip(319, 0, 319, 239, game::Colors::Pink);
 
 		pixelMode.Render();
 

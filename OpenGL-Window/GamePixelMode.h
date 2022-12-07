@@ -30,8 +30,8 @@ namespace game
 		void Clear(const Color &color);
 		void Pixel(const int32_t x, const int32_t y, const game::Color& color);
 		void PixelClip(const int32_t x, const int32_t y, const game::Color& color);
-		void Line(const int32_t x1, const int32_t y1, const int32_t x2, const int32_t y2, const Color color);
-		void LineClip(int32_t x1, int32_t y1,  int32_t x2,  int32_t y2, const Color color);
+		void Line(int32_t x1, int32_t y1, int32_t x2, int32_t y2, const Color& color);
+		void LineClip(int32_t x1, int32_t y1,  int32_t x2,  int32_t y2, const Color& color);
 	private:
 		Texture2D _frameBuffer[2];
 #if defined(GAME_OPENGL) & !defined(GAME_USE_SHADERS)
@@ -435,149 +435,65 @@ namespace game
 #endif
 	}
 
-	inline void PixelMode::Line(const int32_t x1, const int32_t y1, const int32_t x2, const int32_t y2, const Color color)
+	inline void PixelMode::Line(int32_t x1, int32_t y1, int32_t x2, int32_t y2, const Color& color)
 	{
-		uint32_t x = 0, y = 0;
-		uint32_t dx = 0, dy = 0;
-		uint32_t xIncrement = 0, yIncrement = 0;
-		uint32_t balance = 0;
+		int delta_x(x2 - x1);
+		// if x1 == x2, then it does not matter what we set here
+		signed char const ix((delta_x > 0) - (delta_x < 0));
+		delta_x = abs(delta_x) << 1;
 
+		int delta_y(y2 - y1);
+		// if y1 == y2, then it does not matter what we set here
+		signed char const iy((delta_y > 0) - (delta_y < 0));
+		delta_y = abs(delta_y) << 1;
 
-		if (x2 >= x1)
+		Pixel(x1, y1, color);
+
+		if (delta_x >= delta_y)
 		{
-			dx = x2 - x1;
-			xIncrement = 1;
-		}
-		else
-		{
-			dx = x1 - x2;
-			xIncrement = -1;
-		}
+			// error may go below zero
+			int error(delta_y - (delta_x >> 1));
 
-		if (y2 >= y1)
-		{
-			dy = y2 - y1;
-			yIncrement = 1;
-		}
-		else
-		{
-			dy = y1 - y2;
-			yIncrement = -1;
-		}
-
-		x = x1;
-		y = y1;
-
-		if (dx >= dy)
-		{
-			dy <<= 1;
-			balance = dy - dx;
-			dx <<= 1;
-
-			while (x != x2)
+			while (x1 != x2)
 			{
-				Pixel(x, y, color);
-				if (balance >= 0)
+				if ((error >= 0) && (error || (ix > 0)))
 				{
-					y += yIncrement;
-					balance -= dx;
+					error -= delta_x;
+					y1 += iy;
 				}
-				balance += dy;
-				x += xIncrement;
-			} 
-			Pixel(x, y, color);
+				// else do nothing
+
+				error += delta_y;
+				x1 += ix;
+
+				Pixel(x1, y1, color);
+			}
 		}
 		else
 		{
-			dx <<= 1;
-			balance = dx - dy;
-			dy <<= 1;
+			// error may go below zero
+			int error(delta_x - (delta_y >> 1));
 
-			while (y != y2)
+			while (y1 != y2)
 			{
-				Pixel(x, y, color);
-				if (balance >= 0)
+				if ((error >= 0) && (error || (iy > 0)))
 				{
-					x += xIncrement;
-					balance -= dy;
+					error -= delta_y;
+					x1 += ix;
 				}
-				balance += dx;
-				y += yIncrement;
-			} 
-			Pixel(x, y, color);
+				// else do nothing
+
+				error += delta_x;
+				y1 += iy;
+
+				Pixel(x1, y1, color);
+			}
 		}
 	}
 
-	inline void PixelMode::LineClip(int32_t x1, int32_t y1, int32_t x2, int32_t y2, const Color color)
+	inline void PixelMode::LineClip(int32_t x1, int32_t y1, int32_t x2, int32_t y2, const Color& color)
 	{
-		uint32_t x = 0, y = 0;
-		uint32_t dx = 0, dy = 0;
-		uint32_t xIncrement = 0, yIncrement = 0;
-		uint32_t balance = 0;
 
-		if (x2 >= x1)
-		{
-			dx = x2 - x1;
-			xIncrement = 1;
-		}
-		else
-		{
-			dx = x1 - x2;
-			xIncrement = -1;
-		}
-
-		if (y2 >= y1)
-		{
-			dy = y2 - y1;
-			yIncrement = 1;
-		}
-		else
-		{
-			dy = y1 - y2;
-			yIncrement = -1;
-		}
-
-		x = x1;
-		y = y1;
-
-		if (dx >= dy)
-		{
-			dy <<= 1;
-			balance = dy - dx;
-			dx <<= 1;
-
-			while (x != x2)
-			{
-				PixelClip(x, y, color);
-				if (balance >= 0)
-				{
-					y += yIncrement;
-					balance -= dx;
-				}
-				balance += dy;
-				x += xIncrement;
-			}
-			PixelClip(x, y, color);
-		}
-		else
-		{
-			dx <<= 1;
-			balance = dx - dy;
-			dy <<= 1;
-
-			while (y != y2)
-			{
-				PixelClip(x, y, color);
-				if (balance >= 0)
-				{
-					x += xIncrement;
-					balance -= dy;
-				}
-				balance += dx;
-				y += yIncrement;
-			}
-			PixelClip(x, y, color);
-		}
 	}
 }
 
