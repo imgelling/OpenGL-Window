@@ -103,12 +103,15 @@ public:
 		pixelMode.Clear(game::Colors::Blue);
 
 		// Top and bottom
-		pixelMode.LineClip(0, 0, 319, 0, game::Colors::Pink);
-		pixelMode.LineClip(0, 239, 319, 239, game::Colors::Pink);
+		pixelMode.LineClip(340, 0, -1, 0, game::Colors::Pink);
+		pixelMode.LineClip(-10, 239, 409, 239, game::Colors::Pink);
 
 		// Left and right
-		pixelMode.LineClip(0, 0, 0, 239, game::Colors::Pink);
-		pixelMode.LineClip(319, 0, 319, 239, game::Colors::Pink);
+		pixelMode.LineClip(0, -10, 0, 300, game::Colors::Pink);
+		pixelMode.LineClip(319, 500, 319, -10, game::Colors::Pink);
+
+		// Weird diagonal
+		pixelMode.LineClip(30, -20, 150, 300, game::Colors::Pink);
 
 		pixelMode.Render();
 

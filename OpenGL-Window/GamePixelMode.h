@@ -491,9 +491,53 @@ namespace game
 		}
 	}
 
+	int clipTest(float p, float q, float* u1, float* u2) {
+		float r;
+		int retVal = TRUE;
+
+		if (p < 0.0) {
+			r = q / p;
+			if (r > *u2)
+				retVal = FALSE;
+			else
+				if (r > *u1)
+					*u1 = r;
+		}
+		else
+			if (p > 0.0) {
+				r = q / p;
+				if (r < *u1)
+					retVal = FALSE;
+				else if (r < *u2)
+					*u2 = r;
+			}
+			else
+				if (q < 0.0)
+					retVal = FALSE;
+
+		return (retVal);
+	}
+
+
 	inline void PixelMode::LineClip(int32_t x1, int32_t y1, int32_t x2, int32_t y2, const Color& color)
 	{
-
+		float u1 = 0.0, u2 = 1.0, dx = x2 - x1, dy;
+		if (clipTest(-dx, x1 - 0, &u1, &u2))
+			if (clipTest(dx, _bufferSize.width - 1 - x1, &u1, &u2)) {
+				dy = y2 - y1;
+				if (clipTest(-dy, y1 - 0, &u1, &u2))
+					if (clipTest(dy, _bufferSize.height - 1 - y1, &u1, &u2)) {
+						if (u2 < 1.0) {
+							x2 = x1 + u2 * dx;
+							y2 = y1 + u2 * dy;
+						}
+						if (u1 > 0.0) {
+							x1 += u1 * dx;
+							y1 += u1 * dy;
+						}
+						Line(std::round(x1), std::round(y1), std::round(x2), std::round(y2), color);
+					}
+			}
 	}
 }
 
