@@ -491,9 +491,10 @@ namespace game
 		}
 	}
 
-	int clipTest(float p, float q, float* u1, float* u2) {
-		float r;
-		int retVal = TRUE;
+	int clipTest(float_t p, float_t q, float_t* u1, float_t* u2) noexcept
+	{
+		float_t r;
+		uint32_t retVal = TRUE;
 
 		if (p < 0.0) {
 			r = q / p;
@@ -521,21 +522,24 @@ namespace game
 
 	inline void PixelMode::LineClip(int32_t x1, int32_t y1, int32_t x2, int32_t y2, const Color& color)
 	{
-		float u1 = 0.0, u2 = 1.0, dx = x2 - x1, dy;
-		if (clipTest(-dx, x1 - 0, &u1, &u2))
-			if (clipTest(dx, _bufferSize.width - 1 - x1, &u1, &u2)) {
-				dy = y2 - y1;
-				if (clipTest(-dy, y1 - 0, &u1, &u2))
-					if (clipTest(dy, _bufferSize.height - 1 - y1, &u1, &u2)) {
+		float_t u1 = 0.0;
+		float_t u2 = 1.0;
+		float_t dx = (float_t)(x2 - x1);
+		float_t dy = 0;
+		if (clipTest(-dx, (float_t)(x1 - 0), &u1, &u2))
+			if (clipTest(dx, (float_t)(_bufferSize.width - 1 - x1), &u1, &u2)) {
+				dy = (float_t)(y2 - y1);
+				if (clipTest(-dy, (float_t)(y1 - 0), &u1, &u2))
+					if (clipTest(dy, (float_t)(_bufferSize.height - 1 - y1), &u1, &u2)) {
 						if (u2 < 1.0) {
-							x2 = x1 + u2 * dx;
-							y2 = y1 + u2 * dy;
+							x2 = (int32_t)(x1 + u2 * dx);
+							y2 = (int32_t)(y1 + u2 * dy);
 						}
 						if (u1 > 0.0) {
-							x1 += u1 * dx;
-							y1 += u1 * dy;
+							x1 += (int32_t)(u1 * dx);
+							y1 += (int32_t)(u1 * dy);
 						}
-						Line(std::round(x1), std::round(y1), std::round(x2), std::round(y2), color);
+						Line((int32_t)std::round(x1), (int32_t)std::round(y1), (int32_t)std::round(x2), (int32_t)std::round(y2), color);
 					}
 			}
 	}
