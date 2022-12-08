@@ -491,46 +491,49 @@ namespace game
 		}
 	}
 
-	int clipTest(float_t p, float_t q, float_t* u1, float_t* u2) noexcept
-	{
-		float_t r;
-		uint32_t retVal = TRUE;
-
-		if (p < 0.0) {
-			r = q / p;
-			if (r > *u2)
-				retVal = FALSE;
-			else
-				if (r > *u1)
-					*u1 = r;
-		}
-		else
-			if (p > 0.0) {
-				r = q / p;
-				if (r < *u1)
-					retVal = FALSE;
-				else if (r < *u2)
-					*u2 = r;
-			}
-			else
-				if (q < 0.0)
-					retVal = FALSE;
-
-		return (retVal);
-	}
-
 
 	inline void PixelMode::LineClip(int32_t x1, int32_t y1, int32_t x2, int32_t y2, const Color& color)
 	{
+		struct _Clip
+		{
+			int clipTest(float_t p, float_t q, float_t* u1, float_t* u2) noexcept
+			{
+				float_t r;
+				uint32_t retVal = TRUE;
+
+				if (p < 0.0) {
+					r = q / p;
+					if (r > *u2)
+						retVal = FALSE;
+					else
+						if (r > *u1)
+							*u1 = r;
+				}
+				else
+					if (p > 0.0) {
+						r = q / p;
+						if (r < *u1)
+							retVal = FALSE;
+						else if (r < *u2)
+							*u2 = r;
+					}
+					else
+						if (q < 0.0)
+							retVal = FALSE;
+
+				return (retVal);
+			}
+		};
+		_Clip _clip;
 		float_t u1 = 0.0;
 		float_t u2 = 1.0;
 		float_t dx = (float_t)(x2 - x1);
 		float_t dy = 0;
-		if (clipTest(-dx, (float_t)(x1 - 0), &u1, &u2))
-			if (clipTest(dx, (float_t)(_bufferSize.width - 1 - x1), &u1, &u2)) {
+		if (_clip.clipTest(-dx, (float_t)(x1 - 0), &u1, &u2))
+			if (_clip.clipTest(dx, (float_t)(_bufferSize.width - 1 - x1), &u1, &u2)) {
 				dy = (float_t)(y2 - y1);
-				if (clipTest(-dy, (float_t)(y1 - 0), &u1, &u2))
-					if (clipTest(dy, (float_t)(_bufferSize.height - 1 - y1), &u1, &u2)) {
+				if (_clip.clipTest(-dy, (float_t)(y1 - 0), &u1, &u2))
+					if (_clip.clipTest(dy, (float_t)(_bufferSize.height - 1 - y1), &u1, &u2)) {
 						if (u2 < 1.0) {
 							x2 = (int32_t)(x1 + u2 * dx);
 							y2 = (int32_t)(y1 + u2 * dy);
