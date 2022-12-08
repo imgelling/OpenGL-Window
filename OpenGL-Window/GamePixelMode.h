@@ -32,6 +32,10 @@ namespace game
 		void PixelClip(const int32_t x, const int32_t y, const game::Color& color);
 		void Line(int32_t x1, int32_t y1, int32_t x2, int32_t y2, const Color& color);
 		void LineClip(int32_t x1, int32_t y1,  int32_t x2,  int32_t y2, const Color& color);
+		void Circle(int32_t x, int32_t y, int32_t radius, const Color& color);
+		void CircleClip(int32_t x, int32_t y, int32_t radius, const Color& color);
+		void Rect(const Recti& rectangle, const Color& color);
+		void RectClip(const Recti& rectangle, const Color& color);
 	private:
 		Texture2D _frameBuffer[2];
 #if defined(GAME_OPENGL) & !defined(GAME_USE_SHADERS)
@@ -437,14 +441,15 @@ namespace game
 
 	inline void PixelMode::Line(int32_t x1, int32_t y1, int32_t x2, int32_t y2, const Color& color)
 	{
-		int delta_x(x2 - x1);
+		int32_t delta_x(x2 - x1);
+		int32_t delta_y(y2 - y1);
+
 		// if x1 == x2, then it does not matter what we set here
-		signed char const ix((delta_x > 0) - (delta_x < 0));
+		int8_t const ix((delta_x > 0) - (delta_x < 0));
 		delta_x = abs(delta_x) << 1;
 
-		int delta_y(y2 - y1);
 		// if y1 == y2, then it does not matter what we set here
-		signed char const iy((delta_y > 0) - (delta_y < 0));
+		int8_t const iy((delta_y > 0) - (delta_y < 0));
 		delta_y = abs(delta_y) << 1;
 
 		Pixel(x1, y1, color);
@@ -452,7 +457,7 @@ namespace game
 		if (delta_x >= delta_y)
 		{
 			// error may go below zero
-			int error(delta_y - (delta_x >> 1));
+			int32_t error(delta_y - (delta_x >> 1));
 
 			while (x1 != x2)
 			{
@@ -472,7 +477,7 @@ namespace game
 		else
 		{
 			// error may go below zero
-			int error(delta_x - (delta_y >> 1));
+			int32_t error(delta_x - (delta_y >> 1));
 
 			while (y1 != y2)
 			{
@@ -490,7 +495,6 @@ namespace game
 			}
 		}
 	}
-
 
 	inline void PixelMode::LineClip(int32_t x1, int32_t y1, int32_t x2, int32_t y2, const Color& color)
 	{
@@ -529,6 +533,7 @@ namespace game
 		float_t u2 = 1.0;
 		float_t dx = (float_t)(x2 - x1);
 		float_t dy = 0;
+
 		if (_clip.clipTest(-dx, (float_t)(x1 - 0), &u1, &u2))
 			if (_clip.clipTest(dx, (float_t)(_bufferSize.width - 1 - x1), &u1, &u2)) {
 				dy = (float_t)(y2 - y1);
@@ -545,6 +550,40 @@ namespace game
 						Line((int32_t)std::round(x1), (int32_t)std::round(y1), (int32_t)std::round(x2), (int32_t)std::round(y2), color);
 					}
 			}
+	}
+
+	inline void PixelMode::Circle(int32_t x, int32_t y, int32_t radius, const Color& color)
+	{
+
+	}
+
+	inline void PixelMode::CircleClip(int32_t x, int32_t y, int32_t radius, const Color& color)
+	{
+
+	}
+
+	inline void PixelMode::Rect(const Recti& rectangle, const Color& color)
+	{
+		// Top
+		Line(rectangle.x, rectangle.y, rectangle.right, rectangle.y, color);
+		// Bottom
+		Line(rectangle.x, rectangle.bottom, rectangle.right, rectangle.bottom, color);
+		// Left
+		Line(rectangle.x, rectangle.y, rectangle.x, rectangle.bottom, color);
+		// Right
+		Line(rectangle.right, rectangle.y, rectangle.right, rectangle.bottom, color);
+	}
+
+	inline void PixelMode::RectClip(const Recti& rectangle, const Color& color)
+	{
+		// Top
+		LineClip(rectangle.x, rectangle.y, rectangle.right, rectangle.y, color);
+		// Bottom
+		LineClip(rectangle.x, rectangle.bottom, rectangle.right, rectangle.bottom, color);
+		// Left
+		LineClip(rectangle.x, rectangle.y, rectangle.x, rectangle.bottom, color);
+		// Right
+		LineClip(rectangle.right, rectangle.y, rectangle.right, rectangle.bottom, color);
 	}
 }
 

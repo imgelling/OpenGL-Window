@@ -113,6 +113,21 @@ public:
 		// Weird diagonal
 		pixelMode.LineClip(30, -20, 150, 300, game::Colors::Pink);
 
+		// Rectangle
+		game::Recti rect;
+		rect.left = 1;
+		rect.top = 1;
+		rect.right = 318;
+		rect.bottom = 238;
+		pixelMode.Rect(rect, game::Colors::White);
+
+		// Rectangle Clipped
+		rect.left = -20;
+		rect.top = -20;
+		rect.right = 60;
+		rect.bottom = 60;
+		pixelMode.RectClip(rect, game::Colors::Green);
+
 		pixelMode.Render();
 
 		spriteBatch.Begin();
