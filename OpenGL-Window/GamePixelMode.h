@@ -407,6 +407,30 @@ namespace game
 
 	inline void PixelMode::Pixel(const int32_t x, const int32_t y, const game::Color& color)
 	{
+#if defined(_DEBUG)
+		if (x < 0)
+		{
+			std::cout << "X < 0\n";
+			return;
+		}
+		if (y < 0)
+		{
+			std::cout << "Y < 0\n";
+			return;
+		}
+		if (x > _bufferSize.width - 1)
+		{
+			std::cout << "X > _bufferSize - 1\n";
+			return;
+		}
+		if (y > _bufferSize.height - 1)
+		{
+			std::cout << "Y > _bufferSize - 1\n";
+			return;
+		}
+
+
+#endif
 #if defined(GAME_DIRECTX9)
 		if (enginePointer->geIsUsing(GAME_DIRECTX9))
 		{
@@ -538,7 +562,7 @@ namespace game
 			if (_clip.clipTest(dx, (float_t)(_bufferSize.width - 1 - x1), &u1, &u2)) {
 				dy = (float_t)(y2 - y1);
 				if (_clip.clipTest(-dy, (float_t)(y1 - 0), &u1, &u2))
-					if (_clip.clipTest(dy, (float_t)(_bufferSize.height - 1 - y1), &u1, &u2)) {
+					if (_clip.clipTest(dy, (float_t)(_bufferSize.height - 2 - y1), &u1, &u2)) {
 						if (u2 < 1.0) {
 							x2 = (int32_t)(x1 + u2 * dx);
 							y2 = (int32_t)(y1 + u2 * dy);
@@ -547,6 +571,12 @@ namespace game
 							x1 += (int32_t)(u1 * dx);
 							y1 += (int32_t)(u1 * dy);
 						}
+						// --------- TEMP (fixes error), to actually fix error, draw h and v lines before
+						if (y1 < 0)
+						{
+							y1 = 0;
+						}
+						// ---------- END TEMP
 						Line((int32_t)std::round(x1), (int32_t)std::round(y1), (int32_t)std::round(x2), (int32_t)std::round(y2), color);
 					}
 			}
@@ -554,7 +584,38 @@ namespace game
 
 	inline void PixelMode::Circle(int32_t x, int32_t y, int32_t radius, const Color& color)
 	{
+		if (radius < 0 || x < -radius || y < -radius || x - _bufferSize.width > radius || y - _bufferSize.height > radius)
+			return;
 
+		if (radius > 0)
+		{
+			int x0 = 0;
+			int y0 = radius;
+			int d = 3 - 2 * radius;
+
+			while (y0 >= x0) // only formulate 1/8 of circle
+			{
+				// Draw even octants
+				Pixel(x + x0, y - y0, color);// Q6 - upper right right
+				Pixel(x + y0, y + x0, color);// Q4 - lower lower right
+				Pixel(x - x0, y + y0, color);// Q2 - lower left left
+				Pixel(x - y0, y - x0, color);// Q0 - upper upper left
+				if (x0 != 0 && x0 != y0)
+				{
+					Pixel(x + y0, y - x0, color);// Q7 - upper upper right
+					Pixel(x + x0, y + y0, color);// Q5 - lower right right
+					Pixel(x - y0, y + x0, color);// Q3 - lower lower left
+					Pixel(x - x0, y - y0, color);// Q1 - upper left left
+				}
+
+				if (d < 0)
+					d += 4 * x0++ + 6;
+				else
+					d += 4 * (x0++ - y0--) + 10;
+			}
+		}
+		else
+			Pixel(x, y, color);
 	}
 
 	inline void PixelMode::CircleClip(int32_t x, int32_t y, int32_t radius, const Color& color)

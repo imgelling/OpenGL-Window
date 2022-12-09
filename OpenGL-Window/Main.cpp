@@ -111,7 +111,7 @@ public:
 		pixelMode.LineClip(319, 500, 319, -10, game::Colors::Pink);
 
 		// Weird diagonal
-		pixelMode.LineClip(30, -20, 150, 300, game::Colors::Pink);
+		pixelMode.LineClip(30, -20, geMouse.GetPosition().x, geMouse.GetPosition().y, game::Colors::Pink);
 
 		// Rectangle
 		game::Recti rect;
@@ -122,11 +122,15 @@ public:
 		pixelMode.Rect(rect, game::Colors::White);
 
 		// Rectangle Clipped
-		rect.left = -20;
-		rect.top = -20;
-		rect.right = 60;
-		rect.bottom = 60;
+		// Mouse position needs to be scaled and moved
+		rect.left = geMouse.GetPosition().x;
+		rect.top = geMouse.GetPosition().y;
+		rect.right = 60 + geMouse.GetPosition().x;
+		rect.bottom = 60 + geMouse.GetPosition().y;
 		pixelMode.RectClip(rect, game::Colors::Green);
+
+		// Circle
+		pixelMode.Circle(160, 120, 75, game::Colors::DarkGray);
 
 		pixelMode.Render();
 
@@ -134,7 +138,7 @@ public:
 		for (int i = 0; i < 40; i++)
 			spriteBatch.Draw(spriteTexture, { 10 + (i * 100), 10 }, game::Colors::White);
 
-		spriteBatch.DrawString(spriteFont, "fps : " + std::to_string(geGetFramesPerSecond()) + " ups : " + std::to_string(geGetUpdatesPerSecond()) + " cpu : " + std::to_string(geGetCPUFrequency()) + "Mhz", 10, 200, game::Colors::Red);
+		spriteBatch.DrawString(spriteFont, "FPS : " + std::to_string(geGetFramesPerSecond()) + " ups : " + std::to_string(geGetUpdatesPerSecond()) + " cpu : " + std::to_string(geGetCPUFrequency()) + "Mhz", 10, 200, game::Colors::Red);
 		spriteBatch.DrawString(spriteFont, "Window Size: " + std::to_string(geGetWindowSize().width) + "x" + std::to_string(geGetWindowSize().height), 10, 220, game::Colors::Red);
 		spriteBatch.End();
 
