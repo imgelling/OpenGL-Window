@@ -469,11 +469,11 @@ namespace game
 		int32_t delta_y(y2 - y1);
 
 		// if x1 == x2, then it does not matter what we set here
-		int8_t const ix((delta_x > 0) - (delta_x < 0));
+		const int8_t ix((delta_x > 0) - (delta_x < 0));
 		delta_x = abs(delta_x) << 1;
 
 		// if y1 == y2, then it does not matter what we set here
-		int8_t const iy((delta_y > 0) - (delta_y < 0));
+		const int8_t iy((delta_y > 0) - (delta_y < 0));
 		delta_y = abs(delta_y) << 1;
 
 		Pixel(x1, y1, color);
@@ -527,12 +527,11 @@ namespace game
 			int clipTest(float_t p, float_t q, float_t* u1, float_t* u2) noexcept
 			{
 				float_t r(0.0f);
-				uint32_t retVal(TRUE);
 
 				if (p < 0.0) {
 					r = q / p;
 					if (r > *u2)
-						retVal = FALSE;
+						return FALSE;
 					else
 						if (r > *u1)
 							*u1 = r;
@@ -541,15 +540,15 @@ namespace game
 					if (p > 0.0) {
 						r = q / p;
 						if (r < *u1)
-							retVal = FALSE;
+							return FALSE;
 						else if (r < *u2)
 							*u2 = r;
 					}
 					else
 						if (q < 0.0)
-							retVal = FALSE;
+							return FALSE;
 
-				return (retVal);
+				return TRUE;
 			}
 		};
 
