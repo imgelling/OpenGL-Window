@@ -34,6 +34,8 @@ namespace game
 		void LineClip(int32_t x1, int32_t y1,  int32_t x2,  int32_t y2, const Color& color);
 		void Circle(int32_t x, int32_t y, int32_t radius, const Color& color);
 		void CircleClip(int32_t x, int32_t y, int32_t radius, const Color& color);
+		void CircleFilled(int32_t x, int32_t y, int32_t radius, const Color& color);
+		void CircleFilledClip(int32_t x, int32_t y, int32_t radius, const Color& color);
 		void Rect(const Recti& rectangle, const Color& color);
 		void RectClip(const Recti& rectangle, const Color& color);
 	private:
@@ -522,6 +524,8 @@ namespace game
 
 	inline void PixelMode::LineClip(int32_t x1, int32_t y1, int32_t x2, int32_t y2, const Color& color)
 	{
+		//Liang - Barsky Algorithm
+
 		struct _Clip
 		{
 			int clipTest(float_t p, float_t q, float_t* u1, float_t* u2) noexcept
@@ -618,7 +622,120 @@ namespace game
 
 	inline void PixelMode::CircleClip(int32_t x, int32_t y, int32_t radius, const Color& color)
 	{
+		if (radius < 0 || x < -radius || y < -radius || x - _bufferSize.width > radius || y - _bufferSize.height > radius)
+			return;
 
+		if (radius > 0)
+		{
+			int32_t x0(0);
+			int32_t y0(radius);
+			int32_t d(3 - 2 * radius);
+
+			while (y0 >= x0) // only formulate 1/8 of circle
+			{
+				// Draw even octants
+				PixelClip(x + x0, y - y0, color);// Q6 - upper right right
+				PixelClip(x + y0, y + x0, color);// Q4 - lower lower right
+				PixelClip(x - x0, y + y0, color);// Q2 - lower left left
+				PixelClip(x - y0, y - x0, color);// Q0 - upper upper left
+				if (x0 != 0 && x0 != y0)
+				{
+					PixelClip(x + y0, y - x0, color);// Q7 - upper upper right
+					PixelClip(x + x0, y + y0, color);// Q5 - lower right right
+					PixelClip(x - y0, y + x0, color);// Q3 - lower lower left
+					PixelClip(x - x0, y - y0, color);// Q1 - upper left left
+				}
+
+				if (d < 0)
+					d += 4 * x0++ + 6;
+				else
+					d += 4 * (x0++ - y0--) + 10;
+			}
+		}
+		else
+			PixelClip(x, y, color);
+	}
+
+	inline void PixelMode::CircleFilled(int32_t x, int32_t y, int32_t radius, const Color& color)
+	{
+		if (radius < 0 || x < -radius || y < -radius || x - _bufferSize.width > radius || y - _bufferSize.height > radius)
+			return;
+
+		if (radius > 0)
+		{
+			int x0 = 0;
+			int y0 = radius;
+			int d = 3 - 2 * radius;
+
+			auto drawline = [&](int sx, int ex, int y)
+			{
+				for (int x = sx; x <= ex; x++)
+					Pixel(x, y, color);
+			};
+
+			while (y0 >= x0)
+			{
+				drawline(x - y0, x + y0, y - x0);
+				if (x0 > 0)	drawline(x - y0, x + y0, y + x0);
+
+				if (d < 0)
+					d += 4 * x0++ + 6;
+				else
+				{
+					if (x0 != y0)
+					{
+						drawline(x - x0, x + x0, y - y0);
+						drawline(x - x0, x + x0, y + y0);
+					}
+					d += 4 * (x0++ - y0--) + 10;
+				}
+			}
+		}
+		else
+			Pixel(x, y, color);
+	}
+
+	inline void PixelMode::CircleFilledClip(int32_t x, int32_t y, int32_t radius, const Color& color)
+	{
+		if (radius < 0 || x < -radius || y < -radius || x - _bufferSize.width > radius || y - _bufferSize.height > radius)
+			return;
+
+		if (radius > 0)
+		{
+			int x0 = 0;
+			int y0 = radius;
+			int d = 3 - 2 * radius;
+
+			auto drawline = [&](int sx, int ex, int y)
+			{
+				if (sx < 0) sx = 0;
+				if (ex > _bufferSize.width - 1) ex = _bufferSize.width - 1;
+				if (y < 0) y = 0;
+				if (y > _bufferSize.height - 1) y = _bufferSize.height - 1;
+				for (int x = sx; x <= ex; x++)
+					Pixel(x, y, color);
+			};
+
+			while (y0 >= x0)
+			{
+				drawline(x - y0, x + y0, y - x0);
+				if (x0 > 0)	drawline(x - y0, x + y0, y + x0);
+
+				if (d < 0)
+					d += 4 * x0++ + 6;
+				else
+				{
+					if (x0 != y0)
+					{
+						drawline(x - x0, x + x0, y - y0);
+						drawline(x - x0, x + x0, y + y0);
+					}
+					d += 4 * (x0++ - y0--) + 10;
+				}
+			}
+		}
+		else
+			Pixel(x, y, color);
 	}
 
 	inline void PixelMode::Rect(const Recti& rectangle, const Color& color)

@@ -121,16 +121,16 @@ public:
 		rect.bottom = 238;
 		pixelMode.Rect(rect, game::Colors::White);
 
-		// Rectangle Clipped
+		// Circle Clipped
 		// Mouse position needs to be scaled and moved
 		rect.left = geMouse.GetPosition().x;
 		rect.top = geMouse.GetPosition().y;
 		rect.right = 60 + geMouse.GetPosition().x;
 		rect.bottom = 60 + geMouse.GetPosition().y;
-		pixelMode.RectClip(rect, game::Colors::Green);
+		pixelMode.CircleFilledClip(rect.x, rect.y, 40, game::Colors::Green);
 
 		// Circle
-		pixelMode.Circle(160, 120, 75, game::Colors::DarkGray);
+		pixelMode.CircleFilled(160, 120, 75, game::Colors::DarkGray);
 
 		pixelMode.Render();
 
