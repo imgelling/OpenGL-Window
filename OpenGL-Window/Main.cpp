@@ -111,7 +111,7 @@ public:
 		pixelMode.LineClip(319, 500, 319, -10, game::Colors::Pink);
 
 		// Weird diagonal
-		pixelMode.LineClip(30, -20, geMouse.GetPosition().x, geMouse.GetPosition().y, game::Colors::Pink);
+		pixelMode.LineClip(-20, -10, geMouse.GetPosition().x, geMouse.GetPosition().y, game::Colors::Pink);
 
 		// Rectangle
 		game::Recti rect;

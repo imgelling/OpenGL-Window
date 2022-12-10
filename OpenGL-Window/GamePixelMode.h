@@ -526,8 +526,8 @@ namespace game
 		{
 			int clipTest(float_t p, float_t q, float_t* u1, float_t* u2) noexcept
 			{
-				float_t r;
-				uint32_t retVal = TRUE;
+				float_t r(0.0f);
+				uint32_t retVal(TRUE);
 
 				if (p < 0.0) {
 					r = q / p;
@@ -552,32 +552,31 @@ namespace game
 				return (retVal);
 			}
 		};
-		_Clip _clip;
-		float_t u1 = 0.0;
-		float_t u2 = 1.0;
-		float_t dx = (float_t)(x2 - x1);
-		float_t dy = 0;
 
-		if (_clip.clipTest(-dx, (float_t)(x1 - 0), &u1, &u2))
-			if (_clip.clipTest(dx, (float_t)(_bufferSize.width - 1 - x1), &u1, &u2)) {
-				dy = (float_t)(y2 - y1);
-				if (_clip.clipTest(-dy, (float_t)(y1 - 0), &u1, &u2))
-					if (_clip.clipTest(dy, (float_t)(_bufferSize.height - 2 - y1), &u1, &u2)) {
+		_Clip _clip;
+		float_t u1(0.0f);
+		float_t u2(1.0f);
+		float_t dx((float_t)(x2 - x1));
+		float_t dy(0);
+		float_t x1f((float_t)x1);
+		float_t x2f((float_t)x2);
+		float_t y1f((float_t)y1);
+		float_t y2f((float_t)y2);
+
+		if (_clip.clipTest(-dx, x1f - 0, &u1, &u2))
+			if (_clip.clipTest(dx, _bufferSize.width - 1 - x1f, &u1, &u2)) {
+				dy = y2f - y1f;
+				if (_clip.clipTest(-dy, y1f, &u1, &u2))
+					if (_clip.clipTest(dy, _bufferSize.height - 1 - y1f, &u1, &u2)) {
 						if (u2 < 1.0) {
-							x2 = (int32_t)(x1 + u2 * dx);
-							y2 = (int32_t)(y1 + u2 * dy);
+							x2f = x1f + u2 * dx;
+							y2f = y1f + u2 * dy;
 						}
 						if (u1 > 0.0) {
-							x1 += (int32_t)(u1 * dx);
-							y1 += (int32_t)(u1 * dy);
+							x1f += u1 * dx;
+							y1f += u1 * dy;
 						}
-						// --------- TEMP (fixes error), to actually fix error, draw h and v lines before
-						if (y1 < 0)
-						{
-							y1 = 0;
-						}
-						// ---------- END TEMP
-						Line((int32_t)std::round(x1), (int32_t)std::round(y1), (int32_t)std::round(x2), (int32_t)std::round(y2), color);
+						Line((int32_t)std::round(x1f), (int32_t)std::round(y1f), (int32_t)std::round(x2f), (int32_t)std::round(y2f), color);
 					}
 			}
 	}
