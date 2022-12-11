@@ -38,8 +38,13 @@ namespace game
 		void CircleFilledClip(int32_t x, int32_t y, int32_t radius, const Color& color);
 		void Rect(const Recti& rectangle, const Color& color);
 		void RectClip(const Recti& rectangle, const Color& color);
+		Pointi ScaleMouse(const Pointi& mouseCoords);
 	private:
 		Texture2D _frameBuffer[2];
+		Vector2f _scale;
+		Vector2f _positionOfScaledTexture;
+		//game::Vector2f scale;
+		Vector2f _sizeOfScaledTexture;
 #if defined(GAME_OPENGL) & !defined(GAME_USE_SHADERS)
 		uint32_t _compiledQuad;
 #endif
@@ -191,7 +196,7 @@ namespace game
 #if defined(GAME_DIRECTX11)
 		if (enginePointer->geIsUsing(GAME_DIRECTX11))
 		{
-			D3D11_MAPPED_SUBRESOURCE data;// = nullptr;
+			D3D11_MAPPED_SUBRESOURCE data;
 			HRESULT hr;
 			hr = enginePointer->d3d11Context->Map(_frameBuffer[_currentBuffer].textureInterface11, 0, D3D11_MAP_WRITE_DISCARD, 0, &data);
 			memcpy(data.pData, (unsigned char*)_video, sizeof(unsigned char) * _frameBuffer[_currentBuffer].width * _frameBuffer[_currentBuffer].height * 4);
@@ -203,55 +208,55 @@ namespace game
 	inline void PixelMode::_ScaleQuadToWindow()
 	{
 
-		game::Vector2f positionOfScaledTexture;
-		game::Vector2f scale;
-		game::Vector2f sizeOfScaledTexture;
+		//game::Vector2f _positionOfScaledTexture;
+		////game::Vector2f scale;
+		//game::Vector2f _sizeOfScaledTexture;
 		float_t tempScale = 0.0f;
 		if (_windowSize.height < _windowSize.width)
 		{
-			scale.y = (float_t)_windowSize.height * _frameBuffer[_currentBuffer].oneOverHeight;
+			_scale.y = (float_t)_windowSize.height * _frameBuffer[_currentBuffer].oneOverHeight;
 			tempScale = (float_t)_windowSize.width * _frameBuffer[_currentBuffer].oneOverWidth;
-			if (tempScale > scale.y)
+			if (tempScale > _scale.y)
 			{
-				scale.x = scale.y;
+				_scale.x = _scale.y;
 			}
 			else
 			{
-				scale.x = scale.y = tempScale;
-				positionOfScaledTexture.y = ((_windowSize.height >> 1) - ((float_t)_frameBuffer[_currentBuffer].height * scale.y / 2.0f));
+				_scale.x = _scale.y = tempScale;
+				_positionOfScaledTexture.y = ((_windowSize.height >> 1) - ((float_t)_frameBuffer[_currentBuffer].height * _scale.y / 2.0f));
 			}
-			positionOfScaledTexture.x = ((_windowSize.width >> 1) - ((float_t)_frameBuffer[_currentBuffer].width * scale.x / 2.0f));
+			_positionOfScaledTexture.x = ((_windowSize.width >> 1) - ((float_t)_frameBuffer[_currentBuffer].width * _scale.x / 2.0f));
 		}
 		else if (_windowSize.height > _windowSize.width)
 		{
-			scale.x = (float_t)_windowSize.width * _frameBuffer[_currentBuffer].oneOverWidth;
-			scale.y = scale.x;
-			positionOfScaledTexture.y = ((_windowSize.height >> 1) - ((float_t)_frameBuffer[_currentBuffer].height * scale.y / 2.0f));
+			_scale.x = (float_t)_windowSize.width * _frameBuffer[_currentBuffer].oneOverWidth;
+			_scale.y = _scale.x;
+			_positionOfScaledTexture.y = ((_windowSize.height >> 1) - ((float_t)_frameBuffer[_currentBuffer].height * _scale.y / 2.0f));
 		}
 		else
 		{
-			scale = { 1.0f, 1.0f };
+			_scale = { 1.0f, 1.0f };
 		}
 
 		// Set the size of the scaled texture
-		sizeOfScaledTexture.width = positionOfScaledTexture.x + (_frameBuffer[_currentBuffer].width * scale.x);
-		sizeOfScaledTexture.height = positionOfScaledTexture.y + (_frameBuffer[_currentBuffer].height * scale.y);
+		_sizeOfScaledTexture.width = _positionOfScaledTexture.x + (_frameBuffer[_currentBuffer].width * _scale.x);
+		_sizeOfScaledTexture.height = _positionOfScaledTexture.y + (_frameBuffer[_currentBuffer].height * _scale.y);
 
 		// Pixel offset fix
-		positionOfScaledTexture.x -= _frameBuffer[_currentBuffer].oneOverWidth;
-		positionOfScaledTexture.y -= _frameBuffer[_currentBuffer].oneOverHeight;
-		sizeOfScaledTexture.width -= _frameBuffer[_currentBuffer].oneOverWidth;
-		sizeOfScaledTexture.height -= _frameBuffer[_currentBuffer].oneOverHeight;
+		_positionOfScaledTexture.x -= _frameBuffer[_currentBuffer].oneOverWidth;
+		_positionOfScaledTexture.y -= _frameBuffer[_currentBuffer].oneOverHeight;
+		_sizeOfScaledTexture.width -= _frameBuffer[_currentBuffer].oneOverWidth;
+		_sizeOfScaledTexture.height -= _frameBuffer[_currentBuffer].oneOverHeight;
 
 #if defined(GAME_OPENGL) & !defined(GAME_USE_SHADERS)
 		if (enginePointer->geIsUsing(GAME_OPENGL))
 		{
 
 			// Homoginize the scaled rect to -1 to 1 range using
-			positionOfScaledTexture.x = (positionOfScaledTexture.x * 2.0f / (float_t)_windowSize.width) - 1.0f;
-			positionOfScaledTexture.y = (positionOfScaledTexture.y * 2.0f / (float_t)_windowSize.height) - 1.0f;
-			sizeOfScaledTexture.width = ((float_t)sizeOfScaledTexture.width * 2.0f / (float_t)_windowSize.width) - 1.0f;
-			sizeOfScaledTexture.height = ((float_t)sizeOfScaledTexture.height * 2.0f / (float_t)_windowSize.height) - 1.0f;
+			_positionOfScaledTexture.x = (_positionOfScaledTexture.x * 2.0f / (float_t)_windowSize.width) - 1.0f;
+			_positionOfScaledTexture.y = (_positionOfScaledTexture.y * 2.0f / (float_t)_windowSize.height) - 1.0f;
+			_sizeOfScaledTexture.width = ((float_t)_sizeOfScaledTexture.width * 2.0f / (float_t)_windowSize.width) - 1.0f;
+			_sizeOfScaledTexture.height = ((float_t)_sizeOfScaledTexture.height * 2.0f / (float_t)_windowSize.height) - 1.0f;
 
 			glNewList(_compiledQuad, GL_COMPILE);
 			{
@@ -259,19 +264,19 @@ namespace game
 				//bl
 				glColor3f(1.0f, 1.0f, 1.0f);
 				glTexCoord2f(0, 1);
-				glVertex2f(positionOfScaledTexture.x, -sizeOfScaledTexture.height);
+				glVertex2f(_positionOfScaledTexture.x, -_sizeOfScaledTexture.height);
 				//br
 				glColor3f(1.0f, 1.0f, 1.0f);
 				glTexCoord2f(1, 1);
-				glVertex2f(sizeOfScaledTexture.width, -sizeOfScaledTexture.height);
+				glVertex2f(_sizeOfScaledTexture.width, -_sizeOfScaledTexture.height);
 				//tr
 				glColor3f(1.0f, 1.0f, 1.0f);
 				glTexCoord2f(1.0f, 0.0f);
-				glVertex2f(sizeOfScaledTexture.width, -positionOfScaledTexture.y);
+				glVertex2f(_sizeOfScaledTexture.width, -_positionOfScaledTexture.y);
 				// tl
 				glColor3f(1.0f, 1.0f, 1.0f);
 				glTexCoord2f(0, 0);
-				glVertex2f(positionOfScaledTexture.x, -positionOfScaledTexture.y);
+				glVertex2f(_positionOfScaledTexture.x, -_positionOfScaledTexture.y);
 
 				glEnd();
 			}
@@ -284,24 +289,24 @@ namespace game
 			VOID* pVoid = nullptr;  
 
 			// tl
-			_QuadVertices9[0].x = positionOfScaledTexture.x;
-			_QuadVertices9[0].y = positionOfScaledTexture.y;
+			_QuadVertices9[0].x = _positionOfScaledTexture.x;
+			_QuadVertices9[0].y = _positionOfScaledTexture.y;
 			// tr
-			_QuadVertices9[1].x = sizeOfScaledTexture.width;
-			_QuadVertices9[1].y = positionOfScaledTexture.y;
+			_QuadVertices9[1].x = _sizeOfScaledTexture.width;
+			_QuadVertices9[1].y = _positionOfScaledTexture.y;
 			// bl
-			_QuadVertices9[2].x = positionOfScaledTexture.x;
-			_QuadVertices9[2].y = sizeOfScaledTexture.height;
+			_QuadVertices9[2].x = _positionOfScaledTexture.x;
+			_QuadVertices9[2].y = _sizeOfScaledTexture.height;
 
 			// tr
-			_QuadVertices9[3].x = sizeOfScaledTexture.width;
-			_QuadVertices9[3].y = positionOfScaledTexture.y;
+			_QuadVertices9[3].x = _sizeOfScaledTexture.width;
+			_QuadVertices9[3].y = _positionOfScaledTexture.y;
 			// br
-			_QuadVertices9[4].x = sizeOfScaledTexture.width;
-			_QuadVertices9[4].y = sizeOfScaledTexture.height;
+			_QuadVertices9[4].x = _sizeOfScaledTexture.width;
+			_QuadVertices9[4].y = _sizeOfScaledTexture.height;
 			// bl
-			_QuadVertices9[5].x = positionOfScaledTexture.x;
-			_QuadVertices9[5].y = sizeOfScaledTexture.height;
+			_QuadVertices9[5].x = _positionOfScaledTexture.x;
+			_QuadVertices9[5].y = _sizeOfScaledTexture.height;
 
 			// Copy vertices to the vertex buffer
 			_vertexBuffer9->Lock(0, 0, (void**)&pVoid, 0);
@@ -760,6 +765,17 @@ namespace game
 		LineClip(rectangle.x, rectangle.y, rectangle.x, rectangle.bottom, color);
 		// Right
 		LineClip(rectangle.right, rectangle.y, rectangle.right, rectangle.bottom, color);
+	}
+
+	inline Pointi PixelMode::ScaleMouse(const Pointi& mouseCoords)
+	{
+		Pointi scaledMouseCoords;
+
+		scaledMouseCoords.x = (int32_t)(mouseCoords.x - _positionOfScaledTexture.x);
+		scaledMouseCoords.y = (int32_t)(mouseCoords.y - _positionOfScaledTexture.y);
+		scaledMouseCoords.x = (int32_t)(scaledMouseCoords.x * (1.0 / _scale.x));
+		scaledMouseCoords.y = (int32_t)(scaledMouseCoords.y * (1.0 / _scale.y));
+		return scaledMouseCoords;
 	}
 }
 

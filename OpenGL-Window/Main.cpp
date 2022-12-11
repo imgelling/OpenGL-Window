@@ -36,7 +36,7 @@ public:
 		attributes.DebugMode = true;
 		attributes.MultiSamples = 8;
 		attributes.RenderingAPI = game::RenderAPI::DirectX9; 
-		attributes.RenderingAPI = game::RenderAPI::OpenGL;
+		//attributes.RenderingAPI = game::RenderAPI::OpenGL;
 		//attributes.RenderingAPI = game::RenderAPI::DirectX11;
 		
 		geSetAttributes(attributes);
@@ -111,7 +111,9 @@ public:
 		pixelMode.LineClip(319, 500, 319, -10, game::Colors::Pink);
 
 		// Weird diagonal
-		pixelMode.LineClip(-20, -10, geMouse.GetPosition().x, geMouse.GetPosition().y, game::Colors::Pink);
+		game::Pointi test = geMouse.GetPosition();
+		game::Pointi sm = pixelMode.ScaleMouse(test);
+		pixelMode.LineClip(-20, -10, sm.x, sm.y, game::Colors::Pink);
 
 		// Rectangle
 		game::Recti rect;
@@ -123,11 +125,11 @@ public:
 
 		// Circle Clipped
 		// Mouse position needs to be scaled and moved
-		rect.left = geMouse.GetPosition().x;
-		rect.top = geMouse.GetPosition().y;
+		rect.left = sm.x;// geMouse.GetPosition().x;
+		rect.top = sm.y;// geMouse.GetPosition().y;
 		rect.right = 60 + geMouse.GetPosition().x;
 		rect.bottom = 60 + geMouse.GetPosition().y;
-		pixelMode.CircleFilledClip(rect.x, rect.y, 40, game::Colors::Green);
+		//pixelMode.CircleFilledClip(rect.x, rect.y, 40, game::Colors::Green);
 
 		// Circle
 		pixelMode.CircleFilled(160, 120, 75, game::Colors::DarkGray);
