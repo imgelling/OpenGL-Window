@@ -27,23 +27,23 @@ namespace game
 
 		bool Initialize(const Vector2i& sizeOfScreen);
 		void Render();
-		void Clear(const Color &color);
-		void Pixel(const int32_t x, const int32_t y, const game::Color& color);
-		void PixelClip(const int32_t x, const int32_t y, const game::Color& color);
-		void Line(int32_t x1, int32_t y1, int32_t x2, int32_t y2, const Color& color);
-		void LineClip(int32_t x1, int32_t y1,  int32_t x2,  int32_t y2, const Color& color);
-		void Circle(int32_t x, int32_t y, int32_t radius, const Color& color);
-		void CircleClip(int32_t x, int32_t y, int32_t radius, const Color& color);
-		void CircleFilled(int32_t x, int32_t y, int32_t radius, const Color& color);
-		void CircleFilledClip(int32_t x, int32_t y, int32_t radius, const Color& color);
-		void Rect(const Recti& rectangle, const Color& color);
-		void RectClip(const Recti& rectangle, const Color& color);
-		Pointi ScaleMouse(const Pointi& mouseCoords);
+		void Clear(const Color &color) noexcept;
+		void Pixel(const int32_t x, const int32_t y, const game::Color& color) noexcept;
+		void PixelClip(const int32_t x, const int32_t y, const game::Color& color) noexcept;
+		void Line(int32_t x1, int32_t y1, int32_t x2, int32_t y2, const Color& color) noexcept;
+		void LineClip(int32_t x1, int32_t y1,  int32_t x2,  int32_t y2, const Color& color) noexcept;
+		void Circle(int32_t x, int32_t y, int32_t radius, const Color& color) noexcept;
+		void CircleClip(int32_t x, int32_t y, int32_t radius, const Color& color) noexcept;
+		void CircleFilled(int32_t x, int32_t y, int32_t radius, const Color& color) noexcept;
+		void CircleFilledClip(int32_t x, int32_t y, int32_t radius, const Color& color) noexcept;
+		void Rect(const Recti& rectangle, const Color& color) noexcept;
+		void RectClip(const Recti& rectangle, const Color& color) noexcept;
+		Pointi ScaleMouseToPixel(const Pointi& mouseCoords) noexcept;
 	private:
 		Texture2D _frameBuffer[2];
 		Vector2f _scale;
+		Vector2f _oneOverScale;
 		Vector2f _positionOfScaledTexture;
-		//game::Vector2f scale;
 		Vector2f _sizeOfScaledTexture;
 #if defined(GAME_OPENGL) & !defined(GAME_USE_SHADERS)
 		uint32_t _compiledQuad;
@@ -207,11 +207,8 @@ namespace game
 
 	inline void PixelMode::_ScaleQuadToWindow()
 	{
-
-		//game::Vector2f _positionOfScaledTexture;
-		////game::Vector2f scale;
-		//game::Vector2f _sizeOfScaledTexture;
 		float_t tempScale = 0.0f;
+
 		if (_windowSize.height < _windowSize.width)
 		{
 			_scale.y = (float_t)_windowSize.height * _frameBuffer[_currentBuffer].oneOverHeight;
@@ -237,6 +234,9 @@ namespace game
 		{
 			_scale = { 1.0f, 1.0f };
 		}
+
+		_oneOverScale.x = 1.0f / _scale.x;
+		_oneOverScale.y = 1.0f / _scale.y;
 
 		// Set the size of the scaled texture
 		_sizeOfScaledTexture.width = _positionOfScaledTexture.x + (_frameBuffer[_currentBuffer].width * _scale.x);
@@ -396,7 +396,7 @@ namespace game
 
 	}
 
-	inline void PixelMode::Clear(const Color &color)
+	inline void PixelMode::Clear(const Color &color) noexcept
 	{
 #if defined(GAME_DIRECTX9)
 		if (enginePointer->geIsUsing(GAME_DIRECTX9))
@@ -412,7 +412,7 @@ namespace game
 #endif
 	}
 
-	inline void PixelMode::Pixel(const int32_t x, const int32_t y, const game::Color& color)
+	inline void PixelMode::Pixel(const int32_t x, const int32_t y, const game::Color& color) noexcept
 	{
 #if defined(_DEBUG)
 		if (x < 0)
@@ -435,8 +435,6 @@ namespace game
 			std::cout << "Y > _bufferSize - 1\n";
 			return;
 		}
-
-
 #endif
 #if defined(GAME_DIRECTX9)
 		if (enginePointer->geIsUsing(GAME_DIRECTX9))
@@ -452,7 +450,7 @@ namespace game
 #endif
 	}
 
-	inline void PixelMode::PixelClip(const int32_t x, const int32_t y, const game::Color& color)
+	inline void PixelMode::PixelClip(const int32_t x, const int32_t y, const game::Color& color) noexcept
 	{
 		if (x < 0 || y < 0) return;
 		if (x > _bufferSize.width-1 || y > _bufferSize.height - 1) return;
@@ -470,7 +468,7 @@ namespace game
 #endif
 	}
 
-	inline void PixelMode::Line(int32_t x1, int32_t y1, int32_t x2, int32_t y2, const Color& color)
+	inline void PixelMode::Line(int32_t x1, int32_t y1, int32_t x2, int32_t y2, const Color& color) noexcept
 	{
 		int32_t delta_x(x2 - x1);
 		int32_t delta_y(y2 - y1);
@@ -527,7 +525,7 @@ namespace game
 		}
 	}
 
-	inline void PixelMode::LineClip(int32_t x1, int32_t y1, int32_t x2, int32_t y2, const Color& color)
+	inline void PixelMode::LineClip(int32_t x1, int32_t y1, int32_t x2, int32_t y2, const Color& color) noexcept
 	{
 		//Liang - Barsky Algorithm
 
@@ -589,7 +587,7 @@ namespace game
 			}
 	}
 
-	inline void PixelMode::Circle(int32_t x, int32_t y, int32_t radius, const Color& color)
+	inline void PixelMode::Circle(int32_t x, int32_t y, int32_t radius, const Color& color) noexcept
 	{
 		if (radius < 0 || x < -radius || y < -radius || x - _bufferSize.width > radius || y - _bufferSize.height > radius)
 			return;
@@ -625,7 +623,7 @@ namespace game
 			Pixel(x, y, color);
 	}
 
-	inline void PixelMode::CircleClip(int32_t x, int32_t y, int32_t radius, const Color& color)
+	inline void PixelMode::CircleClip(int32_t x, int32_t y, int32_t radius, const Color& color) noexcept
 	{
 		if (radius < 0 || x < -radius || y < -radius || x - _bufferSize.width > radius || y - _bufferSize.height > radius)
 			return;
@@ -661,7 +659,7 @@ namespace game
 			PixelClip(x, y, color);
 	}
 
-	inline void PixelMode::CircleFilled(int32_t x, int32_t y, int32_t radius, const Color& color)
+	inline void PixelMode::CircleFilled(int32_t x, int32_t y, int32_t radius, const Color& color) noexcept
 	{
 		if (radius < 0 || x < -radius || y < -radius || x - _bufferSize.width > radius || y - _bufferSize.height > radius)
 			return;
@@ -700,7 +698,7 @@ namespace game
 			Pixel(x, y, color);
 	}
 
-	inline void PixelMode::CircleFilledClip(int32_t x, int32_t y, int32_t radius, const Color& color)
+	inline void PixelMode::CircleFilledClip(int32_t x, int32_t y, int32_t radius, const Color& color) noexcept
 	{
 		if (radius < 0 || x < -radius || y < -radius || x - _bufferSize.width > radius || y - _bufferSize.height > radius)
 			return;
@@ -743,7 +741,7 @@ namespace game
 			Pixel(x, y, color);
 	}
 
-	inline void PixelMode::Rect(const Recti& rectangle, const Color& color)
+	inline void PixelMode::Rect(const Recti& rectangle, const Color& color) noexcept
 	{
 		// Top
 		Line(rectangle.x, rectangle.y, rectangle.right, rectangle.y, color);
@@ -755,7 +753,7 @@ namespace game
 		Line(rectangle.right, rectangle.y, rectangle.right, rectangle.bottom, color);
 	}
 
-	inline void PixelMode::RectClip(const Recti& rectangle, const Color& color)
+	inline void PixelMode::RectClip(const Recti& rectangle, const Color& color) noexcept
 	{
 		// Top
 		LineClip(rectangle.x, rectangle.y, rectangle.right, rectangle.y, color);
@@ -767,14 +765,14 @@ namespace game
 		LineClip(rectangle.right, rectangle.y, rectangle.right, rectangle.bottom, color);
 	}
 
-	inline Pointi PixelMode::ScaleMouse(const Pointi& mouseCoords)
+	inline Pointi PixelMode::ScaleMouseToPixel(const Pointi& mouseCoords) noexcept
 	{
 		Pointi scaledMouseCoords;
 
 		scaledMouseCoords.x = (int32_t)(mouseCoords.x - _positionOfScaledTexture.x);
 		scaledMouseCoords.y = (int32_t)(mouseCoords.y - _positionOfScaledTexture.y);
-		scaledMouseCoords.x = (int32_t)(scaledMouseCoords.x * (1.0 / _scale.x));
-		scaledMouseCoords.y = (int32_t)(scaledMouseCoords.y * (1.0 / _scale.y));
+		scaledMouseCoords.x = (int32_t)(scaledMouseCoords.x * _oneOverScale.x);
+		scaledMouseCoords.y = (int32_t)(scaledMouseCoords.y * _oneOverScale.y);
 		return scaledMouseCoords;
 	}
 }

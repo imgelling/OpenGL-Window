@@ -112,7 +112,7 @@ public:
 
 		// Weird diagonal
 		game::Pointi test = geMouse.GetPosition();
-		game::Pointi sm = pixelMode.ScaleMouse(test);
+		game::Pointi sm = pixelMode.ScaleMouseToPixel(test);
 		pixelMode.LineClip(-20, -10, sm.x, sm.y, game::Colors::Pink);
 
 		// Rectangle
