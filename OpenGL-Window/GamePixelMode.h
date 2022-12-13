@@ -671,13 +671,13 @@ namespace game
 
 		if (radius > 0)
 		{
-			int x0 = 0;
-			int y0 = radius;
-			int d = 3 - 2 * radius;
+			int32_t x0 = 0;
+			int32_t y0 = radius;
+			int32_t d = 3 - 2 * radius;
 
-			auto drawline = [&](int sx, int ex, int y)
+			auto drawline = [&](int32_t sx, int32_t ex, int32_t y)
 			{
-				for (int x = sx; x <= ex; x++)
+				for (int32_t x = sx; x <= ex; x++)
 					Pixel(x, y, color);
 			};
 
@@ -710,11 +710,11 @@ namespace game
 
 		if (radius > 0)
 		{
-			int x0 = 0;
-			int y0 = radius;
-			int d = 3 - 2 * radius;
+			int32_t x0 = 0;
+			int32_t y0 = radius;
+			int32_t d = 3 - 2 * radius;
 
-			auto drawline = [&](int sx, int ex, int y)
+			auto drawline = [&](int32_t sx, int32_t ex, int32_t y)
 			{
 				if (sx < 0) sx = 0;
 				if (ex > _bufferSize.width - 1) ex = _bufferSize.width - 1;
