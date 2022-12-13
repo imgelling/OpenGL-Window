@@ -37,7 +37,7 @@ public:
 		attributes.MultiSamples = 8;
 		attributes.RenderingAPI = game::RenderAPI::DirectX9; 
 		//attributes.RenderingAPI = game::RenderAPI::OpenGL;
-		//attributes.RenderingAPI = game::RenderAPI::DirectX11;
+		attributes.RenderingAPI = game::RenderAPI::DirectX11;
 		
 		geSetAttributes(attributes);
 	}

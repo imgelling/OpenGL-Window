@@ -21,7 +21,7 @@ namespace game
 		void HandleWindowResize(const uint32_t width, const uint32_t height);
 		void FillOutRendererInfo() {}
 		bool CreateTexture(Texture2D& texture);
-		bool LoadTexture(std::string fileName, Texture2D& texture) { return false; }
+		bool LoadTexture(std::string fileName, Texture2D& texture) { lastError = { GameErrors::GameDirectX11Specific, "could not load texture" }; return false; }
 		void UnLoadTexture(Texture2D& texture);
 		bool LoadShader(const std::string vertex, const std::string fragment, Shader& shader) { return false; };
 		void UnLoadShader(Shader& shader) {};
@@ -74,6 +74,26 @@ namespace game
 		{
 			lastError = { GameErrors::GameDirectX11Specific, "Could not create device." };
 			return false;
+		}
+
+		ID3D11Debug* d3dDebug = nullptr;
+		_d3d11Device->QueryInterface(__uuidof(ID3D11Debug), (void**)&d3dDebug);
+		if (d3dDebug)
+		{
+			ID3D11InfoQueue* d3dInfoQueue = nullptr;
+			if (SUCCEEDED(d3dDebug->QueryInterface(__uuidof(ID3D11InfoQueue), (void**)&d3dInfoQueue)))
+			{
+				d3dInfoQueue->SetBreakOnSeverity(D3D11_MESSAGE_SEVERITY_CORRUPTION, true);
+				d3dInfoQueue->SetBreakOnSeverity(D3D11_MESSAGE_SEVERITY_ERROR, true);
+				d3dInfoQueue->Release();
+			}
+			else
+			{
+				lastError = { GameErrors::GameDirectX11Specific, "Could not set breaking on error for DirectX11." };
+				d3dDebug->Release();
+				return false;
+			}
+			d3dDebug->Release();
 		}
 
 		// get the address of the back buffer
