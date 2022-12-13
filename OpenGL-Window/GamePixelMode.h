@@ -38,13 +38,17 @@ namespace game
 		void CircleFilledClip(int32_t x, int32_t y, int32_t radius, const Color& color) noexcept;
 		void Rect(const Recti& rectangle, const Color& color) noexcept;
 		void RectClip(const Recti& rectangle, const Color& color) noexcept;
-		Pointi ScaleMouseToPixel(const Pointi& mouseCoords) noexcept;
+		Pointi GetScaledMousePosition() noexcept;
 	private:
 		Texture2D _frameBuffer[2];
-		Vector2f _scale;
 		Vector2f _oneOverScale;
-		Vector2f _positionOfScaledTexture;
-		Vector2f _sizeOfScaledTexture;
+		Vector2f _savedPositionOfScaledTexture;
+		uint32_t* _video;
+		Vector2i _bufferSize;
+		Vector2i _windowSize;
+		uint32_t _currentBuffer;
+		void _UpdateFrameBuffer();
+		void _ScaleQuadToWindow();
 #if defined(GAME_OPENGL) & !defined(GAME_USE_SHADERS)
 		uint32_t _compiledQuad;
 #endif
@@ -70,12 +74,6 @@ namespace game
 #if defined(GAME_DIRECTX11)
 
 #endif
-		uint32_t* _video;
-		Vector2i _bufferSize;
-		Vector2i _windowSize;
-		uint32_t _currentBuffer;
-		void _UpdateFrameBuffer();
-		void _ScaleQuadToWindow();
 	};
 
 	inline PixelMode::PixelMode()
@@ -208,6 +206,9 @@ namespace game
 	inline void PixelMode::_ScaleQuadToWindow()
 	{
 		float_t tempScale = 0.0f;
+		Vector2f _scale;
+		Vector2f _sizeOfScaledTexture;
+		Vector2f _positionOfScaledTexture;
 
 		if (_windowSize.height < _windowSize.width)
 		{
@@ -247,6 +248,8 @@ namespace game
 		_positionOfScaledTexture.y -= _frameBuffer[_currentBuffer].oneOverHeight;
 		_sizeOfScaledTexture.width -= _frameBuffer[_currentBuffer].oneOverWidth;
 		_sizeOfScaledTexture.height -= _frameBuffer[_currentBuffer].oneOverHeight;
+
+		_savedPositionOfScaledTexture = _positionOfScaledTexture;
 
 #if defined(GAME_OPENGL) & !defined(GAME_USE_SHADERS)
 		if (enginePointer->geIsUsing(GAME_OPENGL))
@@ -440,12 +443,14 @@ namespace game
 		if (enginePointer->geIsUsing(GAME_DIRECTX9))
 		{
 			_video[y * _bufferSize.width + x] = D3DCOLOR_ARGB(color.a, color.r, color.g, color.b);
+			return;
 		}
 #endif
 #if defined(GAME_OPENGL)
 		if (enginePointer->geIsUsing(GAME_OPENGL))
 		{
 			_video[y * _bufferSize.width + x] = color.packed;
+			return;
 		}
 #endif
 	}
@@ -765,12 +770,12 @@ namespace game
 		LineClip(rectangle.right, rectangle.y, rectangle.right, rectangle.bottom, color);
 	}
 
-	inline Pointi PixelMode::ScaleMouseToPixel(const Pointi& mouseCoords) noexcept
+	inline Pointi PixelMode::GetScaledMousePosition() noexcept
 	{
-		Pointi scaledMouseCoords;
+		Pointi scaledMouseCoords = enginePointer->geMouse.GetPosition();
 
-		scaledMouseCoords.x = (int32_t)(mouseCoords.x - _positionOfScaledTexture.x);
-		scaledMouseCoords.y = (int32_t)(mouseCoords.y - _positionOfScaledTexture.y);
+		scaledMouseCoords.x = (int32_t)(scaledMouseCoords.x - _savedPositionOfScaledTexture.x);
+		scaledMouseCoords.y = (int32_t)(scaledMouseCoords.y - _savedPositionOfScaledTexture.y);
 		scaledMouseCoords.x = (int32_t)(scaledMouseCoords.x * _oneOverScale.x);
 		scaledMouseCoords.y = (int32_t)(scaledMouseCoords.y * _oneOverScale.y);
 		return scaledMouseCoords;

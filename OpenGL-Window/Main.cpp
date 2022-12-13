@@ -90,6 +90,10 @@ public:
 
 	void Render(const float_t msElapsed)
 	{
+		game::Pointi scaledMousePos;
+
+		scaledMousePos = pixelMode.GetScaledMousePosition();
+
 		// Api dependent methods in this
 		Clear();
 
@@ -110,10 +114,11 @@ public:
 		pixelMode.LineClip(0, -10, 0, 300, game::Colors::Pink);
 		pixelMode.LineClip(319, 500, 319, -10, game::Colors::Pink);
 
+		// Circle Clipped
+		pixelMode.CircleFilledClip(scaledMousePos.x, scaledMousePos.y, 40, game::Colors::Green);
+
 		// Weird diagonal
-		game::Pointi test = geMouse.GetPosition();
-		game::Pointi sm = pixelMode.ScaleMouseToPixel(test);
-		pixelMode.LineClip(-20, -10, sm.x, sm.y, game::Colors::Pink);
+		pixelMode.LineClip(-20, -10, scaledMousePos.x, scaledMousePos.y, game::Colors::Pink);
 
 		// Rectangle
 		game::Recti rect;
@@ -123,13 +128,6 @@ public:
 		rect.bottom = 238;
 		pixelMode.Rect(rect, game::Colors::White);
 
-		// Circle Clipped
-		// Mouse position needs to be scaled and moved
-		rect.left = sm.x;// geMouse.GetPosition().x;
-		rect.top = sm.y;// geMouse.GetPosition().y;
-		rect.right = 60 + geMouse.GetPosition().x;
-		rect.bottom = 60 + geMouse.GetPosition().y;
-		//pixelMode.CircleFilledClip(rect.x, rect.y, 40, game::Colors::Green);
 
 		// Circle
 		pixelMode.CircleFilled(160, 120, 75, game::Colors::DarkGray);
