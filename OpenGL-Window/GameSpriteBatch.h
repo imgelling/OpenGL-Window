@@ -120,14 +120,18 @@ namespace game
 			_spriteVertices[vertex].z = 0.0f;
 			_spriteVertices[vertex].u = 0.0f;
 			_spriteVertices[vertex].v = 0.0f;
+#if defined(GAME_DIRECTX9)
 			if (enginePointer->geIsUsing(GAME_DIRECTX9))
 			{
 				_spriteVertices[vertex].color = D3DCOLOR_ARGB(255, 255, 255, 255);
 			}
-			else if (enginePointer->geIsUsing(GAME_OPENGL))
+#endif
+#if defined(GAME_OPENGL)
+			if (enginePointer->geIsUsing(GAME_OPENGL))
 			{
 				_spriteVertices[vertex].color = Colors::White.packed;
 			}
+#endif
 		}
 #if defined(GAME_OPENGL)
 		if (enginePointer->geIsUsing(GAME_OPENGL))

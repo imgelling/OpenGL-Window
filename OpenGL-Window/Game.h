@@ -1,5 +1,6 @@
 #pragma once
 
+#define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
 
 #if defined(GAME_SUPPORT_OPENGL) || defined(GAME_SUPPORT_ALL)
@@ -16,6 +17,10 @@
 
 #if defined(GAME_SUPPORT_VULKAN) || defined(GAME_SUPPORT_ALL)
 #define GAME_VULKAN 3
+#endif
+
+#if defined(GAME_SUPPORT_DIRECTX12) || defined(GAME_SUPPORT_ALL)
+#define GAME_DIRECTX12 5
 #endif
 
 
@@ -48,6 +53,21 @@
 #include <d3d11.h>
 #pragma comment (lib, "d3d11.lib")
 #include "GameRendererDX11.h"
+#endif
+#pragma endregion
+
+#pragma region DirectX12
+#if defined(GAME_DIRECTX12)
+#include <d3d12.h>
+#include <dxgi1_6.h>
+#include <d3dcompiler.h>
+#include <DirectXMath.h>
+#include <wrl.h>
+//using namespace Microsoft::WRL;
+#pragma comment(lib,"d3dcompiler.lib")
+#pragma comment(lib, "D3D12.lib")
+#pragma comment(lib, "dxgi.lib")
+#include "GameRendererDX12.h"
 #endif
 #pragma endregion
 

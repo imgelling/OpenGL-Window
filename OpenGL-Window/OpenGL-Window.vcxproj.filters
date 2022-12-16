@@ -101,5 +101,8 @@
     <ClInclude Include="GameSpriteFont.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="GameRendererDX12.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

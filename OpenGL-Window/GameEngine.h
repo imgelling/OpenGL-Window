@@ -195,6 +195,10 @@ namespace game
 		if ((renderer == 4) && (_attributes.RenderingAPI == RenderAPI::DirectX11))
 			return true;
 #endif
+#if defined(GAME_DIRECTX12)
+		if ((renderer == 5) && (_attributes.RenderingAPI == RenderAPI::DirectX12))
+			return true;
+#endif
 		return false;
 	}
 
@@ -474,6 +478,15 @@ namespace game
 			_renderer = new game::RendererDX11();
 #else
 			lastError = { GameErrors::GameInvalidParameter, "Requested DirectX11 without #defining GAME_SUPPORT_DIRECTX11 or GAME_SUPPORT ALL." };
+			return false;
+#endif
+		}
+		else if (_attributes.RenderingAPI == RenderAPI::DirectX12)
+		{
+#if defined(GAME_DIRECTX12)
+			_renderer = new game::RendererDX12();
+#else
+			lastError = { GameErrors::GameInvalidParameter, "Requested DirectX12 without #defining GAME_SUPPORT_DIRECTX12 or GAME_SUPPORT ALL." };
 			return false;
 #endif
 		}

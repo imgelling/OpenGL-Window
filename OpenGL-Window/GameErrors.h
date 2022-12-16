@@ -16,6 +16,7 @@ namespace game
 		GameVulkanSpecific,
 		GameDirectX9Specific,
 		GameDirectX11Specific,
+		GameDirectX12Specific,
 		GameContent
 	};
 	
@@ -38,6 +39,7 @@ namespace game
 			case (uint32_t)GameErrors::GameRenderer: _stream << "GameRenderer"; break;
 			case (uint32_t)GameErrors::GameDirectX9Specific: _stream << "GameDirectX9Specific"; break;
 			case (uint32_t)GameErrors::GameDirectX11Specific: _stream << "GameDirectX11Specific"; break;
+			case (uint32_t)GameErrors::GameDirectX12Specific: _stream << "GameDirectX12Specific"; break;
 			case (uint32_t)GameErrors::GameContent: _stream << "GameContent"; break;
 			default: _stream << "GameErrorUnknown"; break;
 			}
