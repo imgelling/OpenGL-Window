@@ -23,6 +23,7 @@ namespace game
 		uint8_t MultiSamples;		// Multisampling, 1 is none, >1 enables multisampling
 		bool DebugMode;				// Enable debug mode with the renderer
 		float_t Framelock;			// A software lock on max frames per second
+		float_t Updatelock;			// A software lock on max updates per second
 		RenderAPI RenderingAPI;		// Which rendering API are we using
 		bool VsyncOn;				// Is vsync on
 		std::string GameVersion;	// What version the game is
@@ -52,6 +53,7 @@ namespace game
 		MultiSamples = 1;
 		DebugMode = false;
 		Framelock = 0.0f;
+		Updatelock = 0.0f;
 		RenderingAPI = RenderAPI::OpenGL; // Defaults to OpenGL
 		VsyncOn = true;
 		GameVersion = "0";

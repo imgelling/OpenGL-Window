@@ -1,14 +1,14 @@
 // Engine header
 #define GAME_USE_DEDICATED_GPU
 //#define GAME_USE_SHADERS
-//#define GAME_SUPPORT_DIRECTX9
+#define GAME_SUPPORT_DIRECTX9
 //#define GAME_SUPPORT_DIRECTX11
 //#define GAME_SUPPORT_DIRECTX12
 //#define GAME_SUPPORT_OPENGL
 //#define GAME_SUPPORT_VULKAN 
 
 // need to force GAME_USE_SHADERS with dx12/vulkan and maybe dx11 maybe
-#define GAME_SUPPORT_ALL
+//#define GAME_SUPPORT_ALL
 #include "Game.h"
 
 class Game : public game::Engine
@@ -39,7 +39,7 @@ public:
 		attributes.RenderingAPI = game::RenderAPI::DirectX9; 
 		//attributes.RenderingAPI = game::RenderAPI::OpenGL;
 		//attributes.RenderingAPI = game::RenderAPI::DirectX11;
-		attributes.RenderingAPI = game::RenderAPI::DirectX12;
+		//attributes.RenderingAPI = game::RenderAPI::DirectX12;
 		
 		geSetAttributes(attributes);
 	}
@@ -70,7 +70,7 @@ public:
 		if (!spriteFont.Load("Content/new.fnt", "Content/new.png"))
 		{
 			geLogLastError();
-		}
+		}		
 	}
 
 	void Shutdown()
@@ -79,6 +79,14 @@ public:
 
 	void Update(const float_t msElapsed)
 	{
+		if (geIsMinimized)
+		{
+			geSetFrameLock(10);
+		}
+		else
+		{
+			geSetFrameLock(0);
+		}
 		// Handle Input
 		if (geKeyboard.WasKeyReleased(VK_F11))
 		{
@@ -92,6 +100,7 @@ public:
 
 	void Render(const float_t msElapsed)
 	{
+
 		game::Pointi scaledMousePos;
 
 		scaledMousePos = pixelMode.GetScaledMousePosition();

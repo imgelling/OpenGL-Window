@@ -59,6 +59,7 @@ namespace game
 		Mouse geMouse;
 		Logger* geLogger;
 		bool geIsRunning;
+		bool geIsMinimized;
 #if defined(GAME_DIRECTX9)
 		LPDIRECT3DDEVICE9 d3d9Device;
 #endif
@@ -83,6 +84,7 @@ namespace game
 		uint32_t geGetFramesPerSecond() const noexcept;
 		uint32_t geGetCPUFrequency() const noexcept;
 		void geSetFrameLock(const uint32_t limit) noexcept;
+		void geSetUpdateLock(const uint32_t limit) noexcept;
 		
 		// Renderer specific
 		
@@ -113,6 +115,7 @@ namespace game
 
 	private:
 		float_t _frameTime;
+		float_t _updateTime;
 		Attributes _attributes;
 		RendererBase* _renderer;
 		Window _window;
@@ -134,10 +137,12 @@ namespace game
 		enginePointer = this;
 		_renderer = nullptr;
 		_frameTime = 0.0f;
+		_frameTime = 0.0f;
 		_updatesPerSecond = 0;
 		_framesPerSecond = 0;
 		_cpuFrequency = 0;
 		this->geLogger = logger;
+		geIsMinimized = false;
 #if defined(GAME_DIRECTX9)
 		d3d9Device = nullptr;
 #endif
@@ -318,6 +323,19 @@ namespace game
 			_frameTime = 0.0f;
 		}
 
+	}
+
+	inline void Engine::geSetUpdateLock(const uint32_t limit) noexcept
+	{
+		_attributes.Updatelock = (float_t)limit;
+		if (_attributes.Updatelock > 0)
+		{
+			_updateTime = 1000.0f / _attributes.Updatelock;
+		}
+		else
+		{
+			_updateTime = 0.0f;
+		}
 	}
 
 	inline uint32_t Engine::geGetCPUFrequency() const noexcept
@@ -570,7 +588,23 @@ namespace game
 		case WM_RBUTTONUP:	enginePointer->geMouse.SetMouseState(2, false); return 0;
 		case WM_MBUTTONDOWN:enginePointer->geMouse.SetMouseState(1, true); return 0;
 		case WM_MBUTTONUP:	enginePointer->geMouse.SetMouseState(1, false); return 0;
-		case WM_SIZE: enginePointer->HandleWindowResize(lParam & 0xFFF, (lParam >> 16) & 0xFFFF); return 0;
+		case WM_SIZE: 
+		{
+			switch (wParam)
+			{
+			case SIZE_MINIMIZED:
+				enginePointer->geIsMinimized = true;
+				break;
+			case SIZE_MAXIMIZED:
+			case SIZE_RESTORED:
+				enginePointer->geIsMinimized = false;
+			default:
+				break;
+			}
+			// Tell the application the window changed size
+			enginePointer->HandleWindowResize(lParam & 0xFFF, (lParam >> 16) & 0xFFFF); 
+			return 0;
+		}
 		case WM_KEYDOWN: enginePointer->geKeyboard.SetKeyState((uint8_t)wParam, true); return 0;
 		case WM_KEYUP: enginePointer->geKeyboard.SetKeyState((uint8_t)wParam, false); return 0;
 			//case WM_SYSKEYDOWN: ptrPGE->olc_UpdateKeyState(mapKeys[wParam], true);						return 0;
