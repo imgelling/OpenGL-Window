@@ -110,6 +110,8 @@ namespace game
 		virtual void LoadContent() = 0;
 		virtual void Shutdown() = 0;
 
+		virtual void HandleWindowSizeChange() {}
+
 		// Tools
 		void geLogLastError();
 
@@ -137,7 +139,7 @@ namespace game
 		enginePointer = this;
 		_renderer = nullptr;
 		_frameTime = 0.0f;
-		_frameTime = 0.0f;
+		_updateTime = 0.0f;
 		_updatesPerSecond = 0;
 		_framesPerSecond = 0;
 		_cpuFrequency = 0;
@@ -236,6 +238,11 @@ namespace game
 			_ProcessMessages();
 			if (!geIsRunning) break;
 
+			if (geIsMinimized)
+			{
+				Sleep(_updateTime * 0.9f);
+			}
+
 			// Update cpu frequency
 			if (_cpuSpeedTimer.Elapsed() > 1000.0f)
 			{
@@ -244,10 +251,9 @@ namespace game
 				cyclesStart = __rdtsc();
 			}
 
-
-			// Try to update as fast as possible and keep track of UPS
+			// Update to updatelock
 			msElapsed = _updateTimer.Elapsed();
-			if (msElapsed > (0.0f))
+			if (msElapsed >= (_updateTime))
 			{
 				Update(msElapsed);
 				_updateTimer.Reset();
@@ -301,36 +307,43 @@ namespace game
 	inline void Engine::geSetAttributes(const Attributes& attrib)
 	{
 		_attributes = attrib;
-		if (_attributes.Framelock > 0)
+		if (_attributes.FrameLock > 0)
 		{
-			_frameTime = 1000.0f / _attributes.Framelock;
+			_frameTime = 1000.0f / _attributes.FrameLock;
 		}
 		else
 		{
 			_frameTime = 0.0f;
+		}
+		if (_attributes.UpdateLock > 0)
+		{
+			_updateTime = 1000.0f / _attributes.UpdateLock;
+		}
+		else
+		{
+			_updateTime = 0.0f;
 		}
 	}
 
 	inline void Engine::geSetFrameLock(const uint32_t limit) noexcept
 	{
-		_attributes.Framelock = (float_t)limit;
-		if (_attributes.Framelock > 0)
+		_attributes.FrameLock = (float_t)limit;
+		if (_attributes.FrameLock > 0)
 		{
-			_frameTime = 1000.0f / _attributes.Framelock;
+			_frameTime = 1000.0f / _attributes.FrameLock;
 		}
 		else
 		{
 			_frameTime = 0.0f;
 		}
-
 	}
 
 	inline void Engine::geSetUpdateLock(const uint32_t limit) noexcept
 	{
-		_attributes.Updatelock = (float_t)limit;
-		if (_attributes.Updatelock > 0)
+		_attributes.UpdateLock = (float_t)limit;
+		if (_attributes.UpdateLock > 0)
 		{
-			_updateTime = 1000.0f / _attributes.Updatelock;
+			_updateTime = 1000.0f / _attributes.UpdateLock;
 		}
 		else
 		{
@@ -566,6 +579,7 @@ namespace game
 		{
 			_renderer->HandleWindowResize(width, height);
 		}
+		HandleWindowSizeChange();
 	}
 
 	inline void Engine::geLogLastError()

@@ -22,8 +22,8 @@ namespace game
 		uint8_t DepthSize;			// Size, in bits of depth buffer
 		uint8_t MultiSamples;		// Multisampling, 1 is none, >1 enables multisampling
 		bool DebugMode;				// Enable debug mode with the renderer
-		float_t Framelock;			// A software lock on max frames per second
-		float_t Updatelock;			// A software lock on max updates per second
+		float_t FrameLock;			// A software lock on max frames per second
+		float_t UpdateLock;			// A software lock on max updates per second
 		RenderAPI RenderingAPI;		// Which rendering API are we using
 		bool VsyncOn;				// Is vsync on
 		std::string GameVersion;	// What version the game is
@@ -34,7 +34,7 @@ namespace game
 
 	inline Attributes::Attributes()
 	{
-		WindowTitle = "";
+		WindowTitle = "GameEngine Game";
 		WindowWidth = 1280;
 		WindowHeight = 720;
 		WindowFullscreen = false;
@@ -52,8 +52,8 @@ namespace game
 		DepthSize = 24; // 32 bit for amd only, 24 for nvidia
 		MultiSamples = 1;
 		DebugMode = false;
-		Framelock = 0.0f;
-		Updatelock = 0.0f;
+		FrameLock = 0.0f;
+		UpdateLock = 0.0f;
 		RenderingAPI = RenderAPI::OpenGL; // Defaults to OpenGL
 		VsyncOn = true;
 		GameVersion = "0";

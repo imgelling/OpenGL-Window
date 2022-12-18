@@ -11,6 +11,12 @@
 //#define GAME_SUPPORT_ALL
 #include "Game.h"
 
+constexpr uint32_t MAX_UPDATE = 100;
+constexpr uint32_t MIN_UPDATE = 10;
+constexpr uint32_t MAX_RENDER = 100;
+constexpr uint32_t MIN_RENDER = 10;
+
+
 class Game : public game::Engine
 {
 
@@ -24,7 +30,20 @@ public:
 	{
 	}
 
-
+	void HandleWindowSizeChange() override
+	{
+		std::cout << "window changed\n";
+		if (geIsMinimized)
+		{
+			geSetFrameLock(MIN_RENDER);
+			geSetUpdateLock(MIN_UPDATE);
+		}
+		else
+		{
+			geSetFrameLock(MAX_RENDER);
+			geSetUpdateLock(MAX_UPDATE);
+		}
+	}
 
 	void Initialize()
 	{
@@ -32,7 +51,8 @@ public:
 		
 		attributes.WindowTitle = "PixelMode tests";
 		attributes.GameVersion = "0.01";
-		attributes.Framelock = 0;  
+		attributes.FrameLock = 60;
+		attributes.UpdateLock = 10;
 		attributes.VsyncOn = false;
 		attributes.DebugMode = true;
 		attributes.MultiSamples = 8;
@@ -79,14 +99,6 @@ public:
 
 	void Update(const float_t msElapsed)
 	{
-		if (geIsMinimized)
-		{
-			geSetFrameLock(10);
-		}
-		else
-		{
-			geSetFrameLock(0);
-		}
 		// Handle Input
 		if (geKeyboard.WasKeyReleased(VK_F11))
 		{
