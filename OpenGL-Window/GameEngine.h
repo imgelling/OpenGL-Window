@@ -85,6 +85,7 @@ namespace game
 		uint32_t geGetCPUFrequency() const noexcept;
 		void geSetFrameLock(const uint32_t limit) noexcept;
 		void geSetUpdateLock(const uint32_t limit) noexcept;
+		void geSetGameLocks(const uint32_t fps, const uint32_t ups) noexcept;
 		
 		// Renderer specific
 		
@@ -240,7 +241,7 @@ namespace game
 
 			if (geIsMinimized)
 			{
-				Sleep(_updateTime * 0.9f);
+				Sleep((DWORD)(_updateTime));
 			}
 
 			// Update cpu frequency
@@ -349,6 +350,12 @@ namespace game
 		{
 			_updateTime = 0.0f;
 		}
+	}
+
+	inline void Engine::geSetGameLocks(const uint32_t fps, const uint32_t ups) noexcept
+	{
+		geSetFrameLock(fps);
+		geSetUpdateLock(ups);
 	}
 
 	inline uint32_t Engine::geGetCPUFrequency() const noexcept

@@ -6,14 +6,12 @@
 //#define GAME_SUPPORT_DIRECTX12
 //#define GAME_SUPPORT_OPENGL
 //#define GAME_SUPPORT_VULKAN 
-
-// need to force GAME_USE_SHADERS with dx12/vulkan and maybe dx11 maybe
 //#define GAME_SUPPORT_ALL
 #include "Game.h"
 
-constexpr uint32_t MAX_UPDATE = 100;
+constexpr uint32_t MAX_UPDATE = 165;
 constexpr uint32_t MIN_UPDATE = 10;
-constexpr uint32_t MAX_RENDER = 100;
+constexpr uint32_t MAX_RENDER = 165;
 constexpr uint32_t MIN_RENDER = 10;
 
 
@@ -32,16 +30,13 @@ public:
 
 	void HandleWindowSizeChange() override
 	{
-		std::cout << "window changed\n";
 		if (geIsMinimized)
 		{
-			geSetFrameLock(MIN_RENDER);
-			geSetUpdateLock(MIN_UPDATE);
+			geSetGameLocks(MIN_RENDER, MIN_UPDATE);
 		}
 		else
 		{
-			geSetFrameLock(MAX_RENDER);
-			geSetUpdateLock(MAX_UPDATE);
+			geSetGameLocks(MAX_RENDER, MAX_UPDATE);
 		}
 	}
 
@@ -99,6 +94,7 @@ public:
 
 	void Update(const float_t msElapsed)
 	{
+		geSetWindowTitle(std::to_string(geGetUpdatesPerSecond()) + " fps = " + std::to_string(geGetFramesPerSecond()));
 		// Handle Input
 		if (geKeyboard.WasKeyReleased(VK_F11))
 		{
