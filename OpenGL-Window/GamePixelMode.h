@@ -39,6 +39,7 @@ namespace game
 		void Rect(const Recti& rectangle, const Color& color) noexcept;
 		void RectClip(const Recti& rectangle, const Color& color) noexcept;
 		Pointi GetScaledMousePosition() noexcept;
+		Pointi GetPixelFrameBufferSize() noexcept;
 	private:
 		Texture2D _frameBuffer[2];
 		Vector2f _oneOverScale;
@@ -779,6 +780,11 @@ namespace game
 		scaledMouseCoords.x = (int32_t)(scaledMouseCoords.x * _oneOverScale.x);
 		scaledMouseCoords.y = (int32_t)(scaledMouseCoords.y * _oneOverScale.y);
 		return scaledMouseCoords;
+	}
+
+	inline Pointi PixelMode::GetPixelFrameBufferSize() noexcept
+	{
+		return { _bufferSize.width, _bufferSize.height };
 	}
 }
 

@@ -1,8 +1,8 @@
 #pragma once
 
 #include <d3d9.h>
-#include <dxgi.h>
-#pragma comment(lib, "dxgi.lib") // for gpu memory
+//#include <dxgi.h>
+//#pragma comment(lib, "dxgi.lib") // for gpu memory
 
 #include "GameErrors.h"
 #include "GameImageLoader.h"
@@ -26,7 +26,7 @@ namespace game
 		bool CreateTexture(Texture2D& texture);
 		bool LoadTexture(std::string fileName, Texture2D& texture);
 		void UnLoadTexture(Texture2D& texture);
-		bool LoadShader(const std::string vertex, const std::string fragment, Shader& shader) { return false; };
+		bool LoadShader(const std::string vertex, const std::string fragment, Shader& shader);
 		void UnLoadShader(Shader& shader) {};
 		void GetDevice(LPDIRECT3DDEVICE9& device);
 	protected:
@@ -158,45 +158,6 @@ namespace game
 		sStream << "GPU available memory : " << systemInfo.gpuInfo.freeMemory << "MB";
 		LOG(sStream);
 
-		// This should be done with all renderers
-		HINSTANCE hDXGI = LoadLibrary(L"dxgi.dll");
-		if (hDXGI != nullptr)
-		{
-			typedef HRESULT(WINAPI* LPCREATEDXGIFACTORY)(REFIID, void**);
-
-			LPCREATEDXGIFACTORY pCreateDXGIFactory = nullptr;
-			IDXGIFactory* pDXGIFactory = nullptr;
-
-			// We prefer the use of DXGI 1.1
-			pCreateDXGIFactory = (LPCREATEDXGIFACTORY)GetProcAddress(hDXGI, "CreateDXGIFactory1");
-
-			if (!pCreateDXGIFactory)
-			{
-				pCreateDXGIFactory = (LPCREATEDXGIFACTORY)GetProcAddress(hDXGI, "CreateDXGIFactory");
-
-				if (!pCreateDXGIFactory)
-				{
-					FreeLibrary(hDXGI);
-
-					return;
-				}
-			}
-
-			HRESULT hr = pCreateDXGIFactory(__uuidof(IDXGIFactory), (LPVOID*)&pDXGIFactory);
-			IDXGIAdapter* pAdapter = nullptr;
-			hr = pDXGIFactory->EnumAdapters(0, &pAdapter);
-			DXGI_ADAPTER_DESC desc{ 0 };
-			pAdapter->GetDesc(&desc);
-
-			std::cout << "DedicatedVideoMemory = " << desc.DedicatedVideoMemory / 1024 / 1024 << "MB\n";
-
-			pAdapter->Release();
-			pAdapter = nullptr;
-			pDXGIFactory->Release();
-			pDXGIFactory = nullptr;
-			FreeLibrary(hDXGI);
-		}
-
 		D3DCAPS9 caps;
 		_d3d9Device->GetDeviceCaps(&caps);
 	}
@@ -284,5 +245,11 @@ namespace game
 		texture.isMipMapped = true;
 		texture.filterType = TextureFilterType::Trilinear;
 		texture.anisotropyLevel = 1;
+	}
+
+	inline bool RendererDX9::LoadShader(const std::string vertex, const std::string fragment, Shader& shader)
+	{
+
+		return false;
 	}
 }

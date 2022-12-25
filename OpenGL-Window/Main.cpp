@@ -9,9 +9,9 @@
 //#define GAME_SUPPORT_ALL
 #include "Game.h"
 
-constexpr uint32_t MAX_UPDATE = 165;
+constexpr uint32_t MAX_UPDATE = 0;
 constexpr uint32_t MIN_UPDATE = 10;
-constexpr uint32_t MAX_RENDER = 165;
+constexpr uint32_t MAX_RENDER = 0;
 constexpr uint32_t MIN_RENDER = 10;
 
 
@@ -86,6 +86,8 @@ public:
 		{
 			geLogLastError();
 		}		
+
+		//D3DCompileFromFile()
 	}
 
 	void Shutdown()
@@ -157,8 +159,9 @@ public:
 		for (int i = 0; i < 40; i++)
 			spriteBatch.Draw(spriteTexture, { 10 + (i * 100), 10 }, game::Colors::White);
 
-		spriteBatch.DrawString(spriteFont, "FPS : " + std::to_string(geGetFramesPerSecond()) + " ups : " + std::to_string(geGetUpdatesPerSecond()) + " cpu : " + std::to_string(geGetCPUFrequency()) + "Mhz", 10, 200, game::Colors::Red);
-		spriteBatch.DrawString(spriteFont, "Window Size: " + std::to_string(geGetWindowSize().width) + "x" + std::to_string(geGetWindowSize().height), 10, 220, game::Colors::Red);
+		spriteBatch.DrawString(spriteFont, "FPS : " + std::to_string(geGetFramesPerSecond()) + " UPS : " + std::to_string(geGetUpdatesPerSecond()) + " cpu : " + std::to_string(geGetCPUFrequency()) + "Mhz", 10, 200, game::Colors::Red);
+		spriteBatch.DrawString(spriteFont, "Window Pixel Size: " + std::to_string(geGetWindowSize().width) + "x" + std::to_string(geGetWindowSize().height), 10, 220, game::Colors::Red);
+		spriteBatch.DrawString(spriteFont, "PixelMode Pixel Size: " + std::to_string(pixelMode.GetPixelFrameBufferSize().width) + "x" + std::to_string(pixelMode.GetPixelFrameBufferSize().height), 10, 240, game::Colors::Red);
 		spriteBatch.End();
 
 #if defined(GAME_DIRECTX9)
@@ -169,7 +172,7 @@ public:
 #endif
 	}
 
-	// Clears the screen and does beginscene for dx9
+	// Clears the screen
 	void Clear()
 	{
 #if defined (GAME_OPENGL)
