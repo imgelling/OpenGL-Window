@@ -89,6 +89,7 @@ namespace game
 #define GL_DEBUG_SEVERITY_LOW 0x9148
 #define GL_TEXTURE_BASE_LEVEL 0x813C
 #define GL_TEXTURE_MAX_LEVEL 0x813D
+#define piiepe 5
 	
 	class RendererGL : public RendererBase
 	{

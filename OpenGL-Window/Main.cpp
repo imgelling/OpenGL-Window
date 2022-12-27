@@ -1,12 +1,12 @@
 // Engine header
-#define GAME_USE_DEDICATED_GPU
+//#define GAME_USE_DEDICATED_GPU
 //#define GAME_USE_SHADERS
 #define GAME_SUPPORT_DIRECTX9
 //#define GAME_SUPPORT_DIRECTX11
 //#define GAME_SUPPORT_DIRECTX12
 //#define GAME_SUPPORT_OPENGL
 //#define GAME_SUPPORT_VULKAN 
-//#define GAME_SUPPORT_ALL
+#define GAME_SUPPORT_ALL
 #include "Game.h"
 
 constexpr uint32_t MAX_UPDATE = 0;
@@ -47,7 +47,7 @@ public:
 		attributes.WindowTitle = "PixelMode tests";
 		attributes.GameVersion = "0.01";
 		attributes.FrameLock = 60;
-		attributes.UpdateLock = 10;
+		attributes.UpdateLock = 60;
 		attributes.VsyncOn = false;
 		attributes.DebugMode = true;
 		attributes.MultiSamples = 8;
@@ -96,7 +96,7 @@ public:
 
 	void Update(const float_t msElapsed)
 	{
-		geSetWindowTitle(std::to_string(geGetUpdatesPerSecond()) + " fps = " + std::to_string(geGetFramesPerSecond()));
+		//geSetWindowTitle(std::to_string(geGetUpdatesPerSecond()) + " fps = " + std::to_string(geGetFramesPerSecond()));
 		// Handle Input
 		if (geKeyboard.WasKeyReleased(VK_F11))
 		{
@@ -185,7 +185,7 @@ public:
 #if defined (GAME_DIRECTX9)
 		if (geIsUsing(GAME_DIRECTX9))
 		{
-			d3d9Device->Clear(0, NULL, D3DCLEAR_TARGET, D3DCOLOR_XRGB(64, 64, 64), 1.0f, 0);
+			d3d9Device->Clear(0, NULL, D3DCLEAR_TARGET, game::Colors::DarkGray.packedARGB, 1.0f, 0);
 		}
 #endif
 

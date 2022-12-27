@@ -405,13 +405,13 @@ namespace game
 #if defined(GAME_DIRECTX9)
 		if (enginePointer->geIsUsing(GAME_DIRECTX9))
 		{
-			std::fill_n(_video, _bufferSize.width * _bufferSize.height, D3DCOLOR_ARGB(color.a, color.r, color.g, color.b));
+			std::fill_n(_video, _bufferSize.width * _bufferSize.height, color.packedARGB);
 		}
 #endif
 #if defined(GAME_OPENGL)
 		if (enginePointer->geIsUsing(GAME_OPENGL))
 		{
-			std::fill_n(_video, _bufferSize.width * _bufferSize.height, color.packed);
+			std::fill_n(_video, _bufferSize.width * _bufferSize.height, color.packedABGR);
 		}
 #endif
 	}
@@ -443,14 +443,14 @@ namespace game
 #if defined(GAME_DIRECTX9)
 		if (enginePointer->geIsUsing(GAME_DIRECTX9))
 		{
-			_video[y * _bufferSize.width + x] = D3DCOLOR_ARGB(color.a, color.r, color.g, color.b);
+			_video[y * _bufferSize.width + x] = color.packedARGB;
 			return;
 		}
 #endif
 #if defined(GAME_OPENGL)
 		if (enginePointer->geIsUsing(GAME_OPENGL))
 		{
-			_video[y * _bufferSize.width + x] = color.packed;
+			_video[y * _bufferSize.width + x] = color.packedABGR;
 			return;
 		}
 #endif
@@ -463,13 +463,13 @@ namespace game
 #if defined(GAME_DIRECTX9)
 		if (enginePointer->geIsUsing(GAME_DIRECTX9))
 		{
-			_video[y * _bufferSize.width + x] = D3DCOLOR_ARGB(color.a, color.r, color.g, color.b);
+			_video[y * _bufferSize.width + x] = color.packedARGB;
 		}
 #endif
 #if defined(GAME_OPENGL)
 		if (enginePointer->geIsUsing(GAME_OPENGL))
 		{
-			_video[y * _bufferSize.width + x] = color.packed;
+			_video[y * _bufferSize.width + x] = color.packedABGR;
 		}
 #endif
 	}

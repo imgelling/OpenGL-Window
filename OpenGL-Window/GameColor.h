@@ -13,7 +13,8 @@ namespace game
 		uint32_t g;
 		uint32_t b;
 		uint32_t a;
-		uint32_t packed;
+		uint32_t packedABGR;
+		uint32_t packedARGB;
 
 		Color();
 		Color(const float_t r, const float_t g, const float_t b, const float_t a);
@@ -38,7 +39,8 @@ namespace game
 		g = 0;
 		b = 0;
 		a = 255;
-		packed = a << 24;
+		packedABGR = a << 24;
+		packedARGB = a << 24;
 	}
 
 	// ----- Begin float_t
@@ -62,7 +64,11 @@ namespace game
 		uint32_t packedG = this->g << 8;
 		uint32_t packedB = this->b << 16;
 		uint32_t packedA = this->a << 24;
-		packed = ((packedA) | (packedR) | (packedG) | (packedB));
+		packedABGR = ((packedA) | (packedR) | (packedG) | (packedB));
+
+		packedR = this->r << 16;
+		packedB = this->b << 0;
+		packedARGB = ((packedA) | (packedR) | (packedG) | (packedB));
 	}
 	// ----- End float_t
 
@@ -87,7 +93,11 @@ namespace game
 		uint32_t packedG = this->g << 8;
 		uint32_t packedB = this->b << 16;
 		uint32_t packedA = this->a << 24;
-		packed = ((packedA) | (packedR) | (packedG) | (packedB));
+		packedABGR = ((packedA) | (packedR) | (packedG) | (packedB));
+
+		packedR = this->r << 16;
+		packedB = this->b << 0;
+		packedARGB = ((packedA) | (packedR) | (packedG) | (packedB));
 	}
 	// End double_t
 
@@ -112,7 +122,11 @@ namespace game
 		uint32_t packedG = g << 8;
 		uint32_t packedB = b << 16;
 		uint32_t packedA = a << 24;
-		packed = ((packedA) | (packedR) | (packedG) | (packedB));
+		packedABGR = ((packedA) | (packedR) | (packedG) | (packedB));
+
+		packedR = this->r << 16;
+		packedB = this->b << 0;
+		packedARGB = ((packedA) | (packedR) | (packedG) | (packedB));
 	}
 	// End uint32_t
 

@@ -62,6 +62,7 @@ namespace game
 		bool geIsMinimized;
 #if defined(GAME_DIRECTX9)
 		LPDIRECT3DDEVICE9 d3d9Device;
+		bool doReset;
 #endif
 #if defined(GAME_DIRECTX11)
 		ID3D11DeviceContext* d3d11Context;
@@ -148,6 +149,7 @@ namespace game
 		geIsMinimized = false;
 #if defined(GAME_DIRECTX9)
 		d3d9Device = nullptr;
+		doReset = false;
 #endif
 #if defined(GAME_DIRECTX11)
 		d3d11Context = nullptr;
@@ -615,17 +617,25 @@ namespace game
 			{
 			case SIZE_MINIMIZED:
 				enginePointer->geIsMinimized = true;
+				enginePointer->doReset = true;
 				break;
 			case SIZE_MAXIMIZED:
 			case SIZE_RESTORED:
 				enginePointer->geIsMinimized = false;
+				enginePointer->doReset = true;
 			default:
 				break;
 			}
 			// Tell the application the window changed size
-			enginePointer->HandleWindowResize(lParam & 0xFFF, (lParam >> 16) & 0xFFFF); 
+			if (enginePointer->doReset)
+			{
+				enginePointer->HandleWindowResize(lParam & 0xFFF, (lParam >> 16) & 0xFFFF);
+				enginePointer->doReset = false;
+			}
 			return 0;
 		}
+		case WM_ENTERSIZEMOVE: enginePointer->doReset = false; return 0;
+		case WM_EXITSIZEMOVE: enginePointer->doReset = true; return 0;
 		case WM_KEYDOWN: enginePointer->geKeyboard.SetKeyState((uint8_t)wParam, true); return 0;
 		case WM_KEYUP: enginePointer->geKeyboard.SetKeyState((uint8_t)wParam, false); return 0;
 			//case WM_SYSKEYDOWN: ptrPGE->olc_UpdateKeyState(mapKeys[wParam], true);						return 0;

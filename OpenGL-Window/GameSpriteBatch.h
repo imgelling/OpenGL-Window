@@ -123,13 +123,13 @@ namespace game
 #if defined(GAME_DIRECTX9)
 			if (enginePointer->geIsUsing(GAME_DIRECTX9))
 			{
-				_spriteVertices[vertex].color = D3DCOLOR_ARGB(255, 255, 255, 255);
+				_spriteVertices[vertex].color = Colors::White.packedARGB;
 			}
 #endif
 #if defined(GAME_OPENGL)
 			if (enginePointer->geIsUsing(GAME_OPENGL))
 			{
-				_spriteVertices[vertex].color = Colors::White.packed;
+				_spriteVertices[vertex].color = Colors::White.packedABGR;
 			}
 #endif
 		}
@@ -347,7 +347,7 @@ namespace game
 			access->y = (float_t)y + (float_t)texture.height;
 			access->u = 0.0f;
 			access->v = 1.0f;
-			access->color = color.packed;
+			access->color = color.packedABGR;
 			access++;
 
 			// br
@@ -355,7 +355,7 @@ namespace game
 			access->y = (float_t)y + (float_t)texture.height;
 			access->u = 1.0f;
 			access->v = 1.0f;
-			access->color = color.packed;
+			access->color = color.packedABGR;
 			access++;
 
 			// tr
@@ -363,7 +363,7 @@ namespace game
 			access->y = (float_t)y;
 			access->u = 1.0f;
 			access->v = 0.0f;
-			access->color = color.packed;
+			access->color = color.packedABGR;
 			access++;
 
 			// tl
@@ -371,7 +371,7 @@ namespace game
 			access->y = (float_t)y;
 			access->u = 0.0f;
 			access->v = 0.0f;
-			access->color = color.packed;
+			access->color = color.packedABGR;
 			access++;
 
 		}
@@ -392,7 +392,7 @@ namespace game
 			access->y = (float_t)y;
 			access->u = 0.0f;
 			access->v = 0.0f;
-			access->color = D3DCOLOR_ARGB(color.a, color.r, color.g, color.b);
+			access->color = color.packedARGB;
 			access++;
 
 			// Top right
@@ -400,7 +400,7 @@ namespace game
 			access->y = (float_t)y;
 			access->u = 1.0f;
 			access->v = 0.0f;
-			access->color = D3DCOLOR_ARGB(color.a, color.r, color.g, color.b);
+			access->color = color.packedARGB;
 			access++;
 
 			// Bottom left
@@ -408,7 +408,7 @@ namespace game
 			access->y = (float_t)y + (float_t)texture.height;
 			access->u = 0.0f;
 			access->v = 1.0f;
-			access->color = D3DCOLOR_ARGB(color.a, color.r, color.g, color.b);
+			access->color = color.packedARGB;
 			access++;
 
 			// Top right
@@ -416,7 +416,7 @@ namespace game
 			access->y = (float_t)y;
 			access->u = 1.0f;
 			access->v = 0.0f;
-			access->color = D3DCOLOR_ARGB(color.a, color.r, color.g, color.b);
+			access->color = color.packedARGB;
 			access++;
 
 			// Bottom right
@@ -424,7 +424,7 @@ namespace game
 			access->y = (float_t)y + (float_t)texture.height;
 			access->u = 1.0f;
 			access->v = 1.0f;
-			access->color = D3DCOLOR_ARGB(color.a, color.r, color.g, color.b);
+			access->color = color.packedARGB;
 			access++;
 
 			// Bottom left
@@ -432,7 +432,7 @@ namespace game
 			access->y = (float_t)y + (float_t)texture.height;
 			access->u = 0.0f;
 			access->v = 1.0f;
-			access->color = D3DCOLOR_ARGB(color.a, color.r, color.g, color.b);
+			access->color = color.packedARGB;
 			access++;
 		}
 #endif
@@ -462,7 +462,7 @@ namespace game
 			access->y = (float_t)destination.bottom - texture.oneOverHeight;
 			access->u = (float_t)portion.x * texture.oneOverWidth;
 			access->v = (float_t)portion.bottom * texture.oneOverHeight;
-			access->color = color.packed;
+			access->color = color.packedABGR;
 			access++;
 
 			// Bottom right
@@ -470,7 +470,7 @@ namespace game
 			access->y = (float_t)destination.bottom - texture.oneOverHeight;
 			access->u = (float_t)portion.right * texture.oneOverWidth;
 			access->v = (float_t)portion.bottom * texture.oneOverHeight;
-			access->color = color.packed;
+			access->color = color.packedABGR;
 			access++;
 
 			// Top right
@@ -478,7 +478,7 @@ namespace game
 			access->y = (float_t)destination.y - texture.oneOverHeight;
 			access->u = (float_t)portion.right * texture.oneOverWidth;
 			access->v = (float_t)portion.y * texture.oneOverHeight;
-			access->color = color.packed;
+			access->color = color.packedABGR;
 			access++;
 
 			// Top left
@@ -486,7 +486,7 @@ namespace game
 			access->y = (float_t)destination.y - texture.oneOverHeight;
 			access->u = (float_t)portion.x * texture.oneOverWidth;
 			access->v = (float_t)portion.y * texture.oneOverHeight;
-			access->color = color.packed;
+			access->color = color.packedABGR;
 			access++;
 		}
 #endif
@@ -506,7 +506,7 @@ namespace game
 			access->y = (float_t)destination.y - texture.oneOverHeight;
 			access->u = (float_t)portion.x * texture.oneOverWidth;
 			access->v = (float_t)portion.y * texture.oneOverHeight;
-			access->color = D3DCOLOR_ARGB(color.a, color.r, color.g, color.b);
+			access->color = color.packedARGB;
 			access++;
 
 			// Top right
@@ -514,7 +514,7 @@ namespace game
 			access->y = (float_t)destination.y - texture.oneOverHeight;
 			access->u = (float_t)portion.right * texture.oneOverWidth;// 1.0f;
 			access->v = (float_t)portion.y * texture.oneOverHeight;
-			access->color = D3DCOLOR_ARGB(color.a, color.r, color.g, color.b);
+			access->color = color.packedARGB;
 			access++;
 
 			// Bottom left
@@ -522,7 +522,7 @@ namespace game
 			access->y = (float_t)destination.bottom - texture.oneOverHeight;
 			access->u = (float_t)portion.x * texture.oneOverWidth;
 			access->v = (float_t)portion.bottom * texture.oneOverHeight;
-			access->color = D3DCOLOR_ARGB(color.a, color.r, color.g, color.b);
+			access->color = color.packedARGB;
 			access++;
 
 			// Top right
@@ -530,7 +530,7 @@ namespace game
 			access->y = (float_t)destination.y - texture.oneOverHeight;
 			access->u = (float_t)portion.right * texture.oneOverWidth;// 1.0f;
 			access->v = (float_t)portion.y * texture.oneOverHeight;
-			access->color = D3DCOLOR_ARGB(color.a, color.r, color.g, color.b);
+			access->color = color.packedARGB;
 			access++;
 
 			// Bottom right
@@ -538,7 +538,7 @@ namespace game
 			access->y = (float_t)destination.bottom - texture.oneOverHeight;
 			access->u = (float_t)portion.right * texture.oneOverWidth;
 			access->v = (float_t)portion.bottom * texture.oneOverHeight;
-			access->color = D3DCOLOR_ARGB(color.a, color.r, color.g, color.b);
+			access->color = color.packedARGB;
 			access++;
 
 			// Bottom left
@@ -546,7 +546,7 @@ namespace game
 			access->y = (float_t)destination.bottom - texture.oneOverHeight;
 			access->u = (float_t)portion.x * texture.oneOverWidth;
 			access->v = (float_t)portion.bottom * texture.oneOverHeight;
-			access->color = D3DCOLOR_ARGB(color.a, color.r, color.g, color.b);
+			access->color = color.packedARGB;
 	}
 #endif
 

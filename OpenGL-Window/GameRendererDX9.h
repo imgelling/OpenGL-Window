@@ -34,7 +34,6 @@ namespace game
 	private:
 		LPDIRECT3D9 _d3d9;
 		LPDIRECT3DDEVICE9 _d3d9Device;
-		Color _clearColor;
 		D3DPRESENT_PARAMETERS _d3dpp = { 0 };
 
 
@@ -59,7 +58,7 @@ namespace game
 		
 		if (!width && !height) return;
 
-		_d3d9Device->Clear(0, NULL, D3DCLEAR_TARGET, D3DCOLOR_XRGB(_clearColor.r, _clearColor.g, _clearColor.b), 1.0f, 0);
+		_d3d9Device->Clear(0, NULL, D3DCLEAR_TARGET, Colors::Black.packedARGB, 1.0f, 0);
 		_d3dpp.BackBufferWidth = width;
 		_d3dpp.BackBufferHeight = height;
 		_d3d9Device->Reset(&_d3dpp);
