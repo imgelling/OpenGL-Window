@@ -25,7 +25,7 @@ namespace game
 	};
 		void DestroyDevice() {};
 		void Swap() {};
-		void HandleWindowResize(const uint32_t width, const uint32_t height) {};
+		void HandleWindowResize(const uint32_t width, const uint32_t height, const bool doReset) {};
 		void FillOutRendererInfo() {};
 		bool CreateTexture(Texture2D& texture) { return false; };
 		bool LoadTexture(std::string fileName, Texture2D& texture) { return false; };

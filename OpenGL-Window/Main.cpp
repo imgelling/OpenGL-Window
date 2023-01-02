@@ -4,15 +4,15 @@
 #define GAME_SUPPORT_DIRECTX9
 //#define GAME_SUPPORT_DIRECTX11
 //#define GAME_SUPPORT_DIRECTX12
-//#define GAME_SUPPORT_OPENGL
+#define GAME_SUPPORT_OPENGL
 //#define GAME_SUPPORT_VULKAN 
 #define GAME_SUPPORT_ALL
 #include "Game.h"
 
-constexpr uint32_t MAX_UPDATE = 0;
-constexpr uint32_t MIN_UPDATE = 10;
-constexpr uint32_t MAX_RENDER = 0;
-constexpr uint32_t MIN_RENDER = 10;
+constexpr uint32_t MAX_UPDATES = 0;
+constexpr uint32_t MIN_UPDATES = 10;
+constexpr uint32_t MAX_FRAMES = 0;
+constexpr uint32_t MIN_FRAMES = 10;
 
 
 class Game : public game::Engine
@@ -32,11 +32,11 @@ public:
 	{
 		if (geIsMinimized)
 		{
-			geSetGameLocks(MIN_RENDER, MIN_UPDATE);
+			geSetGameLocks(MIN_FRAMES, MIN_UPDATES);
 		}
 		else
 		{
-			geSetGameLocks(MAX_RENDER, MAX_UPDATE);
+			geSetGameLocks(MAX_FRAMES, MAX_UPDATES);
 		}
 	}
 
@@ -46,10 +46,10 @@ public:
 		
 		attributes.WindowTitle = "PixelMode tests";
 		attributes.GameVersion = "0.01";
-		attributes.FrameLock = 60;
-		attributes.UpdateLock = 60;
+		attributes.FrameLock = MAX_FRAMES;
+		attributes.UpdateLock = MAX_UPDATES;
 		attributes.VsyncOn = false;
-		attributes.DebugMode = true;
+		attributes.DebugMode = false;
 		attributes.MultiSamples = 8;
 		attributes.RenderingAPI = game::RenderAPI::DirectX9; 
 		//attributes.RenderingAPI = game::RenderAPI::OpenGL;

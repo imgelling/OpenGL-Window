@@ -98,7 +98,7 @@ namespace game
 		bool CreateDevice(Window& window);
 		void DestroyDevice();
 		void Swap();
-		void HandleWindowResize(const uint32_t width, const uint32_t height);
+		void HandleWindowResize(const uint32_t width, const uint32_t height, const bool doReset);
 		void FillOutRendererInfo();
 		bool CreateTexture(Texture2D& texture);
 		bool LoadTexture(std::string fileName, Texture2D &texture);
@@ -671,7 +671,7 @@ namespace game
 		SwapBuffers(_glDeviceContext);
 	};
 
-	inline void RendererGL::HandleWindowResize(const uint32_t width, const uint32_t height)
+	inline void RendererGL::HandleWindowResize(const uint32_t width, const uint32_t height, const bool doReset)
 	{
 		glClear(GL_COLOR_BUFFER_BIT);
 		glViewport(0, 0, width, height);

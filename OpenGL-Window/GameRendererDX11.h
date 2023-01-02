@@ -18,7 +18,7 @@ namespace game
 		bool CreateDevice(Window& window);
 		void DestroyDevice();
 		void Swap();
-		void HandleWindowResize(const uint32_t width, const uint32_t height);
+		void HandleWindowResize(const uint32_t width, const uint32_t height, const bool doReset);
 		void FillOutRendererInfo() {}
 		bool CreateTexture(Texture2D& texture);
 		bool LoadTexture(std::string fileName, Texture2D& texture) { lastError = { GameErrors::GameDirectX11Specific, "could not load texture" }; return false; }
@@ -152,7 +152,7 @@ namespace game
 		_d3d11SwapChain->Present(0, 0);
 	}
 
-	inline void RendererDX11::HandleWindowResize(const uint32_t width, const uint32_t height)
+	inline void RendererDX11::HandleWindowResize(const uint32_t width, const uint32_t height, const bool doReset)
 	{
 		float color[4] = { 0 };
 		D3D11_VIEWPORT viewport = { 0 };

@@ -21,7 +21,7 @@ namespace game
 		bool CreateDevice(Window& window);
 		void DestroyDevice();
 		void Swap();
-		void HandleWindowResize(const uint32_t width, const uint32_t height);
+		void HandleWindowResize(const uint32_t width, const uint32_t height, const bool doReset);
 		void FillOutRendererInfo();
 		bool CreateTexture(Texture2D& texture);
 		bool LoadTexture(std::string fileName, Texture2D& texture);
@@ -52,16 +52,16 @@ namespace game
 		device = _d3d9Device;
 	}
 
-	inline void RendererDX9::HandleWindowResize(const uint32_t width, const uint32_t height)
+	inline void RendererDX9::HandleWindowResize(const uint32_t width, const uint32_t height, const bool doReset)
 	{
 		D3DVIEWPORT9 view { 0, 0, width, height, 0.0f, 1.0f};
 		
-		if (!width && !height) return;
+		if (!width || !height) return;
 
 		_d3d9Device->Clear(0, NULL, D3DCLEAR_TARGET, Colors::Black.packedARGB, 1.0f, 0);
 		_d3dpp.BackBufferWidth = width;
 		_d3dpp.BackBufferHeight = height;
-		_d3d9Device->Reset(&_d3dpp);
+		if (doReset) _d3d9Device->Reset(&_d3dpp);
 		if (_d3d9Device->SetViewport(&view) != D3D_OK)
 		{
 			std::cout << "viewport";

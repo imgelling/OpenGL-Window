@@ -19,7 +19,7 @@ namespace game
 
 		bool CreateInstance();
 
-		void HandleWindowResize(const uint32_t width, const uint32_t height);
+		void HandleWindowResize(const uint32_t width, const uint32_t height, const bool doReset);
 		void FillOutRendererInfo();
 		bool CreateTexture(Texture2D& texture);
 		bool LoadTexture(std::string fileName, Texture2D &texture);
@@ -117,7 +117,7 @@ namespace game
 		return true;
 	}
 
-	inline void RendererVK::HandleWindowResize(const uint32_t width, const uint32_t height)
+	inline void RendererVK::HandleWindowResize(const uint32_t width, const uint32_t height, const bool doReset)
 	{
 
 	}

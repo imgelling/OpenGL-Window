@@ -60,9 +60,9 @@ namespace game
 		Logger* geLogger;
 		bool geIsRunning;
 		bool geIsMinimized;
+		bool test;
 #if defined(GAME_DIRECTX9)
 		LPDIRECT3DDEVICE9 d3d9Device;
-		bool doReset;
 #endif
 #if defined(GAME_DIRECTX11)
 		ID3D11DeviceContext* d3d11Context;
@@ -102,7 +102,7 @@ namespace game
 		Vector2i geGetWindowSize() const noexcept;
 		void geSetWindowTitle(const std::string title);
 		void geToggleFullscreen();
-		void HandleWindowResize(const uint32_t width, const uint32_t height);
+		void HandleWindowResize(const uint32_t width, const uint32_t height, const bool doReset);
 		
 		// Created by end user		
 
@@ -147,9 +147,9 @@ namespace game
 		_cpuFrequency = 0;
 		this->geLogger = logger;
 		geIsMinimized = false;
+		test = false;
 #if defined(GAME_DIRECTX9)
 		d3d9Device = nullptr;
-		doReset = false;
 #endif
 #if defined(GAME_DIRECTX11)
 		d3d11Context = nullptr;
@@ -580,13 +580,13 @@ namespace game
 		}
 	}
 
-	inline void Engine::HandleWindowResize(const uint32_t width, const uint32_t height)
+	inline void Engine::HandleWindowResize(const uint32_t width, const uint32_t height, const bool doReset)
 	{
 		_attributes.WindowWidth = width;
 		_attributes.WindowHeight = height;
 		if (_renderer)
 		{
-			_renderer->HandleWindowResize(width, height);
+			_renderer->HandleWindowResize(width, height, doReset);
 		}
 		HandleWindowSizeChange();
 	}
@@ -611,31 +611,37 @@ namespace game
 		case WM_RBUTTONUP:	enginePointer->geMouse.SetMouseState(2, false); return 0;
 		case WM_MBUTTONDOWN:enginePointer->geMouse.SetMouseState(1, true); return 0;
 		case WM_MBUTTONUP:	enginePointer->geMouse.SetMouseState(1, false); return 0;
+		case WM_SIZING: break;
 		case WM_SIZE: 
 		{
 			switch (wParam)
 			{
 			case SIZE_MINIMIZED:
 				enginePointer->geIsMinimized = true;
-				enginePointer->doReset = true;
+				enginePointer->HandleWindowResize(lParam & 0xFFF, (lParam >> 16) & 0xFFFF, true); return 0;
 				break;
 			case SIZE_MAXIMIZED:
+				enginePointer->test = true;
+				enginePointer->HandleWindowResize(lParam & 0xFFF, (lParam >> 16) & 0xFFFF, true); return 0;
+				break;
 			case SIZE_RESTORED:
+				if (enginePointer->test)
+				{
+					enginePointer->HandleWindowResize(lParam & 0xFFF, (lParam >> 16) & 0xFFFF, true);
+					enginePointer->test = false;
+				}
 				enginePointer->geIsMinimized = false;
-				enginePointer->doReset = true;
+				break;
 			default:
 				break;
 			}
 			// Tell the application the window changed size
-			if (enginePointer->doReset)
-			{
-				enginePointer->HandleWindowResize(lParam & 0xFFF, (lParam >> 16) & 0xFFFF);
-				enginePointer->doReset = false;
-			}
+			enginePointer->HandleWindowResize(lParam & 0xFFF, (lParam >> 16) & 0xFFFF, false);
+
 			return 0;
 		}
-		case WM_ENTERSIZEMOVE: enginePointer->doReset = false; return 0;
-		case WM_EXITSIZEMOVE: enginePointer->doReset = true; return 0;
+		case WM_EXITSIZEMOVE: enginePointer->HandleWindowResize(enginePointer->geGetWindowSize().x, enginePointer->geGetWindowSize().y, true); return 0;
+
 		case WM_KEYDOWN: enginePointer->geKeyboard.SetKeyState((uint8_t)wParam, true); return 0;
 		case WM_KEYUP: enginePointer->geKeyboard.SetKeyState((uint8_t)wParam, false); return 0;
 			//case WM_SYSKEYDOWN: ptrPGE->olc_UpdateKeyState(mapKeys[wParam], true);						return 0;
