@@ -629,6 +629,7 @@ namespace game
 				{
 					enginePointer->HandleWindowResize(lParam & 0xFFF, (lParam >> 16) & 0xFFFF, true);
 					enginePointer->test = false;
+					return 0;
 				}
 				enginePointer->geIsMinimized = false;
 				break;
