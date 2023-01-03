@@ -626,13 +626,11 @@ namespace game
 				enginePointer->geIsMinimized = true;
 				enginePointer->geIsMaximized = false;
 				enginePointer->HandleWindowResize(lParam & 0xFFF, (lParam >> 16) & 0xFFFF, true); 
-				//return 0;
 				break;
 			case SIZE_MAXIMIZED:
 				enginePointer->geIsMaximized = true;
 				enginePointer->geIsMinimized = false;
 				enginePointer->HandleWindowResize(lParam & 0xFFF, (lParam >> 16) & 0xFFFF, true); 
-				//return 0;
 				break;
 			case SIZE_RESTORED:
 				if (enginePointer->geIsMaximized)
