@@ -58,9 +58,10 @@ namespace game
 		Keyboard geKeyboard;
 		Mouse geMouse;
 		Logger* geLogger;
-		bool geIsRunning;
-		bool geIsMinimized;
-		bool test;
+		std::atomic_bool geIsRunning;
+		std::atomic_bool geIsMinimized;
+		std::atomic_bool geIsMaximized;
+		std::atomic_bool geFullScreenToggled;
 #if defined(GAME_DIRECTX9)
 		LPDIRECT3DDEVICE9 d3d9Device;
 #endif
@@ -147,7 +148,8 @@ namespace game
 		_cpuFrequency = 0;
 		this->geLogger = logger;
 		geIsMinimized = false;
-		test = false;
+		geIsMaximized = false;
+		geFullScreenToggled = false;
 #if defined(GAME_DIRECTX9)
 		d3d9Device = nullptr;
 #endif
@@ -433,6 +435,10 @@ namespace game
 	{
 		_window.ToggleFullScreen();
 		_attributes.WindowFullscreen = !_attributes.WindowFullscreen;
+		RECT size;
+		GetClientRect(_window.GetHandle(), &size);
+		HandleWindowResize(size.right, size.bottom, true);
+		geFullScreenToggled = true;
 	}
 
 	inline void Engine::_GetAndLogCPUInfo()
@@ -618,18 +624,25 @@ namespace game
 			{
 			case SIZE_MINIMIZED:
 				enginePointer->geIsMinimized = true;
-				enginePointer->HandleWindowResize(lParam & 0xFFF, (lParam >> 16) & 0xFFFF, true); return 0;
+				enginePointer->geIsMaximized = false;
+				enginePointer->HandleWindowResize(lParam & 0xFFF, (lParam >> 16) & 0xFFFF, true); 
+				//return 0;
 				break;
 			case SIZE_MAXIMIZED:
-				enginePointer->test = true;
-				enginePointer->HandleWindowResize(lParam & 0xFFF, (lParam >> 16) & 0xFFFF, true); return 0;
+				enginePointer->geIsMaximized = true;
+				enginePointer->geIsMinimized = false;
+				enginePointer->HandleWindowResize(lParam & 0xFFF, (lParam >> 16) & 0xFFFF, true); 
+				//return 0;
 				break;
 			case SIZE_RESTORED:
-				if (enginePointer->test)
+				if (enginePointer->geIsMaximized)
 				{
 					enginePointer->HandleWindowResize(lParam & 0xFFF, (lParam >> 16) & 0xFFFF, true);
-					enginePointer->test = false;
-					return 0;
+					enginePointer->geIsMaximized = false;
+				}
+				if (enginePointer->geFullScreenToggled)
+				{
+					enginePointer->geFullScreenToggled = false;
 				}
 				enginePointer->geIsMinimized = false;
 				break;
@@ -641,7 +654,15 @@ namespace game
 
 			return 0;
 		}
-		case WM_EXITSIZEMOVE: enginePointer->HandleWindowResize(enginePointer->geGetWindowSize().x, enginePointer->geGetWindowSize().y, true); return 0;
+		case WM_EXITSIZEMOVE: 
+		{
+			if (enginePointer->geFullScreenToggled)
+			{
+				enginePointer->HandleWindowResize(enginePointer->geGetWindowSize().x, enginePointer->geGetWindowSize().y, true);
+			}
+			enginePointer->HandleWindowResize(enginePointer->geGetWindowSize().x, enginePointer->geGetWindowSize().y, true);
+			return 0;
+		}
 
 		case WM_KEYDOWN: enginePointer->geKeyboard.SetKeyState((uint8_t)wParam, true); return 0;
 		case WM_KEYUP: enginePointer->geKeyboard.SetKeyState((uint8_t)wParam, false); return 0;
