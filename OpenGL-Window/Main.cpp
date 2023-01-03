@@ -1,5 +1,5 @@
 // Engine header
-//#define GAME_USE_DEDICATED_GPU
+#define GAME_USE_DEDICATED_GPU
 //#define GAME_USE_SHADERS
 #define GAME_SUPPORT_DIRECTX9
 //#define GAME_SUPPORT_DIRECTX11
@@ -14,6 +14,12 @@ constexpr uint32_t MIN_UPDATES = 10;
 constexpr uint32_t MAX_FRAMES = 0;
 constexpr uint32_t MIN_FRAMES = 10;
 
+
+//
+// Need for dx9
+// internal pixel format -- not sure how to do
+// internal pixel type  -- not sure how to do
+//
 
 class Game : public game::Engine
 {

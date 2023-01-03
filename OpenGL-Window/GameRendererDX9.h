@@ -93,6 +93,16 @@ namespace game
 		d3dpp.hDeviceWindow = window.GetHandle();   
 		d3dpp.Flags = D3DPRESENTFLAG_DISCARD_DEPTHSTENCIL;
 		d3dpp.EnableAutoDepthStencil = true;
+		//D3DFMT_D16_LOCKABLE = 70,
+		//	D3DFMT_D32 = 71,
+		//	D3DFMT_D15S1 = 73,
+		//	D3DFMT_D24S8 = 75,
+		//	D3DFMT_D24X8 = 77,
+		//	D3DFMT_D24X4S4 = 79,
+		//	D3DFMT_D16 = 80,
+
+		//	D3DFMT_D32F_LOCKABLE = 82,
+		//	D3DFMT_D24FS8 = 83,
 		d3dpp.AutoDepthStencilFormat = D3DFMT_D24X8; // 24 bit, no stencil
 		d3dpp.BackBufferFormat = D3DFMT_A8R8G8B8;
 		if (_attributes.VsyncOn)
@@ -125,6 +135,15 @@ namespace game
 		D3DVIEWPORT9 view{ 0, 0, _attributes.WindowWidth, _attributes.WindowHeight, 0.0f, 1.0f };
 
 		_d3d9Device->SetViewport(&view);
+
+		// If device was created then the settings must have worked, log them
+		systemInfo.gpuInfo.depthBufferSize = 24; //temp
+		systemInfo.gpuInfo.backBufferColorSize = 32; // temp
+		systemInfo.gpuInfo.frontBufferColorSize = 32; //temp
+		systemInfo.gpuInfo.multisampleSamples = _attributes.MultiSamples;
+		systemInfo.gpuInfo.maxMultisamples = 0; // temp till I can fix
+		systemInfo.gpuInfo.internalPixelFormat = 0;// figure out from somewhere
+		systemInfo.gpuInfo.internalPixelType = 0; // unkown
 		return true;
 	}
 
@@ -152,13 +171,83 @@ namespace game
 		sStream << "DirectX version : " << systemInfo.gpuInfo.version;
 		LOG(sStream);
 
+		D3DCAPS9 caps;
+		_d3d9Device->GetDeviceCaps(&caps);
+
+		// Log shader versions
+		systemInfo.gpuInfo.maxShaderLanguageVersion = "VS 3.0, ";
+		if (caps.VertexShaderVersion < D3DVS_VERSION(3, 0))
+		{
+			systemInfo.gpuInfo.maxShaderLanguageVersion = "VS 2.x, ";
+			if (caps.VertexShaderVersion < D3DVS_VERSION(2, 0))
+			{
+				systemInfo.gpuInfo.maxShaderLanguageVersion = "VS 1.1, ";
+			}
+		}
+		systemInfo.gpuInfo.maxShaderLanguageVersion += "PS 3.0";
+		if (caps.PixelShaderVersion < D3DVS_VERSION(3, 0))
+		{
+			systemInfo.gpuInfo.maxShaderLanguageVersion += "PS 2.x";
+			if (caps.PixelShaderVersion < D3DVS_VERSION(2, 0))
+			{
+				systemInfo.gpuInfo.maxShaderLanguageVersion += "PS 1.1";
+			}
+		}
+		sStream << "Max supported shader versions : " << systemInfo.gpuInfo.maxShaderLanguageVersion;
+		LOG(sStream);
+
 		// Log video memory
 		systemInfo.gpuInfo.freeMemory = _d3d9Device->GetAvailableTextureMem() / 1024 / 1024;
 		sStream << "GPU available memory : " << systemInfo.gpuInfo.freeMemory << "MB";
 		LOG(sStream);
 
-		D3DCAPS9 caps;
-		_d3d9Device->GetDeviceCaps(&caps);
+		// Log internal pixel format
+		sStream << "Internal Pixel Format : " << systemInfo.gpuInfo.internalPixelFormat << " (";
+		switch (systemInfo.gpuInfo.internalPixelFormat)
+		{
+		case 0: sStream << "Unknown)"; break;
+		default: sStream << "Unknown)";
+		}
+		LOG(sStream);
+
+		// Log internal pixel type
+		sStream << "Internal Pixel Type : " << systemInfo.gpuInfo.internalPixelType << " (";
+		switch (systemInfo.gpuInfo.internalPixelType)
+		{
+		case 0: sStream << "Unknown)"; break;
+		default: sStream << "Unknown)";
+		}
+		LOG(sStream);
+
+		// Log multisampling 
+		sStream << "Multisampling samples : ";
+		if (systemInfo.gpuInfo.multisampleSamples > 1)
+		{
+			sStream << systemInfo.gpuInfo.multisampleSamples << " (";
+			sStream << systemInfo.gpuInfo.maxMultisamples << " max)";
+		}
+		else
+		{
+			sStream << "Disabled";
+		}
+		LOG(sStream);
+
+		// Log front buffer
+		sStream << "Front buffer : " << systemInfo.gpuInfo.frontBufferColorSize << " bits";
+		LOG(sStream);
+
+		// Log back buffer
+		sStream << "Back buffer : " << systemInfo.gpuInfo.backBufferColorSize << " bits";
+		LOG(sStream);
+
+		// Log depth buffer
+		sStream << "Depth buffer : " << systemInfo.gpuInfo.depthBufferSize << " bits";
+		LOG(sStream);
+
+		// Log max anisotropy
+		systemInfo.gpuInfo.maxAnisotropy = caps.MaxAnisotropy;
+		sStream << "Max anisotropy : " << systemInfo.gpuInfo.maxAnisotropy << "x";
+		LOG(sStream);
 	}
 		
 	inline void RendererDX9::Swap()

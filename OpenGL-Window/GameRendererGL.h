@@ -819,7 +819,7 @@ namespace game
 
 		// Log depth buffer
 		_glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_DEPTH, GL_FRAMEBUFFER_ATTACHMENT_DEPTH_SIZE, &systemInfo.gpuInfo.depthBufferSize);
-		sStream << "Depth buffer : " << systemInfo.gpuInfo.depthBufferSize << "bits";
+		sStream << "Depth buffer : " << systemInfo.gpuInfo.depthBufferSize << " bits";
 		LOG(sStream);
 
 		// Get the max anisotropy
