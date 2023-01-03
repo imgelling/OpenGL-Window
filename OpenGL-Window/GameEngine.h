@@ -654,10 +654,6 @@ namespace game
 		}
 		case WM_EXITSIZEMOVE: 
 		{
-			if (enginePointer->geFullScreenToggled)
-			{
-				enginePointer->HandleWindowResize(enginePointer->geGetWindowSize().x, enginePointer->geGetWindowSize().y, true);
-			}
 			enginePointer->HandleWindowResize(enginePointer->geGetWindowSize().x, enginePointer->geGetWindowSize().y, true);
 			return 0;
 		}
