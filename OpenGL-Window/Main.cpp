@@ -6,7 +6,7 @@
 //#define GAME_SUPPORT_DIRECTX12
 //#define GAME_SUPPORT_OPENGL
 //#define GAME_SUPPORT_VULKAN 
-#define GAME_SUPPORT_ALL
+//#define GAME_SUPPORT_ALL
 #include "Game.h"
 
 constexpr uint32_t MAX_UPDATES = 0;
@@ -88,6 +88,7 @@ public:
 			geLogLastError();
 		}
 
+		// Load font for output to screen
 		if (!spriteFont.Load("Content/new.fnt", "Content/new.png"))
 		{
 			geLogLastError();
@@ -116,20 +117,12 @@ public:
 
 	void Render(const float_t msElapsed)
 	{
-
 		game::Pointi scaledMousePos;
 
 		scaledMousePos = pixelMode.GetScaledMousePosition();
 
 		// Api dependent methods in this
 		Clear();
-
-#if defined (GAME_DIRECTX9)
-		if (geIsUsing(GAME_DIRECTX9))
-		{
-			d3d9Device->BeginScene();
-		}
-#endif
 
 		pixelMode.Clear(game::Colors::Blue);
 
@@ -191,6 +184,7 @@ public:
 #if defined (GAME_DIRECTX9)
 		if (geIsUsing(GAME_DIRECTX9))
 		{
+			d3d9Device->BeginScene();
 			d3d9Device->Clear(0, NULL, D3DCLEAR_TARGET, game::Colors::DarkGray.packedARGB, 1.0f, 0);
 		}
 #endif

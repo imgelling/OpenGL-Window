@@ -142,7 +142,7 @@ namespace game
 		systemInfo.gpuInfo.frontBufferColorSize = 32; //temp
 		systemInfo.gpuInfo.multisampleSamples = _attributes.MultiSamples;
 		systemInfo.gpuInfo.maxMultisamples = 0; // temp till I can fix
-		systemInfo.gpuInfo.internalPixelFormat = 0;// figure out from somewhere
+		systemInfo.gpuInfo.internalPixelFormat = (int32_t)D3DFMT_A8R8G8B8;// figure out from somewhere
 		systemInfo.gpuInfo.internalPixelType = 0; // unkown
 		return true;
 	}
@@ -206,6 +206,7 @@ namespace game
 		switch (systemInfo.gpuInfo.internalPixelFormat)
 		{
 		case 0: sStream << "Unknown)"; break;
+		case 21: sStream << "ARGB)"; break;
 		default: sStream << "Unknown)";
 		}
 		LOG(sStream);
