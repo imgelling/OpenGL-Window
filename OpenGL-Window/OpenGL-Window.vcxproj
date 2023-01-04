@@ -158,6 +158,7 @@
     <ClInclude Include="GameMouse.h" />
     <ClInclude Include="GamePerformanceTimer.h" />
     <ClInclude Include="GamePixelMode.h" />
+    <ClInclude Include="GameRandom.h" />
     <ClInclude Include="GameRendererBase.h" />
     <ClInclude Include="GameRendererDX12.h" />
     <ClInclude Include="GameRendererDX9.h" />

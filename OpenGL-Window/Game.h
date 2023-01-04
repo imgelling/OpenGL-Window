@@ -86,6 +86,7 @@
 #include "GameMouse.h"
 #include "GamePerformanceTimer.h"
 #include "GamePixelMode.h"
+#include "GameRandom.h"
 #include "GameRendererBase.h"
 #include "GameShader.h"
 #include "GameSpriteBatch.h"

@@ -17,7 +17,6 @@ constexpr uint32_t MIN_FRAMES = 10;
 
 //
 // Need for dx9
-// internal pixel format -- not sure how to do
 // internal pixel type  -- not sure how to do
 //
 
@@ -29,6 +28,7 @@ public:
 	game::SpriteBatch spriteBatch;
 	game::Texture2D spriteTexture;
 	game::SpriteFont spriteFont;
+	game::GameRandom random;
 
 	Game(game::Logger& logger) : game::Engine(&logger)
 	{
@@ -121,8 +121,8 @@ public:
 
 		scaledMousePos = pixelMode.GetScaledMousePosition();
 
-		// Api dependent methods in this
-		Clear();
+		// Clears and starts new scene
+		BeginScene();
 
 		pixelMode.Clear(game::Colors::Blue);
 
@@ -163,16 +163,11 @@ public:
 		spriteBatch.DrawString(spriteFont, "PixelMode Pixel Size: " + std::to_string(pixelMode.GetPixelFrameBufferSize().width) + "x" + std::to_string(pixelMode.GetPixelFrameBufferSize().height), 10, 240, game::Colors::Red);
 		spriteBatch.End();
 
-#if defined(GAME_DIRECTX9)
-		if (geIsUsing(GAME_DIRECTX9))
-		{
-			d3d9Device->EndScene();
-		}
-#endif
+		EndScene();
 	}
 
 	// Clears the screen
-	void Clear()
+	void BeginScene()
 	{
 #if defined (GAME_OPENGL)
 		if (geIsUsing(GAME_OPENGL))
@@ -198,6 +193,18 @@ public:
 #endif
 	}
 
+	// Ends the scene
+	void EndScene()
+	{
+#if defined (GAME_DIRECTX9)
+		if (geIsUsing(GAME_DIRECTX9))
+		{
+			d3d9Device->EndScene();
+		}
+#endif
+	}
+
+	// Sets up API stuff
 	void Setup()
 	{
 #if defined (GAME_OPENGL)
