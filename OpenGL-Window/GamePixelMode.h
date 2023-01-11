@@ -537,7 +537,7 @@ namespace game
 
 		struct _Clip
 		{
-			int clipTest(float_t p, float_t q, float_t* u1, float_t* u2) noexcept
+			inline int clipTest(float_t p, float_t q, float_t* u1, float_t* u2) noexcept
 			{
 				float_t r(0.0f);
 

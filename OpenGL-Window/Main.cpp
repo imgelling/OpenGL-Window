@@ -116,9 +116,9 @@ public:
 		}
 	}
 
-	void DrawHorizontalPill(const uint32_t x, const uint32_t y, const uint32_t length, const uint32_t radius, const game::Color& color)
+	void DrawHorizontalPill(const int32_t x, const int32_t y, const int32_t length, const int32_t radius, const game::Color& color)
 	{
-		uint32_t calculatedLength = length - radius - radius;
+		uint32_t calculatedLength = length - (radius * 2);
 
 		//if (radius < 0 || x < -radius || y < -radius || x - _bufferSize.width > radius || y - _bufferSize.height > radius)
 			//return;
