@@ -115,9 +115,7 @@ public:
 			geStopEngine();
 		}
 	}
-
-
-
+		
 	void Render(const float_t msElapsed)
 	{
 		game::Pointi scaledMousePos;
@@ -157,8 +155,11 @@ public:
 
 		// Circle Clipped
 		//pixelMode.CircleFilledClip(scaledMousePos.x, scaledMousePos.y, 40, game::Colors::Green);
-		pixelMode.DrawHorizontalPillClip(scaledMousePos.x, scaledMousePos.y, 40, 5, game::Colors::Green);
-		pixelMode.DrawHorizontalPillClip(scaledMousePos.x, scaledMousePos.y, 38, 4, game::Colors::White);
+		//pixelMode.HorizontalPillClip(scaledMousePos.x, scaledMousePos.y, 40, 5, game::Colors::Green);
+		//pixelMode.HorizontalPillClip(scaledMousePos.x, scaledMousePos.y, 38, 4, game::Colors::White);
+
+		pixelMode.VerticalPillClip(scaledMousePos.x, scaledMousePos.y, 40, 5, game::Colors::Green);
+		pixelMode.VerticalPillClip(scaledMousePos.x, scaledMousePos.y, 38, 4, game::Colors::White);
 
 		// Weird diagonal
 		pixelMode.LineClip(-20, -10, scaledMousePos.x, scaledMousePos.y, game::Colors::Pink);
@@ -170,10 +171,6 @@ public:
 		rect.right = 318;
 		rect.bottom = 238;
 		pixelMode.Rect(rect, game::Colors::White);
-
-
-		// Circle
-		pixelMode.CircleFilled(160, 120, 75, game::Colors::DarkGray);
 
 		pixelMode.Render();
 
