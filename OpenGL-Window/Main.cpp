@@ -116,47 +116,7 @@ public:
 		}
 	}
 
-	void DrawHorizontalPill(const int32_t x, const int32_t y, const int32_t length, const int32_t radius, const game::Color& color)
-	{
-		uint32_t calculatedLength = length - (radius * 2);
 
-		//if (radius < 0 || x < -radius || y < -radius || x - _bufferSize.width > radius || y - _bufferSize.height > radius)
-			//return;
-
-		if (radius > 0)
-		{
-			int32_t x0 = 0;
-			int32_t y0 = radius;
-			int32_t d = 3 - 2 * radius;
-
-			auto drawline = [&](int32_t sx, int32_t ex, int32_t y)
-			{
-				//for (int32_t x = sx; x <= ex; x++)
-				//	pixelMode.Pixel(x, y, color);
-				pixelMode.LineClip(sx, y, ex + calculatedLength, y, color);
-			};
-
-			while (y0 >= x0)
-			{
-				drawline(x - y0, x + y0, y - x0);
-				if (x0 > 0)	drawline(x - y0, x + y0, y + x0);
-
-				if (d < 0)
-					d += 4 * x0++ + 6;
-				else
-				{
-					if (x0 != y0)
-					{
-						drawline(x - x0, x + x0, y - y0);
-						drawline(x - x0, x + x0, y + y0);
-					}
-					d += 4 * (x0++ - y0--) + 10;
-				}
-			}
-		}
-		else
-			pixelMode.Pixel(x, y, color);
-	}
 
 	void Render(const float_t msElapsed)
 	{
@@ -197,8 +157,8 @@ public:
 
 		// Circle Clipped
 		//pixelMode.CircleFilledClip(scaledMousePos.x, scaledMousePos.y, 40, game::Colors::Green);
-		DrawHorizontalPill(scaledMousePos.x, scaledMousePos.y, 40, 5, game::Colors::Green);
-		DrawHorizontalPill(scaledMousePos.x, scaledMousePos.y, 38, 4, game::Colors::White);
+		pixelMode.DrawHorizontalPillClip(scaledMousePos.x, scaledMousePos.y, 40, 5, game::Colors::Green);
+		pixelMode.DrawHorizontalPillClip(scaledMousePos.x, scaledMousePos.y, 38, 4, game::Colors::White);
 
 		// Weird diagonal
 		pixelMode.LineClip(-20, -10, scaledMousePos.x, scaledMousePos.y, game::Colors::Pink);

@@ -38,6 +38,8 @@ namespace game
 		void CircleFilledClip(int32_t x, int32_t y, int32_t radius, const Color& color) noexcept;
 		void Rect(const Recti& rectangle, const Color& color) noexcept;
 		void RectClip(const Recti& rectangle, const Color& color) noexcept;
+		void DrawHorizontalPillClip(const int32_t x, const int32_t y, const int32_t length, const int32_t radius, const game::Color& color) noexcept;
+		
 		Pointi GetScaledMousePosition() noexcept;
 		Pointi GetPixelFrameBufferSize() noexcept;
 	private:
@@ -769,6 +771,44 @@ namespace game
 		LineClip(rectangle.x, rectangle.y, rectangle.x, rectangle.bottom, color);
 		// Right
 		LineClip(rectangle.right, rectangle.y, rectangle.right, rectangle.bottom, color);
+	}
+
+	inline void PixelMode::DrawHorizontalPillClip(const int32_t x, const int32_t y, const int32_t length, const int32_t radius, const game::Color& color) noexcept
+	{
+		int32_t calculatedLength = length - (radius * 2);
+
+		if (radius < 0 || x < -length || y < -radius || x - _bufferSize.width > length || y - _bufferSize.height > radius)
+			return;
+
+		if (radius > 0)
+		{
+			int32_t x0 = 0;
+			int32_t y0 = radius;
+			int32_t d = 3 - 2 * radius;
+
+			while (y0 >= x0)
+			{
+				LineClip(x - y0, y - x0, x + y0 + calculatedLength, y - x0, color);
+				if (x0 > 0)
+				{
+					LineClip(x - y0, y + x0, x + y0 + calculatedLength, y + x0, color);
+				}
+
+				if (d < 0)
+					d += 4 * x0++ + 6;
+				else
+				{
+					if (x0 != y0)
+					{
+						LineClip(x - x0, y - y0, x + x0 + calculatedLength, y - y0, color);
+						LineClip(x - x0, y + y0, x + x0 + calculatedLength, y + y0, color);
+					}
+					d += 4 * (x0++ - y0--) + 10;
+				}
+			}
+		}
+		else
+			Pixel(x, y, color);
 	}
 
 	inline Pointi PixelMode::GetScaledMousePosition() noexcept
