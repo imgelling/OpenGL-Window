@@ -4,22 +4,22 @@
 
 namespace game
 {
-	class GameRandom
+	class Random
 	{
 	public:
-		GameRandom();
+		Random();
 		void SetSeed(const uint32_t seed);
 		uint32_t GetSeed();
 		uint32_t Rnd();
 		uint32_t RndRange(const uint32_t min, const uint32_t max);
-		~GameRandom();
+		~Random();
 	private:
 		unsigned int _seed;
 		std::mt19937 _mt19937Generator;
 
 	};
 
-	GameRandom::GameRandom()
+	Random::Random()
 	{
 		std::random_device rd;
 		_seed = rd() ^
@@ -32,29 +32,29 @@ namespace game
 		_mt19937Generator.seed(_seed);
 	}
 
-	inline void GameRandom::SetSeed(const uint32_t seed)
+	inline void Random::SetSeed(const uint32_t seed)
 	{
 		this->_seed = seed;
 		_mt19937Generator.seed(seed);
 	}
 
-	inline uint32_t GameRandom::GetSeed()
+	inline uint32_t Random::GetSeed()
 	{
 		return _seed;
 	}
 
-	inline uint32_t GameRandom::Rnd()
+	inline uint32_t Random::Rnd()
 	{
 		return _mt19937Generator();
 	}
 
-	inline uint32_t GameRandom::RndRange(const uint32_t min, const uint32_t max)
+	inline uint32_t Random::RndRange(const uint32_t min, const uint32_t max)
 	{
 		std::uniform_int_distribution<unsigned> distrib(min, max);
 		return distrib(_mt19937Generator);
 	}
 
-	GameRandom::~GameRandom()
+	Random::~Random()
 	{
 	}
 }

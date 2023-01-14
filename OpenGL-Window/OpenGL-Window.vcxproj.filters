@@ -107,5 +107,8 @@
     <ClInclude Include="GameRandom.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="GameRendererDX10.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

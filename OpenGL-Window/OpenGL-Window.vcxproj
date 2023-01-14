@@ -175,6 +175,7 @@
     <ClInclude Include="GameWindow.h" />
     <ClInclude Include="GameShader.h" />
     <ClInclude Include="GameRendererDX11.h" />
+    <ClInclude Include="GameRendererDX10.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

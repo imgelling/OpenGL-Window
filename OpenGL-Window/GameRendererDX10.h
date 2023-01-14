@@ -1,10 +1,6 @@
 #pragma once
 
-#include <wrl.h>
-#include <d3d12.h>
-#include <dxgi1_6.h>
-#include <d3dcompiler.h>
-#include <DirectXMath.h>
+#include <d3d10.h>
 
 #include "GameErrors.h"
 #include "GameImageLoader.h"
@@ -16,7 +12,7 @@
 namespace game
 {
 	extern SystemInfo systemInfo;
-	class RendererDX12 : public RendererBase
+	class RendererDX10 : public RendererBase
 	{
 	public:
 		bool CreateDevice(Window& window);
@@ -33,9 +29,9 @@ namespace game
 		void _ReadExtensions() {};
 	};
 
-	inline bool RendererDX12::CreateDevice(Window& window) 
+	inline bool RendererDX10::CreateDevice(Window& window)
 	{
-		lastError = { GameErrors::GameDirectX12Specific, "Not implemented" }; 
+		lastError = { GameErrors::GameDirectX10Specific, "Not implemented" };
 		return false;
 	};
 }

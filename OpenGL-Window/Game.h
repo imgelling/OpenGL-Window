@@ -11,17 +11,22 @@
 #define GAME_DIRECTX9 2
 #endif
 
+#if defined(GAME_SUPPORT_DIRECTX10) || defined(GAME_SUPPORT_ALL)
+#define GAME_DIRECTX10 6
+#endif
+
 #if defined(GAME_SUPPORT_DIRECTX11) || defined(GAME_SUPPORT_ALL)
 #define GAME_DIRECTX11 4
+#endif
+
+#if defined(GAME_SUPPORT_DIRECTX12) || defined(GAME_SUPPORT_ALL)
+#define GAME_DIRECTX12 5
 #endif
 
 #if defined(GAME_SUPPORT_VULKAN) || defined(GAME_SUPPORT_ALL)
 #define GAME_VULKAN 3
 #endif
 
-#if defined(GAME_SUPPORT_DIRECTX12) || defined(GAME_SUPPORT_ALL)
-#define GAME_DIRECTX12 5
-#endif
 
 
 #pragma region Vulkan
@@ -34,8 +39,12 @@
 
 #pragma region OpenGL
 #if defined(GAME_OPENGL)
+#if defined(_WIN32)
 #include <gl/GL.h>
 #pragma comment(lib, "opengl32.lib")
+#endif
+#if defined(__unix__)
+#endif
 #include "GameRendererGL.h"
 #pragma endregion
 #endif
@@ -49,6 +58,16 @@
 #include "GameRendererDX9.h"
 #endif
 #pragma endregion
+
+#pragma region DirectX10
+#if defined(GAME_DIRECTX10)
+#include <d3d10.h>
+#pragma comment(lib, "d3d10.lib")
+#pragma comment(lib, "dxgi.lib")
+#include "GameRendererDX10.h"
+#endif
+#pragma endregion
+
 
 #pragma region DirectX11
 #if defined(GAME_DIRECTX11)

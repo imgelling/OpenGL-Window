@@ -26,6 +26,12 @@
 #endif
 #pragma endregion
 
+#pragma region DirectX10
+#if defined(GAME_DIRECTX10)
+#include "GameRendererDX10.h"
+#endif
+#pragma endregion
+
 #pragma region DirectX11
 #if defined(GAME_DIRECTX11)
 #include "GameRendererDX11.h"
@@ -209,6 +215,10 @@ namespace game
 #endif
 #if defined(GAME_DIRECTX12)
 		if ((renderer == 5) && (_attributes.RenderingAPI == RenderAPI::DirectX12))
+			return true;
+#endif
+#if defined(GAME_DIRECTX10)
+		if ((renderer == 6) && (_attributes.RenderingAPI == RenderAPI::DirectX10))
 			return true;
 #endif
 		return false;
@@ -518,6 +528,15 @@ namespace game
 			return false;
 #endif
 		}
+		else if (_attributes.RenderingAPI == RenderAPI::DirectX10)
+		{
+#if defined(GAME_DIRECTX10)
+			_renderer = new game::RendererDX10();
+#else
+			lastError = { GameErrors::GameInvalidParameter, "Requested DirectX10 without #defining GAME_SUPPORT_DIRECTX10 or GAME_SUPPORT ALL." };
+			return false;
+#endif
+		}
 		else if (_attributes.RenderingAPI == RenderAPI::DirectX11)
 		{
 #if defined(GAME_DIRECTX11)
@@ -538,7 +557,7 @@ namespace game
 		}
 		else
 		{
-			lastError = { GameErrors::GameInvalidParameter, "Only OpenGL is implemented." };
+			lastError = { GameErrors::GameInvalidParameter, "Unknown Rendering Api requested." };
 			return false;
 		}
 		_renderer->SetAttributes(_attributes, geLogger);

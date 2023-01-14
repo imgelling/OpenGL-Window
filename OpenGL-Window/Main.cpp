@@ -2,6 +2,7 @@
 #define GAME_USE_DEDICATED_GPU
 //#define GAME_USE_SHADERS
 #define GAME_SUPPORT_DIRECTX9
+//#define GAME_SUPPORT_DIRECTX10
 //#define GAME_SUPPORT_DIRECTX11
 //#define GAME_SUPPORT_DIRECTX12
 //#define GAME_SUPPORT_OPENGL
@@ -14,12 +15,6 @@ constexpr uint32_t MIN_UPDATES = 10;
 constexpr uint32_t MAX_FRAMES = 0;
 constexpr uint32_t MIN_FRAMES = 10;
 
-
-//
-// Need for dx9
-// internal pixel type  -- not sure how to do
-//
-
 class Game : public game::Engine
 {
 
@@ -28,7 +23,7 @@ public:
 	game::SpriteBatch spriteBatch;
 	game::Texture2D spriteTexture;
 	game::SpriteFont spriteFont;
-	game::GameRandom random;
+	game::Random random;
 	game::PerformanceTimer perftimer;
 
 	Game(game::Logger& logger) : game::Engine(&logger)
@@ -58,8 +53,9 @@ public:
 		attributes.VsyncOn = false;
 		attributes.DebugMode = false;
 		attributes.MultiSamples = 8;
-		attributes.RenderingAPI = game::RenderAPI::DirectX9; 
 		//attributes.RenderingAPI = game::RenderAPI::OpenGL;
+		attributes.RenderingAPI = game::RenderAPI::DirectX9; 
+		//attributes.RenderingAPI = game::RenderAPI::DirectX10;
 		//attributes.RenderingAPI = game::RenderAPI::DirectX11;
 		//attributes.RenderingAPI = game::RenderAPI::DirectX12;
 		
