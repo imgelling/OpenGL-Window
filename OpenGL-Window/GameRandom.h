@@ -1,4 +1,6 @@
-#pragma once
+#if !defined(GAMERANDOM_H)
+#define GAMERANDOM_H
+
 #include <random>
 #include <chrono>
 
@@ -58,3 +60,5 @@ namespace game
 	{
 	}
 }
+
+#endif

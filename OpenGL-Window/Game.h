@@ -1,4 +1,5 @@
-#pragma once
+#if !defined(GAME_H)
+#define GAME_H
 
 #if defined(_WIN32)
 #define WIN32_LEAN_AND_MEAN
@@ -41,12 +42,11 @@
 
 #pragma region OpenGL
 #if defined(GAME_OPENGL)
+#include <GL/gl.h>
 #if defined(_WIN32)
-#include <gl/GL.h>
 #pragma comment(lib, "opengl32.lib")
 #endif
 #if defined(__linux__)
-#include <GL/gl.h>
 #endif
 #include "GameRendererGL.h"
 #pragma endregion
@@ -130,3 +130,5 @@ namespace game
 	// Information about computer and graphics card
 	SystemInfo systemInfo;
 }
+
+#endif
