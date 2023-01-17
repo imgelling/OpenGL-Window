@@ -1,7 +1,9 @@
 #pragma once
 
+#if defined(_WIN32)
 #define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
+#endif
 
 #if defined(GAME_SUPPORT_OPENGL) || defined(GAME_SUPPORT_ALL)
 #define GAME_OPENGL 1
@@ -43,7 +45,8 @@
 #include <gl/GL.h>
 #pragma comment(lib, "opengl32.lib")
 #endif
-#if defined(__unix__)
+#if defined(__linux__)
+#include <GL/gl.h>
 #endif
 #include "GameRendererGL.h"
 #pragma endregion
