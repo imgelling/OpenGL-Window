@@ -1,6 +1,6 @@
 #pragma once
 #if defined(GAME_OPENGL)
-#include <gl/GL.h>
+#include <GL/gl.h>
 #endif
 #if defined(GAME_DIRECTX9)
 #include <d3d9.h>

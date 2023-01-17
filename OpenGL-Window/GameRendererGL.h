@@ -1,7 +1,7 @@
 #pragma once
 
 #include <fstream>
-#include <gl/GL.h>
+#include <GL/gl.h>
 #include <sstream>
 
 #include "GameImageLoader.h"
