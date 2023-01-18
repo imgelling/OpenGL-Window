@@ -1,4 +1,5 @@
-#pragma once
+#if !defined(GAMERENDERERDX10_H)
+#define GAMERENDERERDX10_H
 
 #include <d3d10.h>
 
@@ -35,3 +36,5 @@ namespace game
 		return false;
 	};
 }
+
+#endif

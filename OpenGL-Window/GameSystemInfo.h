@@ -1,4 +1,6 @@
-#pragma once
+#if !defined(GAMESYSTEMINFO_H)
+#define GAMESYSTEMINFO_H
+
 #include <intrin.h>
 #include <psapi.h>
 #include <powerbase.h>
@@ -453,4 +455,6 @@ namespace game
     }
 
 }
+
+#endif
 

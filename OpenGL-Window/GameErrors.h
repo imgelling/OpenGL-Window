@@ -1,4 +1,5 @@
-#pragma once
+#if !defined(GAMEERRORS_H)
+#define GAMEERRORS_H
 
 #include <string>
 #include <iostream>
@@ -56,3 +57,5 @@ namespace game
 	}
 
 }
+
+#endif

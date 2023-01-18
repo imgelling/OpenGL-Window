@@ -6,10 +6,6 @@
 #include <Windows.h>
 #endif
 
-#if defined(GAME_SUPPORT_OPENGL) || defined(GAME_SUPPORT_ALL)
-#define GAME_OPENGL 1
-#endif
-
 #if defined(GAME_SUPPORT_DIRECTX9) || defined(GAME_SUPPORT_ALL)
 #define GAME_DIRECTX9 2
 #endif
@@ -24,6 +20,10 @@
 
 #if defined(GAME_SUPPORT_DIRECTX12) || defined(GAME_SUPPORT_ALL)
 #define GAME_DIRECTX12 5
+#endif
+
+#if defined(GAME_SUPPORT_OPENGL) || defined(GAME_SUPPORT_ALL)
+#define GAME_OPENGL 1
 #endif
 
 #if defined(GAME_SUPPORT_VULKAN) || defined(GAME_SUPPORT_ALL)
@@ -87,7 +87,6 @@
 #include <d3dcompiler.h>
 #include <DirectXMath.h>
 #include <wrl.h>
-//using namespace Microsoft::WRL;
 #pragma comment(lib,"d3dcompiler.lib")
 #pragma comment(lib, "D3D12.lib")
 #pragma comment(lib, "dxgi.lib")

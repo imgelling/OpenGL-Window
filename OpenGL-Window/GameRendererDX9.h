@@ -1,4 +1,5 @@
-#pragma once
+#if !defined(GAMERENDERERDX9_H)
+#define GAMERENDERERDX9_H
 
 #include <d3d9.h>
 //#include <dxgi.h>
@@ -342,3 +343,5 @@ namespace game
 		return false;
 	}
 }
+
+#endif

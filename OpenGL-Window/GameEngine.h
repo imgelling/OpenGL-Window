@@ -1,4 +1,5 @@
-#pragma once
+#if !defined(GAMEENGINE_H)
+#define GAMEENGINE_H
 
 #include "GameAttributes.h"
 #include "GameRendererBase.h"
@@ -687,3 +688,5 @@ namespace game
 		return DefWindowProc(hWnd, uMsg, wParam, lParam);
 	}
 }
+
+#endif
