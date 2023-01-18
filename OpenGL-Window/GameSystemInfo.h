@@ -3,11 +3,11 @@
 
 #if defined(_WIN32)
 #include <intrin.h>
-#elif define(__linux__)
-#include <cpuid.h>
-#endif
 #include <psapi.h> // windows??
 #include <powerbase.h> // windows??
+#elif defined(__linux__)
+#include <cpuid.h>
+#endif
 #include <sstream>
 #include <string>
 #include <thread>
@@ -189,7 +189,7 @@ namespace game
         // in a human readable form.
 #if defined(_WIN32)
         __cpuid(CPUInfo, 0);
-#elif define(__linux__)
+#elif defined(__linux__)
 
 #endif
         nIds = CPUInfo[0];
@@ -202,7 +202,7 @@ namespace game
         {
 #if defined(_WIN32)
             __cpuid(CPUInfo, i);
-#elif define(__linux__)
+#elif defined(__linux__)
 
 #endif
 
@@ -242,7 +242,7 @@ namespace game
         // gets the number of valid extended IDs.
 #if defined(_WIN32)
         __cpuid(CPUInfo, 0x80000000);
-#elif define(__linux__)
+#elif defined(__linux__)
 
 #endif
         nExIds = CPUInfo[0];
@@ -252,7 +252,7 @@ namespace game
         {
 #if defined(_WIN32)
             __cpuid(CPUInfo, i);
-#elif define(__linux__)
+#elif defined(__linux__)
 
 #endif
 
@@ -442,6 +442,7 @@ namespace game
         cpuInfo.processorVendor = CPUString;
 
         // ram info
+#if defined(_WIN32)
         MEMORYSTATUSEX memInfo = { 0 };
         memInfo.dwLength = sizeof(MEMORYSTATUSEX);
         GlobalMemoryStatusEx(&memInfo);
@@ -467,6 +468,9 @@ namespace game
 		ramInfo.totalPhysicalMemoryUsed = (uint64_t)(physMemUsed / 1024.0f / 1024.0f);
 		ramInfo.totalPhysicalMemoryUsedByGame = (uint64_t)(physMemUsedByMe / 1024.0f / 1024.0f);
         ramInfo.totalPhysicalMemoryAvailable = (uint64_t)(memInfo.ullAvailPhys / 1024.0f / 1024.0f);
+#endif
+#elif defined(__linux__)
+#endif
 
 
         // cpu usage
@@ -475,5 +479,4 @@ namespace game
 
 }
 
-#endif
 

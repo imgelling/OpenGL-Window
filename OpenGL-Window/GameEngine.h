@@ -46,11 +46,13 @@ namespace game
 {
 	// Makes computer choose dedicated over integrated gpus
 #ifdef GAME_USE_DEDICATED_GPU
+#if defined(_WIN32)
 	extern "C"
 	{
 		__declspec(dllexport) DWORD NvOptimusEnablement = 0x00000001;
 		__declspec(dllexport) int AmdPowerXpressRequestHighPerformance = 1;
 	}
+#endif
 #endif
 
 	class Engine;

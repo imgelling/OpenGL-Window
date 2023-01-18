@@ -547,7 +547,7 @@ namespace game
 				if (p < 0.0) {
 					r = q / p;
 					if (r > *u2)
-						return FALSE;
+						return false;
 					else
 						if (r > *u1)
 							*u1 = r;
@@ -556,15 +556,15 @@ namespace game
 					if (p > 0.0) {
 						r = q / p;
 						if (r < *u1)
-							return FALSE;
+							return false;
 						else if (r < *u2)
 							*u2 = r;
 					}
 					else
 						if (q < 0.0)
-							return FALSE;
+							return false;
 
-				return TRUE;
+				return true;
 			}
 		};
 

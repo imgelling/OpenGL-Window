@@ -1,4 +1,4 @@
-#if !defined(GAMERANDOM_H)
+#ifndef GAMERANDOM_H
 #define GAMERANDOM_H
 
 #include <random>
