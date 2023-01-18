@@ -3,8 +3,8 @@
 
 #if defined(_WIN32)
 #include <intrin.h>
-#include <psapi.h> // windows??
-#include <powerbase.h> // windows??
+#include <psapi.h> 
+#include <powerbase.h>
 #elif defined(__linux__)
 #include <cpuid.h>
 #endif
@@ -468,7 +468,6 @@ namespace game
 		ramInfo.totalPhysicalMemoryUsed = (uint64_t)(physMemUsed / 1024.0f / 1024.0f);
 		ramInfo.totalPhysicalMemoryUsedByGame = (uint64_t)(physMemUsedByMe / 1024.0f / 1024.0f);
         ramInfo.totalPhysicalMemoryAvailable = (uint64_t)(memInfo.ullAvailPhys / 1024.0f / 1024.0f);
-#endif
 #elif defined(__linux__)
 #endif
 
@@ -479,4 +478,4 @@ namespace game
 
 }
 
-
+#endif
