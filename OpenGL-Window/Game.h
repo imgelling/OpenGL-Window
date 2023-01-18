@@ -79,6 +79,8 @@
 #if defined (_WIN32)
 #include "vulkan/vulkan.hpp"
 #pragma comment(lib, "vulkan-1.lib")
+#elif define(__linux__)
+
 #endif
 #include "GameRendererVK.h"
 #endif
@@ -89,8 +91,8 @@
 #include <GL/gl.h>
 #if defined(_WIN32)
 #pragma comment(lib, "opengl32.lib")
-#endif
-#if defined(__linux__)
+#elif define(__linux__)
+
 #endif
 #include "GameRendererGL.h"
 #pragma endregion

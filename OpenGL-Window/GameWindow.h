@@ -18,15 +18,21 @@ namespace game
 		void SetWindowTitle(const std::string title);
 		void ToggleFullScreen();
 		void DoMessagePump();
+#if defined(_WIN32)
 		HWND GetHandle();
+#elif define(__linux__)
+
+#endif
 	private:
 		Attributes _attributes;
 
 		// Windows only stuff
+#if defined(_WIN32)
 		RECT _windowPositionSave;
 		HWND _windowHandle;
 		MONITORINFO _monitorInfo = { 0 };
 		static LRESULT CALLBACK _WindowEventProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+#endif
 	};
 
 	inline Window::Window()
@@ -36,6 +42,7 @@ namespace game
 
 	inline bool Window::CreateTheWindow()
 	{
+#if defined(_WIN32)
 		WNDCLASS wc{};
 		DWORD dwExStyle = 0;
 		DWORD dwStyle = 0;
@@ -139,6 +146,9 @@ namespace game
 		SetWindowTitle(_attributes.WindowTitle);
 
 		return true;
+#elif define(__linux__)
+
+#endif
 	}
 
 	inline void Window::SetAttributes(const Attributes attrib)
@@ -148,25 +158,34 @@ namespace game
 
 	inline void Window::SetWindowTitle(const std::string title)
 	{
+#if defined(_WIN32)
 #ifdef UNICODE
 		SetWindowText(_windowHandle, ConvertToWide(title).c_str());
 #else
 		SetWindowText(olc_hWnd, s.c_str());
 #endif
+#elif define(__linux__)
+
+#endif
 	}
 
 	inline void Window::DoMessagePump()
 	{
+#if defined(_WIN32)
 		MSG msg;
 		while (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE) > 0)
 		{
 			TranslateMessage(&msg);
 			DispatchMessage(&msg);
 		}
+#elif define(__linux__)
+
+#endif
 	}
 
 	inline void Window::ToggleFullScreen()
 	{
+#if defined(_WIN32)
 		DWORD dwExStyle = WS_EX_APPWINDOW | WS_EX_WINDOWEDGE;
 		DWORD dwStyle = WS_CAPTION | WS_SYSMENU | WS_VISIBLE | WS_THICKFRAME | WS_MAXIMIZEBOX | WS_MINIMIZEBOX | WS_CLIPCHILDREN | WS_CLIPSIBLINGS;
 
@@ -200,12 +219,19 @@ namespace game
 			// Move window to corners for fullscreen
 			SetWindowPos(_windowHandle, 0, 0, 0, _monitorInfo.rcMonitor.right, _monitorInfo.rcMonitor.bottom, SWP_DRAWFRAME | SWP_FRAMECHANGED);
 		}
+#elif define(__linux__)
+
+#endif
 
 
 	}
 
+#if defined(_WIN32)
 	inline HWND Window::GetHandle()
 	{
 		return _windowHandle;
 	}
+#elif define(__linux__)
+
+#endif
 }

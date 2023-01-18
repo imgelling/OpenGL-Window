@@ -1,14 +1,17 @@
 #if !defined(GAMESYSTEMINFO_H)
 #define GAMESYSTEMINFO_H
 
+#if defined(_WIN32)
 #include <intrin.h>
-#include <psapi.h>
-#include <powerbase.h>
+#elif define(__linux__)
+#include <cpuid.h>
+#endif
+#include <psapi.h> // windows??
+#include <powerbase.h> // windows??
 #include <sstream>
 #include <string>
 #include <thread>
 
-#pragma comment(lib, "Powrprof.lib")
 
 namespace game
 {
@@ -184,7 +187,11 @@ namespace game
         // the other three array elements. The CPU identification string is
         // not in linear order. The code below arranges the information 
         // in a human readable form.
+#if defined(_WIN32)
         __cpuid(CPUInfo, 0);
+#elif define(__linux__)
+
+#endif
         nIds = CPUInfo[0];
         *((int*)CPUString) = CPUInfo[1];
         *((int*)(CPUString + 4)) = CPUInfo[3];
@@ -193,7 +200,11 @@ namespace game
         // Get the information associated with each valid Id
         for (i = 0; i <= nIds; ++i)
         {
+#if defined(_WIN32)
             __cpuid(CPUInfo, i);
+#elif define(__linux__)
+
+#endif
 
             // Interpret CPU feature information.
             if (i == 1)
@@ -229,13 +240,21 @@ namespace game
 
         // Calling __cpuid with 0x80000000 as the InfoType argument
         // gets the number of valid extended IDs.
+#if defined(_WIN32)
         __cpuid(CPUInfo, 0x80000000);
+#elif define(__linux__)
+
+#endif
         nExIds = CPUInfo[0];
 
         // Get the information associated with each extended ID.
         for (i = 0x80000000; i <= nExIds; ++i)
         {
+#if defined(_WIN32)
             __cpuid(CPUInfo, i);
+#elif define(__linux__)
+
+#endif
 
             if (i == 0x80000001)
             {
