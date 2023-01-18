@@ -4,7 +4,6 @@
 #if defined(_WIN32)
 #define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
-#endif
 
 #if defined(GAME_SUPPORT_DIRECTX9) || defined(GAME_SUPPORT_ALL)
 #define GAME_DIRECTX9 2
@@ -21,6 +20,7 @@
 #if defined(GAME_SUPPORT_DIRECTX12) || defined(GAME_SUPPORT_ALL)
 #define GAME_DIRECTX12 5
 #endif
+#endif // _WIN32
 
 #if defined(GAME_SUPPORT_OPENGL) || defined(GAME_SUPPORT_ALL)
 #define GAME_OPENGL 1
@@ -30,28 +30,7 @@
 #define GAME_VULKAN 3
 #endif
 
-
-
-#pragma region Vulkan
-#if defined(GAME_VULKAN)
-#include "vulkan/vulkan.hpp"
-#pragma comment(lib, "vulkan-1.lib")
-#include "GameRendererVK.h"
-#endif
-#pragma endregion
-
-#pragma region OpenGL
-#if defined(GAME_OPENGL)
-#include <GL/gl.h>
 #if defined(_WIN32)
-#pragma comment(lib, "opengl32.lib")
-#endif
-#if defined(__linux__)
-#endif
-#include "GameRendererGL.h"
-#pragma endregion
-#endif
-
 #pragma region DirectX9
 #if defined(GAME_DIRECTX9)
 #include <d3d9.h>
@@ -93,6 +72,29 @@
 #include "GameRendererDX12.h"
 #endif
 #pragma endregion
+#endif // _WIN32
+
+#pragma region Vulkan
+#if defined(GAME_VULKAN)
+#if defined (_WIN32)
+#include "vulkan/vulkan.hpp"
+#pragma comment(lib, "vulkan-1.lib")
+#endif
+#include "GameRendererVK.h"
+#endif
+#pragma endregion
+
+#pragma region OpenGL
+#if defined(GAME_OPENGL)
+#include <GL/gl.h>
+#if defined(_WIN32)
+#pragma comment(lib, "opengl32.lib")
+#endif
+#if defined(__linux__)
+#endif
+#include "GameRendererGL.h"
+#pragma endregion
+#endif
 
 #pragma region Engine
 #include "GameAttributes.h"

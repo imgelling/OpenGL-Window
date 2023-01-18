@@ -1,4 +1,5 @@
-#pragma once
+#if !defined(GAMEHELPERS_H)
+#define GAMEHELPERS_H
 
 #include <string>
 
@@ -31,6 +32,6 @@ namespace game
 #else
 #define Wide(s) s
 #endif
-
-	// --- Helpers Stop
 }
+
+#endif
