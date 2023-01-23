@@ -1,4 +1,5 @@
-#pragma once
+#if !defined(GAMEIMAGELOADER_H)
+#define GAMEIMAGELOADER_H
 
 #define STB_IMAGE_IMPLEMENTATION
 #define STBI_ONLY_PNG
@@ -54,3 +55,5 @@ namespace game
 		}
 	}
 }
+
+#endif

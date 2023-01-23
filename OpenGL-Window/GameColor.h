@@ -1,4 +1,5 @@
-#pragma once
+#if !defined(GAMECOLOR_H)
+#define GAMECOLOR_H
 
 namespace game
 {
@@ -145,3 +146,5 @@ namespace game
 		const Color DarkGray(0.25f, 0.25f, 0.25f, 1.0f);
 	}
 }
+
+#endif

@@ -1,4 +1,5 @@
-#pragma once
+#if !defined(GAMEKEYBOARD_H)
+#define GAMEKEYBOARD_H
 #include <iostream>
 
 namespace game
@@ -90,4 +91,6 @@ namespace game
 
 	}
 }
+
+#endif
 

@@ -1,4 +1,5 @@
-#pragma once
+#if !defined(GAMEATTRIBUTES_H)
+#define GAMEATTRIBUTES_H
 #include "GameHelpers.h"
 
 namespace game
@@ -59,3 +60,5 @@ namespace game
 		GameVersion = "0";
 	}
 }
+
+#endif
