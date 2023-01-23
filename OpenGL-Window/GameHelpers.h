@@ -26,6 +26,18 @@ namespace game
 		return wideString;
 	}
 
+	inline uint64_t GetCPUCycles() noexcept
+	{
+#if defined(_WIN32)
+		return __rdtsc();
+#elif defined(__linux__)
+		uint32_t lo = 0;
+		uint32_t hi = 0;
+		asm  volatile("rdtsc" : "=a" (c), "=d" (d));
+		uint64_t cyclesStart = (((uint64_t)lo) | (((uint64_t)hi) << 32));
+#endif
+	}
+
 	// Macro to state a literal string is a wide string
 #if defined(UNICODE) || defined(_UNICODE)
 #define Wide(s) L##s

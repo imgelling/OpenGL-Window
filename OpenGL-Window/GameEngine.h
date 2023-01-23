@@ -3,10 +3,11 @@
 
 
 #include "GameAttributes.h"
-#include "GameRendererBase.h"
+#include "GameHelpers.h"
 #include "GameKeyboard.h"
 #include "GameLogger.h"
 #include "GameMouse.h"
+#include "GameRendererBase.h"
 #include "GameSystemInfo.h"
 #include "GameTimer.h"
 
@@ -238,10 +239,9 @@ namespace game
 		// Tracks frames per second
 		float_t fpsTime = 0.0f;
 		uint32_t framesCounted = 0;
-		
-		uint32_t c,d;
-		asm  volatile("rdtsc" : "=a" (c), "=d" (d));
-		uint64_t cyclesStart = (((uint64_t)c) | (((uint64_t)d) << 32));
+	
+
+		uint64_t cyclesStart = GetCPUCycles();
 
 		geIsRunning = true;
 
@@ -273,10 +273,8 @@ namespace game
 			if (_cpuSpeedTimer.Elapsed() > 1000.0f)
 			{
 				_cpuSpeedTimer.Reset();
-				asm  volatile("rdtsc" : "=a" (c), "=d" (d));
-				_cpuFrequency = (uint32_t)(((((uint64_t)c) | (((uint64_t)d) << 32))- cyclesStart) / 1000000);
-				asm  volatile("rdtsc" : "=a" (c), "=d" (d));
-				cyclesStart = (((uint64_t)c) | (((uint64_t)d) << 32));
+				_cpuFrequency = (uint32_t)((GetCPUCycles() - cyclesStart) / 1000000);
+				cyclesStart = GetCPUCycles();
 			}
 
 			// Update to updatelock
