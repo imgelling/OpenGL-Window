@@ -1,6 +1,7 @@
 #if !defined(GAMEENGINE_H)
 #define GAMEENGINE_H
 
+
 #include "GameAttributes.h"
 #include "GameRendererBase.h"
 #include "GameKeyboard.h"
@@ -237,7 +238,10 @@ namespace game
 		// Tracks frames per second
 		float_t fpsTime = 0.0f;
 		uint32_t framesCounted = 0;
-		__int64 cyclesStart = __rdtsc();
+		
+		uint32_t c,d;
+		asm  volatile("rdtsc" : "=a" (c), "=d" (d));
+		uint64_t cyclesStart = (((uint64_t)c) | (((uint64_t)d) << 32));
 
 		geIsRunning = true;
 
@@ -258,15 +262,21 @@ namespace game
 
 			if (geIsMinimized)
 			{
-				Sleep((DWORD)(_updateTime));
+				#if defined(_WIN32)
+				Sleep((uint32_t)(_updateTime));
+				#elif defined(__linux__)
+				sleep((uint32_t)(_updateTime));
+				#endif
 			}
 
 			// Update cpu frequency
 			if (_cpuSpeedTimer.Elapsed() > 1000.0f)
 			{
 				_cpuSpeedTimer.Reset();
-				_cpuFrequency = (uint32_t)((__rdtsc() - cyclesStart) / 1000000);
-				cyclesStart = __rdtsc();
+				asm  volatile("rdtsc" : "=a" (c), "=d" (d));
+				_cpuFrequency = (uint32_t)(((((uint64_t)c) | (((uint64_t)d) << 32))- cyclesStart) / 1000000);
+				asm  volatile("rdtsc" : "=a" (c), "=d" (d));
+				cyclesStart = (((uint64_t)c) | (((uint64_t)d) << 32));
 			}
 
 			// Update to updatelock
@@ -448,8 +458,12 @@ namespace game
 	{
 		_window.ToggleFullScreen();
 		_attributes.WindowFullscreen = !_attributes.WindowFullscreen;
+		#if defined (_WIN32)
 		RECT size;
 		GetClientRect(_window.GetHandle(), &size);
+		#elif defined(__linux__)
+		Recti size;  // get window size on linux
+		#endif
 		HandleWindowResize(size.right, size.bottom, true);
 		geFullScreenToggled = true;
 	}
@@ -624,6 +638,7 @@ namespace game
 		geLogger->Error(lastError);
 	}
 
+#if defined(_WIN32)
 	inline LRESULT CALLBACK Window::_WindowEventProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	{
 		switch (uMsg)
@@ -689,6 +704,9 @@ namespace game
 		}
 		return DefWindowProc(hWnd, uMsg, wParam, lParam);
 	}
+	#elif defined(__linux__)
+	
+	#endif
 }
 
 #endif
