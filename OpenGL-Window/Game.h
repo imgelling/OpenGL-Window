@@ -109,6 +109,9 @@
 #include "GameLogger.h"
 #include "GameMath.h"
 #include "GameMouse.h"
+#if defined(GAME_ENABLE_NETWORKING)
+#include "GameNetwork.h"
+#endif
 #include "GamePerformanceTimer.h"
 #include "GamePixelMode.h"
 #include "GameRandom.h"
