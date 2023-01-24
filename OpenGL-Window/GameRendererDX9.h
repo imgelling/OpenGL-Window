@@ -2,6 +2,7 @@
 #define GAMERENDERERDX9_H
 
 #include <d3d9.h>
+#include <d3dcompiler.h>
 //#include <dxgi.h>
 //#pragma comment(lib, "dxgi.lib") // for gpu memory
 
@@ -339,6 +340,7 @@ namespace game
 
 	inline bool RendererDX9::LoadShader(const std::string vertex, const std::string fragment, Shader& shader)
 	{
+		//D3DCompileFromFile()
 
 		return false;
 	}

@@ -1,4 +1,6 @@
-#pragma once
+#if !defined(GAMEPIXELMODE_H)
+#define GAMEPIXELMODE_H
+
 #if defined(GAME_OPENGL)
 #include <GL/gl.h>
 #endif
@@ -877,3 +879,5 @@ namespace game
 }
 
 #undef PIXELMODEFVF
+
+#endif
