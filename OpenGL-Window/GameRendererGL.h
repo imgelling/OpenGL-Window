@@ -1112,12 +1112,15 @@ namespace game
 
 	inline void RendererGL::UnLoadShader(Shader& shader)
 	{
-		_glDetachShader(shader.shaderId, shader.fragmentId);
-		_glDetachShader(shader.shaderId, shader.vertexId);
+		if (shader.shaderId)
+		{
+			_glDetachShader(shader.shaderId, shader.fragmentId);
+			_glDetachShader(shader.shaderId, shader.vertexId);
 
-		_glDeleteShader(shader.fragmentId);
-		_glDeleteShader(shader.vertexId);
-		_glDeleteProgram(shader.shaderId);
+			_glDeleteShader(shader.fragmentId);
+			_glDeleteShader(shader.vertexId);
+			_glDeleteProgram(shader.shaderId);
+		}
 
 		shader.shaderId = 0;
 		shader.fragmentId = 0;

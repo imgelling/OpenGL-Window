@@ -30,7 +30,7 @@ namespace game
 		bool LoadTexture(std::string fileName, Texture2D& texture);
 		void UnLoadTexture(Texture2D& texture);
 		bool LoadShader(const std::string vertex, const std::string fragment, Shader& shader);
-		void UnLoadShader(Shader& shader) {};
+		void UnLoadShader(Shader& shader);
 		void GetDevice(LPDIRECT3DDEVICE9& device);
 	protected:
 		void _ReadExtensions() {};
@@ -457,6 +457,20 @@ namespace game
 		{
 			lastError = { GameErrors::GameDirectX9Specific, "Precompiled shaders not implements." };
 			return false;
+		}
+	}
+
+	inline void RendererDX9::UnLoadShader(Shader& shader)
+	{
+		if (shader.vertexShader)
+		{
+			shader.vertexShader->Release();
+			shader.vertexShader = nullptr;
+		}
+		if (shader.pixelShader)
+		{
+			shader.pixelShader->Release();
+			shader.pixelShader = nullptr;
 		}
 	}
 }

@@ -13,7 +13,7 @@
 #include "GameTexture2D.h"
 
 // Just a test to make sure defines are working
-#if defined(GAME_USE_SHADERS)
+#if defined(GAME_ENABLE_SHADERS)
 #define USING_SHADERS
 #endif
 
@@ -55,7 +55,7 @@ namespace game
 		uint32_t _currentBuffer;
 		void _UpdateFrameBuffer();
 		void _ScaleQuadToWindow();
-#if defined(GAME_OPENGL) & !defined(GAME_USE_SHADERS)
+#if defined(GAME_OPENGL) & !defined(GAME_ENABLE_SHADERS)
 		uint32_t _compiledQuad;
 #endif
 #if defined(GAME_DIRECTX9)
@@ -86,7 +86,7 @@ namespace game
 	{
 		_video = nullptr;
 		_currentBuffer = 0;
-#if defined(GAME_OPENGL) & !defined(GAME_USE_SHADERS)
+#if defined(GAME_OPENGL) & !defined(GAME_ENABLE_SHADERS)
 		_compiledQuad = 0;
 #endif
 #if defined(GAME_DIRECTX9)
@@ -146,7 +146,7 @@ namespace game
 			}
 		}
 
-#if defined(GAME_OPENGL) & !defined(GAME_USE_SHADERS)
+#if defined(GAME_OPENGL) & !defined(GAME_ENABLE_SHADERS)
 		if (enginePointer->geIsUsing(GAME_OPENGL))
 		{
 			_compiledQuad = glGenLists(1);
@@ -257,7 +257,7 @@ namespace game
 
 		_savedPositionOfScaledTexture = _positionOfScaledTexture;
 
-#if defined(GAME_OPENGL) & !defined(GAME_USE_SHADERS)
+#if defined(GAME_OPENGL) & !defined(GAME_ENABLE_SHADERS)
 		if (enginePointer->geIsUsing(GAME_OPENGL))
 		{
 
@@ -343,7 +343,7 @@ namespace game
 		_UpdateFrameBuffer();
 
 		// Draw the quad
-#if defined(GAME_OPENGL) & !defined(GAME_USE_SHADERS)
+#if defined(GAME_OPENGL) & !defined(GAME_ENABLE_SHADERS)
 		if (enginePointer->geIsUsing(GAME_OPENGL))
 		{
 			glEnable(GL_TEXTURE_2D);
