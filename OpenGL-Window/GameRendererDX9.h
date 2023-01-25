@@ -341,84 +341,105 @@ namespace game
 
 	inline bool RendererDX9::LoadShader(const std::string vertex, const std::string fragment, Shader& shader)
 	{
-		DWORD flags = D3DCOMPILE_ENABLE_STRICTNESS;
-		if (_attributes.DebugMode)
+		if (!shader.precompiled)
 		{
-			flags |= D3DCOMPILE_DEBUG;
-		}
-		ID3DBlob* compiledVertexShader = nullptr;
-		ID3DBlob* compiledPixelShader = nullptr;
-		ID3DBlob* compilationMsgs = nullptr;
-
-		// Compile the vertex shader
-		if (D3DCompileFromFile(ConvertToWide(vertex).c_str(), NULL, NULL, "main", "vs_3_0", flags, NULL, &compiledVertexShader, &compilationMsgs) != D3D_OK)
-		{
-			SIZE_T size = compilationMsgs->GetBufferSize();
-			uint8_t* p = reinterpret_cast<unsigned char*>(compilationMsgs->GetBufferPointer());
-			lastError = { GameErrors::GameDirectX9Specific,"Could not load shader \"" + vertex + "\".\n" };
-			for (uint32_t bytes = 0; bytes < size; bytes++)
+			DWORD flags = D3DCOMPILE_ENABLE_STRICTNESS;
+			if (_attributes.DebugMode)
 			{
-				lastError.lastErrorString += p[bytes];
+				flags |= D3DCOMPILE_DEBUG;
 			}
+			ID3DBlob* compiledVertexShader = nullptr;
+			ID3DBlob* compiledPixelShader = nullptr;
+			ID3DBlob* compilationMsgs = nullptr;
+
+			// Compile the vertex shader
+			if (D3DCompileFromFile(ConvertToWide(vertex).c_str(), NULL, NULL, "main", "vs_3_0", flags, NULL, &compiledVertexShader, &compilationMsgs) != D3D_OK)
+			{
+				SIZE_T size = compilationMsgs->GetBufferSize();
+				uint8_t* p = reinterpret_cast<unsigned char*>(compilationMsgs->GetBufferPointer());
+				lastError = { GameErrors::GameDirectX9Specific,"Could not load shader \"" + vertex + "\".\n" };
+				for (uint32_t bytes = 0; bytes < size; bytes++)
+				{
+					lastError.lastErrorString += p[bytes];
+				}
+				if (compilationMsgs)
+				{
+					compilationMsgs->Release();
+				}
+				if (compiledVertexShader)
+				{
+					compiledVertexShader->Release();
+				}
+				return false;
+			}
+
+			// Compile the pixel shader
+			if (D3DCompileFromFile(ConvertToWide(fragment).c_str(), NULL, NULL, "main", "ps_3_0", flags, NULL, &compiledPixelShader, &compilationMsgs) != D3D_OK)
+			{
+				SIZE_T size = compilationMsgs->GetBufferSize();
+				auto* p = reinterpret_cast<unsigned char*>(compilationMsgs->GetBufferPointer());
+				lastError = { GameErrors::GameDirectX9Specific,"Could not load shader \"" + fragment + "\".\n" };
+				for (uint32_t bytes = 0; bytes < size; bytes++)
+				{
+					lastError.lastErrorString += p[bytes];
+				}
+				if (compilationMsgs)
+				{
+					compilationMsgs->Release();
+				}
+				if (compiledVertexShader)
+				{
+					compiledVertexShader->Release();
+				}
+				if (compiledPixelShader)
+				{
+					compiledPixelShader->Release();
+				}
+				return false;
+			}
+
+			// Free up any messages from compilation if any
 			if (compilationMsgs)
 			{
 				compilationMsgs->Release();
 			}
-			if (compiledVertexShader)
-			{
-				compiledVertexShader->Release();
-			}
-			return false;
-		}
 
-		// Compile the pixel shader
-		if (D3DCompileFromFile(ConvertToWide(fragment).c_str(), NULL, NULL, "main", "ps_3_0", flags, NULL, &compiledPixelShader, &compilationMsgs) != D3D_OK)
-		{
-			SIZE_T size = compilationMsgs->GetBufferSize();
-			auto* p = reinterpret_cast<unsigned char*>(compilationMsgs->GetBufferPointer());
-			lastError = { GameErrors::GameDirectX9Specific,"Could not load shader \"" + fragment + "\".\n" };
-			for (uint32_t bytes = 0; bytes < size; bytes++)
+			// Create vertex shader
+			if (_d3d9Device->CreateVertexShader((DWORD*)(compiledVertexShader->GetBufferPointer()), &shader.vertexShader) != D3D_OK)
 			{
-				lastError.lastErrorString += p[bytes];
+				lastError = { GameErrors::GameDirectX9Specific,"Could not create vertex shader from \"" + vertex + "\"." };
+				if (compiledVertexShader)
+				{
+					compiledVertexShader->Release();
+				}
+				if (compiledPixelShader)
+				{
+					compiledPixelShader->Release();
+				}
+				return false;
 			}
-			if (compilationMsgs)
-			{
-				compilationMsgs->Release();
-			}
-			if (compiledVertexShader)
-			{
-				compiledVertexShader->Release();
-			}
-			if (compiledPixelShader)
-			{
-				compiledPixelShader->Release();
-			}
-			return false;
-		}
 
-		// these need to go in game::shader
-		IDirect3DVertexShader9 *vertexShader = nullptr;
-		IDirect3DPixelShader9* pixelShader = nullptr;
-
-		// Create vertex shader
-		if (_d3d9Device->CreateVertexShader((DWORD*)(compiledVertexShader->GetBufferPointer()), &shader.vertexShader) != D3D_OK)
-		{
-			lastError = { GameErrors::GameDirectX9Specific,"Could not create vertex shader from \"" + vertex + "\"." };
-			if (compiledVertexShader)
+			// Create pixel shader
+			if (_d3d9Device->CreatePixelShader((DWORD*)(compiledPixelShader->GetBufferPointer()), &shader.pixelShader) != D3D_OK)
 			{
-				compiledVertexShader->Release();
+				lastError = { GameErrors::GameDirectX9Specific,"Could not create pixel shader from \"" + fragment + "\"." };
+				if (compiledVertexShader)
+				{
+					compiledVertexShader->Release();
+				}
+				if (compiledPixelShader)
+				{
+					compiledPixelShader->Release();
+				}
+				if (shader.vertexShader)
+				{
+					shader.vertexShader->Release();
+					shader.vertexShader = nullptr;
+				}
+				return false;
 			}
-			if (compiledPixelShader)
-			{
-				compiledPixelShader->Release();
-			}
-			return false;
-		}
 
-		// Create pixel shader
-		if (_d3d9Device->CreatePixelShader((DWORD*)(compiledPixelShader->GetBufferPointer()), &shader.pixelShader) != D3D_OK)
-		{
-			lastError = { GameErrors::GameDirectX9Specific,"Could not create pixel shader from \"" + fragment + "\"." };
+			// Shaders created, release the compiled code
 			if (compiledVertexShader)
 			{
 				compiledVertexShader->Release();
@@ -427,27 +448,16 @@ namespace game
 			{
 				compiledPixelShader->Release();
 			}
-			if (shader.vertexShader)
-			{
-				shader.vertexShader->Release();
-				shader.vertexShader = nullptr;
-			}
+
+
+
+			return true;
+		}
+		else
+		{
+			lastError = { GameErrors::GameDirectX9Specific, "Precompiled shaders not implements." };
 			return false;
 		}
-
-		// Shaders created, release the compiled code
-		if (compiledVertexShader)
-		{
-			compiledVertexShader->Release();
-		}
-		if (compiledPixelShader)
-		{
-			compiledPixelShader->Release();
-		}
-
-
-
-		return true;
 	}
 }
 

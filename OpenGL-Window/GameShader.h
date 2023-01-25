@@ -13,6 +13,7 @@ namespace game
 		uint32_t shaderId;
 		uint32_t vertexId;
 		uint32_t fragmentId;
+		bool precompiled;
 #endif
 #if defined(GAME_DIRECTX9)
 		IDirect3DVertexShader9* vertexShader;
@@ -32,6 +33,7 @@ namespace game
 #if defined(GAME_DIRECTX9)
 		vertexShader = nullptr;
 		pixelShader = nullptr;
+		precompiled = false;
 #endif
 	}
 
