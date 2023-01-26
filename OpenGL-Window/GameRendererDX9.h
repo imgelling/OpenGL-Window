@@ -3,6 +3,7 @@
 
 #include <d3d9.h>
 #include <d3dcompiler.h>
+#include <fstream>
 //#include <dxgi.h>
 //#pragma comment(lib, "dxgi.lib") // for gpu memory
 
@@ -365,10 +366,12 @@ namespace game
 				if (compilationMsgs)
 				{
 					compilationMsgs->Release();
+					compilationMsgs = nullptr;
 				}
 				if (compiledVertexShader)
 				{
 					compiledVertexShader->Release();
+					compiledVertexShader = nullptr;
 				}
 				return false;
 			}
@@ -386,14 +389,17 @@ namespace game
 				if (compilationMsgs)
 				{
 					compilationMsgs->Release();
+					compilationMsgs = nullptr;
 				}
 				if (compiledVertexShader)
 				{
 					compiledVertexShader->Release();
+					compiledVertexShader = nullptr;
 				}
 				if (compiledPixelShader)
 				{
 					compiledPixelShader->Release();
+					compiledPixelShader = nullptr;
 				}
 				return false;
 			}
@@ -411,10 +417,12 @@ namespace game
 				if (compiledVertexShader)
 				{
 					compiledVertexShader->Release();
+					compiledVertexShader = nullptr;
 				}
 				if (compiledPixelShader)
 				{
 					compiledPixelShader->Release();
+					compiledPixelShader = nullptr;
 				}
 				return false;
 			}
@@ -426,10 +434,12 @@ namespace game
 				if (compiledVertexShader)
 				{
 					compiledVertexShader->Release();
+					compiledVertexShader = nullptr;
 				}
 				if (compiledPixelShader)
 				{
 					compiledPixelShader->Release();
+					compiledPixelShader = nullptr;
 				}
 				if (shader.vertexShader)
 				{
@@ -443,10 +453,12 @@ namespace game
 			if (compiledVertexShader)
 			{
 				compiledVertexShader->Release();
+				compiledVertexShader = nullptr;
 			}
 			if (compiledPixelShader)
 			{
 				compiledPixelShader->Release();
+				compiledPixelShader = nullptr;
 			}
 
 
@@ -455,9 +467,150 @@ namespace game
 		}
 		else
 		{
-			lastError = { GameErrors::GameDirectX9Specific, "Precompiled shaders not implements." };
-			return false;
+			// Load compiled vertex shader
+			std::ifstream file;
+			uint32_t fileSize = 0;
+			uint8_t* compiledVertexShader = nullptr;
+			uint8_t* compiledPixelShader = nullptr;
+
+			file.open(vertex, std::fstream::in | std::fstream::binary | std::fstream::ate);
+			if (file.is_open())
+			{
+				fileSize = (uint32_t)file.tellg();
+				file.seekg(0, file.beg);
+				compiledVertexShader = new uint8_t[fileSize];
+				file.read((char *)compiledVertexShader, fileSize);
+				if (!file.good())
+				{
+					lastError = { GameErrors::GameDirectX9Specific,"Error reading vertex shader file \"" + vertex + "\".\n" };
+					if (compiledVertexShader)
+					{
+						delete[] compiledVertexShader;
+						compiledVertexShader = nullptr;
+					}
+					file.close();
+					return false;
+				}
+				file.close();
+
+				// Create vertex shader
+				if (_d3d9Device->CreateVertexShader((DWORD*)(compiledVertexShader), &shader.vertexShader) != D3D_OK)
+				{
+					lastError = { GameErrors::GameDirectX9Specific,"Could not create vertex shader from \"" + vertex + "\"." };
+					if (compiledVertexShader)
+					{
+						delete[] compiledVertexShader;
+						compiledVertexShader = nullptr;
+					}
+					return false;
+				}				
+			}
+			else
+			{
+				lastError = { GameErrors::GameDirectX9Specific, "Compiled vertex shader \"" + vertex + "\" does not exsist." };
+				if (compiledVertexShader)
+				{
+					delete[] compiledVertexShader;
+					compiledVertexShader = nullptr;
+				}
+				return false;
+			}
+
+			// Reset file size
+			fileSize = 0;
+
+			// Load compiled pixel shader
+			file.open(fragment, std::fstream::in | std::fstream::binary | std::fstream::ate);
+			if (file.is_open())
+			{
+				fileSize = (uint32_t)file.tellg();
+				file.seekg(0, file.beg);
+				compiledPixelShader = new uint8_t[fileSize];
+				file.read((char*)compiledPixelShader, fileSize);
+				if (!file.good())
+				{
+					if (_d3d9Device->CreatePixelShader((DWORD*)(compiledPixelShader), &shader.pixelShader) != D3D_OK)
+					{
+						lastError = { GameErrors::GameDirectX9Specific,"Error reading pixel shader file \"" + fragment + "\"\n" };
+						if (compiledVertexShader)
+						{
+							delete[] compiledVertexShader;
+							compiledVertexShader = nullptr;
+						}
+						if (compiledPixelShader)
+						{
+							delete[] compiledPixelShader;
+							compiledPixelShader = nullptr;
+						}
+						if (shader.vertexShader)
+						{
+							shader.vertexShader->Release();
+						}
+						file.close();
+
+						return false;
+					}
+				}
+				file.close();
+
+				// Create vertex shader
+				if (_d3d9Device->CreatePixelShader((DWORD*)(compiledPixelShader), &shader.pixelShader) != D3D_OK)
+				{
+					lastError = { GameErrors::GameDirectX9Specific,"Could not create pixel shader from \"" + fragment + "\"." };
+					if (compiledVertexShader)
+					{
+						delete[] compiledVertexShader;
+						compiledVertexShader = nullptr;
+					}
+					if (compiledPixelShader)
+					{
+						delete[] compiledPixelShader;
+						compiledPixelShader = nullptr;
+					}
+					if (shader.vertexShader)
+					{
+						shader.vertexShader->Release();
+					}
+
+					return false;
+				}
+			}
+			else
+			{
+				lastError = { GameErrors::GameDirectX9Specific, "Compiled pixel shader \"" + fragment + "\" does not exsist." };
+				if (compiledVertexShader)
+				{
+					delete[] compiledVertexShader;
+					compiledVertexShader = nullptr;
+				}
+				if (compiledPixelShader)
+				{
+					delete[] compiledPixelShader;
+					compiledPixelShader = nullptr;
+				}
+				if (shader.vertexShader)
+				{
+					shader.vertexShader->Release();
+				}
+				return false;
+			}
+
+			// Shaders created, release the compiled code
+			if (compiledVertexShader)
+			{
+				delete[] compiledVertexShader;
+				compiledVertexShader = nullptr;
+			}
+			if (compiledPixelShader)
+			{
+				delete[] compiledPixelShader;
+				compiledPixelShader = nullptr;
+			}
+
+			return true;
 		}
+
+
 	}
 
 	inline void RendererDX9::UnLoadShader(Shader& shader)
