@@ -2,8 +2,8 @@
 #define GAME_USE_DEDICATED_GPU
 //#define GAME_ENABLE_NETWORKING
 //#define GAME_ENABLE_SHADERS
-#define GAME_SUPPORT_DIRECTX9
-//#define GAME_SUPPORT_DIRECTX10
+//#define GAME_SUPPORT_DIRECTX9
+#define GAME_SUPPORT_DIRECTX10
 //#define GAME_SUPPORT_DIRECTX11
 //#define GAME_SUPPORT_DIRECTX12
 //#define GAME_SUPPORT_OPENGL
@@ -55,8 +55,8 @@ public:
 		attributes.DebugMode = true;
 		attributes.MultiSamples = 8;
 		//attributes.RenderingAPI = game::RenderAPI::OpenGL;
-		attributes.RenderingAPI = game::RenderAPI::DirectX9; 
-		//attributes.RenderingAPI = game::RenderAPI::DirectX10;
+		//attributes.RenderingAPI = game::RenderAPI::DirectX9; 
+		attributes.RenderingAPI = game::RenderAPI::DirectX10;
 		//attributes.RenderingAPI = game::RenderAPI::DirectX11;
 		//attributes.RenderingAPI = game::RenderAPI::DirectX12;
 		
@@ -74,16 +74,16 @@ public:
 			geLogLastError();
 		}
 
-		// Temp load shader
-		game::Shader shader;
-#if defined(GAME_DIRECTX9)
-		shader.precompiled = true;
-#endif
-		if (!geLoadShader("Content/VertexShader.cso", "Content/PixelShader.cso", shader))
-		{
-			geLogLastError();
-		}
-		geUnLoadShader(shader);
+//		// Temp load shader
+//		game::Shader shader;
+//#if defined(GAME_DIRECTX9)
+//		shader.precompiled = true;
+//#endif
+//		if (!geLoadShader("Content/VertexShader.cso", "Content/PixelShader.cso", shader))
+//		{
+//			geLogLastError();
+//		}
+//		geUnLoadShader(shader);
 
 		// Setup pixel mode
 		if (!pixelMode.Initialize({ 320, 240 }))
@@ -102,8 +102,6 @@ public:
 		{
 			geLogLastError();
 		}		
-
-		//D3DCompileFromFile()
 	}
 
 	void Shutdown()
@@ -112,7 +110,6 @@ public:
 
 	void Update(const float_t msElapsed)
 	{
-		//geSetWindowTitle(std::to_string(geGetUpdatesPerSecond()) + " fps = " + std::to_string(geGetFramesPerSecond()));
 		// Handle Input
 		if (geKeyboard.WasKeyReleased(VK_F11))
 		{
