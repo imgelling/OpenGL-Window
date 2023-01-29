@@ -24,10 +24,10 @@ namespace game
 		void HandleWindowResize(const uint32_t width, const uint32_t height, const bool doReset) {};
 		void FillOutRendererInfo() {};
 		bool CreateTexture(Texture2D& texture);
-		bool LoadTexture(std::string fileName, Texture2D& texture) { lastError = { GameErrors::GameDirectX10Specific, "Can't load textures." }; return false; };
+		bool LoadTexture(std::string fileName, Texture2D& texture);
 		void UnLoadTexture(Texture2D& texture);
-		bool LoadShader(const std::string vertex, const std::string fragment, Shader& shader) { return false; };
-		void UnLoadShader(Shader& shader) {};
+		bool LoadShader(const std::string vertex, const std::string fragment, Shader& shader);
+		void UnLoadShader(Shader& shader);
 	protected:
 		void _ReadExtensions() {};
 	private:
@@ -42,7 +42,6 @@ namespace game
 		_d3d10SwapChain = nullptr;
 		_d3d10RenderTargetView = nullptr;
 	}
-
 
 	inline bool RendererDX10::CreateDevice(Window& window)
 	{
@@ -182,6 +181,8 @@ namespace game
 
 		texture.oneOverWidth = 1.0f / (float_t)texture.width;
 		texture.oneOverHeight = 1.0f / (float_t)texture.height;
+		texture.isCopy = false;
+		texture.name = "Created";
 
 		if (_d3d10Device->CreateTexture2D(&desc, NULL, &texture.textureInterface10) != S_OK)
 		{
@@ -191,6 +192,62 @@ namespace game
 
 		return true; 
 	};
+
+	inline bool RendererDX10::LoadTexture(std::string fileName, Texture2D& texture) 
+	{ 
+		ImageLoader loader;
+		void* data = nullptr;
+		int32_t width = 0;
+		int32_t height = 0;
+		int32_t componentsPerPixel = 0;
+		D3D10_MAPPED_TEXTURE2D  lockedRectangle = { 0 };
+
+		data = loader.Load(fileName.c_str(), width, height, componentsPerPixel, false);
+		if (data == nullptr)
+		{
+			lastError = { GameErrors::GameContent, "Failed to load texture : " + fileName };
+			return false;
+		}
+
+		texture.width = width;
+		texture.height = height;
+		texture.oneOverWidth = 1.0f / (float_t)texture.width;
+		texture.oneOverHeight = 1.0f / (float_t)texture.height;
+		texture.isCopy = false;
+		texture.name = fileName;
+
+		D3D10_TEXTURE2D_DESC desc = { 0 };
+		desc.Width = texture.width;
+		desc.Height = texture.height;
+		desc.MipLevels = desc.ArraySize = 1; // change for mipmapping
+		desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+		desc.SampleDesc.Count = 1;
+		desc.Usage = D3D10_USAGE_DYNAMIC;
+		desc.BindFlags = D3D10_BIND_SHADER_RESOURCE;
+		desc.CPUAccessFlags = D3D10_CPU_ACCESS_WRITE;
+
+		// Create texture memory
+		if (_d3d10Device->CreateTexture2D(&desc, NULL, &texture.textureInterface10) != S_OK)
+		{
+			lastError = { GameErrors::GameDirectX10Specific, "Could not create texture, \"" + fileName + "\"." };
+			return false;
+		}
+
+		// Copy texture data to the memory
+		if (texture.textureInterface10->Map(D3D10CalcSubresource(0,0,1), D3D10_MAP_WRITE_DISCARD, 0, &lockedRectangle) != S_OK)
+		{
+			lastError = { GameErrors::GameDirectX10Specific,"Could not map texture, \"" + fileName + "\"." };
+			UnLoadTexture(texture);
+			return false;
+		}
+		unsigned char* dest = static_cast<unsigned char*>(lockedRectangle.pData);
+		if (dest != NULL)
+		{
+			memcpy(dest, data, sizeof(unsigned char) * texture.width * texture.height * 4);
+		}
+		texture.textureInterface10->Unmap(D3D10CalcSubresource(0, 0, 1));
+		return true;
+	}
 
 	inline void RendererDX10::UnLoadTexture(Texture2D& texture)
 	{
@@ -212,6 +269,15 @@ namespace game
 		texture.anisotropyLevel = 1;
 	}
 
+	inline bool RendererDX10::LoadShader(const std::string vertex, const std::string fragment, Shader& shader)
+	{
+		return false;
+	}
+
+	inline void RendererDX10::UnLoadShader(Shader& shader)
+	{
+
+	}
 	inline void RendererDX10::Swap()
 	{
 		_d3d10SwapChain->Present(0, 0); // first is vsync, 0 for non, 1-4 interval, second is ???
