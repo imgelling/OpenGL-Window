@@ -94,6 +94,12 @@ namespace game
 		packedB = this->b << 0;
 		packedARGB = ((packedA) | (packedR) | (packedG) | (packedB));
 #endif
+#if defined(GAME_DIRECTX10)
+		rgba[0] = rf;
+		rgba[1] = gf;
+		rgba[2] = bf;
+		rgba[3] = af;
+#endif
 	}
 	// End float_t
 
@@ -126,6 +132,12 @@ namespace game
 		packedB = this->b << 0;
 		packedARGB = ((packedA) | (packedR) | (packedG) | (packedB));
 #endif
+#if defined(GAME_DIRECTX10)
+		rgba[0] = rf;
+		rgba[1] = gf;
+		rgba[2] = bf;
+		rgba[3] = af;
+#endif
 	}
 	// End double_t
 
@@ -157,6 +169,12 @@ namespace game
 		packedR = this->r << 16;
 		packedB = this->b << 0;
 		packedARGB = ((packedA) | (packedR) | (packedG) | (packedB));
+#endif
+#if defined(GAME_DIRECTX10)
+		rgba[0] = rf;
+		rgba[1] = gf;
+		rgba[2] = bf;
+		rgba[3] = af;
 #endif
 	}
 	// End uint32_t

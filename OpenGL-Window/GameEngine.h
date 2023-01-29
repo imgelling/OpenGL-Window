@@ -76,6 +76,11 @@ namespace game
 #if defined(GAME_DIRECTX9)
 		LPDIRECT3DDEVICE9 d3d9Device;
 #endif
+#if defined(GAME_DIRECTX10)
+		ID3D10Device* d3d10Device;
+		IDXGISwapChain* d3d10SwapChain;
+		ID3D10RenderTargetView* d3d10RenderTargetView;
+#endif
 #if defined(GAME_DIRECTX11)
 		ID3D11DeviceContext* d3d11Context;
 		ID3D11RenderTargetView* d3d11RenderTarget;
@@ -164,6 +169,11 @@ namespace game
 #if defined(GAME_DIRECTX9)
 		d3d9Device = nullptr;
 #endif
+#if defined(GAME_DIRECTX10)
+		d3d10Device = nullptr;
+		d3d10SwapChain = nullptr;
+		d3d10RenderTargetView = nullptr;
+#endif
 #if defined(GAME_DIRECTX11)
 		d3d11Context = nullptr;
 		d3d11RenderTarget = nullptr;
@@ -214,16 +224,16 @@ namespace game
 		if ((renderer == 3) && (_attributes.RenderingAPI == RenderAPI::Vulkan))
 			return true;
 #endif
+#if defined(GAME_DIRECTX10)
+		if ((renderer == 6) && (_attributes.RenderingAPI == RenderAPI::DirectX10))
+			return true;
+#endif
 #if defined(GAME_DIRECTX11)
 		if ((renderer == 4) && (_attributes.RenderingAPI == RenderAPI::DirectX11))
 			return true;
 #endif
 #if defined(GAME_DIRECTX12)
 		if ((renderer == 5) && (_attributes.RenderingAPI == RenderAPI::DirectX12))
-			return true;
-#endif
-#if defined(GAME_DIRECTX10)
-		if ((renderer == 6) && (_attributes.RenderingAPI == RenderAPI::DirectX10))
 			return true;
 #endif
 		return false;
@@ -595,7 +605,15 @@ namespace game
 			}
 		}
 #endif
-
+#if defined(GAME_DIRECTX10)
+		if (geIsUsing(GAME_DIRECTX10))
+		{
+			if (_renderer)
+			{
+				//dynamic_cast<RendererDX10*>(_renderer)->GetDevice();
+			}
+		}
+#endif
 #if defined(GAME_DIRECTX11)
 		if (geIsUsing(GAME_DIRECTX11))
 		{

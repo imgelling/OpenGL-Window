@@ -2,6 +2,9 @@
 #if defined(GAME_DIRECTX9)
 #include <d3d9.h>
 #endif
+#if defined(GAME_DIRECTX10)
+#include <d3d10.h>
+#endif
 #if defined(GAME_DIRECTX11)
 #include <d3d11.h>
 #endif
@@ -23,6 +26,9 @@ namespace game
 #endif
 #if defined(GAME_DIRECTX9)
 		LPDIRECT3DTEXTURE9 textureInterface9;
+#endif
+#if defined(GAME_DIRECTX10)
+		ID3D10Texture2D* textureInterface10;
 #endif
 #if defined(GAME_DIRECTX11)
 		ID3D11Texture2D* textureInterface11;
@@ -58,6 +64,9 @@ namespace game
 #endif
 #if defined(GAME_DIRECTX9)
 		textureInterface9 = nullptr;
+#endif
+#if defined(GAME_DIRECTX10)
+		textureInterface10 = nullptr;
 #endif
 #if defined(GAME_DIRECTX11)
 		textureInterface11 = nullptr;

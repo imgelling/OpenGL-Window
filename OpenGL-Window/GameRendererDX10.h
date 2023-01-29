@@ -20,12 +20,12 @@ namespace game
 		RendererDX10();
 		bool CreateDevice(Window& window);
 		void DestroyDevice();
-		void Swap() {};
+		void Swap();
 		void HandleWindowResize(const uint32_t width, const uint32_t height, const bool doReset) {};
 		void FillOutRendererInfo() {};
-		bool CreateTexture(Texture2D& texture) { return false; };
+		bool CreateTexture(Texture2D& texture);
 		bool LoadTexture(std::string fileName, Texture2D& texture) { lastError = { GameErrors::GameDirectX10Specific, "Can't load textures." }; return false; };
-		void UnLoadTexture(Texture2D& texture) {};
+		void UnLoadTexture(Texture2D& texture);
 		bool LoadShader(const std::string vertex, const std::string fragment, Shader& shader) { return false; };
 		void UnLoadShader(Shader& shader) {};
 	protected:
@@ -142,10 +142,9 @@ namespace game
 		_d3d10Device->RSSetViewports(1, &viewPort);
 		
 		//test for clear
-		float black[4] = {0.0f, 0.0f, 1.0f, 1.0f};
-		_d3d10Device->ClearRenderTargetView(_d3d10RenderTargetView, black); // rgba
+		_d3d10Device->ClearRenderTargetView(_d3d10RenderTargetView, Colors::Pink.rgba); // rgba
 
-		_d3d10SwapChain->Present(0, 0);
+		//_d3d10SwapChain->Present(0, 0);
 
 		return true;
 	};
@@ -167,6 +166,55 @@ namespace game
 			_d3d10Device->Release();
 			_d3d10Device = nullptr;
 		}
+	}
+
+	inline bool RendererDX10::CreateTexture(Texture2D& texture) 
+	{
+		D3D10_TEXTURE2D_DESC desc = { 0 };
+		desc.Width = texture.width;
+		desc.Height = texture.height;
+		desc.MipLevels = desc.ArraySize = 1;
+		desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+		desc.SampleDesc.Count = 1;
+		desc.Usage = D3D10_USAGE_DYNAMIC;
+		desc.BindFlags = D3D10_BIND_SHADER_RESOURCE;
+		desc.CPUAccessFlags = D3D10_CPU_ACCESS_WRITE;
+
+		texture.oneOverWidth = 1.0f / (float_t)texture.width;
+		texture.oneOverHeight = 1.0f / (float_t)texture.height;
+
+		if (_d3d10Device->CreateTexture2D(&desc, NULL, &texture.textureInterface10) != S_OK)
+		{
+			lastError = { GameErrors::GameDirectX10Specific, "Could not create the texture." };
+			return false;
+		}
+
+		return true; 
+	};
+
+	inline void RendererDX10::UnLoadTexture(Texture2D& texture)
+	{
+		if (texture.textureInterface10)
+		{
+			texture.textureInterface10->Release();
+			texture.textureInterface10 = nullptr;
+		}
+		texture.width = 0;
+		texture.height = 0;
+		texture.oneOverWidth = 0.0f;
+		texture.oneOverHeight = 0.0f;
+		texture.componentsPerPixel = 0;
+		texture.isCopy = false;
+		texture.name = "NULL";
+		// Attributes of texture filtering
+		texture.isMipMapped = true;
+		texture.filterType = TextureFilterType::Trilinear;
+		texture.anisotropyLevel = 1;
+	}
+
+	inline void RendererDX10::Swap()
+	{
+		_d3d10SwapChain->Present(0, 0); // first is vsync, 0 for non, 1-4 interval, second is ???
 	}
 }
 
