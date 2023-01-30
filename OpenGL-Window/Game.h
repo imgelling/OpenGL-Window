@@ -5,21 +5,24 @@
 #define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
 
-#if defined(GAME_SUPPORT_DIRECTX9) || defined(GAME_SUPPORT_ALL)
-#define GAME_DIRECTX9 2
-#endif
-
-#if defined(GAME_SUPPORT_DIRECTX10) || defined(GAME_SUPPORT_ALL)
-#define GAME_DIRECTX10 6
+#if defined(GAME_SUPPORT_DIRECTX12) || defined(GAME_SUPPORT_ALL)
+#define GAME_DIRECTX12 5
 #endif
 
 #if defined(GAME_SUPPORT_DIRECTX11) || defined(GAME_SUPPORT_ALL)
 #define GAME_DIRECTX11 4
 #endif
 
-#if defined(GAME_SUPPORT_DIRECTX12) || defined(GAME_SUPPORT_ALL)
-#define GAME_DIRECTX12 5
+#if defined(GAME_SUPPORT_DIRECTX10) || defined(GAME_SUPPORT_ALL)
+#define GAME_DIRECTX10 6
 #endif
+
+#if defined(GAME_SUPPORT_DIRECTX9) || defined(GAME_SUPPORT_ALL)
+#define GAME_DIRECTX9 2
+#endif
+
+
+
 #endif // _WIN32
 
 #if defined(GAME_SUPPORT_OPENGL) || defined(GAME_SUPPORT_ALL)
@@ -31,34 +34,6 @@
 #endif
 
 #if defined(_WIN32)
-#pragma region DirectX9
-#if defined(GAME_DIRECTX9)
-#include <d3d9.h>
-#include <d3dcompiler.h>
-#pragma comment (lib, "d3d9.lib")
-#pragma comment(lib,"d3dcompiler.lib")
-#include "GameRendererDX9.h"
-#endif
-#pragma endregion
-
-#pragma region DirectX10
-#if defined(GAME_DIRECTX10)
-#include <d3d10.h>
-#pragma comment(lib, "d3d10.lib")
-#pragma comment(lib, "dxgi.lib")
-#include "GameRendererDX10.h"
-#endif
-#pragma endregion
-
-
-#pragma region DirectX11
-#if defined(GAME_DIRECTX11)
-#include <d3d11.h>
-#pragma comment (lib, "d3d11.lib")
-#include "GameRendererDX11.h"
-#endif
-#pragma endregion
-
 #pragma region DirectX12
 #if defined(GAME_DIRECTX12)
 #include <d3d12.h>
@@ -72,6 +47,34 @@
 #include "GameRendererDX12.h"
 #endif
 #pragma endregion
+
+#pragma region DirectX11
+#if defined(GAME_DIRECTX11)
+#include <d3d11.h>
+#pragma comment (lib, "d3d11.lib")
+#include "GameRendererDX11.h"
+#endif
+#pragma endregion
+
+#pragma region DirectX10
+#if defined(GAME_DIRECTX10)
+#include <d3d10_1.h>
+#pragma comment(lib, "d3d10.lib")
+#pragma comment(lib, "dxgi.lib")
+#include "GameRendererDX10.h"
+#endif
+#pragma endregion
+
+#pragma region DirectX9
+#if defined(GAME_DIRECTX9)
+#include <d3d9.h>
+#include <d3dcompiler.h>
+#pragma comment (lib, "d3d9.lib")
+#pragma comment(lib,"d3dcompiler.lib")
+#include "GameRendererDX9.h"
+#endif
+#pragma endregion
+
 #endif // _WIN32
 
 #pragma region Vulkan

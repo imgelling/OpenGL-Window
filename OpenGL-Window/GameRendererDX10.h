@@ -1,7 +1,7 @@
 #if !defined(GAMERENDERERDX10_H)
 #define GAMERENDERERDX10_H
 
-#include <d3d10.h>
+#include <d3d10_1.h>
 
 #include "GameColor.h"
 #include "GameErrors.h"
@@ -182,7 +182,7 @@ namespace game
 		texture.oneOverWidth = 1.0f / (float_t)texture.width;
 		texture.oneOverHeight = 1.0f / (float_t)texture.height;
 		texture.isCopy = false;
-		texture.name = "Created";
+		//texture.name = "Created";
 
 		if (_d3d10Device->CreateTexture2D(&desc, NULL, &texture.textureInterface10) != S_OK)
 		{
@@ -271,11 +271,22 @@ namespace game
 
 	inline bool RendererDX10::LoadShader(const std::string vertex, const std::string fragment, Shader& shader)
 	{
+		
 		return false;
 	}
 
 	inline void RendererDX10::UnLoadShader(Shader& shader)
 	{
+		if (shader.vertexShader10)
+		{
+			shader.vertexShader10->Release();
+			shader.vertexShader10 = nullptr;
+		}
+		if (shader.pixelShader10)
+		{
+			shader.pixelShader10->Release();
+			shader.pixelShader10 = nullptr;
+		}
 
 	}
 	inline void RendererDX10::Swap()

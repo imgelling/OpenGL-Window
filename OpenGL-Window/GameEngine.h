@@ -17,6 +17,18 @@
 #endif
 #pragma endregion
 
+#pragma region DirectX11
+#if defined(GAME_DIRECTX11)
+#include "GameRendererDX11.h"
+#endif
+#pragma endregion
+
+#pragma region DirectX10
+#if defined(GAME_DIRECTX10)
+#include "GameRendererDX10.h"
+#endif
+#pragma endregion
+
 #pragma region DirectX9
 #if defined(GAME_DIRECTX9)
 #include "GameRendererDX9.h"
@@ -29,17 +41,7 @@
 #endif
 #pragma endregion
 
-#pragma region DirectX10
-#if defined(GAME_DIRECTX10)
-#include "GameRendererDX10.h"
-#endif
-#pragma endregion
 
-#pragma region DirectX11
-#if defined(GAME_DIRECTX11)
-#include "GameRendererDX11.h"
-#endif
-#pragma endregion
 
 #include "GameTexture2D.h"
 #include "GameMath.h"

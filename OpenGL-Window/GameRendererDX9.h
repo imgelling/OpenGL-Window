@@ -342,7 +342,7 @@ namespace game
 
 	inline bool RendererDX9::LoadShader(const std::string vertex, const std::string fragment, Shader& shader)
 	{
-		if (!shader.precompiled)
+		if (!shader.precompiled9)
 		{
 			DWORD flags = D3DCOMPILE_ENABLE_STRICTNESS;
 			if (_attributes.DebugMode)
@@ -411,7 +411,7 @@ namespace game
 			}
 
 			// Create vertex shader
-			if (_d3d9Device->CreateVertexShader((DWORD*)(compiledVertexShader->GetBufferPointer()), &shader.vertexShader) != D3D_OK)
+			if (_d3d9Device->CreateVertexShader((DWORD*)(compiledVertexShader->GetBufferPointer()), &shader.vertexShader9) != D3D_OK)
 			{
 				lastError = { GameErrors::GameDirectX9Specific,"Could not create vertex shader from \"" + vertex + "\"." };
 				if (compiledVertexShader)
@@ -428,7 +428,7 @@ namespace game
 			}
 
 			// Create pixel shader
-			if (_d3d9Device->CreatePixelShader((DWORD*)(compiledPixelShader->GetBufferPointer()), &shader.pixelShader) != D3D_OK)
+			if (_d3d9Device->CreatePixelShader((DWORD*)(compiledPixelShader->GetBufferPointer()), &shader.pixelShader9) != D3D_OK)
 			{
 				lastError = { GameErrors::GameDirectX9Specific,"Could not create pixel shader from \"" + fragment + "\"." };
 				if (compiledVertexShader)
@@ -441,10 +441,10 @@ namespace game
 					compiledPixelShader->Release();
 					compiledPixelShader = nullptr;
 				}
-				if (shader.vertexShader)
+				if (shader.vertexShader9)
 				{
-					shader.vertexShader->Release();
-					shader.vertexShader = nullptr;
+					shader.vertexShader9->Release();
+					shader.vertexShader9 = nullptr;
 				}
 				return false;
 			}
@@ -494,7 +494,7 @@ namespace game
 				file.close();
 
 				// Create vertex shader
-				if (_d3d9Device->CreateVertexShader((DWORD*)(compiledVertexShader), &shader.vertexShader) != D3D_OK)
+				if (_d3d9Device->CreateVertexShader((DWORD*)(compiledVertexShader), &shader.vertexShader9) != D3D_OK)
 				{
 					lastError = { GameErrors::GameDirectX9Specific,"Could not create vertex shader from \"" + vertex + "\"." };
 					if (compiledVertexShader)
@@ -529,7 +529,7 @@ namespace game
 				file.read((char*)compiledPixelShader, fileSize);
 				if (!file.good())
 				{
-					if (_d3d9Device->CreatePixelShader((DWORD*)(compiledPixelShader), &shader.pixelShader) != D3D_OK)
+					if (_d3d9Device->CreatePixelShader((DWORD*)(compiledPixelShader), &shader.pixelShader9) != D3D_OK)
 					{
 						lastError = { GameErrors::GameDirectX9Specific,"Error reading pixel shader file \"" + fragment + "\"\n" };
 						if (compiledVertexShader)
@@ -542,9 +542,9 @@ namespace game
 							delete[] compiledPixelShader;
 							compiledPixelShader = nullptr;
 						}
-						if (shader.vertexShader)
+						if (shader.vertexShader9)
 						{
-							shader.vertexShader->Release();
+							shader.vertexShader9->Release();
 						}
 						file.close();
 
@@ -554,7 +554,7 @@ namespace game
 				file.close();
 
 				// Create vertex shader
-				if (_d3d9Device->CreatePixelShader((DWORD*)(compiledPixelShader), &shader.pixelShader) != D3D_OK)
+				if (_d3d9Device->CreatePixelShader((DWORD*)(compiledPixelShader), &shader.pixelShader9) != D3D_OK)
 				{
 					lastError = { GameErrors::GameDirectX9Specific,"Could not create pixel shader from \"" + fragment + "\"." };
 					if (compiledVertexShader)
@@ -567,9 +567,9 @@ namespace game
 						delete[] compiledPixelShader;
 						compiledPixelShader = nullptr;
 					}
-					if (shader.vertexShader)
+					if (shader.vertexShader9)
 					{
-						shader.vertexShader->Release();
+						shader.vertexShader9->Release();
 					}
 
 					return false;
@@ -588,9 +588,9 @@ namespace game
 					delete[] compiledPixelShader;
 					compiledPixelShader = nullptr;
 				}
-				if (shader.vertexShader)
+				if (shader.vertexShader9)
 				{
-					shader.vertexShader->Release();
+					shader.vertexShader9->Release();
 				}
 				return false;
 			}
@@ -615,15 +615,15 @@ namespace game
 
 	inline void RendererDX9::UnLoadShader(Shader& shader)
 	{
-		if (shader.vertexShader)
+		if (shader.vertexShader9)
 		{
-			shader.vertexShader->Release();
-			shader.vertexShader = nullptr;
+			shader.vertexShader9->Release();
+			shader.vertexShader9 = nullptr;
 		}
-		if (shader.pixelShader)
+		if (shader.pixelShader9)
 		{
-			shader.pixelShader->Release();
-			shader.pixelShader = nullptr;
+			shader.pixelShader9->Release();
+			shader.pixelShader9 = nullptr;
 		}
 	}
 }

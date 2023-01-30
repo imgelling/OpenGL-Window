@@ -1,9 +1,9 @@
 #pragma once
+#if defined(GAME_DIRECTX10)
+#include <d3d10_1.h>
+#endif
 #if defined(GAME_DIRECTX9)
 #include <d3d9.h>
-#endif
-#if defined(GAME_DIRECTX10)
-#include <d3d10.h>
 #endif
 namespace game
 {
@@ -18,14 +18,14 @@ namespace game
 		uint32_t fragmentId;
 #endif
 #if defined(GAME_DIRECTX9)
-		IDirect3DVertexShader9* vertexShader;
-		IDirect3DPixelShader9* pixelShader;
-		bool precompiled;
+		IDirect3DVertexShader9* vertexShader9;
+		IDirect3DPixelShader9* pixelShader9;
+		bool precompiled9;
 #endif
 #if defined(GAME_DIRECTX10)
-		ID3D10VertexShader* vertexShader;
-		ID3D10PixelShader* pixelShader;
-		bool precompiled;
+		ID3D10VertexShader* vertexShader10;
+		ID3D10PixelShader* pixelShader10;
+		bool precompiled10;
 #endif
 	private:
 	};
@@ -39,14 +39,14 @@ namespace game
 #endif
 
 #if defined(GAME_DIRECTX9)
-		vertexShader = nullptr;
-		pixelShader = nullptr;
-		precompiled = false;
+		vertexShader9 = nullptr;
+		pixelShader9 = nullptr;
+		precompiled9 = false;
 #endif
 #if defined(GAME_DIRECTX10)
-		vertexShader = nullptr;
-		pixelShader = nullptr;
-		precompiled = false;
+		vertexShader10 = nullptr;
+		pixelShader10 = nullptr;
+		precompiled10 = false;
 #endif
 	}
 

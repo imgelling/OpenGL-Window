@@ -139,6 +139,7 @@ namespace game
 			_frameBuffer[loop].componentsPerPixel = 4;
 			_frameBuffer[loop].filterType = game::TextureFilterType::Point;
 			_frameBuffer[loop].isMipMapped = false;
+			_frameBuffer[loop].name = "PixelMode FrameBuffer" + std::to_string(loop);
 			if (!enginePointer->geCreateTexture(_frameBuffer[loop]))
 			{
 				lastError = { GameErrors::GameRenderer, "Could not create textures for PixelMode frame buffers." };
