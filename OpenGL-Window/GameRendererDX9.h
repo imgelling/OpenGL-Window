@@ -342,7 +342,7 @@ namespace game
 
 	inline bool RendererDX9::LoadShader(const std::string vertex, const std::string fragment, Shader& shader)
 	{
-		if (!shader.precompiled9)
+		if (!shader.isPrecompiled)
 		{
 			DWORD flags = D3DCOMPILE_ENABLE_STRICTNESS;
 			if (_attributes.DebugMode)

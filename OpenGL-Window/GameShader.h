@@ -20,12 +20,13 @@ namespace game
 #if defined(GAME_DIRECTX9)
 		IDirect3DVertexShader9* vertexShader9;
 		IDirect3DPixelShader9* pixelShader9;
-		bool precompiled9;
 #endif
 #if defined(GAME_DIRECTX10)
 		ID3D10VertexShader* vertexShader10;
 		ID3D10PixelShader* pixelShader10;
-		bool precompiled10;
+#endif
+#if defined(GAME_DIRECTX9) | (GAME_DIRECTX10)
+		bool isPrecompiled;
 #endif
 	private:
 	};
@@ -41,12 +42,13 @@ namespace game
 #if defined(GAME_DIRECTX9)
 		vertexShader9 = nullptr;
 		pixelShader9 = nullptr;
-		precompiled9 = false;
 #endif
 #if defined(GAME_DIRECTX10)
 		vertexShader10 = nullptr;
 		pixelShader10 = nullptr;
-		precompiled10 = false;
+#endif
+#if defined(GAME_DIRECTX9) | (GAME_DIRECTX10)
+		isPrecompiled = false;
 #endif
 	}
 

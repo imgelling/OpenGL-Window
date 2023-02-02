@@ -77,7 +77,7 @@ public:
 		// Temp load shader
 		game::Shader shader;
 #if defined(GAME_DIRECTX9) | defined(GAME_DIRECTX10)
-		shader.precompiled10 = true;
+		shader.isPrecompiled = true;
 #endif
 		if (!geLoadShader("Content/VertexShader.cso", "Content/PixelShader.cso", shader))
 		{

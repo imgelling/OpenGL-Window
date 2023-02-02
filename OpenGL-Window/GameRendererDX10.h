@@ -271,7 +271,7 @@ namespace game
 
 	inline bool RendererDX10::LoadShader(const std::string vertex, const std::string fragment, Shader& shader)
 	{
-		if (shader.precompiled10)
+		if (!shader.isPrecompiled)
 		{
 
 		}
@@ -304,7 +304,7 @@ namespace game
 				file.close();
 
 				// Create vertex shader
-				if (_d3d10Device->CreateVertexShader((DWORD*)(compiledVertexShader), fileSize, &shader.vertexShader10) != S_OK)
+				if (_d3d10Device->CreateVertexShader((DWORD*)(compiledVertexShader), (SIZE_T)fileSize, &shader.vertexShader10) != S_OK)
 				{
 					lastError = { GameErrors::GameDirectX10Specific,"Could not create vertex shader from \"" + vertex + "\"." };
 					if (compiledVertexShader)
