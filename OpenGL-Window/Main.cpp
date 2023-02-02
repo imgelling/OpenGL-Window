@@ -74,16 +74,16 @@ public:
 			geLogLastError();
 		}
 
-//		// Temp load shader
-//		game::Shader shader;
-//#if defined(GAME_DIRECTX9)
-//		shader.precompiled = true;
-//#endif
-//		if (!geLoadShader("Content/VertexShader.cso", "Content/PixelShader.cso", shader))
-//		{
-//			geLogLastError();
-//		}
-//		geUnLoadShader(shader);
+		// Temp load shader
+		game::Shader shader;
+#if defined(GAME_DIRECTX9) | defined(GAME_DIRECTX10)
+		shader.precompiled10 = true;
+#endif
+		if (!geLoadShader("Content/VertexShader.cso", "Content/PixelShader.cso", shader))
+		{
+			geLogLastError();
+		}
+		geUnLoadShader(shader);
 
 		// Setup pixel mode
 		if (!pixelMode.Initialize({ 320, 240 }))

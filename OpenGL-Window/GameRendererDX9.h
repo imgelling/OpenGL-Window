@@ -529,31 +529,29 @@ namespace game
 				file.read((char*)compiledPixelShader, fileSize);
 				if (!file.good())
 				{
-					if (_d3d9Device->CreatePixelShader((DWORD*)(compiledPixelShader), &shader.pixelShader9) != D3D_OK)
+					lastError = { GameErrors::GameDirectX9Specific,"Error reading pixel shader file \"" + fragment + "\"\n" };
+					if (compiledVertexShader)
 					{
-						lastError = { GameErrors::GameDirectX9Specific,"Error reading pixel shader file \"" + fragment + "\"\n" };
-						if (compiledVertexShader)
-						{
-							delete[] compiledVertexShader;
-							compiledVertexShader = nullptr;
-						}
-						if (compiledPixelShader)
-						{
-							delete[] compiledPixelShader;
-							compiledPixelShader = nullptr;
-						}
-						if (shader.vertexShader9)
-						{
-							shader.vertexShader9->Release();
-						}
-						file.close();
-
-						return false;
+						delete[] compiledVertexShader;
+						compiledVertexShader = nullptr;
 					}
+					if (compiledPixelShader)
+					{
+						delete[] compiledPixelShader;
+						compiledPixelShader = nullptr;
+					}
+					if (shader.vertexShader9)
+					{
+						shader.vertexShader9->Release();
+					}
+					file.close();
+
+					return false;
 				}
+			
 				file.close();
 
-				// Create vertex shader
+				// Create pixel shader
 				if (_d3d9Device->CreatePixelShader((DWORD*)(compiledPixelShader), &shader.pixelShader9) != D3D_OK)
 				{
 					lastError = { GameErrors::GameDirectX9Specific,"Could not create pixel shader from \"" + fragment + "\"." };
@@ -570,8 +568,8 @@ namespace game
 					if (shader.vertexShader9)
 					{
 						shader.vertexShader9->Release();
+						shader.vertexShader9 = nullptr;
 					}
-
 					return false;
 				}
 			}
