@@ -2,7 +2,7 @@
 #define GAME_USE_DEDICATED_GPU
 //#define GAME_ENABLE_NETWORKING
 //#define GAME_ENABLE_SHADERS
-//#define GAME_SUPPORT_DIRECTX9
+#define GAME_SUPPORT_DIRECTX9
 #define GAME_SUPPORT_DIRECTX10
 //#define GAME_SUPPORT_DIRECTX11
 //#define GAME_SUPPORT_DIRECTX12
@@ -54,13 +54,14 @@ public:
 		attributes.VsyncOn = false;
 		attributes.DebugMode = true;
 		attributes.MultiSamples = 8;
-		//attributes.RenderingAPI = game::RenderAPI::OpenGL;
-		//attributes.RenderingAPI = game::RenderAPI::DirectX9; 
+		attributes.RenderingAPI = game::RenderAPI::DirectX9; 
 		attributes.RenderingAPI = game::RenderAPI::DirectX10;
 		//attributes.RenderingAPI = game::RenderAPI::DirectX11;
 		//attributes.RenderingAPI = game::RenderAPI::DirectX12;
+		//attributes.RenderingAPI = game::RenderAPI::OpenGL;
 		
 		geSetAttributes(attributes);
+		
 	}
 
 	void LoadContent()
@@ -76,14 +77,17 @@ public:
 
 		// Temp load shader
 		game::Shader shader;
-#if defined(GAME_DIRECTX9) | defined(GAME_DIRECTX10)
+#if defined(GAME_DIRECTX9) || defined(GAME_DIRECTX10)
 		shader.isPrecompiled = true;
-#endif
-		if (!geLoadShader("Content/VertexShader.cso", "Content/PixelShader.cso", shader))
+		if (geIsUsing(GAME_DIRECTX9) || geIsUsing(GAME_DIRECTX10))
 		{
-			geLogLastError();
+			if (!geLoadShader("Content/VertexShader.cso", "Content/PixelShader.cso", shader))
+			{
+				geLogLastError();
+			}
+			geUnLoadShader(shader);
 		}
-		geUnLoadShader(shader);
+#endif
 
 		// Setup pixel mode
 		if (!pixelMode.Initialize({ 320, 240 }))
@@ -106,6 +110,7 @@ public:
 
 	void Shutdown()
 	{
+		geUnLoadTexture(spriteTexture);
 	}
 
 	void Update(const float_t msElapsed)
@@ -207,6 +212,12 @@ public:
 		{
 			d3d9Device->BeginScene();
 			d3d9Device->Clear(0, NULL, D3DCLEAR_TARGET, game::Colors::DarkGray.packedARGB, 1.0f, 0);
+		}
+#endif
+#if defined (GAME_DIRECTX10)
+		if (geIsUsing(GAME_DIRECTX10))
+		{
+			d3d10Device->ClearRenderTargetView(d3d10RenderTargetView, game::Colors::DarkGray.rgba); // rgba
 		}
 #endif
 

@@ -54,6 +54,8 @@ namespace game
 		DWORD _savedBlending;
 		IDirect3DBaseTexture9* _savedTexture;
 #endif
+#if defined (GAME_DIRECTX10)
+#endif
 #if defined (GAME_DIRECTX11)
 #endif
 	};
@@ -75,6 +77,8 @@ namespace game
 		_savedFVF = 0;
 		_savedBlending = 0;
 		_savedTexture = nullptr;
+#endif
+#if defined (GAME_DIRECTX10)
 #endif
 #if defined (GAME_DIRECTX11)
 #endif
@@ -105,6 +109,8 @@ namespace game
 			}
 		}
 #endif
+#if defined (GAME_DIRECTX10)
+#endif
 #if defined (GAME_DIRECTX11)
 #endif
 	}
@@ -125,6 +131,8 @@ namespace game
 			{
 				_spriteVertices[vertex].color = Colors::White.packedARGB;
 			}
+#endif
+#if defined (GAME_DIRECTX10)
 #endif
 #if defined(GAME_OPENGL)
 			if (enginePointer->geIsUsing(GAME_OPENGL))
@@ -149,8 +157,8 @@ namespace game
 				return false;
 			}
 		}
-
-		return true;
+#endif
+#if defined (GAME_DIRECTX10)
 #endif
 #if defined (GAME_DIRECTX11)
 #endif
@@ -177,6 +185,11 @@ namespace game
 			enginePointer->d3d9Device->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
 		}
 #endif
+#if defined(GAME_DIRECTX10)
+#endif
+#if defined(GAME_DIRECTX11)
+#endif
+
 
 #if defined (GAME_OPENGL)
 		if (enginePointer->geIsUsing(GAME_OPENGL))
@@ -216,6 +229,10 @@ namespace game
 			}
 		}
 #endif
+#if defined (GAME_DIRECTX10)
+#endif
+#if defined (GAME_DIRECTX11)
+#endif
 #if defined (GAME_OPENGL)
 		if (enginePointer->geIsUsing(GAME_OPENGL))
 		{
@@ -249,6 +266,10 @@ namespace game
 			enginePointer->d3d9Device->SetStreamSource(0, _vertexBuffer, 0, sizeof(_spriteVertex));
 			enginePointer->d3d9Device->DrawPrimitive(D3DPT_TRIANGLELIST, 0, _numberOfSpritesUsed * 2);
 		}
+#endif
+#if defined (GAME_DIRECTX10)
+#endif
+#if defined (GAME_DIRECTX11)
 #endif
 
 #if defined(GAME_OPENGL)
@@ -436,6 +457,10 @@ namespace game
 			access++;
 		}
 #endif
+#if defined (GAME_DIRECTX10)
+#endif
+#if defined (GAME_DIRECTX11)
+#endif
 
 		_numberOfSpritesUsed++;
 	}
@@ -549,6 +574,10 @@ namespace game
 			access->color = color.packedARGB;
 	}
 #endif
+#if defined (GAME_DIRECTX10)
+#endif
+#if defined (GAME_DIRECTX11)
+#endif
 
 		_numberOfSpritesUsed++;
 	}
@@ -589,14 +618,22 @@ namespace game
 #endif
 #if defined (GAME_DIRECTX9)
 #endif
+#if defined (GAME_DIRECTX10)
+#endif
 #if defined (GAME_DIRECTX11)
 #endif
 	}
 
 	inline void SpriteBatch::_Disable2D()
 	{
+#if defined (GAME_OPENGL)
+#endif
 #if defined(GAME_DIRECTX9)
 
+#endif
+#if defined (GAME_DIRECTX10)
+#endif
+#if defined (GAME_DIRECTX11)
 #endif
 	}
 }

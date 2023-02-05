@@ -196,6 +196,20 @@ namespace game
 			d3d9Device->Release();
 		}
 #endif
+#if defined(GAME_DIRECTX10)
+		if (d3d10Device)
+		{
+			d3d10Device->Release();
+		}
+		if (d3d10SwapChain)
+		{
+			d3d10SwapChain->Release();
+		}
+		if (d3d10RenderTargetView)
+		{
+			d3d10RenderTargetView->Release();
+		}
+#endif
 #if defined(GAME_DIRECTX11)
 		if (d3d11RenderTarget)
 		{
@@ -612,7 +626,7 @@ namespace game
 		{
 			if (_renderer)
 			{
-				//dynamic_cast<RendererDX10*>(_renderer)->GetDevice();
+				dynamic_cast<RendererDX10*>(_renderer)->GetDevice(d3d10Device,d3d10SwapChain,d3d10RenderTargetView);
 			}
 		}
 #endif

@@ -358,7 +358,7 @@ namespace game
 			{
 				SIZE_T size = compilationMsgs->GetBufferSize();
 				uint8_t* p = reinterpret_cast<unsigned char*>(compilationMsgs->GetBufferPointer());
-				lastError = { GameErrors::GameDirectX9Specific,"Could not load shader \"" + vertex + "\".\n" };
+				lastError = { GameErrors::GameDirectX9Specific,"Could not compile shader \"" + vertex + "\".\n" };
 				for (uint32_t bytes = 0; bytes < size; bytes++)
 				{
 					lastError.lastErrorString += p[bytes];
@@ -381,7 +381,7 @@ namespace game
 			{
 				SIZE_T size = compilationMsgs->GetBufferSize();
 				auto* p = reinterpret_cast<unsigned char*>(compilationMsgs->GetBufferPointer());
-				lastError = { GameErrors::GameDirectX9Specific,"Could not load shader \"" + fragment + "\".\n" };
+				lastError = { GameErrors::GameDirectX9Specific,"Could not compile shader \"" + fragment + "\".\n" };
 				for (uint32_t bytes = 0; bytes < size; bytes++)
 				{
 					lastError.lastErrorString += p[bytes];

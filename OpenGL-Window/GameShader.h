@@ -24,8 +24,10 @@ namespace game
 #if defined(GAME_DIRECTX10)
 		ID3D10VertexShader* vertexShader10;
 		ID3D10PixelShader* pixelShader10;
+		ID3DBlob* compiledPixelShader10 = nullptr;
+		ID3DBlob* compiledVertexShader10 = nullptr;
 #endif
-#if defined(GAME_DIRECTX9) | (GAME_DIRECTX10)
+#if defined(GAME_DIRECTX9) || defined(GAME_DIRECTX10)
 		bool isPrecompiled;
 #endif
 	private:
@@ -46,8 +48,10 @@ namespace game
 #if defined(GAME_DIRECTX10)
 		vertexShader10 = nullptr;
 		pixelShader10 = nullptr;
+		compiledPixelShader10 = nullptr;
+		compiledVertexShader10 = nullptr;
 #endif
-#if defined(GAME_DIRECTX9) | (GAME_DIRECTX10)
+#if defined(GAME_DIRECTX9) || defined(GAME_DIRECTX10)
 		isPrecompiled = false;
 #endif
 	}

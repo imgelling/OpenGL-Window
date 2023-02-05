@@ -59,8 +59,10 @@
 #pragma region DirectX10
 #if defined(GAME_DIRECTX10)
 #include <d3d10_1.h>
+#include <d3dcompiler.h>
 #pragma comment(lib, "d3d10.lib")
 #pragma comment(lib, "dxgi.lib")
+#pragma comment(lib,"d3dcompiler.lib")
 #include "GameRendererDX10.h"
 #endif
 #pragma endregion
