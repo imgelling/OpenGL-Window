@@ -1,7 +1,9 @@
 #if !defined(GAMEENGINE_H)
 #define GAMEENGINE_H
 
+#if defined(__linux__)
 #include <unistd.h>
+#endif
 
 #include "GameAttributes.h"
 #include "GameHelpers.h"
