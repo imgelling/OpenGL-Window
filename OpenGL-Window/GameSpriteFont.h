@@ -77,7 +77,7 @@ namespace game
 			return false;
 		}
 
-		stream.open(fileName.c_str(), std::ios::_Nocreate);
+		stream.open(fileName.c_str());
 		if (!stream.is_open())
 		{
 			lastError = { GameErrors::GameContent, "Could not load \"" + fileName + "\" for SpriteFont." };
@@ -171,7 +171,7 @@ namespace game
 
 	inline uint32_t SpriteFont::Length(std::string text)
 	{
-
+		return 0;
 	}
 
 	inline Texture2D SpriteFont::Texture() const

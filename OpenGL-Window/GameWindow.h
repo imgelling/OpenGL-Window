@@ -20,7 +20,7 @@ namespace game
 		void DoMessagePump();
 #if defined(_WIN32)
 		HWND GetHandle();
-#elif define(__linux__)
+#elif defined(__linux__)
 
 #endif
 	private:
@@ -37,7 +37,10 @@ namespace game
 
 	inline Window::Window()
 	{
+#if defined(_WIN32)
 		_windowHandle = NULL;
+#elif defined(__linux__)
+#endif
 	}
 
 	inline bool Window::CreateTheWindow()
@@ -146,8 +149,8 @@ namespace game
 		SetWindowTitle(_attributes.WindowTitle);
 
 		return true;
-#elif define(__linux__)
-
+#elif defined(__linux__)
+		return false;
 #endif
 	}
 
@@ -164,7 +167,7 @@ namespace game
 #else
 		SetWindowText(olc_hWnd, s.c_str());
 #endif
-#elif define(__linux__)
+#elif defined(__linux__)
 
 #endif
 	}
@@ -178,7 +181,7 @@ namespace game
 			TranslateMessage(&msg);
 			DispatchMessage(&msg);
 		}
-#elif define(__linux__)
+#elif defined(__linux__)
 
 #endif
 	}
@@ -219,7 +222,7 @@ namespace game
 			// Move window to corners for fullscreen
 			SetWindowPos(_windowHandle, 0, 0, 0, _monitorInfo.rcMonitor.right, _monitorInfo.rcMonitor.bottom, SWP_DRAWFRAME | SWP_FRAMECHANGED);
 		}
-#elif define(__linux__)
+#elif defined(__linux__)
 
 #endif
 
@@ -231,7 +234,7 @@ namespace game
 	{
 		return _windowHandle;
 	}
-#elif define(__linux__)
+#elif defined(__linux__)
 
 #endif
 }

@@ -1,5 +1,6 @@
 #if !defined(GAMEATTRIBUTES_H)
 #define GAMEATTRIBUTES_H
+#include <math.h>
 #include "GameHelpers.h"
 
 namespace game

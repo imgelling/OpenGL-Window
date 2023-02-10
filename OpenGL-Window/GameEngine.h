@@ -1,6 +1,7 @@
 #if !defined(GAMEENGINE_H)
 #define GAMEENGINE_H
 
+#include <unistd.h>
 
 #include "GameAttributes.h"
 #include "GameHelpers.h"
@@ -71,10 +72,10 @@ namespace game
 		Keyboard geKeyboard;
 		Mouse geMouse;
 		Logger* geLogger;
-		std::atomic_bool geIsRunning;
-		std::atomic_bool geIsMinimized;
-		std::atomic_bool geIsMaximized;
-		std::atomic_bool geFullScreenToggled;
+		bool geIsRunning;
+		bool geIsMinimized;
+		bool geIsMaximized;
+		bool geFullScreenToggled;
 #if defined(GAME_DIRECTX9)
 		LPDIRECT3DDEVICE9 d3d9Device;
 #endif

@@ -90,6 +90,10 @@ namespace game
 
 	inline void Mouse::ShowMouse(const bool isShown)
 	{
+#if defined(_WIN32)
 		ShowCursor(isShown);
+#elif defined(__linux__)
+		// show mouse
+#endif
 	}
 }

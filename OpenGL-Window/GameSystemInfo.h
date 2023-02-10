@@ -7,6 +7,7 @@
 #include <powerbase.h>
 #elif defined(__linux__)
 #include <cpuid.h>
+#include <cstring>
 #endif
 #include <sstream>
 #include <string>
@@ -281,7 +282,7 @@ namespace game
 
             // Interpret CPU brand string and cache information.
             if (i == 0x80000002)
-                memcpy(CPUBrandString, CPUInfo, sizeof(CPUInfo));
+                std::memcpy(CPUBrandString, CPUInfo, sizeof(CPUInfo));
             else if (i == 0x80000003)
                 memcpy(CPUBrandString + 16, CPUInfo, sizeof(CPUInfo));
             else if (i == 0x80000004)

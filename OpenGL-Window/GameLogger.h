@@ -51,7 +51,10 @@ namespace game
 		_rawtime = 0;
 		_streamlock.lock();
 		_stream.open(filename.c_str(), std::ios::out);
+#if defined(_WIN32_)
 		SetLastError(0);
+#elif defined(__linux__)
+#endif
 		_streamlock.unlock();
 	}
 
