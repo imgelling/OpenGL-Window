@@ -85,7 +85,7 @@ namespace game
 			// D3DXColor is just a float for rgba
 			// D3DXColor color
 		};
-		_vertex10 _quadVertices10[6] =
+		_vertex10 _quadVertices10[4] =
 		{
 			// tl
 			{0.0f, 0.5f, 0.5f, 1.0f, 0.0f, 0.0f, 1.0f},
@@ -93,15 +93,16 @@ namespace game
 			{0.5f, -0.5f, 0.5f, 0.0f, 1.0f, 0.0f, 1.0f},
 			// bl
 			{-0.5f, -0.5f, 0.5f, 0.0f, 0.0f, 1.0f, 1.0f},
-			// tr
-			{0.5f, -0.5f, 0.5f, 0.0f, 1.0f, 0.0f, 1.0f},
+			//// tr
+			//{0.5f, -0.5f, 0.5f, 0.0f, 1.0f, 0.0f, 1.0f},
 			// br
 			{-0.5f, -0.5f, 0.5f, 1.0f, 1.0f, 1.0f, 1.0f},
-			// bl
-			{0.0f, 0.0f, 0.5f, 0.0f, 0.0f, 1.0f, 1.0f},
+			//// bl
+			//{0.0f, 0.0f, 0.5f, 0.0f, 0.0f, 1.0f, 1.0f},
 
 		};
 		ID3D10Buffer* _vertexBuffer10;
+		ID3D10Buffer* _indexBuffer;
 		Shader _pixelModeShader;
 		ID3D10InputLayout* _vertexLayout;
 #endif
@@ -123,6 +124,7 @@ namespace game
 #if defined(GAME_DIRECTX10)
 		_vertexBuffer10 = nullptr;
 		_vertexLayout = nullptr;
+		_indexBuffer = nullptr;
 #endif
 #if defined(GAME_DIRECTX11)
 
@@ -154,6 +156,11 @@ namespace game
 			{
 				_vertexLayout->Release();
 				_vertexLayout = nullptr;
+			}
+			if (_indexBuffer)
+			{
+				_indexBuffer->Release();
+				_indexBuffer = nullptr;
 			}
 			enginePointer->geUnLoadShader(_pixelModeShader);
 		}
@@ -215,56 +222,79 @@ namespace game
 #if defined(GAME_DIRECTX10)
 		if (enginePointer->geIsUsing(GAME_DIRECTX10))
 		{
-			D3D10_BUFFER_DESC bd = { 0 };
-			D3D10_SUBRESOURCE_DATA InitData = { 0 };
+			D3D10_BUFFER_DESC vertexBufferDescription = { 0 };
+			D3D10_BUFFER_DESC indexBufferDescription = { 0 };
+			D3D10_SUBRESOURCE_DATA vertexInitialData = { 0 };
+			D3D10_SUBRESOURCE_DATA indexInitialData = { 0 };
+			uint32_t stride = sizeof(_vertex10);
+			uint32_t offset = 0;
+			DWORD indices[] = { 0, 1, 2, 1, 3, 2, };
+			D3D10_INPUT_ELEMENT_DESC inputLayout[] =
+			{
+				{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D10_INPUT_PER_VERTEX_DATA, 0 },
+				{ "COLOR",    0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 12, D3D10_INPUT_PER_VERTEX_DATA, 0},
+			};
 			
+			// Load shaders for sprite mode
 			if (!enginePointer->geLoadShader("Content/VertexShader.hlsl", "Content/PixelShader.hlsl", _pixelModeShader))
 			{
-				//lastError = { GameErrors::GameDirectX10Specific,"Could not create vertex buffer for PixelMode." };
 				return false;
 			}
 			
-			bd.ByteWidth = sizeof(_vertex10) * 6;
-			bd.Usage = D3D10_USAGE_DYNAMIC;// D3D10_USAGE_DEFAULT;
-			bd.BindFlags = D3D10_BIND_VERTEX_BUFFER;
-			bd.CPUAccessFlags = D3D10_CPU_ACCESS_WRITE; //0;
-			bd.MiscFlags = 0;
-
-			InitData.pSysMem = _quadVertices10;
-			if (enginePointer->d3d10Device->CreateBuffer(&bd, &InitData, &_vertexBuffer10) != S_OK)
+			// Create the vertex buffer
+			vertexBufferDescription.ByteWidth = sizeof(_vertex10) * 4;
+			vertexBufferDescription.Usage = D3D10_USAGE_DYNAMIC;// D3D10_USAGE_DEFAULT;
+			vertexBufferDescription.BindFlags = D3D10_BIND_VERTEX_BUFFER;
+			vertexBufferDescription.CPUAccessFlags = D3D10_CPU_ACCESS_WRITE; //0;
+			vertexBufferDescription.MiscFlags = 0;
+			vertexInitialData.pSysMem = _quadVertices10;
+			if (enginePointer->d3d10Device->CreateBuffer(&vertexBufferDescription, &vertexInitialData, &_vertexBuffer10) != S_OK)
 			{
 				lastError = { GameErrors::GameDirectX10Specific,"Could not create vertex buffer for PixelMode." };
 				enginePointer->geUnLoadShader(_pixelModeShader);
 				return false;
 			}
-
-			UINT stride = sizeof(_vertex10);
-			UINT offset = 0;
 			//enginePointer->d3d10Device->IAGetVertexBuffers()
 			enginePointer->d3d10Device->IASetVertexBuffers(0, 1, &_vertexBuffer10, &stride, &offset);
 
-
-			D3D10_INPUT_ELEMENT_DESC layout[] =
+			// Create index buffer
+			indexBufferDescription.Usage = D3D10_USAGE_IMMUTABLE;
+			indexBufferDescription.ByteWidth = sizeof(DWORD) * 2 * 3;
+			indexBufferDescription.BindFlags = D3D10_BIND_INDEX_BUFFER;
+			indexBufferDescription.CPUAccessFlags = 0;
+			indexBufferDescription.MiscFlags = 0;
+			indexInitialData.pSysMem = indices;
+			if (enginePointer->d3d10Device->CreateBuffer(&indexBufferDescription, &indexInitialData, &_indexBuffer) != S_OK)
 			{
-				{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D10_INPUT_PER_VERTEX_DATA, 0 },
-				{ "COLOR",    0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 12, D3D10_INPUT_PER_VERTEX_DATA, 0},
-			};
-
-			if (enginePointer->d3d10Device->CreateInputLayout(layout, 2, _pixelModeShader.compiledVertexShader10->GetBufferPointer(), _pixelModeShader.compiledVertexShader10->GetBufferSize(), &_vertexLayout) != S_OK)
-			{
-				lastError = { GameErrors::GameDirectX10Specific,"Could not create input layout for PixelMode." };
+				lastError = { GameErrors::GameDirectX10Specific,"Could not create index buffer for PixelMode." };
 				_vertexBuffer10->Release();
 				_vertexBuffer10 = nullptr;
 				enginePointer->geUnLoadShader(_pixelModeShader);
 				return false;
 			}
+			enginePointer->d3d10Device->IASetIndexBuffer(_indexBuffer, DXGI_FORMAT_R32_UINT, 0);
+			//enginePointer->d3d10Device->IAGetIndexBuffer
 
-
+			// Create input layout for shaders
+			if (enginePointer->d3d10Device->CreateInputLayout(inputLayout, 2, _pixelModeShader.compiledVertexShader10->GetBufferPointer(), _pixelModeShader.compiledVertexShader10->GetBufferSize(), &_vertexLayout) != S_OK)
+			{
+				lastError = { GameErrors::GameDirectX10Specific,"Could not create input layout for PixelMode." };
+				_indexBuffer->Release();
+				_indexBuffer = nullptr;
+				_vertexBuffer10->Release();
+				_vertexBuffer10 = nullptr;
+				enginePointer->geUnLoadShader(_pixelModeShader);
+				return false;
+			}
 			enginePointer->d3d10Device->IASetInputLayout(_vertexLayout);
 			//enginePointer->d3d10Device->IAGetInputLayout()
 
+			// Set type of primitive to render
 			enginePointer->d3d10Device->IASetPrimitiveTopology(D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 			//enginePointer->d3d10Device->IAGetPrimitiveTopology();
+
+			// load texture stuff here
+
 
 		}
 #endif
@@ -455,21 +485,12 @@ namespace game
 			_quadVertices10[2].x = _positionOfScaledTexture.x;
 			_quadVertices10[2].y = _sizeOfScaledTexture.height;
 
-			// tr
-			_quadVertices10[3].x = _sizeOfScaledTexture.width;
-			_quadVertices10[3].y = _positionOfScaledTexture.y;
 			// br
-			_quadVertices10[4].x = _sizeOfScaledTexture.width;
-			_quadVertices10[4].y = _sizeOfScaledTexture.height;
-			// bl
-			_quadVertices10[5].x = _positionOfScaledTexture.x;
-			_quadVertices10[5].y = _sizeOfScaledTexture.height;
+			_quadVertices10[3].x = _sizeOfScaledTexture.width;
+			_quadVertices10[3].y = _sizeOfScaledTexture.height;
 
 			VOID* pVoid = nullptr;
-			if (FAILED(_vertexBuffer10->Map(D3D10_MAP_WRITE_DISCARD, 0, &pVoid)))
-			{
-				std::cout << "map failed";
-			}
+			_vertexBuffer10->Map(D3D10_MAP_WRITE_DISCARD, 0, &pVoid);
 			memcpy(pVoid, _quadVertices10, sizeof(_quadVertices10));
 			_vertexBuffer10->Unmap();
 		}
@@ -556,8 +577,9 @@ namespace game
 		{
 			// need to save old shaders
 			enginePointer->d3d10Device->VSSetShader(_pixelModeShader.vertexShader10);
+			//enginePointer->d3d10Device->VSSetShaderResources()
 			enginePointer->d3d10Device->PSSetShader(_pixelModeShader.pixelShader10);
-			enginePointer->d3d10Device->Draw(6, 0);
+			enginePointer->d3d10Device->DrawIndexed(6, 0, 0);
 			// and restore them down here
 		}
 #endif

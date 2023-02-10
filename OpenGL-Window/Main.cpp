@@ -2,7 +2,7 @@
 #define GAME_USE_DEDICATED_GPU
 //#define GAME_ENABLE_NETWORKING
 //#define GAME_ENABLE_SHADERS
-#define GAME_SUPPORT_DIRECTX9
+//#define GAME_SUPPORT_DIRECTX9
 #define GAME_SUPPORT_DIRECTX10
 //#define GAME_SUPPORT_DIRECTX11
 //#define GAME_SUPPORT_DIRECTX12
@@ -78,15 +78,15 @@ public:
 		// Temp load shader
 		game::Shader shader;
 #if defined(GAME_DIRECTX9) || defined(GAME_DIRECTX10)
-		shader.isPrecompiled = true;
-		if (geIsUsing(GAME_DIRECTX9) || geIsUsing(GAME_DIRECTX10))
-		{
-			if (!geLoadShader("Content/VertexShader.cso", "Content/PixelShader.cso", shader))
-			{
-				geLogLastError();
-			}
-			geUnLoadShader(shader);
-		}
+		//shader.isPrecompiled = true;
+		//if (geIsUsing(GAME_DIRECTX9) || geIsUsing(GAME_DIRECTX10))
+		//{
+		//	if (!geLoadShader("Content/VertexShader.cso", "Content/PixelShader.cso", shader))
+		//	{
+		//		geLogLastError();
+		//	}
+		//	geUnLoadShader(shader);
+		//}
 #endif
 
 		// Setup pixel mode
