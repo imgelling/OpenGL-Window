@@ -31,13 +31,15 @@ namespace game
 		bool LoadShader(const std::string vertex, const std::string fragment, Shader& shader);
 		void UnLoadShader(Shader& shader);
 		//ID3D11Device*& device, ID3D11DeviceContext*& context, ID3D11RenderTargetView*& target
-		void GetDevice(ID3D10Device*& device, IDXGISwapChain*& swapChain, ID3D10RenderTargetView*& renderTargetView);
+		void GetDevice(ID3D10Device*& device, IDXGISwapChain*& swapChain, ID3D10RenderTargetView*& renderTargetView, ID3D10DepthStencilView*& depthStencilView);
 	protected:
 		void _ReadExtensions() {};
 	private:
 		ID3D10Device* _d3d10Device;
 		IDXGISwapChain* _d3d10SwapChain;
 		ID3D10RenderTargetView* _d3d10RenderTargetView;
+		ID3D10DepthStencilView* _d3d10DepthStencilView;
+		ID3D10Texture2D* _d3d10DepthStencilBuffer;
 	};
 
 	inline RendererDX10::RendererDX10()
@@ -45,16 +47,20 @@ namespace game
 		_d3d10Device = nullptr;
 		_d3d10SwapChain = nullptr;
 		_d3d10RenderTargetView = nullptr;
+		_d3d10DepthStencilView = nullptr;
+		_d3d10DepthStencilBuffer = nullptr;
 	}
 
-	inline void RendererDX10::GetDevice(ID3D10Device*& device, IDXGISwapChain*& swapChain, ID3D10RenderTargetView*& renderTargetView)
+	inline void RendererDX10::GetDevice(ID3D10Device*& device, IDXGISwapChain*& swapChain, ID3D10RenderTargetView*& renderTargetView, ID3D10DepthStencilView*& depthStencilView)
 	{
 		_d3d10Device->AddRef();
 		_d3d10SwapChain->AddRef();
 		_d3d10RenderTargetView->AddRef();
+		_d3d10DepthStencilView->AddRef();
 		device = _d3d10Device;
 		swapChain = _d3d10SwapChain;
 		renderTargetView = _d3d10RenderTargetView;
+		depthStencilView = _d3d10DepthStencilView;
 	}
 
 	inline bool RendererDX10::CreateDevice(Window& window)
@@ -96,6 +102,37 @@ namespace game
 			return false;
 		}
 
+		// Create depth and stencil buffer
+		D3D10_TEXTURE2D_DESC depthStencilDesc = { 0 };
+
+		depthStencilDesc.Width = _attributes.WindowWidth;
+		depthStencilDesc.Height = _attributes.WindowHeight;
+		depthStencilDesc.MipLevels = 1;
+		depthStencilDesc.ArraySize = 1;
+		depthStencilDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+		depthStencilDesc.SampleDesc.Count = 1;
+		depthStencilDesc.SampleDesc.Quality = 0;
+		depthStencilDesc.Usage = D3D10_USAGE_DEFAULT;
+		depthStencilDesc.BindFlags = D3D10_BIND_DEPTH_STENCIL;
+		depthStencilDesc.CPUAccessFlags = 0;	// can change for reading or writing i think
+		depthStencilDesc.MiscFlags = 0;
+
+		// Create depth stencil buffer texture
+		if (_d3d10Device->CreateTexture2D(&depthStencilDesc, NULL, &_d3d10DepthStencilBuffer) != S_OK)
+		{
+			lastError = { GameErrors::GameDirectX10Specific, "Could not create depth stencil buffer texture." };
+			DestroyDevice();
+			return false;
+		}
+
+		// Second param is states for depth stencil
+		if (FAILED(_d3d10Device->CreateDepthStencilView(_d3d10DepthStencilBuffer, NULL, &_d3d10DepthStencilView)))
+		{
+			lastError = { GameErrors::GameDirectX10Specific, "Could not create depth stencil view." };
+			DestroyDevice();
+			return false;
+		}
+
 		// Create the back buffer texture
 		if (_d3d10SwapChain->GetBuffer(0, _uuidof(ID3D10Texture2D), reinterpret_cast<void**>(&backBuffer)) != S_OK)
 		{
@@ -109,6 +146,16 @@ namespace game
 			{
 				_d3d10Device->Release();
 				_d3d10Device = nullptr;
+			}
+			if (_d3d10DepthStencilBuffer)
+			{
+				_d3d10DepthStencilBuffer->Release();
+				_d3d10DepthStencilBuffer = nullptr;
+			}
+			if (_d3d10DepthStencilView)
+			{
+				_d3d10DepthStencilView->Release();
+				_d3d10DepthStencilView = nullptr;
 			}
 			return false;
 		}
@@ -127,6 +174,16 @@ namespace game
 				_d3d10Device->Release();
 				_d3d10Device = nullptr;
 			}
+			if (_d3d10DepthStencilBuffer)
+			{
+				_d3d10DepthStencilBuffer->Release();
+				_d3d10DepthStencilBuffer = nullptr;
+			}
+			if (_d3d10DepthStencilView)
+			{
+				_d3d10DepthStencilView->Release();
+				_d3d10DepthStencilView = nullptr;
+			}
 			if (backBuffer)
 			{
 				backBuffer->Release();
@@ -139,11 +196,13 @@ namespace game
 		if (backBuffer)
 		{
 			backBuffer->Release();
+			backBuffer = nullptr;
 		}
 
 		// Set the render target
-		_d3d10Device->OMSetRenderTargets(1, &_d3d10RenderTargetView, NULL); // last parameter is depth/stencil
+		_d3d10Device->OMSetRenderTargets(1, &_d3d10RenderTargetView, _d3d10DepthStencilView);
 
+		
 		// Set the viewport
 		viewPort.TopLeftX = 0;
 		viewPort.TopLeftY = 0;
@@ -164,6 +223,16 @@ namespace game
 			_d3d10SwapChain->Release();
 			_d3d10SwapChain = nullptr;
 		}
+		if (_d3d10DepthStencilBuffer)
+		{
+			_d3d10DepthStencilBuffer->Release();
+			_d3d10DepthStencilBuffer = nullptr;
+		}
+		if (_d3d10DepthStencilView)
+		{
+			_d3d10DepthStencilView->Release();
+			_d3d10DepthStencilView = nullptr;
+		}
 		if (_d3d10RenderTargetView)
 		{
 			_d3d10RenderTargetView->Release();
@@ -174,6 +243,8 @@ namespace game
 			_d3d10Device->Release();
 			_d3d10Device = nullptr;
 		}
+
+
 	}
 
 	inline bool RendererDX10::CreateTexture(Texture2D& texture) 

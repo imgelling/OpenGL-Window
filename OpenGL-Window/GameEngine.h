@@ -85,6 +85,7 @@ namespace game
 		ID3D10Device* d3d10Device;
 		IDXGISwapChain* d3d10SwapChain;
 		ID3D10RenderTargetView* d3d10RenderTargetView;
+		ID3D10DepthStencilView* d3d10DepthStencilView;
 #endif
 #if defined(GAME_DIRECTX11)
 		ID3D11DeviceContext* d3d11Context;
@@ -211,6 +212,11 @@ namespace game
 		if (d3d10RenderTargetView)
 		{
 			d3d10RenderTargetView->Release();
+		}
+		if (d3d10DepthStencilView)
+		{
+			d3d10DepthStencilView->Release();
+			d3d10DepthStencilView = nullptr;
 		}
 #endif
 #if defined(GAME_DIRECTX11)
@@ -629,7 +635,7 @@ namespace game
 		{
 			if (_renderer)
 			{
-				dynamic_cast<RendererDX10*>(_renderer)->GetDevice(d3d10Device,d3d10SwapChain,d3d10RenderTargetView);
+				dynamic_cast<RendererDX10*>(_renderer)->GetDevice(d3d10Device, d3d10SwapChain, d3d10RenderTargetView, d3d10DepthStencilView);
 			}
 		}
 #endif

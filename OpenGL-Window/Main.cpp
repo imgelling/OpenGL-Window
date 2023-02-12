@@ -217,7 +217,8 @@ public:
 #if defined (GAME_DIRECTX10)
 		if (geIsUsing(GAME_DIRECTX10))
 		{
-			d3d10Device->ClearRenderTargetView(d3d10RenderTargetView, game::Colors::DarkGray.rgba); // rgba
+			d3d10Device->ClearRenderTargetView(d3d10RenderTargetView, game::Colors::DarkGray.rgba);
+			d3d10Device->ClearDepthStencilView(d3d10DepthStencilView, D3D10_CLEAR_DEPTH | D3D10_CLEAR_STENCIL, 1.0f, 0);
 		}
 #endif
 
