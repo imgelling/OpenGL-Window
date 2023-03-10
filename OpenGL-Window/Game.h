@@ -21,8 +21,6 @@
 #define GAME_DIRECTX9 2
 #endif
 
-
-
 #endif // _WIN32
 
 #if defined(GAME_SUPPORT_OPENGL) || defined(GAME_SUPPORT_ALL)
