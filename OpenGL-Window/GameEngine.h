@@ -194,7 +194,7 @@ namespace game
 			_renderer->DestroyDevice();
 			delete _renderer;
 			_renderer = nullptr;
-		}
+	}
 #if defined(GAME_DIRECTX9)
 		if (d3d9Device)
 		{
@@ -202,10 +202,10 @@ namespace game
 		}
 #endif
 #if defined(GAME_DIRECTX10)
-		SAFE_RELEASE(d3d10Device);
 		SAFE_RELEASE(d3d10SwapChain);
 		SAFE_RELEASE(d3d10RenderTargetView);
 		SAFE_RELEASE(d3d10DepthStencilView);
+		SAFE_RELEASE(d3d10Device);
 #endif
 #if defined(GAME_DIRECTX11)
 		if (d3d11RenderTarget)
@@ -221,6 +221,7 @@ namespace game
 			d3d11Device->Release();
 		}
 #endif
+
 	}
 
 	inline bool Engine::geIsUsing(const uint32_t renderer)

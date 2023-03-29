@@ -2,7 +2,7 @@
 #define GAMERENDERERDX10_H
 
 #if !defined(SAFE_RELEASE)
-#define SAFE_RELEASE(p) { if ( (p) ) { (p)->Release(); (p) = 0; } }
+#define SAFE_RELEASE(p) { if ( (p) ) { (p)->Release(); (p) = nullptr; } }
 #endif
 
 
@@ -101,10 +101,17 @@ namespace game
 			debug = D3D10_CREATE_DEVICE_DEBUG;
 		}
 
-		if (D3D10CreateDeviceAndSwapChain(0, D3D10_DRIVER_TYPE_HARDWARE, NULL, debug, D3D10_SDK_VERSION, &scd, &_d3d10SwapChain, &_d3d10Device) != S_OK)
+		try
 		{
-			lastError = { GameErrors::GameDirectX10Specific, "Could not create device." };
-			return false;
+			if (D3D10CreateDeviceAndSwapChain(0, D3D10_DRIVER_TYPE_HARDWARE, NULL, debug, D3D10_SDK_VERSION, &scd, &_d3d10SwapChain, &_d3d10Device) != S_OK)
+			{
+				lastError = { GameErrors::GameDirectX10Specific, "Could not create device." };
+				return false;
+			}
+		}
+		catch (...)
+		{
+			std::cout << "exception after createDeviceandswapchain.\n";
 		}
 
 		// Create depth and stencil buffer
@@ -176,11 +183,11 @@ namespace game
 
 	inline void RendererDX10::DestroyDevice()
 	{
+		SAFE_RELEASE(_d3d10Device);
 		SAFE_RELEASE(_d3d10SwapChain);
 		SAFE_RELEASE(_d3d10DepthStencilBuffer);
 		SAFE_RELEASE(_d3d10DepthStencilView);
 		SAFE_RELEASE(_d3d10RenderTargetView);
-		SAFE_RELEASE(_d3d10Device);
 	}
 
 	inline bool RendererDX10::CreateTexture(Texture2D& texture) 

@@ -82,17 +82,18 @@ namespace game
 		{
 			float_t x, y, z;
 			float_t r, g, b, a;
+			float_t u, v;
 			// D3DXColor is just a float for rgba
 			// D3DXColor color
 		};
 		_vertex10 _quadVertices10[4] =
 		{
 			// tl
-			{0.0f, 0.5f, 0.5f, 1.0f, 0.0f, 0.0f, 1.0f},
+			{0.0f, 0.5f, 0.5f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f},
 			// tr
-			{0.5f, -0.5f, 0.5f, 0.0f, 1.0f, 0.0f, 1.0f},
+			{0.5f, -0.5f, 0.5f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f, 0.0f},
 			// bl
-			{-0.5f, -0.5f, 0.5f, 0.0f, 0.0f, 1.0f, 1.0f},
+			{-0.5f, -0.5f, 0.5f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f},
 			//// tr
 			//{0.5f, -0.5f, 0.5f, 0.0f, 1.0f, 0.0f, 1.0f},
 			// br
@@ -105,6 +106,8 @@ namespace game
 		ID3D10Buffer* _indexBuffer;
 		Shader _pixelModeShader;
 		ID3D10InputLayout* _vertexLayout;
+		ID3D10ShaderResourceView* _textureShaderResourceView;
+		ID3D10SamplerState* test = nullptr;
 #endif
 #if defined(GAME_DIRECTX11)
 
@@ -125,6 +128,7 @@ namespace game
 		_vertexBuffer10 = nullptr;
 		_vertexLayout = nullptr;
 		_indexBuffer = nullptr;
+		_textureShaderResourceView = nullptr;
 #endif
 #if defined(GAME_DIRECTX11)
 
@@ -163,6 +167,8 @@ namespace game
 				_indexBuffer = nullptr;
 			}
 			enginePointer->geUnLoadShader(_pixelModeShader);
+			SAFE_RELEASE(_textureShaderResourceView);
+			SAFE_RELEASE(test);
 		}
 #endif
 		enginePointer->geUnLoadTexture(_frameBuffer[0]);
@@ -233,6 +239,7 @@ namespace game
 			{
 				{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D10_INPUT_PER_VERTEX_DATA, 0 },
 				{ "COLOR",    0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 12, D3D10_INPUT_PER_VERTEX_DATA, 0},
+				{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT,    0, 12, D3D10_INPUT_PER_VERTEX_DATA, 0},
 			};
 			
 			// Load shaders for sprite mode
@@ -276,7 +283,7 @@ namespace game
 			//enginePointer->d3d10Device->IAGetIndexBuffer
 
 			// Create input layout for shaders
-			if (enginePointer->d3d10Device->CreateInputLayout(inputLayout, 2, _pixelModeShader.compiledVertexShader10->GetBufferPointer(), _pixelModeShader.compiledVertexShader10->GetBufferSize(), &_vertexLayout) != S_OK)
+			if (enginePointer->d3d10Device->CreateInputLayout(inputLayout, 3, _pixelModeShader.compiledVertexShader10->GetBufferPointer(), _pixelModeShader.compiledVertexShader10->GetBufferSize(), &_vertexLayout) != S_OK)
 			{
 				lastError = { GameErrors::GameDirectX10Specific,"Could not create input layout for PixelMode." };
 				_indexBuffer->Release();
@@ -289,12 +296,47 @@ namespace game
 			enginePointer->d3d10Device->IASetInputLayout(_vertexLayout);
 			//enginePointer->d3d10Device->IAGetInputLayout()
 
+			
+			
 			// Set type of primitive to render
 			enginePointer->d3d10Device->IASetPrimitiveTopology(D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 			//enginePointer->d3d10Device->IAGetPrimitiveTopology();
 
 			// load texture stuff here
+			//D3D10_SAMPLER_DESC desc = {};
+			//desc.Filter = D3D10_FILTER_MIN_MAG_MIP_POINT;
+			//desc.AddressU = D3D10_TEXTURE_ADDRESS_CLAMP;
+			//desc.AddressV = D3D10_TEXTURE_ADDRESS_CLAMP;
+			D3D10_SAMPLER_DESC samplerDesc;
+			ZeroMemory(&samplerDesc, sizeof(samplerDesc));
+			samplerDesc.Filter = D3D10_FILTER_MIN_MAG_MIP_LINEAR;
+			samplerDesc.AddressU = D3D10_TEXTURE_ADDRESS_WRAP;
+			samplerDesc.AddressV = D3D10_TEXTURE_ADDRESS_WRAP;
+			samplerDesc.AddressW = D3D10_TEXTURE_ADDRESS_WRAP;
+			//samplerDesc.ComparisonFunc = D3D10_COMPARISON_NEVER;
+			//samplerDesc.MinLOD = 0;
+			//samplerDesc.MaxLOD = D3D10_FLOAT32_MAX;
 
+			if (FAILED(enginePointer->d3d10Device->CreateSamplerState(&samplerDesc, &test)))
+			{
+				std::cout << "Create sampler failed!\n";
+			}
+
+			D3D10_SHADER_RESOURCE_VIEW_DESC srDesc = {};
+			srDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+			srDesc.ViewDimension = D3D10_SRV_DIMENSION_TEXTURE2D;
+			srDesc.Texture2D.MostDetailedMip = 0;
+			srDesc.Texture2D.MipLevels = 1;
+			if (FAILED(enginePointer->d3d10Device->CreateShaderResourceView(_frameBuffer[_currentBuffer].textureInterface10, &srDesc, &_textureShaderResourceView)))
+			{
+				std::cout << "CreateSRV failed!\n";
+			}
+			//D3D10_SHADER_RESOURCE_VIEW_DESC srDesc = {};
+			//srDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+			//srDesc.ViewDimension = D3D10_SRV_DIMENSION_TEXTURE2D;
+			//srDesc.Texture2D.MostDetailedMip = 0;
+			//srDesc.Texture2D.MipLevels = 1;
+			//enginePointer->d3d10Device->CreateShaderResourceView(, _textureShaderResource);
 
 		}
 #endif
@@ -335,7 +377,16 @@ namespace game
 #if defined(GAME_DIRECTX10)
 		if (enginePointer->geIsUsing(GAME_DIRECTX10))
 		{
+			D3D10_MAPPED_TEXTURE2D mappedTex = { 0 };
+			if (FAILED(_frameBuffer[_currentBuffer].textureInterface10->Map(D3D10CalcSubresource(0, 0, 1), D3D10_MAP_WRITE_DISCARD, 0, &mappedTex)))
+			{
+				std::cout << "Could not map texture\n";
+				return;
+			}
+			unsigned char* dest = (unsigned char*)mappedTex.pData;
+			memcpy(dest, dest, sizeof(unsigned char) * _frameBuffer[_currentBuffer].width * _frameBuffer[_currentBuffer].height * 4);
 
+			_frameBuffer[_currentBuffer].textureInterface10->Unmap(D3D10CalcSubresource(0, 0, 1));
 		}
 #endif
 #if defined(GAME_DIRECTX11)
@@ -579,7 +630,24 @@ namespace game
 			enginePointer->d3d10Device->VSSetShader(_pixelModeShader.vertexShader10);
 			//enginePointer->d3d10Device->VSSetShaderResources()
 			enginePointer->d3d10Device->PSSetShader(_pixelModeShader.pixelShader10);
+
+			//D3D10_SHADER_RESOURCE_VIEW_DESC srDesc = {};
+			//srDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+			//srDesc.ViewDimension = D3D10_SRV_DIMENSION_TEXTURE2D;
+			//srDesc.Texture2D.MostDetailedMip = 0;
+			//srDesc.Texture2D.MipLevels = 1;
+			//if (FAILED(enginePointer->d3d10Device->CreateShaderResourceView(_frameBuffer[_currentBuffer].textureInterface10, &srDesc, &_textureShaderResourceView)))
+			//{
+			//	std::cout << "CreateSRV failed!\n";
+			//}
+
+			
+
+			enginePointer->d3d10Device->PSSetSamplers(0, 1, &test);
+			enginePointer->d3d10Device->PSSetShaderResources(0, 1, &_textureShaderResourceView);
+
 			enginePointer->d3d10Device->DrawIndexed(6, 0, 0);
+			SAFE_RELEASE(_textureShaderResourceView);
 			// and restore them down here
 		}
 #endif
