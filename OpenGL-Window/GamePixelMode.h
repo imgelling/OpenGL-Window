@@ -106,8 +106,9 @@ namespace game
 		ID3D10Buffer* _indexBuffer;
 		Shader _pixelModeShader;
 		ID3D10InputLayout* _vertexLayout;
-		ID3D10ShaderResourceView* _textureShaderResourceView;
-		ID3D10SamplerState* test = nullptr;
+		ID3D10ShaderResourceView* _textureShaderResourceView0;
+		ID3D10ShaderResourceView* _textureShaderResourceView1;
+		ID3D10SamplerState* _textureSamplerState;
 #endif
 #if defined(GAME_DIRECTX11)
 
@@ -128,7 +129,9 @@ namespace game
 		_vertexBuffer10 = nullptr;
 		_vertexLayout = nullptr;
 		_indexBuffer = nullptr;
-		_textureShaderResourceView = nullptr;
+		_textureShaderResourceView0 = nullptr;
+		_textureShaderResourceView1 = nullptr;
+		_textureSamplerState = nullptr;
 #endif
 #if defined(GAME_DIRECTX11)
 
@@ -167,8 +170,9 @@ namespace game
 				_indexBuffer = nullptr;
 			}
 			enginePointer->geUnLoadShader(_pixelModeShader);
-			SAFE_RELEASE(_textureShaderResourceView);
-			SAFE_RELEASE(test);
+			SAFE_RELEASE(_textureShaderResourceView0);
+			SAFE_RELEASE(_textureShaderResourceView1);
+			SAFE_RELEASE(_textureSamplerState);
 		}
 #endif
 		enginePointer->geUnLoadTexture(_frameBuffer[0]);
@@ -317,7 +321,7 @@ namespace game
 			//samplerDesc.MinLOD = 0;
 			//samplerDesc.MaxLOD = D3D10_FLOAT32_MAX;
 
-			if (FAILED(enginePointer->d3d10Device->CreateSamplerState(&samplerDesc, &test)))
+			if (FAILED(enginePointer->d3d10Device->CreateSamplerState(&samplerDesc, &_textureSamplerState)))
 			{
 				std::cout << "Create sampler failed!\n";
 			}
@@ -327,10 +331,15 @@ namespace game
 			srDesc.ViewDimension = D3D10_SRV_DIMENSION_TEXTURE2D;
 			srDesc.Texture2D.MostDetailedMip = 0;
 			srDesc.Texture2D.MipLevels = 1;
-			if (FAILED(enginePointer->d3d10Device->CreateShaderResourceView(_frameBuffer[_currentBuffer].textureInterface10, &srDesc, &_textureShaderResourceView)))
+			if (FAILED(enginePointer->d3d10Device->CreateShaderResourceView(_frameBuffer[0].textureInterface10, &srDesc, &_textureShaderResourceView0)))
 			{
-				std::cout << "CreateSRV failed!\n";
+				std::cout << "CreateSRV0 failed!\n";
 			}
+			if (FAILED(enginePointer->d3d10Device->CreateShaderResourceView(_frameBuffer[1].textureInterface10, &srDesc, &_textureShaderResourceView1)))
+			{
+				std::cout << "CreateSRV1 failed!\n";
+			}
+
 			//D3D10_SHADER_RESOURCE_VIEW_DESC srDesc = {};
 			//srDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
 			//srDesc.ViewDimension = D3D10_SRV_DIMENSION_TEXTURE2D;
@@ -384,7 +393,7 @@ namespace game
 				return;
 			}
 			unsigned char* dest = (unsigned char*)mappedTex.pData;
-			memcpy(dest, dest, sizeof(unsigned char) * _frameBuffer[_currentBuffer].width * _frameBuffer[_currentBuffer].height * 4);
+			memcpy(dest, (unsigned char*)_video, sizeof(unsigned char) * _frameBuffer[_currentBuffer].width * _frameBuffer[_currentBuffer].height * 4);
 
 			_frameBuffer[_currentBuffer].textureInterface10->Unmap(D3D10CalcSubresource(0, 0, 1));
 		}
@@ -631,23 +640,18 @@ namespace game
 			//enginePointer->d3d10Device->VSSetShaderResources()
 			enginePointer->d3d10Device->PSSetShader(_pixelModeShader.pixelShader10);
 
-			//D3D10_SHADER_RESOURCE_VIEW_DESC srDesc = {};
-			//srDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-			//srDesc.ViewDimension = D3D10_SRV_DIMENSION_TEXTURE2D;
-			//srDesc.Texture2D.MostDetailedMip = 0;
-			//srDesc.Texture2D.MipLevels = 1;
-			//if (FAILED(enginePointer->d3d10Device->CreateShaderResourceView(_frameBuffer[_currentBuffer].textureInterface10, &srDesc, &_textureShaderResourceView)))
-			//{
-			//	std::cout << "CreateSRV failed!\n";
-			//}
+			enginePointer->d3d10Device->PSSetSamplers(0, 1, &_textureSamplerState);
 
-			
-
-			enginePointer->d3d10Device->PSSetSamplers(0, 1, &test);
-			enginePointer->d3d10Device->PSSetShaderResources(0, 1, &_textureShaderResourceView);
+			if (!_currentBuffer)
+			{
+				enginePointer->d3d10Device->PSSetShaderResources(0, 1, &_textureShaderResourceView0);
+			}
+			else
+			{
+				enginePointer->d3d10Device->PSSetShaderResources(0, 1, &_textureShaderResourceView1);
+			}
 
 			enginePointer->d3d10Device->DrawIndexed(6, 0, 0);
-			SAFE_RELEASE(_textureShaderResourceView);
 			// and restore them down here
 		}
 #endif

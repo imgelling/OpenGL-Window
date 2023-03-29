@@ -179,6 +179,7 @@ namespace game
 		d3d10Device = nullptr;
 		d3d10SwapChain = nullptr;
 		d3d10RenderTargetView = nullptr;
+		d3d10DepthStencilView = nullptr;
 #endif
 #if defined(GAME_DIRECTX11)
 		d3d11Context = nullptr;
@@ -192,9 +193,7 @@ namespace game
 		if (_renderer)
 		{
 			_renderer->DestroyDevice();
-			delete _renderer;
-			_renderer = nullptr;
-	}
+		}
 #if defined(GAME_DIRECTX9)
 		if (d3d9Device)
 		{
@@ -202,10 +201,10 @@ namespace game
 		}
 #endif
 #if defined(GAME_DIRECTX10)
-		SAFE_RELEASE(d3d10SwapChain);
-		SAFE_RELEASE(d3d10RenderTargetView);
-		SAFE_RELEASE(d3d10DepthStencilView);
-		SAFE_RELEASE(d3d10Device);
+		d3d10SwapChain = nullptr;
+		d3d10RenderTargetView = nullptr;
+		d3d10DepthStencilView = nullptr;
+		d3d10Device = nullptr;
 #endif
 #if defined(GAME_DIRECTX11)
 		if (d3d11RenderTarget)
@@ -221,6 +220,12 @@ namespace game
 			d3d11Device->Release();
 		}
 #endif
+		if (_renderer)
+		{
+			//_renderer->DestroyDevice();
+			delete _renderer;
+			_renderer = nullptr;
+		}
 
 	}
 

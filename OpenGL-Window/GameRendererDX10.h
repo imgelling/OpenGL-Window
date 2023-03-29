@@ -19,6 +19,7 @@
 #include "GameSystemInfo.h"
 #include "GameTexture2D.h"
 
+
 namespace game
 {
 	extern SystemInfo systemInfo;
@@ -58,10 +59,10 @@ namespace game
 
 	inline void RendererDX10::GetDevice(ID3D10Device*& device, IDXGISwapChain*& swapChain, ID3D10RenderTargetView*& renderTargetView, ID3D10DepthStencilView*& depthStencilView)
 	{
-		_d3d10Device->AddRef();
-		_d3d10SwapChain->AddRef();
-		_d3d10RenderTargetView->AddRef();
-		_d3d10DepthStencilView->AddRef();
+//		_d3d10Device->AddRef();
+		//_d3d10SwapChain->AddRef();
+		//_d3d10RenderTargetView->AddRef();
+		//_d3d10DepthStencilView->AddRef();
 		device = _d3d10Device;
 		swapChain = _d3d10SwapChain;
 		renderTargetView = _d3d10RenderTargetView;
@@ -183,11 +184,11 @@ namespace game
 
 	inline void RendererDX10::DestroyDevice()
 	{
-		SAFE_RELEASE(_d3d10Device);
 		SAFE_RELEASE(_d3d10SwapChain);
 		SAFE_RELEASE(_d3d10DepthStencilBuffer);
 		SAFE_RELEASE(_d3d10DepthStencilView);
 		SAFE_RELEASE(_d3d10RenderTargetView);
+		SAFE_RELEASE(_d3d10Device);
 	}
 
 	inline bool RendererDX10::CreateTexture(Texture2D& texture) 
