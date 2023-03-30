@@ -104,7 +104,7 @@ namespace game
 
 		try
 		{
-			if (D3D10CreateDeviceAndSwapChain(0, D3D10_DRIVER_TYPE_HARDWARE, NULL, debug, D3D10_SDK_VERSION, &scd, &_d3d10SwapChain, &_d3d10Device) != S_OK)
+			if (FAILED(D3D10CreateDeviceAndSwapChain(0, D3D10_DRIVER_TYPE_HARDWARE, NULL, debug, D3D10_SDK_VERSION, &scd, &_d3d10SwapChain, &_d3d10Device)))
 			{
 				lastError = { GameErrors::GameDirectX10Specific, "Could not create device." };
 				return false;
@@ -131,7 +131,7 @@ namespace game
 		depthStencilDesc.MiscFlags = 0;
 
 		// Create depth stencil buffer texture
-		if (_d3d10Device->CreateTexture2D(&depthStencilDesc, NULL, &_d3d10DepthStencilBuffer) != S_OK)
+		if (FAILED(_d3d10Device->CreateTexture2D(&depthStencilDesc, NULL, &_d3d10DepthStencilBuffer)))
 		{
 			lastError = { GameErrors::GameDirectX10Specific, "Could not create depth stencil buffer texture." };
 			DestroyDevice();
@@ -147,7 +147,7 @@ namespace game
 		}
 
 		// Create the back buffer texture
-		if (_d3d10SwapChain->GetBuffer(0, _uuidof(ID3D10Texture2D), reinterpret_cast<void**>(&backBuffer)) != S_OK)
+		if (FAILED(_d3d10SwapChain->GetBuffer(0, _uuidof(ID3D10Texture2D), reinterpret_cast<void**>(&backBuffer))))
 		{
 			lastError = { GameErrors::GameDirectX10Specific, "Could not create back buffer." };
 			DestroyDevice();
@@ -155,7 +155,7 @@ namespace game
 		}
 
 		// Create the render target
-		if (_d3d10Device->CreateRenderTargetView(backBuffer, 0, &_d3d10RenderTargetView) != S_OK)
+		if (FAILED(_d3d10Device->CreateRenderTargetView(backBuffer, 0, &_d3d10RenderTargetView)))
 		{
 			lastError = { GameErrors::GameDirectX10Specific, "Could not create render target." };
 			DestroyDevice();
@@ -208,7 +208,7 @@ namespace game
 		texture.isCopy = false;
 		//texture.name = "Created";
 
-		if (_d3d10Device->CreateTexture2D(&desc, NULL, &texture.textureInterface10) != S_OK)
+		if (FAILED(_d3d10Device->CreateTexture2D(&desc, NULL, &texture.textureInterface10)))
 		{
 			lastError = { GameErrors::GameDirectX10Specific, "Could not create the texture." };
 			return false;
@@ -251,14 +251,14 @@ namespace game
 		desc.CPUAccessFlags = D3D10_CPU_ACCESS_WRITE;
 
 		// Create texture memory
-		if (_d3d10Device->CreateTexture2D(&desc, NULL, &texture.textureInterface10) != S_OK)
+		if (FAILED(_d3d10Device->CreateTexture2D(&desc, NULL, &texture.textureInterface10)))
 		{
 			lastError = { GameErrors::GameDirectX10Specific, "Could not create texture, \"" + fileName + "\"." };
 			return false;
 		}
 
 		// Copy texture data to the memory
-		if (texture.textureInterface10->Map(D3D10CalcSubresource(0,0,1), D3D10_MAP_WRITE_DISCARD, 0, &lockedRectangle) != S_OK)
+		if (FAILED(texture.textureInterface10->Map(D3D10CalcSubresource(0,0,1), D3D10_MAP_WRITE_DISCARD, 0, &lockedRectangle)))
 		{
 			lastError = { GameErrors::GameDirectX10Specific,"Could not map texture, \"" + fileName + "\"." };
 			UnLoadTexture(texture);
@@ -303,7 +303,7 @@ namespace game
 			ID3DBlob* compilationMsgs = nullptr;
 
 			// Compile the vertex shader
-			if (D3DCompileFromFile(ConvertToWide(vertex).c_str(), NULL, NULL, "main", "vs_4_0", flags, NULL, &compiledVertexShader, &compilationMsgs) != S_OK)
+			if (FAILED(D3DCompileFromFile(ConvertToWide(vertex).c_str(), NULL, NULL, "main", "vs_4_0", flags, NULL, &compiledVertexShader, &compilationMsgs)))
 			{
 				SIZE_T size = compilationMsgs->GetBufferSize();
 				uint8_t* p = reinterpret_cast<unsigned char*>(compilationMsgs->GetBufferPointer());
@@ -318,7 +318,7 @@ namespace game
 			}
 
 			// Compile the pixel shader
-			if (D3DCompileFromFile(ConvertToWide(fragment).c_str(), NULL, NULL, "main", "ps_4_0", flags, NULL, &compiledPixelShader, &compilationMsgs) != S_OK)
+			if (FAILED(D3DCompileFromFile(ConvertToWide(fragment).c_str(), NULL, NULL, "main", "ps_4_0", flags, NULL, &compiledPixelShader, &compilationMsgs)))
 			{
 				SIZE_T size = compilationMsgs->GetBufferSize();
 				auto* p = reinterpret_cast<unsigned char*>(compilationMsgs->GetBufferPointer());
@@ -337,7 +337,7 @@ namespace game
 			SAFE_RELEASE(compilationMsgs);
 
 			// Create vertex shader
-			if (_d3d10Device->CreateVertexShader(compiledVertexShader->GetBufferPointer(), compiledVertexShader->GetBufferSize(), &shader.vertexShader10) != S_OK)
+			if (FAILED(_d3d10Device->CreateVertexShader(compiledVertexShader->GetBufferPointer(), compiledVertexShader->GetBufferSize(), &shader.vertexShader10)))
 			{
 				lastError = { GameErrors::GameDirectX9Specific,"Could not create vertex shader from \"" + vertex + "\"." };
 				SAFE_RELEASE(compiledVertexShader);
@@ -348,7 +348,7 @@ namespace game
 			}
 
 			// Create pixel shader
-			if (_d3d10Device->CreatePixelShader((DWORD*)(compiledPixelShader->GetBufferPointer()), compiledPixelShader->GetBufferSize(), &shader.pixelShader10) != S_OK)
+			if (FAILED(_d3d10Device->CreatePixelShader((DWORD*)(compiledPixelShader->GetBufferPointer()), compiledPixelShader->GetBufferSize(), &shader.pixelShader10)))
 			{
 				lastError = { GameErrors::GameDirectX9Specific,"Could not create pixel shader from \"" + fragment + "\"." };
 				SAFE_RELEASE(compiledVertexShader);
@@ -398,7 +398,7 @@ namespace game
 				SAFE_RELEASE(compiledPixelShader);
 			}
 
-			if (_d3d10Device->CreatePixelShader((DWORD*)compiledPixelShader->GetBufferPointer(), compiledPixelShader->GetBufferSize(), &shader.pixelShader10) != S_OK)
+			if (FAILED(_d3d10Device->CreatePixelShader((DWORD*)compiledPixelShader->GetBufferPointer(), compiledPixelShader->GetBufferSize(), &shader.pixelShader10)))
 			{
 				lastError = { GameErrors::GameDirectX10Specific,"Could not create pixel shader from \"" + fragment + "\"." };
 				SAFE_RELEASE(compiledVertexShader);

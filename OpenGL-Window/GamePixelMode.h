@@ -252,7 +252,7 @@ namespace game
 			vertexBufferDescription.CPUAccessFlags = D3D10_CPU_ACCESS_WRITE; //0;
 			vertexBufferDescription.MiscFlags = 0;
 			vertexInitialData.pSysMem = _quadVertices10;
-			if (enginePointer->d3d10Device->CreateBuffer(&vertexBufferDescription, &vertexInitialData, &_vertexBuffer10) != S_OK)
+			if (FAILED(enginePointer->d3d10Device->CreateBuffer(&vertexBufferDescription, &vertexInitialData, &_vertexBuffer10)))
 			{
 				lastError = { GameErrors::GameDirectX10Specific,"Could not create vertex buffer for PixelMode." };
 				enginePointer->geUnLoadShader(_pixelModeShader);
@@ -266,7 +266,7 @@ namespace game
 			indexBufferDescription.CPUAccessFlags = 0;
 			indexBufferDescription.MiscFlags = 0;
 			indexInitialData.pSysMem = indices;
-			if (enginePointer->d3d10Device->CreateBuffer(&indexBufferDescription, &indexInitialData, &_indexBuffer) != S_OK)
+			if (FAILED(enginePointer->d3d10Device->CreateBuffer(&indexBufferDescription, &indexInitialData, &_indexBuffer)))
 			{
 				lastError = { GameErrors::GameDirectX10Specific,"Could not create index buffer for PixelMode." };
 				_vertexBuffer10->Release();
@@ -276,7 +276,7 @@ namespace game
 			}
 
 			// Create input layout for shaders
-			if (enginePointer->d3d10Device->CreateInputLayout(inputLayout, 3, _pixelModeShader.compiledVertexShader10->GetBufferPointer(), _pixelModeShader.compiledVertexShader10->GetBufferSize(), &_vertexLayout) != S_OK)
+			if (FAILED(enginePointer->d3d10Device->CreateInputLayout(inputLayout, 3, _pixelModeShader.compiledVertexShader10->GetBufferPointer(), _pixelModeShader.compiledVertexShader10->GetBufferSize(), &_vertexLayout)))
 			{
 				lastError = { GameErrors::GameDirectX10Specific,"Could not create input layout for PixelMode." };
 				_indexBuffer->Release();
@@ -287,8 +287,8 @@ namespace game
 				return false;
 			}
 
-			D3D10_SAMPLER_DESC samplerDesc;
-			ZeroMemory(&samplerDesc, sizeof(samplerDesc));
+			D3D10_SAMPLER_DESC samplerDesc = { };
+			//ZeroMemory(&samplerDesc, sizeof(samplerDesc));
 			samplerDesc.Filter = D3D10_FILTER_MIN_MAG_MIP_POINT;
 			samplerDesc.AddressU = D3D10_TEXTURE_ADDRESS_WRAP;
 			samplerDesc.AddressV = D3D10_TEXTURE_ADDRESS_WRAP;
