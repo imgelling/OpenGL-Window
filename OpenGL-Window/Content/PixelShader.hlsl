@@ -13,6 +13,6 @@ float4 main(VS_OUTPUT input) : SV_Target
 {
 
     float4 diffuse = DiffuseMap.Sample(Sampler,input.TexCoord);
-    diffuse = diffuse * input.Color;
+    //diffuse = diffuse * input.Color;
     return diffuse; // input.Color;
 }

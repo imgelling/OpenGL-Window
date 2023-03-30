@@ -89,18 +89,13 @@ namespace game
 		_vertex10 _quadVertices10[4] =
 		{
 			// tl
-			{0.0f, 0.5f, 0.5f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f},
+			{0.0f, 1.5f, 0.5f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f},
 			// tr
-			{0.5f, -0.5f, 0.5f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f, 0.0f},
+			{0.5f, -0.5f, 0.5f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f, .0f},
 			// bl
 			{-0.5f, -0.5f, 0.5f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f},
-			//// tr
-			//{0.5f, -0.5f, 0.5f, 0.0f, 1.0f, 0.0f, 1.0f},
 			// br
-			{-0.5f, -0.5f, 0.5f, 1.0f, 1.0f, 1.0f, 1.0f},
-			//// bl
-			//{0.0f, 0.0f, 0.5f, 0.0f, 0.0f, 1.0f, 1.0f},
-
+			{0.5f, 0.5f, 0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f},
 		};
 		ID3D10Buffer* _vertexBuffer10;
 		ID3D10Buffer* _indexBuffer;
@@ -236,14 +231,12 @@ namespace game
 			D3D10_BUFFER_DESC indexBufferDescription = { 0 };
 			D3D10_SUBRESOURCE_DATA vertexInitialData = { 0 };
 			D3D10_SUBRESOURCE_DATA indexInitialData = { 0 };
-			uint32_t stride = sizeof(_vertex10);
-			uint32_t offset = 0;
 			DWORD indices[] = { 0, 1, 2, 1, 3, 2, };
 			D3D10_INPUT_ELEMENT_DESC inputLayout[] =
 			{
 				{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D10_INPUT_PER_VERTEX_DATA, 0 },
 				{ "COLOR",    0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 12, D3D10_INPUT_PER_VERTEX_DATA, 0},
-				{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT,    0, 12, D3D10_INPUT_PER_VERTEX_DATA, 0},
+				{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT,    0, 28, D3D10_INPUT_PER_VERTEX_DATA, 0},
 			};
 			
 			// Load shaders for sprite mode
@@ -265,8 +258,6 @@ namespace game
 				enginePointer->geUnLoadShader(_pixelModeShader);
 				return false;
 			}
-			//enginePointer->d3d10Device->IAGetVertexBuffers()
-			enginePointer->d3d10Device->IASetVertexBuffers(0, 1, &_vertexBuffer10, &stride, &offset);
 
 			// Create index buffer
 			indexBufferDescription.Usage = D3D10_USAGE_IMMUTABLE;
@@ -313,13 +304,13 @@ namespace game
 			//desc.AddressV = D3D10_TEXTURE_ADDRESS_CLAMP;
 			D3D10_SAMPLER_DESC samplerDesc;
 			ZeroMemory(&samplerDesc, sizeof(samplerDesc));
-			samplerDesc.Filter = D3D10_FILTER_MIN_MAG_MIP_LINEAR;
+			samplerDesc.Filter = D3D10_FILTER_MIN_MAG_MIP_POINT;
 			samplerDesc.AddressU = D3D10_TEXTURE_ADDRESS_WRAP;
 			samplerDesc.AddressV = D3D10_TEXTURE_ADDRESS_WRAP;
 			samplerDesc.AddressW = D3D10_TEXTURE_ADDRESS_WRAP;
-			//samplerDesc.ComparisonFunc = D3D10_COMPARISON_NEVER;
-			//samplerDesc.MinLOD = 0;
-			//samplerDesc.MaxLOD = D3D10_FLOAT32_MAX;
+			samplerDesc.ComparisonFunc = D3D10_COMPARISON_NEVER;
+			samplerDesc.MinLOD = 0;
+			samplerDesc.MaxLOD = D3D10_FLOAT32_MAX;
 
 			if (FAILED(enginePointer->d3d10Device->CreateSamplerState(&samplerDesc, &_textureSamplerState)))
 			{
@@ -635,11 +626,25 @@ namespace game
 #if defined(GAME_DIRECTX10)
 		if (enginePointer->geIsUsing(GAME_DIRECTX10))
 		{
-			// need to save old shaders
-			enginePointer->d3d10Device->VSSetShader(_pixelModeShader.vertexShader10);
-			//enginePointer->d3d10Device->VSSetShaderResources()
-			enginePointer->d3d10Device->PSSetShader(_pixelModeShader.pixelShader10);
+			uint32_t stride = sizeof(_vertex10);
+			uint32_t oldStride = 0;
+			uint32_t offset = 0;
+			uint32_t oldOffset = 0;
+			ID3D10Buffer* oldVertexBuffer = nullptr;
+			ID3D10VertexShader* oldVertexShader = nullptr;
+			ID3D10PixelShader* oldPixelShader = nullptr;
+			ID3D10SamplerState* oldTextureSamplerState = nullptr;
 
+			// Save everything we modify
+			enginePointer->d3d10Device->IAGetVertexBuffers(0, 1, &oldVertexBuffer, &oldStride, &oldOffset);
+			enginePointer->d3d10Device->VSGetShader(&oldVertexShader);
+			enginePointer->d3d10Device->PSGetShader(&oldPixelShader);
+			enginePointer->d3d10Device->PSGetSamplers(0, 1, &oldTextureSamplerState);
+
+			// Change what we need
+			enginePointer->d3d10Device->IASetVertexBuffers(0, 1, &_vertexBuffer10, &stride, &offset);
+			enginePointer->d3d10Device->VSSetShader(_pixelModeShader.vertexShader10);
+			enginePointer->d3d10Device->PSSetShader(_pixelModeShader.pixelShader10);
 			enginePointer->d3d10Device->PSSetSamplers(0, 1, &_textureSamplerState);
 
 			if (!_currentBuffer)
@@ -652,7 +657,12 @@ namespace game
 			}
 
 			enginePointer->d3d10Device->DrawIndexed(6, 0, 0);
-			// and restore them down here
+			
+			// Restore old states
+			enginePointer->d3d10Device->IASetVertexBuffers(0, 1, &oldVertexBuffer, &oldStride, &oldOffset);
+			enginePointer->d3d10Device->VSSetShader(oldVertexShader);
+			enginePointer->d3d10Device->PSSetShader(oldPixelShader);
+			enginePointer->d3d10Device->PSSetSamplers(0, 1, &oldTextureSamplerState);
 		}
 #endif
 
@@ -669,12 +679,19 @@ namespace game
 			std::fill_n(_video, _bufferSize.width * _bufferSize.height, color.packedARGB);
 		}
 #endif
+#if defined(GAME_DIRECTX10)
+		if (enginePointer->geIsUsing(GAME_DIRECTX10))
+		{
+			std::fill_n(_video, _bufferSize.width * _bufferSize.height, color.packedABGR);
+		}
+#endif
 #if defined(GAME_OPENGL)
 		if (enginePointer->geIsUsing(GAME_OPENGL))
 		{
 			std::fill_n(_video, _bufferSize.width * _bufferSize.height, color.packedABGR);
 		}
 #endif
+
 	}
 
 	inline void PixelMode::Pixel(const int32_t x, const int32_t y, const game::Color& color) noexcept
@@ -708,6 +725,13 @@ namespace game
 			return;
 		}
 #endif
+#if defined(GAME_DIRECTX10)
+		if (enginePointer->geIsUsing(GAME_DIRECTX10))
+		{
+			_video[y * _bufferSize.width + x] = color.packedABGR;
+			return;
+		}
+#endif
 #if defined(GAME_OPENGL)
 		if (enginePointer->geIsUsing(GAME_OPENGL))
 		{
@@ -726,6 +750,13 @@ namespace game
 		{
 			_video[y * _bufferSize.width + x] = color.packedARGB;
 		}
+#endif
+#if defined(GAME_DIRECTX10)
+		if (enginePointer->geIsUsing(GAME_DIRECTX10))
+		{
+			_video[y * _bufferSize.width + x] = color.packedABGR;
+			return;
+	}
 #endif
 #if defined(GAME_OPENGL)
 		if (enginePointer->geIsUsing(GAME_OPENGL))

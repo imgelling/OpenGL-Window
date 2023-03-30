@@ -163,11 +163,6 @@ public:
 		//}
 		//perftimer.Stop("CircleClip");
 
-		// Circle Clipped
-		//pixelMode.CircleFilledClip(scaledMousePos.x, scaledMousePos.y, 40, game::Colors::Green);
-		//pixelMode.HorizontalPillClip(scaledMousePos.x, scaledMousePos.y, 40, 5, game::Colors::Green);
-		//pixelMode.HorizontalPillClip(scaledMousePos.x, scaledMousePos.y, 38, 4, game::Colors::White);
-
 		pixelMode.VerticalPillClip(scaledMousePos.x, scaledMousePos.y, 40, 5, game::Colors::Green);
 		pixelMode.VerticalPillClip(scaledMousePos.x, scaledMousePos.y, 38, 4, game::Colors::White);
 

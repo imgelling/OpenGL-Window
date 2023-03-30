@@ -17,7 +17,7 @@ namespace game
 		uint32_t g;
 		uint32_t b;
 		uint32_t a;
-#if defined(GAME_OPENGL)
+#if defined(GAME_OPENGL) || defined(GAME_DIRECTX10)
 		uint32_t packedABGR;
 #endif
 #if defined(GAME_DIRECTX9)
@@ -50,7 +50,7 @@ namespace game
 		g = 0;
 		b = 0;
 		a = 255;
-#if defined(GAME_OPENGL)
+#if defined(GAME_OPENGL) || defined(GAME_DIRECTX10)
 		packedABGR = a << 24;
 #endif
 #if defined(GAME_DIRECTX9)
@@ -85,7 +85,7 @@ namespace game
 		uint32_t packedG = this->g << 8;
 		uint32_t packedB = this->b << 16;
 		uint32_t packedA = this->a << 24;
-#if defined(GAME_OPENGL)
+#if defined(GAME_OPENGL) || defined(GAME_DIRECTX10)
 		packedABGR = ((packedA) | (packedR) | (packedG) | (packedB));
 #endif
 
@@ -124,7 +124,7 @@ namespace game
 		uint32_t packedG = this->g << 8;
 		uint32_t packedB = this->b << 16;
 		uint32_t packedA = this->a << 24;
-#if defined(GAME_OPENGL)
+#if defined(GAME_OPENGL) || defined(GAME_DIRECTX10)
 		packedABGR = ((packedA) | (packedR) | (packedG) | (packedB));
 #endif
 #if defined(GAME_DIRECTX9)
@@ -162,7 +162,7 @@ namespace game
 		uint32_t packedG = g << 8;
 		uint32_t packedB = b << 16;
 		uint32_t packedA = a << 24;
-#if defined(GAME_OPENGL)
+#if defined(GAME_OPENGL)  || defined(GAME_DIRECTX10)
 		packedABGR = ((packedA) | (packedR) | (packedG) | (packedB));
 #endif
 #if defined(GAME_DIRECTX9)
