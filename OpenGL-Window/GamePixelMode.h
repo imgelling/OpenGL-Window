@@ -274,8 +274,6 @@ namespace game
 				enginePointer->geUnLoadShader(_pixelModeShader);
 				return false;
 			}
-			enginePointer->d3d10Device->IASetIndexBuffer(_indexBuffer, DXGI_FORMAT_R32_UINT, 0);
-			//enginePointer->d3d10Device->IAGetIndexBuffer
 
 			// Create input layout for shaders
 			if (enginePointer->d3d10Device->CreateInputLayout(inputLayout, 3, _pixelModeShader.compiledVertexShader10->GetBufferPointer(), _pixelModeShader.compiledVertexShader10->GetBufferSize(), &_vertexLayout) != S_OK)
@@ -288,20 +286,7 @@ namespace game
 				enginePointer->geUnLoadShader(_pixelModeShader);
 				return false;
 			}
-			enginePointer->d3d10Device->IASetInputLayout(_vertexLayout);
-			//enginePointer->d3d10Device->IAGetInputLayout()
 
-			
-			
-			// Set type of primitive to render
-			enginePointer->d3d10Device->IASetPrimitiveTopology(D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-			//enginePointer->d3d10Device->IAGetPrimitiveTopology();
-
-			// load texture stuff here
-			//D3D10_SAMPLER_DESC desc = {};
-			//desc.Filter = D3D10_FILTER_MIN_MAG_MIP_POINT;
-			//desc.AddressU = D3D10_TEXTURE_ADDRESS_CLAMP;
-			//desc.AddressV = D3D10_TEXTURE_ADDRESS_CLAMP;
 			D3D10_SAMPLER_DESC samplerDesc;
 			ZeroMemory(&samplerDesc, sizeof(samplerDesc));
 			samplerDesc.Filter = D3D10_FILTER_MIN_MAG_MIP_POINT;
@@ -330,14 +315,6 @@ namespace game
 			{
 				std::cout << "CreateSRV1 failed!\n";
 			}
-
-			//D3D10_SHADER_RESOURCE_VIEW_DESC srDesc = {};
-			//srDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-			//srDesc.ViewDimension = D3D10_SRV_DIMENSION_TEXTURE2D;
-			//srDesc.Texture2D.MostDetailedMip = 0;
-			//srDesc.Texture2D.MipLevels = 1;
-			//enginePointer->d3d10Device->CreateShaderResourceView(, _textureShaderResource);
-
 		}
 #endif
 #if defined (GAME_DIRECTX11)
@@ -631,21 +608,34 @@ namespace game
 			uint32_t offset = 0;
 			uint32_t oldOffset = 0;
 			ID3D10Buffer* oldVertexBuffer = nullptr;
+			ID3D10Buffer* oldIndexBuffer = nullptr;
+			DXGI_FORMAT oldIndexFormat = {};
+			uint32_t oldIndexOffset = 0;
+			ID3D10InputLayout* oldInputLayout = nullptr;
 			ID3D10VertexShader* oldVertexShader = nullptr;
 			ID3D10PixelShader* oldPixelShader = nullptr;
 			ID3D10SamplerState* oldTextureSamplerState = nullptr;
+			D3D10_PRIMITIVE_TOPOLOGY oldPrimitiveTopology = {};
+
 
 			// Save everything we modify
+			enginePointer->d3d10Device->IAGetIndexBuffer(&oldIndexBuffer, &oldIndexFormat, &oldIndexOffset);
 			enginePointer->d3d10Device->IAGetVertexBuffers(0, 1, &oldVertexBuffer, &oldStride, &oldOffset);
+			enginePointer->d3d10Device->IAGetInputLayout(&oldInputLayout);
 			enginePointer->d3d10Device->VSGetShader(&oldVertexShader);
 			enginePointer->d3d10Device->PSGetShader(&oldPixelShader);
 			enginePointer->d3d10Device->PSGetSamplers(0, 1, &oldTextureSamplerState);
+			enginePointer->d3d10Device->IAGetPrimitiveTopology(&oldPrimitiveTopology);
+
 
 			// Change what we need
+			enginePointer->d3d10Device->IASetIndexBuffer(_indexBuffer, DXGI_FORMAT_R32_UINT, 0);
 			enginePointer->d3d10Device->IASetVertexBuffers(0, 1, &_vertexBuffer10, &stride, &offset);
+			enginePointer->d3d10Device->IASetInputLayout(_vertexLayout);
 			enginePointer->d3d10Device->VSSetShader(_pixelModeShader.vertexShader10);
 			enginePointer->d3d10Device->PSSetShader(_pixelModeShader.pixelShader10);
 			enginePointer->d3d10Device->PSSetSamplers(0, 1, &_textureSamplerState);
+			enginePointer->d3d10Device->IASetPrimitiveTopology(D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 			if (!_currentBuffer)
 			{
@@ -659,10 +649,13 @@ namespace game
 			enginePointer->d3d10Device->DrawIndexed(6, 0, 0);
 			
 			// Restore old states
+			enginePointer->d3d10Device->IASetIndexBuffer(oldIndexBuffer, oldIndexFormat, oldIndexOffset);
 			enginePointer->d3d10Device->IASetVertexBuffers(0, 1, &oldVertexBuffer, &oldStride, &oldOffset);
+			enginePointer->d3d10Device->IASetInputLayout(oldInputLayout);
 			enginePointer->d3d10Device->VSSetShader(oldVertexShader);
 			enginePointer->d3d10Device->PSSetShader(oldPixelShader);
 			enginePointer->d3d10Device->PSSetSamplers(0, 1, &oldTextureSamplerState);
+			enginePointer->d3d10Device->IASetPrimitiveTopology(oldPrimitiveTopology);
 		}
 #endif
 
