@@ -240,7 +240,7 @@ namespace game
 			};
 			
 			// Load shaders for sprite mode
-			if (!enginePointer->geLoadShader("Content/VertexShader.hlsl", "Content/PixelShader.hlsl", _pixelModeShader))
+			if (!enginePointer->geLoadShader("Content/VertexShader.hlsl", "Content/PixelShader.hlsl", "Content/GeometryShader.hlsl", _pixelModeShader))
 			{
 				return false;
 			}

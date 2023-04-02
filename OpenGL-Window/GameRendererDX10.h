@@ -36,6 +36,7 @@ namespace game
 		bool LoadTexture(std::string fileName, Texture2D& texture);
 		void UnLoadTexture(Texture2D& texture);
 		bool LoadShader(const std::string vertex, const std::string fragment, Shader& shader);
+		bool LoadShader(const std::string vertex, const std::string fragment, const std::string geometry, Shader& shader);
 		void UnLoadShader(Shader& shader);
 		void GetDevice(ID3D10Device*& device, IDXGISwapChain*& swapChain, ID3D10RenderTargetView*& renderTargetView, ID3D10DepthStencilView*& depthStencilView);
 	protected:
@@ -420,12 +421,50 @@ namespace game
 		return true;
 	}
 
+	inline bool RendererDX10::LoadShader(const std::string vertex, const std::string fragment, const std::string geometry, Shader& shader)
+	{
+		if (!LoadShader(vertex, fragment, shader))
+		{
+			return false;
+		}
+
+		ID3D10Blob* pCompiledShader = nullptr;
+		ID3D10Blob* pErrors = nullptr;
+
+		HRESULT hr = D3DCompileFromFile(ConvertToWide(geometry).c_str(), nullptr, nullptr, "main", "gs_4_0", 0, 0, &shader.compiledGeometryShader10, &pErrors);
+
+		if (FAILED(hr))
+		{
+			if (pErrors)
+			{
+				std::cout << (char*)pErrors->GetBufferPointer() << "\n";
+				pErrors->Release();
+			}
+			lastError = { GameErrors::GameDirectX10Specific, "Could not compile geometry shader." };
+			return false;
+		}
+
+		hr = _d3d10Device->CreateGeometryShader(shader.compiledGeometryShader10->GetBufferPointer(), shader.compiledGeometryShader10->GetBufferSize(), &shader.geometryShader10);
+
+		if (FAILED(hr))
+		{
+			SAFE_RELEASE(shader.compiledGeometryShader10);// pCompiledShader->Release();
+			lastError = { GameErrors::GameDirectX10Specific, "Could not create geometry shader." };
+			return false;
+		}
+
+		//pCompiledShader->Release();
+		return true;
+	}
+
 	inline void RendererDX10::UnLoadShader(Shader& shader)
 	{
 		SAFE_RELEASE(shader.compiledVertexShader10);
 		SAFE_RELEASE(shader.vertexShader10);
 		SAFE_RELEASE(shader.compiledPixelShader10);
 		SAFE_RELEASE(shader.pixelShader10);
+		SAFE_RELEASE(shader.compiledGeometryShader10);
+		SAFE_RELEASE(shader.geometryShader10);
 	}
 
 	inline void RendererDX10::Swap()

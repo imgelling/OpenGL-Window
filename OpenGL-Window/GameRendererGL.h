@@ -104,6 +104,7 @@ namespace game
 		bool LoadTexture(std::string fileName, Texture2D &texture);
 		void UnLoadTexture(Texture2D& texture);
 		bool LoadShader(const std::string vertex, const std::string fragment, Shader& shader);
+		bool LoadShader(const std::string vertex, const std::string fragment, const std::string geometry, Shader& shader);
 		void UnLoadShader(Shader& shader);
 	protected:
 		void _ReadExtensions();
@@ -1108,6 +1109,12 @@ namespace game
 		}
 
 		return true;
+	}
+
+	inline bool RendererGL::LoadShader(const std::string vertex, const std::string fragment, const std::string geometry, Shader& shader)
+	{
+		lastError = { GameErrors::GameOpenGLSpecific, "Geometry Shaders not supported in OpenGL, for now." };
+		return false;
 	}
 
 	inline void RendererGL::UnLoadShader(Shader& shader)

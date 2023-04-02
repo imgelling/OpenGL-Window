@@ -5,6 +5,9 @@
 #if defined(GAME_DIRECTX9)
 #include <d3d9.h>
 #endif
+#if defined(GAME_DIRECTX10)
+#include <d3d10.h>
+#endif
 namespace game
 {
 	class Shader
@@ -24,8 +27,10 @@ namespace game
 #if defined(GAME_DIRECTX10)
 		ID3D10VertexShader* vertexShader10;
 		ID3D10PixelShader* pixelShader10;
-		ID3DBlob* compiledPixelShader10 = nullptr;
-		ID3DBlob* compiledVertexShader10 = nullptr;
+		ID3D10GeometryShader* geometryShader10;
+		ID3DBlob* compiledPixelShader10;
+		ID3DBlob* compiledVertexShader10;
+		ID3DBlob* compiledGeometryShader10;
 #endif
 #if defined(GAME_DIRECTX9) || defined(GAME_DIRECTX10)
 		bool isPrecompiled;
@@ -50,6 +55,7 @@ namespace game
 		pixelShader10 = nullptr;
 		compiledPixelShader10 = nullptr;
 		compiledVertexShader10 = nullptr;
+		compiledGeometryShader10 = nullptr;
 #endif
 #if defined(GAME_DIRECTX9) || defined(GAME_DIRECTX10)
 		isPrecompiled = false;
