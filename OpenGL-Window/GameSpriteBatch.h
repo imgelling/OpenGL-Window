@@ -226,6 +226,21 @@ namespace game
 		}
 #endif
 #if defined (GAME_DIRECTX10)
+		D3D10_BUFFER_DESC vertexBufferDescription = { 0 };
+		D3D10_BUFFER_DESC indexBufferDescription = { 0 };
+		D3D10_SUBRESOURCE_DATA vertexInitialData = { 0 };
+		D3D10_SUBRESOURCE_DATA indexInitialData = { 0 };
+		DWORD indices[] = { 0, 1, 2, 1, 3, 2, };
+		
+		// 3 floats POSITION (xyz)
+		// 4 FLOATS COLOR (rgba)
+		// 2 UINT DIMENSIONS (width and height)
+		// 4 FLOATS POSITIONS (2 sets of UVS)
+		D3D10_INPUT_ELEMENT_DESC inputLayout[] = // DOUBLE CHECK IS SHIT AINT WORKING!
+		{
+			{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D10_INPUT_PER_VERTEX_DATA, 0 },
+			{ "COLOR",    0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 12, D3D10_INPUT_PER_VERTEX_DATA, 0},
+			{ "DIMENSIONS", 0, DXGI_FORMAT_R32G32_UINT, 0, 28, D3D10_INPUT_PER_VERTEX_DATA, 0},
 			{ "TEXCOORDS", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 44, D3D10_INPUT_PER_VERTEX_DATA, 0},
 		};
 
