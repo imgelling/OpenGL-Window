@@ -55,10 +55,33 @@ namespace game
 		IDirect3DBaseTexture9* _savedTexture;
 #endif
 #if defined (GAME_DIRECTX10)
+		struct _spriteGeometryVertex
+		{
+			float_t x, y, z;
+			float_t r, g, b, a;
+			float_t width, height;
+			float_t leftU, topV;
+			float_t rightU, bottomV;
+		};
+		_spriteGeometryVertex* _spriteGeometryVertices;
+		ID3D10Buffer* _vertexBuffer10;
+		ID3D10InputLayout* _vertexLayout10;
+		ID3D10SamplerState* _textureSamplerState10;
+		// not sure on how to handle the textures
+		ID3D10ShaderResourceView* _textureShaderResourceView10;
 #endif
 #if defined (GAME_DIRECTX11)
 #endif
 	};
+
+	// Notes for gs for dx10
+	// not using shaders, just index buffers, will be 6 floats to define a vertex (x,y,z) (c) (u,v)
+	// and 4 vertices per sprite, total of 24 floats
+	// for using shaders, position (x,y,z), color(r,g,b,a), width(w), height(h), top left uv (u,v), bottom right uv(u,v) per
+	// sprite, total of 13 floats per sprite.
+	// In old spritebatch I had a max of 32,768 sprites, no shaders that is 3.1 million bytes (3.072MB)
+	// Using GS, 32,768 sprites will use 1.7 million bytes (1.664MB)
+	// So about half the data, so maybe 2x the sprite limit? x4? Maybe
 
 
 
@@ -79,6 +102,11 @@ namespace game
 		_savedTexture = nullptr;
 #endif
 #if defined (GAME_DIRECTX10)
+		_spriteGeometryVertices = nullptr;
+		_vertexBuffer10 = nullptr;
+		_vertexLayout10 = nullptr;
+		_textureSamplerState10 = nullptr;
+		_textureShaderResourceView10 = nullptr;
 #endif
 #if defined (GAME_DIRECTX11)
 #endif
@@ -91,7 +119,11 @@ namespace game
 #if defined(GAME_OPENGL)
 		if (enginePointer->geIsUsing(GAME_OPENGL))
 		{
-
+			if (_spriteVertices)
+			{
+				delete[] _spriteVertices;
+				_spriteGeometryVertices = nullptr
+			}
 		}
 #endif
 #if defined (GAME_DIRECTX9)
@@ -110,6 +142,15 @@ namespace game
 		}
 #endif
 #if defined (GAME_DIRECTX10)
+		if (_spriteGeometryVertices)
+		{
+			delete[] _spriteGeometryVertices;
+			_spriteGeometryVertices = nullptr;
+		}
+		SAFE_RELEASE(_vertexBuffer10);
+		SAFE_RELEASE(_vertexLayout10);
+		SAFE_RELEASE(_textureSamplerState10);
+		SAFE_RELEASE(_textureShaderResourceView10);
 #endif
 #if defined (GAME_DIRECTX11)
 #endif
@@ -117,6 +158,7 @@ namespace game
 
 	inline bool SpriteBatch::Initialize()
 	{
+		// OpenGL and DX9 implementation of vertices
 		_spriteVertices = new _spriteVertex[_maxSprites * 6];
 		for (uint32_t vertex = 0; vertex < _maxSprites * 6; vertex++)
 		{
@@ -132,8 +174,6 @@ namespace game
 				_spriteVertices[vertex].color = Colors::White.packedARGB;
 			}
 #endif
-#if defined (GAME_DIRECTX10)
-#endif
 #if defined(GAME_OPENGL)
 			if (enginePointer->geIsUsing(GAME_OPENGL))
 			{
@@ -141,6 +181,33 @@ namespace game
 			}
 #endif
 		}
+
+		// DX10 impementation of vertices
+#if defined(GAME_DIRECTX10)
+		if (enginePointer->geIsUsing(GAME_DIRECTX10))
+		{
+			_spriteGeometryVertices = new _spriteGeometryVertex[_maxSprites * 6];
+			for (uint32_t vertex = 0; vertex < _maxSprites * 6; vertex++)
+			{
+				_spriteGeometryVertices[vertex].x = 0.0f;
+				_spriteGeometryVertices[vertex].y = 0.0f;
+				_spriteGeometryVertices[vertex].z = 0.0f;
+				_spriteGeometryVertices[vertex].r = 255.0f; // temp for future debugging
+				_spriteGeometryVertices[vertex].g = 0.0f;
+				_spriteGeometryVertices[vertex].b = 255.0f; // temp for future debugging
+				_spriteGeometryVertices[vertex].a = 255.0f; // temp for future debugging
+				_spriteGeometryVertices[vertex].width = 0.0f;
+				_spriteGeometryVertices[vertex].height = 0.0f;
+				_spriteGeometryVertices[vertex].leftU = 0.0f;
+				_spriteGeometryVertices[vertex].topV = 0.0f;
+				_spriteGeometryVertices[vertex].rightU = 0.0f;
+				_spriteGeometryVertices[vertex].bottomV = 0.0f;
+			}
+
+		}
+#endif
+
+		// Initialization of API methods used
 #if defined(GAME_OPENGL)
 		if (enginePointer->geIsUsing(GAME_OPENGL))
 		{
@@ -159,6 +226,10 @@ namespace game
 		}
 #endif
 #if defined (GAME_DIRECTX10)
+			{ "TEXCOORDS", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 44, D3D10_INPUT_PER_VERTEX_DATA, 0},
+		};
+
+
 #endif
 #if defined (GAME_DIRECTX11)
 #endif
@@ -167,6 +238,7 @@ namespace game
 
 	inline void SpriteBatch::Begin()
 	{
+		// needs to save and retore ALL changed states
 #if defined (GAME_DIRECTX9)
 		if (enginePointer->geIsUsing(GAME_DIRECTX9))
 		{

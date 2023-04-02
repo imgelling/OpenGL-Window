@@ -100,7 +100,7 @@ namespace game
 		ID3D10Buffer* _vertexBuffer10;
 		ID3D10Buffer* _indexBuffer;
 		Shader _pixelModeShader;
-		ID3D10InputLayout* _vertexLayout;
+		ID3D10InputLayout* _vertexLayout10;
 		ID3D10ShaderResourceView* _textureShaderResourceView0;
 		ID3D10ShaderResourceView* _textureShaderResourceView1;
 		ID3D10SamplerState* _textureSamplerState;
@@ -122,7 +122,7 @@ namespace game
 #endif
 #if defined(GAME_DIRECTX10)
 		_vertexBuffer10 = nullptr;
-		_vertexLayout = nullptr;
+		_vertexLayout10 = nullptr;
 		_indexBuffer = nullptr;
 		_textureShaderResourceView0 = nullptr;
 		_textureShaderResourceView1 = nullptr;
@@ -154,10 +154,10 @@ namespace game
 				_vertexBuffer10->Release();
 				_vertexBuffer10 = nullptr;
 			}
-			if (_vertexLayout)
+			if (_vertexLayout10)
 			{
-				_vertexLayout->Release();
-				_vertexLayout = nullptr;
+				_vertexLayout10->Release();
+				_vertexLayout10 = nullptr;
 			}
 			if (_indexBuffer)
 			{
@@ -276,7 +276,7 @@ namespace game
 			}
 
 			// Create input layout for shaders
-			if (FAILED(enginePointer->d3d10Device->CreateInputLayout(inputLayout, 3, _pixelModeShader.compiledVertexShader10->GetBufferPointer(), _pixelModeShader.compiledVertexShader10->GetBufferSize(), &_vertexLayout)))
+			if (FAILED(enginePointer->d3d10Device->CreateInputLayout(inputLayout, 3, _pixelModeShader.compiledVertexShader10->GetBufferPointer(), _pixelModeShader.compiledVertexShader10->GetBufferSize(), &_vertexLayout10)))
 			{
 				lastError = { GameErrors::GameDirectX10Specific,"Could not create input layout for PixelMode." };
 				_indexBuffer->Release();
@@ -631,7 +631,7 @@ namespace game
 			// Change what we need
 			enginePointer->d3d10Device->IASetIndexBuffer(_indexBuffer, DXGI_FORMAT_R32_UINT, 0);
 			enginePointer->d3d10Device->IASetVertexBuffers(0, 1, &_vertexBuffer10, &stride, &offset);
-			enginePointer->d3d10Device->IASetInputLayout(_vertexLayout);
+			enginePointer->d3d10Device->IASetInputLayout(_vertexLayout10);
 			enginePointer->d3d10Device->VSSetShader(_pixelModeShader.vertexShader10);
 			enginePointer->d3d10Device->PSSetShader(_pixelModeShader.pixelShader10);
 			enginePointer->d3d10Device->PSSetSamplers(0, 1, &_textureSamplerState);

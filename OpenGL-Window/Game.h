@@ -23,6 +23,10 @@
 
 #endif // _WIN32
 
+#if defined(GAME_SUPPORT_ALL)
+
+#endif
+
 #if defined(GAME_SUPPORT_OPENGL) || defined(GAME_SUPPORT_ALL)
 #define GAME_OPENGL 1
 #endif

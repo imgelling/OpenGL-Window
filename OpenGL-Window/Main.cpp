@@ -1,5 +1,5 @@
 // Engine header
-#define GAME_USE_DEDICATED_GPU
+//#define GAME_USE_DEDICATED_GPU
 //#define GAME_ENABLE_NETWORKING
 //#define GAME_ENABLE_SHADERS
 //#define GAME_SUPPORT_DIRECTX9
