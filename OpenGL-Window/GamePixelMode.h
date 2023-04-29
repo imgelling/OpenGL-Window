@@ -103,7 +103,7 @@ namespace game
 		ID3D10InputLayout* _vertexLayout10;
 		ID3D10ShaderResourceView* _textureShaderResourceView0;
 		ID3D10ShaderResourceView* _textureShaderResourceView1;
-		ID3D10SamplerState* _textureSamplerState;
+		ID3D10SamplerState* _textureSamplerState10;
 #endif
 #if defined(GAME_DIRECTX11)
 
@@ -126,7 +126,7 @@ namespace game
 		_indexBuffer = nullptr;
 		_textureShaderResourceView0 = nullptr;
 		_textureShaderResourceView1 = nullptr;
-		_textureSamplerState = nullptr;
+		_textureSamplerState10 = nullptr;
 #endif
 #if defined(GAME_DIRECTX11)
 
@@ -167,7 +167,7 @@ namespace game
 			enginePointer->geUnLoadShader(_pixelModeShader);
 			SAFE_RELEASE(_textureShaderResourceView0);
 			SAFE_RELEASE(_textureShaderResourceView1);
-			SAFE_RELEASE(_textureSamplerState);
+			SAFE_RELEASE(_textureSamplerState10);
 		}
 #endif
 		enginePointer->geUnLoadTexture(_frameBuffer[0]);
@@ -240,7 +240,7 @@ namespace game
 			};
 			
 			// Load shaders for sprite mode
-			if (!enginePointer->geLoadShader("Content/VertexShader.hlsl", "Content/PixelShader.hlsl", "Content/GeometryShader.hlsl", _pixelModeShader))
+			if (!enginePointer->geLoadShader("Content/VertexShader.hlsl", "Content/PixelShader.hlsl", _pixelModeShader))
 			{
 				return false;
 			}
@@ -297,8 +297,9 @@ namespace game
 			samplerDesc.MinLOD = 0;
 			samplerDesc.MaxLOD = D3D10_FLOAT32_MAX;
 
-			if (FAILED(enginePointer->d3d10Device->CreateSamplerState(&samplerDesc, &_textureSamplerState)))
+			if (FAILED(enginePointer->d3d10Device->CreateSamplerState(&samplerDesc, &_textureSamplerState10)))
 			{
+
 				std::cout << "Create sampler failed!\n";
 			}
 
@@ -634,7 +635,7 @@ namespace game
 			enginePointer->d3d10Device->IASetInputLayout(_vertexLayout10);
 			enginePointer->d3d10Device->VSSetShader(_pixelModeShader.vertexShader10);
 			enginePointer->d3d10Device->PSSetShader(_pixelModeShader.pixelShader10);
-			enginePointer->d3d10Device->PSSetSamplers(0, 1, &_textureSamplerState);
+			enginePointer->d3d10Device->PSSetSamplers(0, 1, &_textureSamplerState10);
 			enginePointer->d3d10Device->IASetPrimitiveTopology(D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 			if (!_currentBuffer)

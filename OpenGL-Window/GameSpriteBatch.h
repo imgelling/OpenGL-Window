@@ -66,6 +66,7 @@ namespace game
 			float_t leftU, topV;
 			float_t rightU, bottomV;
 		};
+		Shader _spriteBatchShader;
 		_spriteGeometryVertex* _spriteGeometryVertices;
 		ID3D10Buffer* _vertexBuffer10;
 		ID3D10InputLayout* _vertexLayout10;
@@ -154,6 +155,7 @@ namespace game
 		SAFE_RELEASE(_vertexLayout10);
 		SAFE_RELEASE(_textureSamplerState10);
 		SAFE_RELEASE(_textureShaderResourceView10);
+		enginePointer->geUnLoadShader(_spriteBatchShader);
 #endif
 #if defined (GAME_DIRECTX11)
 #endif
@@ -230,30 +232,62 @@ namespace game
 #endif
 #if defined (GAME_DIRECTX10)
 		D3D10_BUFFER_DESC vertexBufferDescription = { 0 };
-		D3D10_BUFFER_DESC indexBufferDescription = { 0 };
+		//D3D10_BUFFER_DESC indexBufferDescription = { 0 }; // Shouldn't be needed with gs
 		D3D10_SUBRESOURCE_DATA vertexInitialData = { 0 };
-		D3D10_SUBRESOURCE_DATA indexInitialData = { 0 };
+		//D3D10_SUBRESOURCE_DATA indexInitialData = { 0 };  // Shouldn't be needed with gs
 		//DWORD indices[] = { 0, 1, 2, 1, 3, 2, }; // Shouldn't be needed with gs
 		
-		// 3 floats POSITION (xyz)
+		// 3 FLOATS POSITION (xyz)
 		// 4 FLOATS COLOR (rgba)
 		// 2 UINT DIMENSIONS (width and height)
 		// 4 FLOATS POSITIONS (2 sets of UVS)
-		D3D10_INPUT_ELEMENT_DESC inputLayout[] = // DOUBLE CHECK IS SHIT AINT WORKING!
+		D3D10_INPUT_ELEMENT_DESC inputLayout[] = // DOUBLE CHECK THIS IF SHIT AINT WORKING!
 		{
 			{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D10_INPUT_PER_VERTEX_DATA, 0 },
 			{ "COLOR",    0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 12, D3D10_INPUT_PER_VERTEX_DATA, 0},
 			{ "DIMENSIONS", 0, DXGI_FORMAT_R32G32_UINT, 0, 28, D3D10_INPUT_PER_VERTEX_DATA, 0},
-			{ "TEXCOORDS", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 44, D3D10_INPUT_PER_VERTEX_DATA, 0},
+			{ "TEXCOORD", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 44, D3D10_INPUT_PER_VERTEX_DATA, 0},
 		 };
+		D3D10_SAMPLER_DESC samplerDesc = { };
 
-		// load shader
+		// Load shaders for spriteBatch
+		if (!enginePointer->geLoadShader("Content/VertexShader.hlsl", "Content/PixelShader.hlsl", "Content/GeometryShader.hlsl", _spriteBatchShader))
+		{
+			return false;
+		}
 
-		// vertex buffer
+		// Create the vertex buffer
+		vertexBufferDescription.ByteWidth = sizeof(_spriteGeometryVertex) * _maxSprites;// *4;
+		vertexBufferDescription.Usage = D3D10_USAGE_DYNAMIC;
+		vertexBufferDescription.BindFlags = D3D10_BIND_VERTEX_BUFFER;
+		vertexBufferDescription.CPUAccessFlags = D3D10_CPU_ACCESS_WRITE;
+		vertexBufferDescription.MiscFlags = 0;
+		if (FAILED(enginePointer->d3d10Device->CreateBuffer(&vertexBufferDescription, NULL, &_vertexBuffer10)))
+		{
+			lastError = { GameErrors::GameDirectX10Specific,"Could not create vertex buffer for SpriteBatch." };
+			return false;
+		}
 
-		// input layout
+		// Create input layout for shaders
+		if (FAILED(enginePointer->d3d10Device->CreateInputLayout(inputLayout, 4, _spriteBatchShader.compiledVertexShader10->GetBufferPointer(), _spriteBatchShader.compiledVertexShader10->GetBufferSize(), &_vertexLayout10)))
+		{
+			lastError = { GameErrors::GameDirectX10Specific,"Could not create input layout for SpriteBatch." };
+			return false;
+		}
 
-		// sampler
+		// Create texture sampler
+		samplerDesc.Filter = D3D10_FILTER_MIN_MAG_MIP_POINT;
+		samplerDesc.AddressU = D3D10_TEXTURE_ADDRESS_WRAP;
+		samplerDesc.AddressV = D3D10_TEXTURE_ADDRESS_WRAP;
+		samplerDesc.AddressW = D3D10_TEXTURE_ADDRESS_WRAP;
+		samplerDesc.ComparisonFunc = D3D10_COMPARISON_NEVER;
+		samplerDesc.MinLOD = 0;
+		samplerDesc.MaxLOD = D3D10_FLOAT32_MAX;
+		if (!FAILED(enginePointer->d3d10Device->CreateSamplerState(&samplerDesc, &_textureSamplerState10)))
+		{
+			lastError = { GameErrors::GameDirectX10Specific,"Could not create sampler state for SpriteBatch." };
+			return false;
+		}
 
 		// shader resource view
 #endif
