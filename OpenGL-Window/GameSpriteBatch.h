@@ -5,6 +5,9 @@
 #if defined(GAME_DIRECTX9)
 #include <d3d9.h>
 #endif
+#if defined(GAME_DIRECTX10)
+#include <d3d10_1.h>
+#endif
 
 #include "GameEngine.h"
 #include "GameErrors.h"
@@ -230,7 +233,7 @@ namespace game
 		D3D10_BUFFER_DESC indexBufferDescription = { 0 };
 		D3D10_SUBRESOURCE_DATA vertexInitialData = { 0 };
 		D3D10_SUBRESOURCE_DATA indexInitialData = { 0 };
-		DWORD indices[] = { 0, 1, 2, 1, 3, 2, };
+		//DWORD indices[] = { 0, 1, 2, 1, 3, 2, }; // Shouldn't be needed with gs
 		
 		// 3 floats POSITION (xyz)
 		// 4 FLOATS COLOR (rgba)
@@ -243,6 +246,16 @@ namespace game
 			{ "DIMENSIONS", 0, DXGI_FORMAT_R32G32_UINT, 0, 28, D3D10_INPUT_PER_VERTEX_DATA, 0},
 			{ "TEXCOORDS", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 44, D3D10_INPUT_PER_VERTEX_DATA, 0},
 		 };
+
+		// load shader
+
+		// vertex buffer
+
+		// input layout
+
+		// sampler
+
+		// shader resource view
 #endif
 #if defined (GAME_DIRECTX11)
 #endif 
