@@ -253,25 +253,28 @@ namespace game
 		// Load shaders for spriteBatch
 		if (!enginePointer->geLoadShader("Content/VertexShader.hlsl", "Content/PixelShader.hlsl", "Content/GeometryShader.hlsl", _spriteBatchShader))
 		{
+			// Will return the lastError from trying to load the shaders
+			// so we do not override it.
 			return false;
 		}
 
 		// Create the vertex buffer
-		vertexBufferDescription.ByteWidth = sizeof(_spriteGeometryVertex) * _maxSprites;// *4;
+		vertexBufferDescription.ByteWidth = sizeof(_spriteGeometryVertex) * _maxSprites;
+		std::cout << "SpriteBatch VertexBuffer size : " << sizeof(_spriteGeometryVertex) * _maxSprites / 1024 << "kB\n";
 		vertexBufferDescription.Usage = D3D10_USAGE_DYNAMIC;
 		vertexBufferDescription.BindFlags = D3D10_BIND_VERTEX_BUFFER;
 		vertexBufferDescription.CPUAccessFlags = D3D10_CPU_ACCESS_WRITE;
 		vertexBufferDescription.MiscFlags = 0;
 		if (FAILED(enginePointer->d3d10Device->CreateBuffer(&vertexBufferDescription, NULL, &_vertexBuffer10)))
 		{
-			lastError = { GameErrors::GameDirectX10Specific,"Could not create vertex buffer for SpriteBatch." };
+			lastError = { GameErrors::GameDirectX10Specific, "Could not create vertex buffer for SpriteBatch." };
 			return false;
 		}
 
 		// Create input layout for shaders
 		if (FAILED(enginePointer->d3d10Device->CreateInputLayout(inputLayout, 4, _spriteBatchShader.compiledVertexShader10->GetBufferPointer(), _spriteBatchShader.compiledVertexShader10->GetBufferSize(), &_vertexLayout10)))
 		{
-			lastError = { GameErrors::GameDirectX10Specific,"Could not create input layout for SpriteBatch." };
+			lastError = { GameErrors::GameDirectX10Specific, "Could not create input layout for SpriteBatch." };
 			return false;
 		}
 
@@ -283,7 +286,7 @@ namespace game
 		samplerDesc.ComparisonFunc = D3D10_COMPARISON_NEVER;
 		samplerDesc.MinLOD = 0;
 		samplerDesc.MaxLOD = D3D10_FLOAT32_MAX;
-		if (!FAILED(enginePointer->d3d10Device->CreateSamplerState(&samplerDesc, &_textureSamplerState10)))
+		if (FAILED(enginePointer->d3d10Device->CreateSamplerState(&samplerDesc, &_textureSamplerState10)))
 		{
 			lastError = { GameErrors::GameDirectX10Specific,"Could not create sampler state for SpriteBatch." };
 			return false;

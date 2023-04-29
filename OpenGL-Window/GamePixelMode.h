@@ -299,7 +299,6 @@ namespace game
 
 			if (FAILED(enginePointer->d3d10Device->CreateSamplerState(&samplerDesc, &_textureSamplerState10)))
 			{
-
 				std::cout << "Create sampler failed!\n";
 			}
 
