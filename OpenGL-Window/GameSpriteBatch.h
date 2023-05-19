@@ -6,7 +6,7 @@
 #include <d3d9.h>
 #endif
 #if defined(GAME_DIRECTX10)
-#include <d3d10_1.h>
+#include <d3d10.h>
 #endif
 
 #include "GameEngine.h"
