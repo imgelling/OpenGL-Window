@@ -1,13 +1,14 @@
 #pragma once
+#if defined(GAME_DIRECTX11)
+#include <d3d11.h>
+#endif
 #if defined(GAME_DIRECTX10)
 #include <d3d10.h>
 #endif
 #if defined(GAME_DIRECTX9)
 #include <d3d9.h>
 #endif
-#if defined(GAME_DIRECTX10)
-#include <d3d10.h>
-#endif
+
 namespace game
 {
 	class Shader

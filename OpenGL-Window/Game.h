@@ -36,6 +36,7 @@
 #endif
 
 #if defined(_WIN32)
+
 #pragma region DirectX12
 #if defined(GAME_DIRECTX12)
 #include <d3d12.h>
