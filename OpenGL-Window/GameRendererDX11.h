@@ -24,6 +24,11 @@ namespace game
 		bool LoadTexture(std::string fileName, Texture2D& texture) { lastError = { GameErrors::GameDirectX11Specific, "could not load texture" }; return false; }
 		void UnLoadTexture(Texture2D& texture);
 		bool LoadShader(const std::string vertex, const std::string fragment, Shader& shader) { return false; };
+		bool LoadShader(const std::string vertex, const std::string fragment, const std::string geometry, Shader& shader)
+		{
+			lastError = { GameErrors::GameDirectX11Specific, "Geometry shaders not implemented yet." };
+			return false;
+		}
 		void UnLoadShader(Shader& shader) {};
 		void GetDevice(ID3D11Device*& device, ID3D11DeviceContext*& context, ID3D11RenderTargetView*& target);
 	protected:

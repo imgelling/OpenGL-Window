@@ -25,6 +25,11 @@ namespace game
 		bool LoadTexture(std::string fileName, Texture2D &texture);
 		void UnLoadTexture(Texture2D& texture);
 		bool LoadShader(const std::string vertex, const std::string fragment, Shader& shader);
+		bool LoadShader(const std::string vertex, const std::string fragment, const std::string geometry, Shader& shader)
+		{
+			lastError = { GameErrors::GameVulkanSpecific, "Geometry shaders not implemented yet." };
+			return false;
+		}
 		void UnLoadShader(Shader& shader);
 	protected:
 		void _ReadExtensions();

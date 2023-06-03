@@ -31,6 +31,11 @@ namespace game
 		bool LoadTexture(std::string fileName, Texture2D& texture);
 		void UnLoadTexture(Texture2D& texture);
 		bool LoadShader(const std::string vertex, const std::string fragment, Shader& shader);
+		bool LoadShader(const std::string vertex, const std::string fragment, const std::string geometry, Shader& shader)
+		{
+			lastError = { GameErrors::GameDirectX9Specific, "Geometry shaders are not supported." };
+			return false;
+		}
 		void UnLoadShader(Shader& shader);
 		void GetDevice(LPDIRECT3DDEVICE9& device);
 	protected:

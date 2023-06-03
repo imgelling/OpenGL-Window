@@ -28,6 +28,11 @@ namespace game
 		bool LoadTexture(std::string fileName, Texture2D& texture) { return false; };
 		void UnLoadTexture(Texture2D& texture) {};
 		bool LoadShader(const std::string vertex, const std::string fragment, Shader& shader) { return false; };
+		bool LoadShader(const std::string vertex, const std::string fragment, const std::string geometry, Shader& shader)
+		{
+			lastError = { GameErrors::GameDirectX12Specific, "Geometry shaders not implemented yet." };
+			return false;
+		}
 		void UnLoadShader(Shader& shader) {};
 	protected:
 		void _ReadExtensions() {};
