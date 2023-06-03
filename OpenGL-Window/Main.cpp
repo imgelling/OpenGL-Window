@@ -6,9 +6,9 @@
 //#define GAME_SUPPORT_DIRECTX10
 //#define GAME_SUPPORT_DIRECTX11
 //#define GAME_SUPPORT_DIRECTX12
-//#define GAME_SUPPORT_OPENGL
+#define GAME_SUPPORT_OPENGL
 //#define GAME_SUPPORT_VULKAN 
-#define GAME_SUPPORT_ALL
+//#define GAME_SUPPORT_ALL
 #include "Game.h"
 
 constexpr uint32_t MAX_UPDATES = 0;
