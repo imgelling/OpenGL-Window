@@ -55,7 +55,7 @@ public:
 		attributes.DebugMode = true;
 		attributes.MultiSamples = 8;
 		attributes.RenderingAPI = game::RenderAPI::DirectX9; 
-		//attributes.RenderingAPI = game::RenderAPI::DirectX10;
+		attributes.RenderingAPI = game::RenderAPI::DirectX10;
 		//attributes.RenderingAPI = game::RenderAPI::DirectX11;
 		//attributes.RenderingAPI = game::RenderAPI::DirectX12;
 		//attributes.RenderingAPI = game::RenderAPI::OpenGL;
@@ -116,11 +116,11 @@ public:
 	void Update(const float_t msElapsed)
 	{
 		// Handle Input
-		if (geKeyboard.WasKeyReleased(VK_F11))
+		if (geKeyboard.WasKeyReleased(geK_F11))
 		{
 			geToggleFullscreen();
 		}
-		if (geKeyboard.WasKeyReleased(VK_ESCAPE))
+		if (geKeyboard.WasKeyReleased(geK_ESCAPE))
 		{
 			geStopEngine();
 		}

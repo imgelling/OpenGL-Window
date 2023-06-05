@@ -183,6 +183,7 @@
     <ClInclude Include="GameShader.h" />
     <ClInclude Include="GameRendererDX11.h" />
     <ClInclude Include="GameRendererDX10.h" />
+    <ClInclude Include="GameWindowsKeys.h" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Content\GeometryShader.hlsl">
