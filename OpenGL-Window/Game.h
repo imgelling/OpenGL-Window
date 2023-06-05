@@ -99,7 +99,7 @@
 #include <GL/gl.h>
 #if defined(_WIN32)
 #pragma comment(lib, "opengl32.lib")
-#elif define(__linux__)
+#elif defined(__linux__)
 
 #endif
 #include "GameRendererGL.h"

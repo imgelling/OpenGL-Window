@@ -126,7 +126,7 @@ namespace game
 			if (_spriteVertices)
 			{
 				delete[] _spriteVertices;
-				_spriteGeometryVertices = nullptr;
+				_spriteVertices = nullptr;
 			}
 		}
 #endif
