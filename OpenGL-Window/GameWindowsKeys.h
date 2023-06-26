@@ -30,8 +30,20 @@
 #define geK_Z 0x5A
 
 // F Keys
-
+#define geK_F1	VK_F1
+#define geK_F2	VK_F2
+#define geK_F3	VK_F3
+#define geK_F4	VK_F4
+#define geK_F5	VK_F5
+#define geK_F6	VK_F6
+#define geK_F7	VK_F7
+#define geK_F8	VK_F8
+#define geK_F9	VK_F9
+#define geK_F10	VK_F10
 #define geK_F11 VK_F11
+#define geK_F12	VK_F12
+
+
 
 
 #define geK_ESCAPE VK_ESCAPE
