@@ -120,6 +120,11 @@ namespace game
 
 	inline SpriteBatch::~SpriteBatch()
 	{
+		if (_spriteVertices)
+		{
+			delete[] _spriteVertices;
+			_spriteVertices = nullptr;
+		}
 #if defined(GAME_OPENGL)
 		if (enginePointer->geIsUsing(GAME_OPENGL))
 		{
@@ -158,6 +163,7 @@ namespace game
 		enginePointer->geUnLoadShader(_spriteBatchShader);
 #endif
 #if defined (GAME_DIRECTX11)
+
 #endif
 	}
 
