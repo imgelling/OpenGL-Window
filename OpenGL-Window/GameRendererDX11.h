@@ -48,14 +48,47 @@ namespace game
 	{ 
 		D3D_FEATURE_LEVEL featureLevels[] =
 		{
-			D3D_FEATURE_LEVEL_9_1,
-			D3D_FEATURE_LEVEL_9_2,
-			D3D_FEATURE_LEVEL_9_3,
-			D3D_FEATURE_LEVEL_10_0,
-			D3D_FEATURE_LEVEL_10_1,
-			D3D_FEATURE_LEVEL_11_0,
-			D3D_FEATURE_LEVEL_11_1
+			//D3D_FEATURE_LEVEL_9_1,	// 0x9100
+			//D3D_FEATURE_LEVEL_9_2,	// 0x9200
+			//D3D_FEATURE_LEVEL_9_3,	// 0x9300
+			D3D_FEATURE_LEVEL_11_1,	// 0xb100
+			D3D_FEATURE_LEVEL_11_0, // 0xb00
+			D3D_FEATURE_LEVEL_10_1, // 0xa100
+			D3D_FEATURE_LEVEL_10_0	// 0xa000
 		};
+		uint32_t deviceFlags = D3D11_CREATE_DEVICE_BGRA_SUPPORT;
+		HRESULT hr = 0;
+		D3D_FEATURE_LEVEL featureLevelCreated;
+
+		if (_attributes.DebugMode)
+		{
+			deviceFlags |= D3D11_CREATE_DEVICE_DEBUG;
+		}
+
+
+		hr = D3D11CreateDevice(
+			nullptr,
+			D3D_DRIVER_TYPE_HARDWARE,
+			0,
+			deviceFlags,
+			featureLevels,
+			ARRAYSIZE(featureLevels),
+			D3D11_SDK_VERSION,
+			&_d3d11Device,
+			&featureLevelCreated,
+			&_d3d11Context
+		);
+
+		//_d3d11Device.As()
+
+		if (FAILED(hr))
+		{
+			lastError = { GameErrors::GameDirectX11Specific, "Could not create device." };
+			return false;
+		}
+
+		std::cout << "Feat = " << featureLevelCreated << " in hex " << 0xb100 << ".\n"; // 0xb100 d3d11_1
+		systemInfo.gpuInfo.versionMajor = featureLevelCreated;
 		
 		return true; 
 	}
@@ -72,10 +105,10 @@ namespace game
 
 	inline void RendererDX11::DestroyDevice()
 	{
-		//if (_d3d11RenderTarget) _d3d11RenderTarget->Release();
-		//if (_d3d11Device) _d3d11Device->Release();
+		if (_d3d11Device) _d3d11Device->Release();
+		if (_d3d11Context) _d3d11Context->Release();
 		//if (_d3d11SwapChain) _d3d11SwapChain->Release();
-		//if (_d3d11Context) _d3d11Context->Release();
+		//if (_d3d11RenderTarget) _d3d11RenderTarget->Release();
 	}
 
 	inline void RendererDX11::Swap()
@@ -92,12 +125,12 @@ namespace game
 
 		//_d3d11Context->ClearRenderTargetView(_d3d11RenderTarget, color);
 
-		//viewport.TopLeftX = 0;
-		//viewport.TopLeftY = 0;
-		//viewport.Width = (float_t)width;
-		//viewport.Height = (float_t)height;
+		viewport.TopLeftX = 0;
+		viewport.TopLeftY = 0;
+		viewport.Width = (float_t)width;
+		viewport.Height = (float_t)height;
 
-		//_d3d11Context->RSSetViewports(1, &viewport);
+		_d3d11Context->RSSetViewports(1, &viewport);
 	}
 
 	inline bool RendererDX11::CreateTexture(Texture2D& texture)
