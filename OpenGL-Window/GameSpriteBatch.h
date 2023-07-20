@@ -328,6 +328,14 @@ namespace game
 		}
 #endif
 #if defined(GAME_DIRECTX10)
+		// Save current state
+		//enginePointer->d3d10Device->get
+
+		// Disable multisampling
+		// not now
+
+		// alpha ??
+		// blend mode?? (may need to be shader)
 #endif
 #if defined(GAME_DIRECTX11)
 #endif
@@ -336,7 +344,9 @@ namespace game
 #if defined (GAME_OPENGL)
 		if (enginePointer->geIsUsing(GAME_OPENGL))
 		{
+			// Save states? thist
 			glEnable(GL_TEXTURE_2D);
+			// and texture bound to it
 		}
 #endif
 
@@ -372,12 +382,14 @@ namespace game
 		}
 #endif
 #if defined (GAME_DIRECTX10)
+		// restore everything
 #endif
 #if defined (GAME_DIRECTX11)
 #endif
 #if defined (GAME_OPENGL)
 		if (enginePointer->geIsUsing(GAME_OPENGL))
 		{
+			// restore saved this stuff
 			glBindTexture(GL_TEXTURE_2D,0);
 			glDisable(GL_TEXTURE_2D);
 		}
