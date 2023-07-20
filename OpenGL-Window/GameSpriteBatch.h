@@ -41,6 +41,7 @@ namespace game
 		Texture2D _currentTexture;
 		void _Enable2D();
 		void _Disable2D();
+#if defined(GAME_OPENGL) | defined(GAME_DIRECTX9)
 		struct _spriteVertex
 		{
 			float_t x, y, z, rhw;
@@ -48,8 +49,6 @@ namespace game
 			float_t u, v;
 		};
 		_spriteVertex* _spriteVertices;
-#if defined(GAME_OPENGL)
-
 #endif
 #if defined(GAME_DIRECTX9)
 		LPDIRECT3DVERTEXBUFFER9 _vertexBuffer;
@@ -91,21 +90,21 @@ namespace game
 
 	inline SpriteBatch::SpriteBatch()
 	{
-		_spriteVertices = nullptr;
 #if defined(GAME_OPENGL)
 		if (enginePointer->geIsUsing(GAME_OPENGL))
 		{
-
+		_spriteVertices = nullptr;
 		}
 #endif
-#if defined(GAME_DIRECTX9)
+#if defined(GAME_DIRECTX9)  // need the if
+		_spriteVertices = nullptr;
 
 		_vertexBuffer = nullptr;
 		_savedFVF = 0;
 		_savedBlending = 0;
 		_savedTexture = nullptr;
 #endif
-#if defined (GAME_DIRECTX10)
+#if defined (GAME_DIRECTX10) // need the if
 		_spriteGeometryVertices = nullptr;
 		_vertexBuffer10 = nullptr;
 		_vertexLayout10 = nullptr;
@@ -120,11 +119,11 @@ namespace game
 
 	inline SpriteBatch::~SpriteBatch()
 	{
-		if (_spriteVertices)
-		{
-			delete[] _spriteVertices;
-			_spriteVertices = nullptr;
-		}
+		//if (_spriteVertices)
+		//{
+		//	delete[] _spriteVertices;
+		//	_spriteVertices = nullptr;
+		//}
 #if defined(GAME_OPENGL)
 		if (enginePointer->geIsUsing(GAME_OPENGL))
 		{
@@ -150,7 +149,7 @@ namespace game
 			}
 		}
 #endif
-#if defined (GAME_DIRECTX10)
+#if defined (GAME_DIRECTX10) // need the if
 		if (_spriteGeometryVertices)
 		{
 			delete[] _spriteGeometryVertices;
@@ -170,6 +169,7 @@ namespace game
 	inline bool SpriteBatch::Initialize()
 	{
 		// OpenGL and DX9 implementation of vertices
+#if defined(GAME_OPENGL) || defined (GAME_DIRECTX9)
 		_spriteVertices = new _spriteVertex[_maxSprites * 6];
 		for (uint32_t vertex = 0; vertex < _maxSprites * 6; vertex++)
 		{
@@ -192,6 +192,7 @@ namespace game
 			}
 #endif
 		}
+#endif
 
 		// DX10 impementation of vertices
 #if defined(GAME_DIRECTX10)
