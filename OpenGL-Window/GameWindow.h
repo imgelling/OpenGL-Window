@@ -39,6 +39,7 @@ namespace game
 	{
 #if defined(_WIN32)
 		_windowHandle = NULL;
+		_windowPositionSave = { 0 };
 #elif defined(__linux__)
 #endif
 	}

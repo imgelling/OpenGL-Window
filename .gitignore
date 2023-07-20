@@ -398,3 +398,6 @@ FodyWeavers.xsd
 *.sln.iml
 *.html
 OpenGL-Window/stb_image.h
+OpenGL-Window/Content/GeometryShader.cso
+OpenGL-Window/Content/GeometryShader.cso
+OpenGL-Window/Content/PixelShader.cso

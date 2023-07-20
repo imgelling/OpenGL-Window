@@ -36,7 +36,7 @@ namespace game
 		void DrawString(const SpriteFont &font, const std::string &Str, const int x, const int y, const Color& color);
 		void End();
 	private:
-		static constexpr uint32_t _maxSprites = 1024;
+		static constexpr uint32_t _maxSprites = 10240;
 		uint32_t _numberOfSpritesUsed;
 		Texture2D _currentTexture;
 		void _Enable2D();
@@ -65,9 +65,9 @@ namespace game
 			float_t leftU, topV;
 			float_t rightU, bottomV;
 		};
-		Shader _spriteBatchShader;
 		_spriteGeometryVertex* _spriteGeometryVertices;
 		ID3D10Buffer* _vertexBuffer10;
+		Shader _spriteBatchShader;
 		ID3D10InputLayout* _vertexLayout10;
 		ID3D10SamplerState* _textureSamplerState10;
 		// not sure on how to handle the textures

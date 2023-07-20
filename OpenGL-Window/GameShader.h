@@ -54,6 +54,7 @@ namespace game
 #if defined(GAME_DIRECTX10)
 		vertexShader10 = nullptr;
 		pixelShader10 = nullptr;
+		geometryShader10 = nullptr;
 		compiledPixelShader10 = nullptr;
 		compiledVertexShader10 = nullptr;
 		compiledGeometryShader10 = nullptr;
