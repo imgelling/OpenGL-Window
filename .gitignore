@@ -9,6 +9,8 @@
 *.user
 *.userosscache
 *.sln.docstates
+OpenGL-Window/stb_image.h
+*.cso
 
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
@@ -397,7 +399,4 @@ FodyWeavers.xsd
 # JetBrains Rider
 *.sln.iml
 *.html
-OpenGL-Window/stb_image.h
-OpenGL-Window/Content/GeometryShader.cso
-OpenGL-Window/Content/GeometryShader.cso
-OpenGL-Window/Content/PixelShader.cso
+
