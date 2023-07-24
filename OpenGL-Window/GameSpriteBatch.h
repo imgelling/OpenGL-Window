@@ -93,23 +93,29 @@ namespace game
 #if defined(GAME_OPENGL)
 		if (enginePointer->geIsUsing(GAME_OPENGL))
 		{
-		_spriteVertices = nullptr;
+			_spriteVertices = nullptr;
 		}
 #endif
-#if defined(GAME_DIRECTX9)  // need the if
-		_spriteVertices = nullptr;
+#if defined(GAME_DIRECTX9)  
+		if (enginePointer->geIsUsing(GAME_DIRECTX9))
+		{
+			_spriteVertices = nullptr;
 
-		_vertexBuffer = nullptr;
-		_savedFVF = 0;
-		_savedBlending = 0;
-		_savedTexture = nullptr;
+			_vertexBuffer = nullptr;
+			_savedFVF = 0;
+			_savedBlending = 0;
+			_savedTexture = nullptr;
+		}
 #endif
 #if defined (GAME_DIRECTX10) // need the if
-		_spriteGeometryVertices = nullptr;
-		_vertexBuffer10 = nullptr;
-		_vertexLayout10 = nullptr;
-		_textureSamplerState10 = nullptr;
-		_textureShaderResourceView10 = nullptr;
+		if (enginePointer->geIsUsing(GAME_DIRECTX10))
+		{
+			_spriteGeometryVertices = nullptr;
+			_vertexBuffer10 = nullptr;
+			_vertexLayout10 = nullptr;
+			_textureSamplerState10 = nullptr;
+			_textureShaderResourceView10 = nullptr;
+		}
 #endif
 #if defined (GAME_DIRECTX11)
 #endif
@@ -149,17 +155,20 @@ namespace game
 			}
 		}
 #endif
-#if defined (GAME_DIRECTX10) // need the if
-		if (_spriteGeometryVertices)
+#if defined (GAME_DIRECTX10)
+		if (enginePointer->geIsUsing(GAME_DIRECTX10))
 		{
-			delete[] _spriteGeometryVertices;
-			_spriteGeometryVertices = nullptr;
+			if (_spriteGeometryVertices)
+			{
+				delete[] _spriteGeometryVertices;
+				_spriteGeometryVertices = nullptr;
+			}
+			SAFE_RELEASE(_vertexBuffer10);
+			SAFE_RELEASE(_vertexLayout10);
+			SAFE_RELEASE(_textureSamplerState10);
+			SAFE_RELEASE(_textureShaderResourceView10);
+			enginePointer->geUnLoadShader(_spriteBatchShader);
 		}
-		SAFE_RELEASE(_vertexBuffer10);
-		SAFE_RELEASE(_vertexLayout10);
-		SAFE_RELEASE(_textureSamplerState10);
-		SAFE_RELEASE(_textureShaderResourceView10);
-		enginePointer->geUnLoadShader(_spriteBatchShader);
 #endif
 #if defined (GAME_DIRECTX11)
 
@@ -238,68 +247,71 @@ namespace game
 		}
 #endif
 #if defined (GAME_DIRECTX10)
-		D3D10_BUFFER_DESC vertexBufferDescription = { 0 };
-		//D3D10_BUFFER_DESC indexBufferDescription = { 0 }; // Shouldn't be needed with gs
-		D3D10_SUBRESOURCE_DATA vertexInitialData = { 0 };
-		//D3D10_SUBRESOURCE_DATA indexInitialData = { 0 };  // Shouldn't be needed with gs
-		//DWORD indices[] = { 0, 1, 2, 1, 3, 2, }; // Shouldn't be needed with gs
-		
-		// 3 FLOATS POSITION (xyz)
-		// 4 FLOATS COLOR (rgba)
-		// 2 UINT DIMENSIONS (width and height)
-		// 4 FLOATS POSITIONS (2 sets of UVS)
-		D3D10_INPUT_ELEMENT_DESC inputLayout[] = // DOUBLE CHECK THIS IF SHIT AINT WORKING!
+		if (enginePointer->geIsUsing(GAME_DIRECTX10))
 		{
-			{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D10_INPUT_PER_VERTEX_DATA, 0 },
-			{ "COLOR",    0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 12, D3D10_INPUT_PER_VERTEX_DATA, 0},
-			{ "DIMENSIONS", 0, DXGI_FORMAT_R32G32_UINT, 0, 28, D3D10_INPUT_PER_VERTEX_DATA, 0},
-			{ "TEXCOORD", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 44, D3D10_INPUT_PER_VERTEX_DATA, 0},
-		 };
-		D3D10_SAMPLER_DESC samplerDesc = { };
+			D3D10_BUFFER_DESC vertexBufferDescription = { 0 };
+			//D3D10_BUFFER_DESC indexBufferDescription = { 0 }; // Shouldn't be needed with gs
+			D3D10_SUBRESOURCE_DATA vertexInitialData = { 0 };
+			//D3D10_SUBRESOURCE_DATA indexInitialData = { 0 };  // Shouldn't be needed with gs
+			//DWORD indices[] = { 0, 1, 2, 1, 3, 2, }; // Shouldn't be needed with gs
 
-		// Load shaders for spriteBatch
-		if (!enginePointer->geLoadShader("Content/VertexShader.hlsl", "Content/PixelShader.hlsl", "Content/GeometryShader.hlsl", _spriteBatchShader))
-		{
-			// Will return the lastError from trying to load the shaders
-			// so we do not override it.
-			return false;
+			// 3 FLOATS POSITION (xyz)
+			// 4 FLOATS COLOR (rgba)
+			// 2 UINT DIMENSIONS (width and height)
+			// 4 FLOATS POSITIONS (2 sets of UVS)
+			D3D10_INPUT_ELEMENT_DESC inputLayout[] = // DOUBLE CHECK THIS IF SHIT AINT WORKING!
+			{
+				{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D10_INPUT_PER_VERTEX_DATA, 0 },
+				{ "COLOR",    0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 12, D3D10_INPUT_PER_VERTEX_DATA, 0},
+				{ "DIMENSIONS", 0, DXGI_FORMAT_R32G32_UINT, 0, 28, D3D10_INPUT_PER_VERTEX_DATA, 0},
+				{ "TEXCOORD", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 44, D3D10_INPUT_PER_VERTEX_DATA, 0},
+			};
+			D3D10_SAMPLER_DESC samplerDesc = { };
+
+			// Load shaders for spriteBatch
+			if (!enginePointer->geLoadShader("Content/VertexShader.hlsl", "Content/PixelShader.hlsl", "Content/GeometryShader.hlsl", _spriteBatchShader))
+			{
+				// Will return the lastError from trying to load the shaders
+				// so we do not override it.
+				return false;
+			}
+
+			// Create the vertex buffer
+			vertexBufferDescription.ByteWidth = sizeof(_spriteGeometryVertex) * _maxSprites;
+			std::cout << "SpriteBatch VertexBuffer size : " << sizeof(_spriteGeometryVertex) * _maxSprites / 1024 << "kB\n";
+			vertexBufferDescription.Usage = D3D10_USAGE_DYNAMIC;
+			vertexBufferDescription.BindFlags = D3D10_BIND_VERTEX_BUFFER;
+			vertexBufferDescription.CPUAccessFlags = D3D10_CPU_ACCESS_WRITE;
+			vertexBufferDescription.MiscFlags = 0;
+			if (FAILED(enginePointer->d3d10Device->CreateBuffer(&vertexBufferDescription, NULL, &_vertexBuffer10)))
+			{
+				lastError = { GameErrors::GameDirectX10Specific, "Could not create vertex buffer for SpriteBatch." };
+				return false;
+			}
+
+			// Create input layout for shaders
+			if (FAILED(enginePointer->d3d10Device->CreateInputLayout(inputLayout, 4, _spriteBatchShader.compiledVertexShader10->GetBufferPointer(), _spriteBatchShader.compiledVertexShader10->GetBufferSize(), &_vertexLayout10)))
+			{
+				lastError = { GameErrors::GameDirectX10Specific, "Could not create input layout for SpriteBatch." };
+				return false;
+			}
+
+			// Create texture sampler
+			samplerDesc.Filter = D3D10_FILTER_MIN_MAG_MIP_POINT;
+			samplerDesc.AddressU = D3D10_TEXTURE_ADDRESS_WRAP;
+			samplerDesc.AddressV = D3D10_TEXTURE_ADDRESS_WRAP;
+			samplerDesc.AddressW = D3D10_TEXTURE_ADDRESS_WRAP;
+			samplerDesc.ComparisonFunc = D3D10_COMPARISON_NEVER;
+			samplerDesc.MinLOD = 0;
+			samplerDesc.MaxLOD = D3D10_FLOAT32_MAX;
+			if (FAILED(enginePointer->d3d10Device->CreateSamplerState(&samplerDesc, &_textureSamplerState10)))
+			{
+				lastError = { GameErrors::GameDirectX10Specific,"Could not create sampler state for SpriteBatch." };
+				return false;
+			}
+
+			// shader resource view
 		}
-
-		// Create the vertex buffer
-		vertexBufferDescription.ByteWidth = sizeof(_spriteGeometryVertex) * _maxSprites;
-		std::cout << "SpriteBatch VertexBuffer size : " << sizeof(_spriteGeometryVertex) * _maxSprites / 1024 << "kB\n";
-		vertexBufferDescription.Usage = D3D10_USAGE_DYNAMIC;
-		vertexBufferDescription.BindFlags = D3D10_BIND_VERTEX_BUFFER;
-		vertexBufferDescription.CPUAccessFlags = D3D10_CPU_ACCESS_WRITE;
-		vertexBufferDescription.MiscFlags = 0;
-		if (FAILED(enginePointer->d3d10Device->CreateBuffer(&vertexBufferDescription, NULL, &_vertexBuffer10)))
-		{
-			lastError = { GameErrors::GameDirectX10Specific, "Could not create vertex buffer for SpriteBatch." };
-			return false;
-		}
-
-		// Create input layout for shaders
-		if (FAILED(enginePointer->d3d10Device->CreateInputLayout(inputLayout, 4, _spriteBatchShader.compiledVertexShader10->GetBufferPointer(), _spriteBatchShader.compiledVertexShader10->GetBufferSize(), &_vertexLayout10)))
-		{
-			lastError = { GameErrors::GameDirectX10Specific, "Could not create input layout for SpriteBatch." };
-			return false;
-		}
-
-		// Create texture sampler
-		samplerDesc.Filter = D3D10_FILTER_MIN_MAG_MIP_POINT;
-		samplerDesc.AddressU = D3D10_TEXTURE_ADDRESS_WRAP;
-		samplerDesc.AddressV = D3D10_TEXTURE_ADDRESS_WRAP;
-		samplerDesc.AddressW = D3D10_TEXTURE_ADDRESS_WRAP;
-		samplerDesc.ComparisonFunc = D3D10_COMPARISON_NEVER;
-		samplerDesc.MinLOD = 0;
-		samplerDesc.MaxLOD = D3D10_FLOAT32_MAX;
-		if (FAILED(enginePointer->d3d10Device->CreateSamplerState(&samplerDesc, &_textureSamplerState10)))
-		{
-			lastError = { GameErrors::GameDirectX10Specific,"Could not create sampler state for SpriteBatch." };
-			return false;
-		}
-
-		// shader resource view
 #endif
 #if defined (GAME_DIRECTX11)
 #endif 
@@ -328,6 +340,8 @@ namespace game
 		}
 #endif
 #if defined(GAME_DIRECTX10)
+		if (enginePointer->geIsUsing(GAME_DIRECTX10))
+		{
 		// Save current state
 		//enginePointer->d3d10Device->get
 
@@ -336,6 +350,7 @@ namespace game
 
 		// alpha ??
 		// blend mode?? (may need to be shader)
+		}
 #endif
 #if defined(GAME_DIRECTX11)
 #endif
@@ -382,7 +397,11 @@ namespace game
 		}
 #endif
 #if defined (GAME_DIRECTX10)
-		// restore everything
+		if (enginePointer->geIsUsing(GAME_DIRECTX10))
+		{
+
+			// restore everything
+		}
 #endif
 #if defined (GAME_DIRECTX11)
 #endif
@@ -422,6 +441,9 @@ namespace game
 		}
 #endif
 #if defined (GAME_DIRECTX10)
+		if (enginePointer->geIsUsing(GAME_DIRECTX10))
+		{
+		}
 #endif
 #if defined (GAME_DIRECTX11)
 #endif
@@ -612,6 +634,9 @@ namespace game
 		}
 #endif
 #if defined (GAME_DIRECTX10)
+		if (enginePointer->geIsUsing(GAME_DIRECTX10))
+		{
+		}
 #endif
 #if defined (GAME_DIRECTX11)
 #endif
@@ -672,13 +697,14 @@ namespace game
 
 
 #if defined(GAME_DIRECTX9)
-		if (texture.textureInterface9 != _currentTexture.textureInterface9)
-		{
-			Render();
-			_currentTexture = texture;
-		}
 		if (enginePointer->geIsUsing(GAME_DIRECTX9))
 		{
+			if (texture.textureInterface9 != _currentTexture.textureInterface9)
+			{
+				Render();
+				_currentTexture = texture;
+			}
+
 			_spriteVertex* access = &_spriteVertices[_numberOfSpritesUsed * 6];
 			// Top left
 			access->x = (float_t)destination.x - texture.oneOverWidth;
@@ -726,9 +752,13 @@ namespace game
 			access->u = (float_t)portion.x * texture.oneOverWidth;
 			access->v = (float_t)portion.bottom * texture.oneOverHeight;
 			access->color = color.packedARGB;
-	}
+
+		}
 #endif
 #if defined (GAME_DIRECTX10)
+		if (enginePointer->geIsUsing(GAME_DIRECTX10))
+		{
+		}
 #endif
 #if defined (GAME_DIRECTX11)
 #endif
@@ -783,7 +813,6 @@ namespace game
 #if defined (GAME_OPENGL)
 #endif
 #if defined(GAME_DIRECTX9)
-
 #endif
 #if defined (GAME_DIRECTX10)
 #endif
