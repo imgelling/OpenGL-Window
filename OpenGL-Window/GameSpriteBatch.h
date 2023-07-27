@@ -107,7 +107,7 @@ namespace game
 			_savedTexture = nullptr;
 		}
 #endif
-#if defined (GAME_DIRECTX10) // need the if
+#if defined (GAME_DIRECTX10)
 		if (enginePointer->geIsUsing(GAME_DIRECTX10))
 		{
 			_spriteGeometryVertices = nullptr;
@@ -343,13 +343,20 @@ namespace game
 		if (enginePointer->geIsUsing(GAME_DIRECTX10))
 		{
 		// Save current state
-		//enginePointer->d3d10Device->get
+
 
 		// Disable multisampling
 		// not now
 
+		// texture
+		//enginePointer->d3d10Device->PSGetShaderResources()
+		// I think I just need to get the ps/vs/gs shaders
+
 		// alpha ??
 		// blend mode?? (may need to be shader)
+		//enginePointer->d3d10Device->OMGetBlendState()
+
+			// Set needed states (see pixel mode for help)
 		}
 #endif
 #if defined(GAME_DIRECTX11)
