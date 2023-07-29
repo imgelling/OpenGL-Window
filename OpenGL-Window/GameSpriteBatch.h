@@ -91,13 +91,13 @@ namespace game
 	inline SpriteBatch::SpriteBatch()
 	{
 #if defined(GAME_OPENGL)
-		if (enginePointer->geIsUsing(GAME_OPENGL))
+		//if (enginePointer->geIsUsing(GAME_OPENGL))
 		{
 			_spriteVertices = nullptr;
 		}
 #endif
 #if defined(GAME_DIRECTX9)  
-		if (enginePointer->geIsUsing(GAME_DIRECTX9))
+		//if (enginePointer->geIsUsing(GAME_DIRECTX9))
 		{
 			_spriteVertices = nullptr;
 
@@ -108,7 +108,7 @@ namespace game
 		}
 #endif
 #if defined (GAME_DIRECTX10)
-		if (enginePointer->geIsUsing(GAME_DIRECTX10))
+		//if (enginePointer->geIsUsing(GAME_DIRECTX10))
 		{
 			_spriteGeometryVertices = nullptr;
 			_vertexBuffer10 = nullptr;
