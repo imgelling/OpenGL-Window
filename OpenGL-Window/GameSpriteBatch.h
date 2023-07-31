@@ -41,7 +41,7 @@ namespace game
 		Texture2D _currentTexture;
 		void _Enable2D();
 		void _Disable2D();
-#if defined(GAME_OPENGL) | defined(GAME_DIRECTX9)
+#if defined(GAME_OPENGL) | defined(GAME_DIRECTX9) | defined(GAME_DIRECTX10)
 		struct _spriteVertex
 		{
 			float_t x, y, z, rhw;
@@ -57,19 +57,20 @@ namespace game
 		IDirect3DBaseTexture9* _savedTexture;
 #endif
 #if defined (GAME_DIRECTX10)
-		struct _spriteGeometryVertex
-		{
-			float_t x, y, z;
-			float_t r, g, b, a;
-			float_t width, height;
-			float_t leftU, topV;
-			float_t rightU, bottomV;
-		};
-		_spriteGeometryVertex* _spriteGeometryVertices;
+		//struct _spriteGeometryVertex
+		//{
+		//	float_t x, y, z;
+		//	float_t r, g, b, a;
+		//	float_t width, height;
+		//	float_t leftU, topV;
+		//	float_t rightU, bottomV;
+		//};
+		//_spriteGeometryVertex* _spriteGeometryVertices;
 		ID3D10Buffer* _vertexBuffer10;
 		Shader _spriteBatchShader;
 		ID3D10InputLayout* _vertexLayout10;
 		ID3D10SamplerState* _textureSamplerState10;
+		ID3D10Buffer* _indexBuffer;
 		// not sure on how to handle the textures
 		ID3D10ShaderResourceView* _textureShaderResourceView10;
 #endif
@@ -110,7 +111,7 @@ namespace game
 #if defined (GAME_DIRECTX10)
 		//if (enginePointer->geIsUsing(GAME_DIRECTX10))
 		{
-			_spriteGeometryVertices = nullptr;
+			_indexBuffer = nullptr;
 			_vertexBuffer10 = nullptr;
 			_vertexLayout10 = nullptr;
 			_textureSamplerState10 = nullptr;
@@ -158,10 +159,15 @@ namespace game
 #if defined (GAME_DIRECTX10)
 		if (enginePointer->geIsUsing(GAME_DIRECTX10))
 		{
-			if (_spriteGeometryVertices)
+			//if (_spriteGeometryVertices)
+			//{
+			//	delete[] _spriteGeometryVertices;
+			//	_spriteGeometryVertices = nullptr;
+			//}
+			if (_spriteVertices)
 			{
-				delete[] _spriteGeometryVertices;
-				_spriteGeometryVertices = nullptr;
+				delete[] _spriteVertices;
+				_spriteVertices = nullptr;
 			}
 			SAFE_RELEASE(_vertexBuffer10);
 			SAFE_RELEASE(_vertexLayout10);
@@ -178,7 +184,7 @@ namespace game
 	inline bool SpriteBatch::Initialize()
 	{
 		// OpenGL and DX9 implementation of vertices
-#if defined(GAME_OPENGL) || defined (GAME_DIRECTX9)
+#if defined(GAME_OPENGL) || defined (GAME_DIRECTX9) || defined(GAME_DIRECTX10)
 		_spriteVertices = new _spriteVertex[_maxSprites * 6];
 		for (uint32_t vertex = 0; vertex < _maxSprites * 6; vertex++)
 		{
@@ -205,27 +211,27 @@ namespace game
 
 		// DX10 impementation of vertices
 #if defined(GAME_DIRECTX10)
-		if (enginePointer->geIsUsing(GAME_DIRECTX10))
-		{
-			_spriteGeometryVertices = new _spriteGeometryVertex[_maxSprites * 6];
-			for (uint32_t vertex = 0; vertex < _maxSprites * 6; vertex++)
-			{
-				_spriteGeometryVertices[vertex].x = 0.0f;
-				_spriteGeometryVertices[vertex].y = 0.0f;
-				_spriteGeometryVertices[vertex].z = 0.0f;
-				_spriteGeometryVertices[vertex].r = 255.0f; // temp for future debugging
-				_spriteGeometryVertices[vertex].g = 0.0f;
-				_spriteGeometryVertices[vertex].b = 255.0f; // temp for future debugging
-				_spriteGeometryVertices[vertex].a = 255.0f; // temp for future debugging
-				_spriteGeometryVertices[vertex].width = 0.0f;
-				_spriteGeometryVertices[vertex].height = 0.0f;
-				_spriteGeometryVertices[vertex].leftU = 0.0f;
-				_spriteGeometryVertices[vertex].topV = 0.0f;
-				_spriteGeometryVertices[vertex].rightU = 0.0f;
-				_spriteGeometryVertices[vertex].bottomV = 0.0f;
-			}
+		//if (enginePointer->geIsUsing(GAME_DIRECTX10))
+		//{
+		//	_spriteGeometryVertices = new _spriteGeometryVertex[_maxSprites * 6];
+		//	for (uint32_t vertex = 0; vertex < _maxSprites * 6; vertex++)
+		//	{
+		//		_spriteGeometryVertices[vertex].x = 0.0f;
+		//		_spriteGeometryVertices[vertex].y = 0.0f;
+		//		_spriteGeometryVertices[vertex].z = 0.0f;
+		//		_spriteGeometryVertices[vertex].r = 255.0f; // temp for future debugging
+		//		_spriteGeometryVertices[vertex].g = 0.0f;
+		//		_spriteGeometryVertices[vertex].b = 255.0f; // temp for future debugging
+		//		_spriteGeometryVertices[vertex].a = 255.0f; // temp for future debugging
+		//		_spriteGeometryVertices[vertex].width = 0.0f;
+		//		_spriteGeometryVertices[vertex].height = 0.0f;
+		//		_spriteGeometryVertices[vertex].leftU = 0.0f;
+		//		_spriteGeometryVertices[vertex].topV = 0.0f;
+		//		_spriteGeometryVertices[vertex].rightU = 0.0f;
+		//		_spriteGeometryVertices[vertex].bottomV = 0.0f;
+		//	}
 
-		}
+		//}
 #endif
 
 		// Initialization of API methods used
@@ -250,26 +256,21 @@ namespace game
 		if (enginePointer->geIsUsing(GAME_DIRECTX10))
 		{
 			D3D10_BUFFER_DESC vertexBufferDescription = { 0 };
-			//D3D10_BUFFER_DESC indexBufferDescription = { 0 }; // Shouldn't be needed with gs
+			D3D10_BUFFER_DESC indexBufferDescription = { 0 }; // Shouldn't be needed with gs
 			D3D10_SUBRESOURCE_DATA vertexInitialData = { 0 };
-			//D3D10_SUBRESOURCE_DATA indexInitialData = { 0 };  // Shouldn't be needed with gs
-			//DWORD indices[] = { 0, 1, 2, 1, 3, 2, }; // Shouldn't be needed with gs
+			D3D10_SUBRESOURCE_DATA indexInitialData = { 0 };  // Shouldn't be needed with gs
+			DWORD indices[] = { 0, 1, 2, 1, 3, 2, }; // Shouldn't be needed with gs
 
-			// 3 FLOATS POSITION (xyz)
-			// 4 FLOATS COLOR (rgba)
-			// 2 UINT DIMENSIONS (width and height)
-			// 4 FLOATS POSITIONS (2 sets of UVS)
-			D3D10_INPUT_ELEMENT_DESC inputLayout[] = // DOUBLE CHECK THIS IF SHIT AINT WORKING!
+			D3D10_INPUT_ELEMENT_DESC inputLayout[] = 
 			{
 				{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D10_INPUT_PER_VERTEX_DATA, 0 },
 				{ "COLOR",    0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 12, D3D10_INPUT_PER_VERTEX_DATA, 0},
-				{ "DIMENSIONS", 0, DXGI_FORMAT_R32G32_UINT, 0, 28, D3D10_INPUT_PER_VERTEX_DATA, 0},
-				{ "TEXCOORD", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 44, D3D10_INPUT_PER_VERTEX_DATA, 0},
+				{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT,    0, 28, D3D10_INPUT_PER_VERTEX_DATA, 0},
 			};
 			D3D10_SAMPLER_DESC samplerDesc = { };
 
 			// Load shaders for spriteBatch
-			if (!enginePointer->geLoadShader("Content/VertexShader.hlsl", "Content/PixelShader.hlsl", "Content/GeometryShader.hlsl", _spriteBatchShader))
+			if (!enginePointer->geLoadShader("Content/VertexShader.hlsl", "Content/PixelShader.hlsl", _spriteBatchShader))
 			{
 				// Will return the lastError from trying to load the shaders
 				// so we do not override it.
@@ -277,8 +278,8 @@ namespace game
 			}
 
 			// Create the vertex buffer
-			vertexBufferDescription.ByteWidth = sizeof(_spriteGeometryVertex) * _maxSprites;
-			std::cout << "SpriteBatch VertexBuffer size : " << sizeof(_spriteGeometryVertex) * _maxSprites / 1024 << "kB\n";
+			vertexBufferDescription.ByteWidth = _maxSprites * (uint32_t)6 * (uint32_t)sizeof(_spriteVertex);
+			std::cout << "SpriteBatch VertexBuffer size : " << sizeof(_spriteVertex) * _maxSprites / 1024 << "kB\n";
 			vertexBufferDescription.Usage = D3D10_USAGE_DYNAMIC;
 			vertexBufferDescription.BindFlags = D3D10_BIND_VERTEX_BUFFER;
 			vertexBufferDescription.CPUAccessFlags = D3D10_CPU_ACCESS_WRITE;
@@ -289,8 +290,24 @@ namespace game
 				return false;
 			}
 
+			// Create index buffer
+			indexBufferDescription.Usage = D3D10_USAGE_IMMUTABLE;
+			indexBufferDescription.ByteWidth = sizeof(DWORD) * 2 * 3;
+			indexBufferDescription.BindFlags = D3D10_BIND_INDEX_BUFFER;
+			indexBufferDescription.CPUAccessFlags = 0;
+			indexBufferDescription.MiscFlags = 0;
+			indexInitialData.pSysMem = indices;
+			if (FAILED(enginePointer->d3d10Device->CreateBuffer(&indexBufferDescription, &indexInitialData, &_indexBuffer)))
+			{
+				lastError = { GameErrors::GameDirectX10Specific,"Could not create index buffer for SpriteBatch." };
+				_vertexBuffer10->Release();
+				_vertexBuffer10 = nullptr;
+				enginePointer->geUnLoadShader(_spriteBatchShader);
+				return false;
+			}
+
 			// Create input layout for shaders
-			if (FAILED(enginePointer->d3d10Device->CreateInputLayout(inputLayout, 4, _spriteBatchShader.compiledVertexShader10->GetBufferPointer(), _spriteBatchShader.compiledVertexShader10->GetBufferSize(), &_vertexLayout10)))
+			if (FAILED(enginePointer->d3d10Device->CreateInputLayout(inputLayout, 3, _spriteBatchShader.compiledVertexShader10->GetBufferPointer(), _spriteBatchShader.compiledVertexShader10->GetBufferSize(), &_vertexLayout10)))
 			{
 				lastError = { GameErrors::GameDirectX10Specific, "Could not create input layout for SpriteBatch." };
 				return false;
