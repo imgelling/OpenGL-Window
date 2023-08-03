@@ -41,7 +41,7 @@ namespace game
 		Texture2D _currentTexture;
 		void _Enable2D();
 		void _Disable2D();
-#if defined(GAME_OPENGL) | defined(GAME_DIRECTX9) | defined(GAME_DIRECTX10)
+#if defined(GAME_OPENGL) | defined(GAME_DIRECTX9) //| defined(GAME_DIRECTX10)
 		struct _spriteVertex
 		{
 			float_t x, y, z, rhw;
@@ -57,6 +57,15 @@ namespace game
 		IDirect3DBaseTexture9* _savedTexture;
 #endif
 #if defined (GAME_DIRECTX10)
+		struct _spriteVertex
+		{
+			float_t x, y, z;
+			float_t r, g, b, a;
+			float_t u, v;
+			// D3DXColor is just a float for rgba
+			// D3DXColor color
+		};
+		_spriteVertex* _spriteVertices;
 		ID3D10Buffer* _vertexBuffer10;
 		Shader _spriteBatchShader;
 		ID3D10InputLayout* _vertexLayout10;
@@ -197,7 +206,9 @@ namespace game
 			_spriteVertices[vertex].x = 0.0f;
 			_spriteVertices[vertex].y = 0.0f;
 			_spriteVertices[vertex].z = 0.0f;
+#if defined(GAME_OPENGL) || defined(GAME_DIRECTX9)
 			_spriteVertices[vertex].rhw = 1.0f;
+#endif
 			_spriteVertices[vertex].u = 0.0f;
 			_spriteVertices[vertex].v = 0.0f;
 #if defined(GAME_DIRECTX9)
@@ -209,7 +220,11 @@ namespace game
 #if defined(GAME_DIRECTX10)
 			if (enginePointer->geIsUsing(GAME_DIRECTX10))
 			{
-				_spriteVertices[vertex].color = Colors::White.packedABGR;
+				_spriteVertices[vertex].r = Colors::White.rf;
+				_spriteVertices[vertex].g = Colors::White.gf;
+				_spriteVertices[vertex].b = Colors::White.bf;
+				_spriteVertices[vertex].a = Colors::White.af;
+
 			}
 #endif
 #if defined(GAME_OPENGL)
@@ -253,11 +268,11 @@ namespace game
 			D3D10_SUBRESOURCE_DATA indexInitialData = { 0 };  
 			//DWORD indices[] = { 0, 1, 2, 1, 3, 2, }; 
 
-			D3D10_INPUT_ELEMENT_DESC inputLayout[] = 
+			D3D10_INPUT_ELEMENT_DESC inputLayout[] = // seems wrong
 			{
-				{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D10_INPUT_PER_VERTEX_DATA, 0 },
-				{ "COLOR",    0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 12, D3D10_INPUT_PER_VERTEX_DATA, 0},
-				{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT,    0, 28, D3D10_INPUT_PER_VERTEX_DATA, 0},
+				{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D10_APPEND_ALIGNED_ELEMENT, D3D10_INPUT_PER_VERTEX_DATA, 0 },
+				{ "COLOR",    0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D10_APPEND_ALIGNED_ELEMENT, D3D10_INPUT_PER_VERTEX_DATA, 0},
+				{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT,    0, D3D10_APPEND_ALIGNED_ELEMENT, D3D10_INPUT_PER_VERTEX_DATA, 0},
 			};
 			D3D10_SAMPLER_DESC samplerDesc = { };
 
@@ -761,7 +776,12 @@ namespace game
 			access->y = (float_t)scaledpos.top;
 			access->u = 0.0f;
 			access->v = 0.0f;
-			access->color = color.packedABGR;
+			//access->color = color.packedABGR;
+			access->r = color.rf;
+			access->g = color.gf;
+			access->b = color.bf;
+			access->a = color.af;
+
 			access++;
 
 			// Top right
@@ -769,7 +789,11 @@ namespace game
 			access->y = (float_t)scaledpos.top;
 			access->u = 1.0f;
 			access->v = 0.0f;
-			access->color = color.packedABGR;
+			//access->color = color.packedABGR;
+			access->r = color.rf;
+			access->g = color.gf;
+			access->b = color.bf;
+			access->a = color.af;
 			access++;
 
 			// Bottom left
@@ -777,7 +801,11 @@ namespace game
 			access->y = (float_t)scaledpos.bottom;// y + (float_t)texture.height;
 			access->u = 0.0f;
 			access->v = 1.0f;
-			access->color = color.packedABGR;
+			//access->color = color.packedABGR;
+			access->r = color.rf;
+			access->g = color.gf;
+			access->b = color.bf;
+			access->a = color.af;
 			access++;
 
 			//// Top right
@@ -793,7 +821,11 @@ namespace game
 			access->y = (float_t)scaledpos.bottom;// y + (float_t)texture.height;
 			access->u = 1.0f;
 			access->v = 1.0f;
-			access->color = Colors::Green.packedABGR;// 0;//color.packedABGR;
+			//access->color = Colors::Green.packedABGR;// 0;//color.packedABGR;
+			access->r = color.rf;
+			access->g = color.gf;
+			access->b = color.bf;
+			access->a = color.af;
 			access++;
 
 			//// Bottom left
