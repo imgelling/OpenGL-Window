@@ -36,7 +36,7 @@ namespace game
 		void DrawString(const SpriteFont &font, const std::string &Str, const int x, const int y, const Color& color);
 		void End();
 	private:
-		static constexpr uint32_t _maxSprites = 10240;
+		static constexpr uint32_t _maxSprites = 200;
 		uint32_t _numberOfSpritesUsed;
 		Texture2D _currentTexture;
 		void _Enable2D();
@@ -64,6 +64,19 @@ namespace game
 		ID3D10Buffer* _indexBuffer;
 		// not sure on how to handle the textures
 		ID3D10ShaderResourceView* _currentTextureResourceView;
+
+		// saves state of dx10
+		uint32_t _oldStride = 0;
+		uint32_t _oldOffset = 0;
+		ID3D10Buffer* _oldVertexBuffer = nullptr;
+		ID3D10Buffer* _oldIndexBuffer = nullptr;
+		DXGI_FORMAT _oldIndexFormat = {};
+		uint32_t _oldIndexOffset = 0;
+		ID3D10InputLayout* _oldInputLayout = nullptr;
+		ID3D10VertexShader* _oldVertexShader = nullptr;
+		ID3D10PixelShader* _oldPixelShader = nullptr;
+		ID3D10SamplerState* _oldTextureSamplerState = nullptr;
+		D3D10_PRIMITIVE_TOPOLOGY _oldPrimitiveTopology = {};
 #endif
 #if defined (GAME_DIRECTX11)
 #endif
@@ -102,6 +115,7 @@ namespace game
 #if defined (GAME_DIRECTX10)
 		//if (enginePointer->geIsUsing(GAME_DIRECTX10))
 		{
+			_spriteVertices = nullptr;
 			_indexBuffer = nullptr;
 			_vertexBuffer10 = nullptr;
 			_vertexLayout10 = nullptr;
@@ -117,11 +131,11 @@ namespace game
 
 	inline SpriteBatch::~SpriteBatch()
 	{
-		//if (_spriteVertices)
-		//{
-		//	delete[] _spriteVertices;
-		//	_spriteVertices = nullptr;
-		//}
+		if (_spriteVertices)
+		{
+			delete[] _spriteVertices;
+			_spriteVertices = nullptr;
+		}
 #if defined(GAME_OPENGL)
 		if (enginePointer->geIsUsing(GAME_OPENGL))
 		{
@@ -155,15 +169,16 @@ namespace game
 			//	delete[] _spriteGeometryVertices;
 			//	_spriteGeometryVertices = nullptr;
 			//}
-			if (_spriteVertices)
-			{
-				delete[] _spriteVertices;
-				_spriteVertices = nullptr;
-			}
+			//if (_spriteVertices)
+			//{
+			//	delete[] _spriteVertices;
+			//	_spriteVertices = nullptr;
+			//}
 			SAFE_RELEASE(_vertexBuffer10);
 			SAFE_RELEASE(_vertexLayout10);
 			SAFE_RELEASE(_textureSamplerState10);
 			SAFE_RELEASE(_currentTextureResourceView);
+			SAFE_RELEASE(_indexBuffer);
 			enginePointer->geUnLoadShader(_spriteBatchShader);
 		}
 #endif
@@ -236,7 +251,7 @@ namespace game
 			D3D10_BUFFER_DESC indexBufferDescription = { 0 }; 
 			D3D10_SUBRESOURCE_DATA vertexInitialData = { 0 };
 			D3D10_SUBRESOURCE_DATA indexInitialData = { 0 };  
-			DWORD indices[] = { 0, 1, 2, 1, 3, 2, }; 
+			//DWORD indices[] = { 0, 1, 2, 1, 3, 2, }; 
 
 			D3D10_INPUT_ELEMENT_DESC inputLayout[] = 
 			{
@@ -266,12 +281,23 @@ namespace game
 			}
 
 			// Create index buffer
+			//  0, 1, 2, 1, 3, 2
+			std::vector<DWORD> indices;
+			for (uint32_t index = 0; index < _maxSprites; index += 1)
+			{
+				indices.push_back(0);
+				indices.push_back(1);
+				indices.push_back(2);
+				indices.push_back(1);
+				indices.push_back(3);
+				indices.push_back(2);
+			}
 			indexBufferDescription.Usage = D3D10_USAGE_IMMUTABLE;
-			indexBufferDescription.ByteWidth = sizeof(DWORD) * 2 * 3;
+			indexBufferDescription.ByteWidth = sizeof(DWORD) * 6 * _maxSprites;
 			indexBufferDescription.BindFlags = D3D10_BIND_INDEX_BUFFER;
 			indexBufferDescription.CPUAccessFlags = 0;
 			indexBufferDescription.MiscFlags = 0;
-			indexInitialData.pSysMem = indices;
+			indexInitialData.pSysMem = indices.data();
 			if (FAILED(enginePointer->d3d10Device->CreateBuffer(&indexBufferDescription, &indexInitialData, &_indexBuffer)))
 			{
 				lastError = { GameErrors::GameDirectX10Specific,"Could not create index buffer for SpriteBatch." };
@@ -281,6 +307,7 @@ namespace game
 				return false;
 			}
 
+
 			// Create input layout for shaders
 			if (FAILED(enginePointer->d3d10Device->CreateInputLayout(inputLayout, 3, _spriteBatchShader.compiledVertexShader10->GetBufferPointer(), _spriteBatchShader.compiledVertexShader10->GetBufferSize(), &_vertexLayout10)))
 			{
@@ -288,7 +315,7 @@ namespace game
 				return false;
 			}
 
-			// Create texture sampler // probably needs to be point/nearest
+			// Create texture sampler 
 			samplerDesc.Filter = D3D10_FILTER_MIN_MAG_MIP_POINT;
 			samplerDesc.AddressU = D3D10_TEXTURE_ADDRESS_WRAP;
 			samplerDesc.AddressV = D3D10_TEXTURE_ADDRESS_WRAP;
@@ -343,7 +370,28 @@ namespace game
 #if defined(GAME_DIRECTX10)
 		if (enginePointer->geIsUsing(GAME_DIRECTX10))
 		{
-		// Save current state
+			uint32_t stride = sizeof(_spriteVertex);
+			uint32_t offset = 0;
+
+
+			// Save everything we modify
+			enginePointer->d3d10Device->IAGetIndexBuffer(&_oldIndexBuffer, &_oldIndexFormat, &_oldIndexOffset);
+			enginePointer->d3d10Device->IAGetVertexBuffers(0, 1, &_oldVertexBuffer, &_oldStride, &_oldOffset);
+			enginePointer->d3d10Device->IAGetInputLayout(&_oldInputLayout);
+			enginePointer->d3d10Device->VSGetShader(&_oldVertexShader);
+			enginePointer->d3d10Device->PSGetShader(&_oldPixelShader);
+			enginePointer->d3d10Device->PSGetSamplers(0, 1, &_oldTextureSamplerState);
+			enginePointer->d3d10Device->IAGetPrimitiveTopology(&_oldPrimitiveTopology);
+
+			// Change what we need
+			enginePointer->d3d10Device->IASetIndexBuffer(_indexBuffer, DXGI_FORMAT_R32_UINT, 0);
+			enginePointer->d3d10Device->IASetVertexBuffers(0, 1, &_vertexBuffer10, &stride, &offset);
+			enginePointer->d3d10Device->IASetInputLayout(_vertexLayout10);
+			enginePointer->d3d10Device->VSSetShader(_spriteBatchShader.vertexShader10);
+			enginePointer->d3d10Device->PSSetShader(_spriteBatchShader.pixelShader10);
+			enginePointer->d3d10Device->PSSetSamplers(0, 1, &_textureSamplerState10);
+			enginePointer->d3d10Device->IASetPrimitiveTopology(D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+			enginePointer->d3d10Device->PSSetShaderResources(0, 1, &_currentTextureResourceView);
 
 
 		// Disable multisampling
@@ -407,7 +455,13 @@ namespace game
 #if defined (GAME_DIRECTX10)
 		if (enginePointer->geIsUsing(GAME_DIRECTX10))
 		{
-
+			enginePointer->d3d10Device->IASetIndexBuffer(_oldIndexBuffer, _oldIndexFormat, _oldIndexOffset);
+			enginePointer->d3d10Device->IASetVertexBuffers(0, 1, &_oldVertexBuffer, &_oldStride, &_oldOffset);
+			enginePointer->d3d10Device->IASetInputLayout(_oldInputLayout);
+			enginePointer->d3d10Device->VSSetShader(_oldVertexShader);
+			enginePointer->d3d10Device->PSSetShader(_oldPixelShader);
+			enginePointer->d3d10Device->PSSetSamplers(0, 1, &_oldTextureSamplerState);
+			enginePointer->d3d10Device->IASetPrimitiveTopology(_oldPrimitiveTopology);
 			// restore everything
 		}
 #endif
@@ -451,6 +505,30 @@ namespace game
 #if defined (GAME_DIRECTX10)
 		if (enginePointer->geIsUsing(GAME_DIRECTX10))
 		{
+			// Send vertices to card
+			VOID* pVoid = nullptr;
+			if (FAILED(_vertexBuffer10->Map(D3D10_MAP_WRITE_DISCARD, 0, &pVoid)))
+			{
+				std::cout << "Could not map vertex buffer\n";
+			}
+			else
+			{
+				memcpy(pVoid, _spriteVertices, sizeof(_spriteVertex) * _maxSprites * 6);
+					_vertexBuffer10->Unmap();
+			}
+
+			//uint32_t stride = sizeof(_spriteVertex);
+			//uint32_t offset = 0;
+			//enginePointer->d3d10Device->IASetIndexBuffer(_indexBuffer, DXGI_FORMAT_R32_UINT, 0);
+			//enginePointer->d3d10Device->IASetVertexBuffers(0, 1, &_vertexBuffer10, &stride, &offset);
+			//enginePointer->d3d10Device->IASetInputLayout(_vertexLayout10);
+			//enginePointer->d3d10Device->VSSetShader(_spriteBatchShader.vertexShader10);
+			//enginePointer->d3d10Device->PSSetShader(_spriteBatchShader.pixelShader10);
+			//enginePointer->d3d10Device->PSSetSamplers(0, 1, &_textureSamplerState10);
+			//enginePointer->d3d10Device->IASetPrimitiveTopology(D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+			//enginePointer->d3d10Device->PSSetShaderResources(0, 1, &_currentTextureResourceView);
+			enginePointer->d3d10Device->DrawIndexed(_numberOfSpritesUsed * 6, 0, 0);
+
 		}
 #endif
 #if defined (GAME_DIRECTX11)
@@ -644,6 +722,87 @@ namespace game
 #if defined (GAME_DIRECTX10)
 		if (enginePointer->geIsUsing(GAME_DIRECTX10))
 		{
+			if (texture.textureInterface10 != _currentTexture.textureInterface10)
+			{
+				Render();
+				_currentTexture = texture;
+				// Change shader texture to new one
+				//enginePointer->d3d10Device->PSSetShaderResources(0, 1, &_textureShaderResourceView0);
+				D3D10_SHADER_RESOURCE_VIEW_DESC srDesc = {};
+				srDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+				srDesc.ViewDimension = D3D10_SRV_DIMENSION_TEXTURE2D;
+				srDesc.Texture2D.MostDetailedMip = 0;
+				srDesc.Texture2D.MipLevels = 1;
+				if (FAILED(enginePointer->d3d10Device->CreateShaderResourceView(texture.textureInterface10, &srDesc, &_currentTextureResourceView)))
+				{
+					std::cout << "CreateSRV spritebatch failed!\n";
+				}
+				//enginePointer->d3d10Device->PSSetShaderResources(0, 1, &_currentTextureResourceView);
+			}
+			_spriteVertex* access = &_spriteVertices[_numberOfSpritesUsed * 6];
+			Vector2i window = enginePointer->geGetWindowSize();
+			Rectf scaledpos;
+			// Homoginize the scaled rect to -1 to 1 range using
+			//_positionOfScaledTexture.x = (_positionOfScaledTexture.x * 2.0f / (float_t)_windowSize.width) - 1.0f;
+			//_positionOfScaledTexture.y = (_positionOfScaledTexture.y * 2.0f / (float_t)_windowSize.height) - 1.0f;
+			//_sizeOfScaledTexture.width = ((float_t)_sizeOfScaledTexture.width * 2.0f / (float_t)_windowSize.width) - 1.0f;
+			//_sizeOfScaledTexture.height = ((float_t)_sizeOfScaledTexture.height * 2.0f / (float_t)_windowSize.height) - 1.0f;
+			//_positionOfScaledTexture.y = -_positionOfScaledTexture.y;
+			//_sizeOfScaledTexture.height = -_sizeOfScaledTexture.height;
+			scaledpos.left = ((float_t)x * 2.0f / (float_t)window.width) - 1.0f;
+			scaledpos.top = ((float_t)y * 2.0f / (float_t)window.height) - 1.0f;
+			scaledpos.right = (((float_t)x + (float_t)texture.width) / (float)window.width) - 1.0f;
+			scaledpos.bottom = (((float_t)y + (float_t)texture.height) / (float)window.height) - 1.0f;
+			scaledpos.top = -scaledpos.top;
+			scaledpos.bottom = -scaledpos.bottom;
+			
+			// Top left
+			access->x = (float_t)scaledpos.left;
+			access->y = (float_t)scaledpos.top;
+			access->u = 0.0f;
+			access->v = 0.0f;
+			access->color = color.packedABGR;
+			access++;
+
+			// Top right
+			access->x = (float_t)scaledpos.right;// x + (float_t)texture.width;
+			access->y = (float_t)scaledpos.top;
+			access->u = 1.0f;
+			access->v = 0.0f;
+			access->color = color.packedABGR;
+			access++;
+
+			// Bottom left
+			access->x = (float_t)scaledpos.left;
+			access->y = (float_t)scaledpos.bottom;// y + (float_t)texture.height;
+			access->u = 0.0f;
+			access->v = 1.0f;
+			access->color = color.packedABGR;
+			access++;
+
+			//// Top right
+			//access->x = (float_t)x + (float_t)texture.width;
+			//access->y = (float_t)y;
+			//access->u = 1.0f;
+			//access->v = 0.0f;
+			//access->color = color.packedABGR;
+			//access++;
+
+			// Bottom right
+			access->x = (float_t)scaledpos.right;// x + (float_t)texture.width;
+			access->y = (float_t)scaledpos.bottom;// y + (float_t)texture.height;
+			access->u = 1.0f;
+			access->v = 1.0f;
+			access->color = color.packedABGR;
+			access++;
+
+			//// Bottom left
+			//access->x = (float_t)x;
+			//access->y = (float_t)y + (float_t)texture.height;
+			//access->u = 0.0f;
+			//access->v = 1.0f;
+			//access->color = color.packedABGR;
+			//access++;
 		}
 #endif
 #if defined (GAME_DIRECTX11)
