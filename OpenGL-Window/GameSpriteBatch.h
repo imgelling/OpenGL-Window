@@ -285,7 +285,7 @@ namespace game
 			std::vector<DWORD> indices;
 			for (uint32_t index = 0; index < _maxSprites; index += 1)
 			{
-				indices.push_back(0+(index*6));
+				indices.push_back(0 + (index * 6));
 				indices.push_back(1 + (index * 6));
 				indices.push_back(2 + (index * 6));
 				indices.push_back(1 + (index * 6));
