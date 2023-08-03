@@ -532,17 +532,28 @@ namespace game
 					_vertexBuffer10->Unmap();
 			}
 
-			//uint32_t stride = sizeof(_spriteVertex);
-			//uint32_t offset = 0;
-			//enginePointer->d3d10Device->IASetIndexBuffer(_indexBuffer, DXGI_FORMAT_R32_UINT, 0);
-			//enginePointer->d3d10Device->IASetVertexBuffers(0, 1, &_vertexBuffer10, &stride, &offset);
-			//enginePointer->d3d10Device->IASetInputLayout(_vertexLayout10);
-			//enginePointer->d3d10Device->VSSetShader(_spriteBatchShader.vertexShader10);
-			//enginePointer->d3d10Device->PSSetShader(_spriteBatchShader.pixelShader10);
-			//enginePointer->d3d10Device->PSSetSamplers(0, 1, &_textureSamplerState10);
-			//enginePointer->d3d10Device->IASetPrimitiveTopology(D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-			//enginePointer->d3d10Device->PSSetShaderResources(0, 1, &_currentTextureResourceView);
+			D3D10_BLEND_DESC BlendStateDesc;
+			ZeroMemory(&BlendStateDesc, sizeof(D3D10_BLEND_DESC));
+			BlendStateDesc.AlphaToCoverageEnable = FALSE;
+			BlendStateDesc.BlendEnable[0] = TRUE;
+			BlendStateDesc.SrcBlend = D3D10_BLEND_SRC_ALPHA;
+			BlendStateDesc.DestBlend = D3D10_BLEND_INV_SRC_ALPHA;
+			BlendStateDesc.BlendOp = D3D10_BLEND_OP_ADD;
+			BlendStateDesc.SrcBlendAlpha = D3D10_BLEND_ONE;
+			BlendStateDesc.DestBlendAlpha = D3D10_BLEND_ZERO;
+			BlendStateDesc.BlendOpAlpha = D3D10_BLEND_OP_ADD;
+			BlendStateDesc.RenderTargetWriteMask[0] = D3D10_COLOR_WRITE_ENABLE_ALL;
+
+			ID3D10BlendState* pBlendState = NULL;
+			HRESULT hr = enginePointer->d3d10Device->CreateBlendState(&BlendStateDesc, &pBlendState);
+			enginePointer->d3d10Device->OMSetBlendState(pBlendState, NULL, 0xffffffff);
+
 			enginePointer->d3d10Device->DrawIndexed(_numberOfSpritesUsed * 6, 0, 0);
+
+			// need to save whatever was there
+			enginePointer->d3d10Device->OMSetBlendState(NULL, NULL, 0xffffffff);
+			SAFE_RELEASE(pBlendState);
+
 
 		}
 #endif
