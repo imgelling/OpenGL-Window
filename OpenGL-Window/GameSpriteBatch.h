@@ -766,8 +766,8 @@ namespace game
 			//_sizeOfScaledTexture.height = -_sizeOfScaledTexture.height;
 			scaledpos.left = ((float_t)x * 2.0f / (float_t)window.width) - 1.0f;
 			scaledpos.top = ((float_t)y * 2.0f / (float_t)window.height) - 1.0f;
-			scaledpos.right = (((float_t)x + (float_t)texture.width) / (float)window.width) - 1.0f;
-			scaledpos.bottom = (((float_t)y + (float_t)texture.height) / (float)window.height) - 1.0f;
+			scaledpos.right = (((float_t)x + (float_t)texture.width) * 2.0f / (float)window.width) - 1.0f;
+			scaledpos.bottom = (((float_t)y + (float_t)texture.height) * 2.0f / (float)window.height) - 1.0f;
 			scaledpos.top = -scaledpos.top;
 			scaledpos.bottom = -scaledpos.bottom;
 			
