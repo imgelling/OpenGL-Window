@@ -194,10 +194,10 @@ namespace game
 		_spriteVertices = new _spriteVertex[_maxSprites * 6];
 		for (uint32_t vertex = 0; vertex < _maxSprites * 6; vertex++)
 		{
-			_spriteVertices[vertex].rhw = 1.0f;
 			_spriteVertices[vertex].x = 0.0f;
 			_spriteVertices[vertex].y = 0.0f;
 			_spriteVertices[vertex].z = 0.0f;
+			_spriteVertices[vertex].rhw = 1.0f;
 			_spriteVertices[vertex].u = 0.0f;
 			_spriteVertices[vertex].v = 0.0f;
 #if defined(GAME_DIRECTX9)
@@ -285,12 +285,12 @@ namespace game
 			std::vector<DWORD> indices;
 			for (uint32_t index = 0; index < _maxSprites; index += 1)
 			{
-				indices.push_back(0);
-				indices.push_back(1);
-				indices.push_back(2);
-				indices.push_back(1);
-				indices.push_back(3);
-				indices.push_back(2);
+				indices.push_back(0+(index*6));
+				indices.push_back(1 + (index * 6));
+				indices.push_back(2 + (index * 6));
+				indices.push_back(1 + (index * 6));
+				indices.push_back(3 + (index * 6));
+				indices.push_back(2 + (index * 6));
 			}
 			indexBufferDescription.Usage = D3D10_USAGE_IMMUTABLE;
 			indexBufferDescription.ByteWidth = sizeof(DWORD) * 6 * _maxSprites;
@@ -513,7 +513,7 @@ namespace game
 			}
 			else
 			{
-				memcpy(pVoid, _spriteVertices, sizeof(_spriteVertex) * _maxSprites * 6);
+				memcpy(pVoid, &_spriteVertices[0], sizeof(_spriteVertex) * 6 * _numberOfSpritesUsed);
 					_vertexBuffer10->Unmap();
 			}
 
@@ -793,7 +793,7 @@ namespace game
 			access->y = (float_t)scaledpos.bottom;// y + (float_t)texture.height;
 			access->u = 1.0f;
 			access->v = 1.0f;
-			access->color = color.packedABGR;
+			access->color = Colors::Green.packedABGR;// 0;//color.packedABGR;
 			access++;
 
 			//// Bottom left

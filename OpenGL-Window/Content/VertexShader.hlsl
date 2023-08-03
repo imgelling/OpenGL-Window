@@ -1,4 +1,4 @@
-Texture2D DiffuseMap;
+//Texture2D<float4> DiffuseMap : register(t0);
 
 struct VS_OUTPUT
 {
