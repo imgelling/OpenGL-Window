@@ -546,12 +546,13 @@ namespace game
 
 			ID3D10BlendState* pBlendState = NULL;
 			HRESULT hr = enginePointer->d3d10Device->CreateBlendState(&BlendStateDesc, &pBlendState);
-			enginePointer->d3d10Device->OMSetBlendState(pBlendState, NULL, 0xffffffff);
+			float b[] = {1.0f, 1.0f, 1.0f, 1.0f};
+			enginePointer->d3d10Device->OMSetBlendState(pBlendState, b, 0xffffffff);
 
 			enginePointer->d3d10Device->DrawIndexed(_numberOfSpritesUsed * 6, 0, 0);
 
 			// need to save whatever was there
-			enginePointer->d3d10Device->OMSetBlendState(NULL, NULL, 0xffffffff);
+			enginePointer->d3d10Device->OMSetBlendState(NULL, b, 0xffffffff);
 			SAFE_RELEASE(pBlendState);
 
 
