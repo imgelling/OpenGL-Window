@@ -62,8 +62,6 @@ namespace game
 			float_t x, y, z;
 			float_t r, g, b, a;
 			float_t u, v;
-			// D3DXColor is just a float for rgba
-			// D3DXColor color
 		};
 		_spriteVertex* _spriteVertices;
 		ID3D10Buffer* _vertexBuffer10;
@@ -173,16 +171,6 @@ namespace game
 #if defined (GAME_DIRECTX10)
 		if (enginePointer->geIsUsing(GAME_DIRECTX10))
 		{
-			//if (_spriteGeometryVertices)
-			//{
-			//	delete[] _spriteGeometryVertices;
-			//	_spriteGeometryVertices = nullptr;
-			//}
-			//if (_spriteVertices)
-			//{
-			//	delete[] _spriteVertices;
-			//	_spriteVertices = nullptr;
-			//}
 			SAFE_RELEASE(_vertexBuffer10);
 			SAFE_RELEASE(_vertexLayout10);
 			SAFE_RELEASE(_textureSamplerState10);
@@ -388,6 +376,7 @@ namespace game
 			uint32_t stride = sizeof(_spriteVertex);
 			uint32_t offset = 0;
 
+			// need to save blend state check Render
 
 			// Save everything we modify
 			enginePointer->d3d10Device->IAGetIndexBuffer(&_oldIndexBuffer, &_oldIndexFormat, &_oldIndexOffset);
@@ -411,16 +400,6 @@ namespace game
 
 		// Disable multisampling
 		// not now
-
-		// texture
-		//enginePointer->d3d10Device->PSGetShaderResources()
-		// I think I just need to get the ps/vs/gs shaders
-
-		// alpha ??
-		// blend mode?? (may need to be shader)
-		//enginePointer->d3d10Device->OMGetBlendState()
-
-			// Set needed states (see pixel mode for help)
 		}
 #endif
 #if defined(GAME_DIRECTX11)
@@ -470,6 +449,7 @@ namespace game
 #if defined (GAME_DIRECTX10)
 		if (enginePointer->geIsUsing(GAME_DIRECTX10))
 		{
+			// restore everything
 			enginePointer->d3d10Device->IASetIndexBuffer(_oldIndexBuffer, _oldIndexFormat, _oldIndexOffset);
 			enginePointer->d3d10Device->IASetVertexBuffers(0, 1, &_oldVertexBuffer, &_oldStride, &_oldOffset);
 			enginePointer->d3d10Device->IASetInputLayout(_oldInputLayout);
@@ -477,7 +457,6 @@ namespace game
 			enginePointer->d3d10Device->PSSetShader(_oldPixelShader);
 			enginePointer->d3d10Device->PSSetSamplers(0, 1, &_oldTextureSamplerState);
 			enginePointer->d3d10Device->IASetPrimitiveTopology(_oldPrimitiveTopology);
-			// restore everything
 		}
 #endif
 #if defined (GAME_DIRECTX11)
@@ -529,7 +508,7 @@ namespace game
 			else
 			{
 				memcpy(pVoid, &_spriteVertices[0], sizeof(_spriteVertex) * 6 * _numberOfSpritesUsed);
-					_vertexBuffer10->Unmap();
+				_vertexBuffer10->Unmap();
 			}
 
 			D3D10_BLEND_DESC BlendStateDesc;
