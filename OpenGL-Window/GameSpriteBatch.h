@@ -755,6 +755,15 @@ namespace game
 			//_sizeOfScaledTexture.height = ((float_t)_sizeOfScaledTexture.height * 2.0f / (float_t)_windowSize.height) - 1.0f;
 			//_positionOfScaledTexture.y = -_positionOfScaledTexture.y;
 			//_sizeOfScaledTexture.height = -_sizeOfScaledTexture.height;
+
+			//		// Pixel offset fix
+			//_positionOfScaledTexture.x -= _frameBuffer[_currentBuffer].oneOverWidth;
+			//_positionOfScaledTexture.y -= _frameBuffer[_currentBuffer].oneOverHeight;
+			//_sizeOfScaledTexture.width -= _frameBuffer[_currentBuffer].oneOverWidth;
+			//_sizeOfScaledTexture.height -= _frameBuffer[_currentBuffer].oneOverHeight;
+			// does not fix
+			//float_t xf = (float_t)x + 0.5f;
+			//float_t yf = (float_t)y + 0.5f;// (1.0f / (float_t)window.height);
 			scaledpos.left = ((float_t)x * 2.0f / (float_t)window.width) - 1.0f;
 			scaledpos.top = ((float_t)y * 2.0f / (float_t)window.height) - 1.0f;
 			scaledpos.right = (((float_t)x + (float_t)texture.width) * 2.0f / (float)window.width) - 1.0f;

@@ -30,7 +30,7 @@ namespace game
 		bool CreateDevice(Window& window);
 		void DestroyDevice();
 		void Swap();
-		void HandleWindowResize(const uint32_t width, const uint32_t height, const bool doReset) {};
+		void HandleWindowResize(const uint32_t width, const uint32_t height, const bool doReset);
 		void FillOutRendererInfo() {};
 		bool CreateTexture(Texture2D& texture);
 		bool LoadTexture(std::string fileName, Texture2D& texture);
@@ -48,6 +48,84 @@ namespace game
 		ID3D10DepthStencilView* _d3d10DepthStencilView;
 		ID3D10Texture2D* _d3d10DepthStencilBuffer;
 	};
+
+	inline void RendererDX10::HandleWindowResize(const uint32_t width, const uint32_t height, const bool doReset)
+	{
+		D3D10_VIEWPORT viewPort = { 0 };
+		ID3D10Texture2D* backBuffer = nullptr;
+
+		if (!width || !height) return;
+
+		_d3d10Device->ClearState();
+
+
+		viewPort.TopLeftX = 0;
+		viewPort.TopLeftY = 0;
+		viewPort.Width = width;// _attributes.WindowWidth;
+		viewPort.Height = height;// _attributes.WindowHeight;
+		viewPort.MinDepth = 0.0f;
+		viewPort.MaxDepth = 1.0f;
+
+		_d3d10Device->OMSetRenderTargets(NULL, NULL, NULL);
+		SAFE_RELEASE(_d3d10RenderTargetView);
+		SAFE_RELEASE(_d3d10DepthStencilView);
+		_d3d10Device->Flush();
+		_d3d10SwapChain->ResizeBuffers(1, 0, 0, DXGI_FORMAT_UNKNOWN, 0);
+		// Create depth and stencil buffer
+		D3D10_TEXTURE2D_DESC depthStencilDesc = { 0 };
+
+		depthStencilDesc.Width = width;// _attributes.WindowWidth;
+		depthStencilDesc.Height = height;// _attributes.WindowHeight;
+		depthStencilDesc.MipLevels = 1;
+		depthStencilDesc.ArraySize = 1;
+		depthStencilDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+		depthStencilDesc.SampleDesc.Count = 1;
+		depthStencilDesc.SampleDesc.Quality = 0;
+		depthStencilDesc.Usage = D3D10_USAGE_DEFAULT;
+		depthStencilDesc.BindFlags = D3D10_BIND_DEPTH_STENCIL;
+		depthStencilDesc.CPUAccessFlags = 0;	// can change for reading or writing i think
+		depthStencilDesc.MiscFlags = 0;
+
+		// Create depth stencil buffer texture
+		if (FAILED(_d3d10Device->CreateTexture2D(&depthStencilDesc, NULL, &_d3d10DepthStencilBuffer)))
+		{
+			lastError = { GameErrors::GameDirectX10Specific, "Could not create depth stencil buffer texture." };
+			DestroyDevice();
+			return ;
+		}
+
+		// Second param is states for depth stencil
+		if (FAILED(_d3d10Device->CreateDepthStencilView(_d3d10DepthStencilBuffer, NULL, &_d3d10DepthStencilView)))
+		{
+			lastError = { GameErrors::GameDirectX10Specific, "Could not create depth stencil view." };
+			DestroyDevice();
+			return ;
+		}
+
+		// Create the back buffer texture
+		if (FAILED(_d3d10SwapChain->GetBuffer(0, _uuidof(ID3D10Texture2D), reinterpret_cast<void**>(&backBuffer))))
+		{
+			lastError = { GameErrors::GameDirectX10Specific, "Could not create back buffer." };
+			DestroyDevice();
+			return ;
+		}
+
+		// Create the render target
+		if (FAILED(_d3d10Device->CreateRenderTargetView(backBuffer, 0, &_d3d10RenderTargetView)))
+		{
+			lastError = { GameErrors::GameDirectX10Specific, "Could not create render target." };
+			DestroyDevice();
+			return ;
+		}
+
+		// And release the texture
+		SAFE_RELEASE(backBuffer);
+
+		// Set the render target
+		_d3d10Device->OMSetRenderTargets(1, &_d3d10RenderTargetView, _d3d10DepthStencilView);
+
+		_d3d10Device->RSSetViewports(1, &viewPort);
+	}
 
 	inline RendererDX10::RendererDX10()
 	{

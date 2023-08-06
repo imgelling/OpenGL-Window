@@ -675,6 +675,33 @@ namespace game
 		{
 			_renderer->HandleWindowResize(width, height, doReset);
 		}
+#if defined(GAME_DIRECTX9)
+			if (geIsUsing(GAME_DIRECTX9))
+			{
+				if (_renderer)
+				{
+					dynamic_cast<RendererDX9*>(_renderer)->GetDevice(d3d9Device);
+				}
+			}
+#endif
+#if defined(GAME_DIRECTX10)
+		if (geIsUsing(GAME_DIRECTX10))
+		{
+			if (_renderer)
+			{
+				dynamic_cast<RendererDX10*>(_renderer)->GetDevice(d3d10Device, d3d10SwapChain, d3d10RenderTargetView, d3d10DepthStencilView);
+			}
+		}
+#endif
+#if defined(GAME_DIRECTX11)
+		if (geIsUsing(GAME_DIRECTX11))
+		{
+			if (_renderer)
+			{
+				dynamic_cast<RendererDX11*>(_renderer)->GetDevice(d3d11Device, d3d11Context, d3d11RenderTarget);
+			}
+		}
+#endif
 		HandleWindowSizeChange();
 	}
 
