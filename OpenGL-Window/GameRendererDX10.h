@@ -59,27 +59,23 @@ namespace game
 
 		//_d3d10Device->ClearState();
 
+		// Save new size
 		_attributes.WindowWidth = width;
 		_attributes.WindowHeight = height;
 
-
-		viewPort.TopLeftX = 0;
-		viewPort.TopLeftY = 0;
-		viewPort.Width = width;// _attributes.WindowWidth;
-		viewPort.Height = height;// _attributes.WindowHeight;
-		viewPort.MinDepth = 0.0f;
-		viewPort.MaxDepth = 1.0f;
-
+		// Destory old buffers
 		_d3d10Device->OMSetRenderTargets(NULL, NULL, NULL);
 		SAFE_RELEASE(_d3d10RenderTargetView);
 		SAFE_RELEASE(_d3d10DepthStencilView);
 		SAFE_RELEASE(_d3d10DepthStencilBuffer);
 		_d3d10Device->Flush();
+
+		// Resize the new buffers
 		_d3d10SwapChain->ResizeBuffers(1, 0, 0, DXGI_FORMAT_UNKNOWN, 0);
 
 		// Create depth and stencil buffer
-		depthStencilDesc.Width = width;// _attributes.WindowWidth;
-		depthStencilDesc.Height = height;// _attributes.WindowHeight;
+		depthStencilDesc.Width = _attributes.WindowWidth;
+		depthStencilDesc.Height = _attributes.WindowHeight;
 		depthStencilDesc.MipLevels = 1;
 		depthStencilDesc.ArraySize = 1;
 		depthStencilDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
@@ -128,6 +124,13 @@ namespace game
 		// Set the render target
 		_d3d10Device->OMSetRenderTargets(1, &_d3d10RenderTargetView, _d3d10DepthStencilView);
 
+		// Set the viewport
+		viewPort.TopLeftX = 0;
+		viewPort.TopLeftY = 0;
+		viewPort.Width = _attributes.WindowWidth;
+		viewPort.Height = _attributes.WindowHeight;
+		viewPort.MinDepth = 0.0f;
+		viewPort.MaxDepth = 1.0f;
 		_d3d10Device->RSSetViewports(1, &viewPort);
 	}
 
