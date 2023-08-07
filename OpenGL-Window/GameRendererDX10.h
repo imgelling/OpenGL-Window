@@ -53,10 +53,14 @@ namespace game
 	{
 		D3D10_VIEWPORT viewPort = { 0 };
 		ID3D10Texture2D* backBuffer = nullptr;
+		D3D10_TEXTURE2D_DESC depthStencilDesc = { 0 };
 
 		if (!width || !height) return;
 
-		_d3d10Device->ClearState();
+		//_d3d10Device->ClearState();
+
+		_attributes.WindowWidth = width;
+		_attributes.WindowHeight = height;
 
 
 		viewPort.TopLeftX = 0;
@@ -69,11 +73,11 @@ namespace game
 		_d3d10Device->OMSetRenderTargets(NULL, NULL, NULL);
 		SAFE_RELEASE(_d3d10RenderTargetView);
 		SAFE_RELEASE(_d3d10DepthStencilView);
+		SAFE_RELEASE(_d3d10DepthStencilBuffer);
 		_d3d10Device->Flush();
 		_d3d10SwapChain->ResizeBuffers(1, 0, 0, DXGI_FORMAT_UNKNOWN, 0);
-		// Create depth and stencil buffer
-		D3D10_TEXTURE2D_DESC depthStencilDesc = { 0 };
 
+		// Create depth and stencil buffer
 		depthStencilDesc.Width = width;// _attributes.WindowWidth;
 		depthStencilDesc.Height = height;// _attributes.WindowHeight;
 		depthStencilDesc.MipLevels = 1;
@@ -89,7 +93,7 @@ namespace game
 		// Create depth stencil buffer texture
 		if (FAILED(_d3d10Device->CreateTexture2D(&depthStencilDesc, NULL, &_d3d10DepthStencilBuffer)))
 		{
-			lastError = { GameErrors::GameDirectX10Specific, "Could not create depth stencil buffer texture." };
+			lastError = { GameErrors::GameDirectX10Specific, "Could not create depth stencil buffer texture on resize." };
 			DestroyDevice();
 			return ;
 		}
@@ -97,7 +101,7 @@ namespace game
 		// Second param is states for depth stencil
 		if (FAILED(_d3d10Device->CreateDepthStencilView(_d3d10DepthStencilBuffer, NULL, &_d3d10DepthStencilView)))
 		{
-			lastError = { GameErrors::GameDirectX10Specific, "Could not create depth stencil view." };
+			lastError = { GameErrors::GameDirectX10Specific, "Could not create depth stencil view on resize." };
 			DestroyDevice();
 			return ;
 		}
@@ -105,7 +109,7 @@ namespace game
 		// Create the back buffer texture
 		if (FAILED(_d3d10SwapChain->GetBuffer(0, _uuidof(ID3D10Texture2D), reinterpret_cast<void**>(&backBuffer))))
 		{
-			lastError = { GameErrors::GameDirectX10Specific, "Could not create back buffer." };
+			lastError = { GameErrors::GameDirectX10Specific, "Could not create back buffer on resize." };
 			DestroyDevice();
 			return ;
 		}
@@ -113,7 +117,7 @@ namespace game
 		// Create the render target
 		if (FAILED(_d3d10Device->CreateRenderTargetView(backBuffer, 0, &_d3d10RenderTargetView)))
 		{
-			lastError = { GameErrors::GameDirectX10Specific, "Could not create render target." };
+			lastError = { GameErrors::GameDirectX10Specific, "Could not create render target on resize." };
 			DestroyDevice();
 			return ;
 		}
