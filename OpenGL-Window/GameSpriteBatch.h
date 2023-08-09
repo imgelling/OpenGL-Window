@@ -728,6 +728,11 @@ namespace game
 #if defined (GAME_DIRECTX10)
 		if (enginePointer->geIsUsing(GAME_DIRECTX10))
 		{
+			_spriteVertex* access = nullptr;
+			Vector2i window;
+			Rectf scaledpos;
+
+			// If texture changed, render and change texture/SRV
 			if (texture.textureInterface10 != _currentTexture.textureInterface10)
 			{
 				Render();
@@ -745,38 +750,25 @@ namespace game
 				}
 				//enginePointer->d3d10Device->PSSetShaderResources(0, 1, &_currentTextureResourceView);
 			}
-			_spriteVertex* access = &_spriteVertices[_numberOfSpritesUsed * 6];
-			Vector2i window = enginePointer->geGetWindowSize();
-			Rectf scaledpos;
-			// Homoginize the scaled rect to -1 to 1 range using
-			//_positionOfScaledTexture.x = (_positionOfScaledTexture.x * 2.0f / (float_t)_windowSize.width) - 1.0f;
-			//_positionOfScaledTexture.y = (_positionOfScaledTexture.y * 2.0f / (float_t)_windowSize.height) - 1.0f;
-			//_sizeOfScaledTexture.width = ((float_t)_sizeOfScaledTexture.width * 2.0f / (float_t)_windowSize.width) - 1.0f;
-			//_sizeOfScaledTexture.height = ((float_t)_sizeOfScaledTexture.height * 2.0f / (float_t)_windowSize.height) - 1.0f;
-			//_positionOfScaledTexture.y = -_positionOfScaledTexture.y;
-			//_sizeOfScaledTexture.height = -_sizeOfScaledTexture.height;
 
-			//		// Pixel offset fix
-			//_positionOfScaledTexture.x -= _frameBuffer[_currentBuffer].oneOverWidth;
-			//_positionOfScaledTexture.y -= _frameBuffer[_currentBuffer].oneOverHeight;
-			//_sizeOfScaledTexture.width -= _frameBuffer[_currentBuffer].oneOverWidth;
-			//_sizeOfScaledTexture.height -= _frameBuffer[_currentBuffer].oneOverHeight;
-			// does not fix
-			//float_t xf = (float_t)x + 0.5f;
-			//float_t yf = (float_t)y + 0.5f;// (1.0f / (float_t)window.height);
+			access = &_spriteVertices[_numberOfSpritesUsed * 6];
+			window = enginePointer->geGetWindowSize();
+			// Homogenise coordinates to -1.0f to 1.0f
 			scaledpos.left = ((float_t)x * 2.0f / (float_t)window.width) - 1.0f;
 			scaledpos.top = ((float_t)y * 2.0f / (float_t)window.height) - 1.0f;
 			scaledpos.right = (((float_t)x + (float_t)texture.width) * 2.0f / (float)window.width) - 1.0f;
 			scaledpos.bottom = (((float_t)y + (float_t)texture.height) * 2.0f / (float)window.height) - 1.0f;
+			// Flip the y axis
 			scaledpos.top = -scaledpos.top;
 			scaledpos.bottom = -scaledpos.bottom;
 			
+			// Fill vertices
+
 			// Top left
-			access->x = (float_t)scaledpos.left;
-			access->y = (float_t)scaledpos.top;
+			access->x = scaledpos.left;
+			access->y = scaledpos.top;
 			access->u = 0.0f;
 			access->v = 0.0f;
-			//access->color = color.packedABGR;
 			access->r = color.rf;
 			access->g = color.gf;
 			access->b = color.bf;
@@ -785,11 +777,10 @@ namespace game
 			access++;
 
 			// Top right
-			access->x = (float_t)scaledpos.right;// x + (float_t)texture.width;
-			access->y = (float_t)scaledpos.top;
+			access->x = scaledpos.right;
+			access->y = scaledpos.top;
 			access->u = 1.0f;
 			access->v = 0.0f;
-			//access->color = color.packedABGR;
 			access->r = color.rf;
 			access->g = color.gf;
 			access->b = color.bf;
@@ -797,44 +788,26 @@ namespace game
 			access++;
 
 			// Bottom left
-			access->x = (float_t)scaledpos.left;
-			access->y = (float_t)scaledpos.bottom;// y + (float_t)texture.height;
+			access->x = scaledpos.left;
+			access->y = scaledpos.bottom;
 			access->u = 0.0f;
 			access->v = 1.0f;
-			//access->color = color.packedABGR;
 			access->r = color.rf;
 			access->g = color.gf;
 			access->b = color.bf;
 			access->a = color.af;
 			access++;
-
-			//// Top right
-			//access->x = (float_t)x + (float_t)texture.width;
-			//access->y = (float_t)y;
-			//access->u = 1.0f;
-			//access->v = 0.0f;
-			//access->color = color.packedABGR;
-			//access++;
 
 			// Bottom right
-			access->x = (float_t)scaledpos.right;// x + (float_t)texture.width;
-			access->y = (float_t)scaledpos.bottom;// y + (float_t)texture.height;
+			access->x = scaledpos.right;
+			access->y = scaledpos.bottom;
 			access->u = 1.0f;
 			access->v = 1.0f;
-			//access->color = Colors::Green.packedABGR;// 0;//color.packedABGR;
 			access->r = color.rf;
 			access->g = color.gf;
 			access->b = color.bf;
 			access->a = color.af;
 			access++;
-
-			//// Bottom left
-			//access->x = (float_t)x;
-			//access->y = (float_t)y + (float_t)texture.height;
-			//access->u = 0.0f;
-			//access->v = 1.0f;
-			//access->color = color.packedABGR;
-			//access++;
 		}
 #endif
 #if defined (GAME_DIRECTX11)
