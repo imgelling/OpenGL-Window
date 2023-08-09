@@ -734,6 +734,7 @@ namespace game
 				_currentTexture = texture;
 				// Change shader texture to new one
 				//enginePointer->d3d10Device->PSSetShaderResources(0, 1, &_textureShaderResourceView0);
+				SAFE_RELEASE(_currentTextureResourceView);
 				D3D10_SHADER_RESOURCE_VIEW_DESC srDesc = {};
 				srDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
 				srDesc.ViewDimension = D3D10_SRV_DIMENSION_TEXTURE2D;
@@ -743,7 +744,7 @@ namespace game
 				{
 					std::cout << "CreateSRV spritebatch failed!\n";
 				}
-				//enginePointer->d3d10Device->PSSetShaderResources(0, 1, &_currentTextureResourceView);
+				enginePointer->d3d10Device->PSSetShaderResources(0, 1, &_currentTextureResourceView);
 			}
 
 			access = &_spriteVertices10[_numberOfSpritesUsed * 6];
@@ -925,6 +926,95 @@ namespace game
 #if defined (GAME_DIRECTX10)
 		if (enginePointer->geIsUsing(GAME_DIRECTX10))
 		{
+			_spriteVertex10* access = nullptr;
+			Vector2i window;
+			Rectf scaledPosition;
+			Rectf scaledUV;
+
+			// If texture changed, render and change texture/SRV
+			if (texture.textureInterface10 != _currentTexture.textureInterface10)
+			{
+				Render();
+				_currentTexture = texture;
+				// Change shader texture to new one
+				//enginePointer->d3d10Device->PSSetShaderResources(0, 1, &_textureShaderResourceView0);
+				{ if ((_currentTextureResourceView)) {
+					(_currentTextureResourceView)->Release(); (_currentTextureResourceView) = nullptr;
+				} };
+				D3D10_SHADER_RESOURCE_VIEW_DESC srDesc = {};
+				srDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+				srDesc.ViewDimension = D3D10_SRV_DIMENSION_TEXTURE2D;
+				srDesc.Texture2D.MostDetailedMip = 0;
+				srDesc.Texture2D.MipLevels = 1;
+				if (FAILED(enginePointer->d3d10Device->CreateShaderResourceView(texture.textureInterface10, &srDesc, &_currentTextureResourceView)))
+				{
+					std::cout << "CreateSRV spritebatch failed!\n";
+				}
+				enginePointer->d3d10Device->PSSetShaderResources(0, 1, &_currentTextureResourceView);
+			}
+
+			access = &_spriteVertices10[_numberOfSpritesUsed * 6];
+			window = enginePointer->geGetWindowSize();
+			// Homogenise coordinates to -1.0f to 1.0f
+			scaledPosition.left = ((float_t)destination.left * 2.0f / (float_t)window.width) - 1.0f;
+			scaledPosition.top = ((float_t)destination.top * 2.0f / (float_t)window.height) - 1.0f;
+			scaledPosition.right = (((float_t)destination.right + (float_t)texture.width) * 2.0f / (float)window.width) - 1.0f;
+			scaledPosition.bottom = (((float_t)destination.bottom + (float_t)texture.height) * 2.0f / (float)window.height) - 1.0f;
+			// Flip the y axis
+			scaledPosition.top = -scaledPosition.top;
+			scaledPosition.bottom = -scaledPosition.bottom;
+			// Homogenise UV coords to 0.0f - 1.0f
+			scaledUV.left = portion.left * texture.oneOverWidth;
+			scaledUV.top = portion.top * texture.oneOverHeight;
+			scaledUV.right = portion.right * texture.oneOverWidth;
+			scaledUV.bottom = portion.bottom * texture.oneOverHeight;
+
+			// Fill vertices
+
+			// Top left
+			access->x = scaledPosition.left;
+			access->y = scaledPosition.top;
+			access->u = (float_t)scaledUV.left;// 0.0f;
+			access->v = (float_t)scaledUV.top;// 0.0f;
+			access->r = color.rf;
+			access->g = color.gf;
+			access->b = color.bf;
+			access->a = color.af;
+
+			access++;
+
+			// Top right
+			access->x = scaledPosition.right;
+			access->y = scaledPosition.top;
+			access->u = (float_t)scaledUV.right;// 1.0f;
+			access->v = (float_t)scaledUV.top;// 0.0f;
+			access->r = color.rf;
+			access->g = color.gf;
+			access->b = color.bf;
+			access->a = color.af;
+			access++;
+
+			// Bottom left
+			access->x = scaledPosition.left;
+			access->y = scaledPosition.bottom;
+			access->u = (float_t)scaledUV.left;// 0.0f;
+			access->v = (float_t)scaledUV.bottom;// 1.0f;
+			access->r = color.rf;
+			access->g = color.gf;
+			access->b = color.bf;
+			access->a = color.af;
+			access++;
+
+			// Bottom right
+			access->x = scaledPosition.right;
+			access->y = scaledPosition.bottom;
+			access->u = (float_t)scaledUV.right;// 1.0f;
+			access->v = (float_t)scaledUV.bottom;// 1.0f;
+			access->r = color.rf;
+			access->g = color.gf;
+			access->b = color.bf;
+			access->a = color.af;
+			access++;
 		}
 #endif
 #if defined (GAME_DIRECTX11)
