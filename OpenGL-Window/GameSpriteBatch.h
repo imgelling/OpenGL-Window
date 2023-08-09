@@ -57,13 +57,13 @@ namespace game
 		IDirect3DBaseTexture9* _savedTexture;
 #endif
 #if defined (GAME_DIRECTX10)
-		struct _spriteVertex
+		struct _spriteVertex10
 		{
 			float_t x, y, z;
 			float_t r, g, b, a;
 			float_t u, v;
 		};
-		_spriteVertex* _spriteVertices;
+		_spriteVertex10* _spriteVertices10;
 		ID3D10Buffer* _vertexBuffer10;
 		Shader _spriteBatchShader;
 		ID3D10InputLayout* _vertexLayout10;
@@ -122,7 +122,7 @@ namespace game
 #if defined (GAME_DIRECTX10)
 		//if (enginePointer->geIsUsing(GAME_DIRECTX10))
 		{
-			_spriteVertices = nullptr;
+			_spriteVertices10 = nullptr;
 			_indexBuffer = nullptr;
 			_vertexBuffer10 = nullptr;
 			_vertexLayout10 = nullptr;
@@ -138,11 +138,7 @@ namespace game
 
 	inline SpriteBatch::~SpriteBatch()
 	{
-		if (_spriteVertices)
-		{
-			delete[] _spriteVertices;
-			_spriteVertices = nullptr;
-		}
+
 #if defined(GAME_OPENGL)
 		if (enginePointer->geIsUsing(GAME_OPENGL))
 		{
@@ -171,6 +167,11 @@ namespace game
 #if defined (GAME_DIRECTX10)
 		if (enginePointer->geIsUsing(GAME_DIRECTX10))
 		{
+			if (_spriteVertices10)
+			{
+				delete[] _spriteVertices10;
+				_spriteVertices10 = nullptr;
+			}
 			SAFE_RELEASE(_vertexBuffer10);
 			SAFE_RELEASE(_vertexLayout10);
 			SAFE_RELEASE(_textureSamplerState10);
@@ -187,7 +188,7 @@ namespace game
 	inline bool SpriteBatch::Initialize()
 	{
 		// OpenGL and DX9 implementation of vertices
-#if defined(GAME_OPENGL) || defined (GAME_DIRECTX9) || defined(GAME_DIRECTX10)
+#if defined(GAME_OPENGL) || defined (GAME_DIRECTX9) // || defined(GAME_DIRECTX10)
 		_spriteVertices = new _spriteVertex[_maxSprites * 6];
 		for (uint32_t vertex = 0; vertex < _maxSprites * 6; vertex++)
 		{
@@ -205,16 +206,6 @@ namespace game
 				_spriteVertices[vertex].color = Colors::White.packedARGB;
 			}
 #endif
-#if defined(GAME_DIRECTX10)
-			if (enginePointer->geIsUsing(GAME_DIRECTX10))
-			{
-				_spriteVertices[vertex].r = Colors::White.rf;
-				_spriteVertices[vertex].g = Colors::White.gf;
-				_spriteVertices[vertex].b = Colors::White.bf;
-				_spriteVertices[vertex].a = Colors::White.af;
-
-			}
-#endif
 #if defined(GAME_OPENGL)
 			if (enginePointer->geIsUsing(GAME_OPENGL))
 			{
@@ -226,7 +217,22 @@ namespace game
 
 		// DX10 impementation of vertices
 #if defined(GAME_DIRECTX10)
-
+		if (enginePointer->geIsUsing(GAME_DIRECTX10))
+		{
+			_spriteVertices10 = new _spriteVertex10[_maxSprites * 6];
+			for (uint32_t vertex = 0; vertex < _maxSprites * 6; vertex++)
+			{
+				_spriteVertices10[vertex].x = 0.0f;
+				_spriteVertices10[vertex].y = 0.0f;
+				_spriteVertices10[vertex].z = 0.0f;
+				_spriteVertices10[vertex].u = 0.0f;
+				_spriteVertices10[vertex].v = 0.0f;
+				_spriteVertices10[vertex].r = Colors::White.rf;
+				_spriteVertices10[vertex].g = Colors::White.gf;
+				_spriteVertices10[vertex].b = Colors::White.bf;
+				_spriteVertices10[vertex].a = Colors::White.af;
+			}
+		}
 #endif
 
 		// Initialization of API methods used
@@ -271,7 +277,7 @@ namespace game
 			}
 
 			// Create the vertex buffer
-			vertexBufferDescription.ByteWidth = _maxSprites * (uint32_t)6 * (uint32_t)sizeof(_spriteVertex);
+			vertexBufferDescription.ByteWidth = _maxSprites * (uint32_t)6 * (uint32_t)sizeof(_spriteVertex10);
 			//std::cout << "SpriteBatch VertexBuffer size : " << sizeof(_spriteVertex) * _maxSprites / 1024 << "kB\n";
 			vertexBufferDescription.Usage = D3D10_USAGE_DYNAMIC;
 			vertexBufferDescription.BindFlags = D3D10_BIND_VERTEX_BUFFER;
@@ -331,17 +337,6 @@ namespace game
 				lastError = { GameErrors::GameDirectX10Specific,"Could not create sampler state for SpriteBatch." };
 				return false;
 			}
-
-			// shader resource view, need one for each texture??
-			//D3D10_SHADER_RESOURCE_VIEW_DESC srDesc = {};
-			//srDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-			//srDesc.ViewDimension = D3D10_SRV_DIMENSION_TEXTURE2D;
-			//srDesc.Texture2D.MostDetailedMip = 0;
-			//srDesc.Texture2D.MipLevels = 1;
-			//if (FAILED(enginePointer->d3d10Device->CreateShaderResourceView(_frameBuffer[0].textureInterface10, &srDesc, &_currentTextureResourceView)))
-			//{
-			//	std::cout << "CreateSRV0 failed!\n";
-			//}
 		}
 #endif
 #if defined (GAME_DIRECTX11)
@@ -373,7 +368,7 @@ namespace game
 #if defined(GAME_DIRECTX10)
 		if (enginePointer->geIsUsing(GAME_DIRECTX10))
 		{
-			uint32_t stride = sizeof(_spriteVertex);
+			uint32_t stride = sizeof(_spriteVertex10);
 			uint32_t offset = 0;
 
 			// need to save blend state check Render
@@ -507,7 +502,7 @@ namespace game
 			}
 			else
 			{
-				memcpy(pVoid, &_spriteVertices[0], sizeof(_spriteVertex) * 6 * _numberOfSpritesUsed);
+				memcpy(pVoid, &_spriteVertices10[0], sizeof(_spriteVertex10) * 6 * _numberOfSpritesUsed);
 				_vertexBuffer10->Unmap();
 			}
 
@@ -728,7 +723,7 @@ namespace game
 #if defined (GAME_DIRECTX10)
 		if (enginePointer->geIsUsing(GAME_DIRECTX10))
 		{
-			_spriteVertex* access = nullptr;
+			_spriteVertex10* access = nullptr;
 			Vector2i window;
 			Rectf scaledpos;
 
@@ -751,7 +746,7 @@ namespace game
 				//enginePointer->d3d10Device->PSSetShaderResources(0, 1, &_currentTextureResourceView);
 			}
 
-			access = &_spriteVertices[_numberOfSpritesUsed * 6];
+			access = &_spriteVertices10[_numberOfSpritesUsed * 6];
 			window = enginePointer->geGetWindowSize();
 			// Homogenise coordinates to -1.0f to 1.0f
 			scaledpos.left = ((float_t)x * 2.0f / (float_t)window.width) - 1.0f;
