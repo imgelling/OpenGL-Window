@@ -958,8 +958,8 @@ namespace game
 			// Homogenise coordinates to -1.0f to 1.0f
 			scaledPosition.left = ((float_t)destination.left * 2.0f / (float_t)window.width) - 1.0f;
 			scaledPosition.top = ((float_t)destination.top * 2.0f / (float_t)window.height) - 1.0f;
-			scaledPosition.right = (((float_t)destination.right + (float_t)texture.width) * 2.0f / (float)window.width) - 1.0f;
-			scaledPosition.bottom = (((float_t)destination.bottom + (float_t)texture.height) * 2.0f / (float)window.height) - 1.0f;
+			scaledPosition.right = (((float_t)destination.right) * 2.0f / (float)window.width) - 1.0f;
+			scaledPosition.bottom = (((float_t)destination.bottom) * 2.0f / (float)window.height) - 1.0f;
 			// Flip the y axis
 			scaledPosition.top = -scaledPosition.top;
 			scaledPosition.bottom = -scaledPosition.bottom;
