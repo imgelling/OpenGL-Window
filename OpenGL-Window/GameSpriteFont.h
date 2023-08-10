@@ -31,9 +31,10 @@ namespace game
 	{
 		unsigned short lineHeight = 0;
 		unsigned short base = 0;
-		unsigned short width = 0, height = 0;
+		unsigned short width = 0;
+		unsigned short height = 0;
 		unsigned short pages = 0;
-		FontDescriptor chars[256];
+		FontDescriptor letters[256];
 	};
 
 	class SpriteFont
@@ -141,21 +142,21 @@ namespace game
 					if (key == "id")
 						Converter >> CharID;
 					else if (key == "x")
-						Converter >> _characterSet.chars[CharID].x;
+						Converter >> _characterSet.letters[CharID].x;
 					else if (key == "y")
-						Converter >> _characterSet.chars[CharID].y;
+						Converter >> _characterSet.letters[CharID].y;
 					else if (key == "width")
-						Converter >> _characterSet.chars[CharID].width;
+						Converter >> _characterSet.letters[CharID].width;
 					else if (key == "height")
-						Converter >> _characterSet.chars[CharID].height;
+						Converter >> _characterSet.letters[CharID].height;
 					else if (key == "xoffset")
-						Converter >> _characterSet.chars[CharID].xOffset;
+						Converter >> _characterSet.letters[CharID].xOffset;
 					else if (key == "yoffset")
-						Converter >> _characterSet.chars[CharID].yOffset;
+						Converter >> _characterSet.letters[CharID].yOffset;
 					else if (key == "xadvance")
-						Converter >> _characterSet.chars[CharID].xAdvance;
+						Converter >> _characterSet.letters[CharID].xAdvance;
 					else if (key == "page")
-						Converter >> _characterSet.chars[CharID].page;
+						Converter >> _characterSet.letters[CharID].page;
 				}
 			}
 		}

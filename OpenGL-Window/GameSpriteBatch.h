@@ -26,7 +26,11 @@ namespace game
 		SpriteBatch();
 		~SpriteBatch();
 		bool Initialize();
+		// Sets up states for sprite rendering and saves old states
 		void Begin();
+		// Cleans up sprite rendering and restores previous states
+		void End();
+		// Render a complete batch of sprites
 		void Render();
 		// Will draw entire texture to location x,y
 		void Draw(const Texture2D &texture, const uint32_t x, const uint32_t y, const Color color);
@@ -34,13 +38,12 @@ namespace game
 		// Will draw a specified rectangle portion of a texture to location x,y
 		void Draw(const Texture2D& texture, const Recti& destination, const Recti& source, const Color& color);
 		void DrawString(const SpriteFont &font, const std::string &Str, const int x, const int y, const Color& color);
-		void End();
 	private:
-		static constexpr uint32_t _maxSprites = 200;
+		const uint32_t _maxSprites = 2000000;
 		uint32_t _numberOfSpritesUsed;
 		Texture2D _currentTexture;
-		void _Enable2D();
-		void _Disable2D();
+		void _Enable2D();  // May not need
+		void _Disable2D();	// May not need
 #if defined(GAME_OPENGL) | defined(GAME_DIRECTX9)
 		struct _spriteVertex
 		{
@@ -69,10 +72,10 @@ namespace game
 		ID3D10InputLayout* _vertexLayout10;
 		ID3D10SamplerState* _textureSamplerState10;
 		ID3D10Buffer* _indexBuffer;
-		// not sure on how to handle the textures
+		// not sure on how to handle the textures, maybe a dictionary
 		ID3D10ShaderResourceView* _currentTextureResourceView;
 
-		// saves state of dx10
+		// saves state of dx10 states we change to restore
 		uint32_t _oldStride = 0;
 		uint32_t _oldOffset = 0;
 		ID3D10Buffer* _oldVertexBuffer = nullptr;
@@ -88,17 +91,6 @@ namespace game
 #if defined (GAME_DIRECTX11)
 #endif
 	};
-
-	// Notes for gs for dx10
-	// not using shaders, just index buffers, will be 6 floats to define a vertex (x,y,z) (c) (u,v)
-	// and 4 vertices per sprite, total of 24 floats
-	// for using shaders, position (x,y,z), color(r,g,b,a), width(w), height(h), top left uv (u,v), bottom right uv(u,v) per
-	// sprite, total of 13 floats per sprite.
-	// In old spritebatch I had a max of 32,768 sprites, no shaders that is 3.1 million bytes (3.072MB)
-	// Using GS, 32,768 sprites will use 1.7 million bytes (1.664MB)
-	// So about half the data, so maybe 2x the sprite limit? x4? Maybe
-
-
 
 	inline SpriteBatch::SpriteBatch()
 	{
@@ -132,7 +124,6 @@ namespace game
 #endif
 #if defined (GAME_DIRECTX11)
 #endif
-
 		_numberOfSpritesUsed = 0;
 	}
 
@@ -188,16 +179,14 @@ namespace game
 	inline bool SpriteBatch::Initialize()
 	{
 		// OpenGL and DX9 implementation of vertices
-#if defined(GAME_OPENGL) || defined (GAME_DIRECTX9) // || defined(GAME_DIRECTX10)
+#if defined(GAME_OPENGL) || defined (GAME_DIRECTX9)
 		_spriteVertices = new _spriteVertex[_maxSprites * 6];
 		for (uint32_t vertex = 0; vertex < _maxSprites * 6; vertex++)
 		{
 			_spriteVertices[vertex].x = 0.0f;
 			_spriteVertices[vertex].y = 0.0f;
 			_spriteVertices[vertex].z = 0.0f;
-#if defined(GAME_OPENGL) || defined(GAME_DIRECTX9)
 			_spriteVertices[vertex].rhw = 1.0f;
-#endif
 			_spriteVertices[vertex].u = 0.0f;
 			_spriteVertices[vertex].v = 0.0f;
 #if defined(GAME_DIRECTX9)
@@ -278,7 +267,7 @@ namespace game
 
 			// Create the vertex buffer
 			vertexBufferDescription.ByteWidth = _maxSprites * (uint32_t)6 * (uint32_t)sizeof(_spriteVertex10);
-			//std::cout << "SpriteBatch VertexBuffer size : " << sizeof(_spriteVertex) * _maxSprites / 1024 << "kB\n";
+			std::cout << "SpriteBatch VertexBuffer size : " << sizeof(_spriteVertex10) * _maxSprites / 1024 << "kB\n";
 			vertexBufferDescription.Usage = D3D10_USAGE_DYNAMIC;
 			vertexBufferDescription.BindFlags = D3D10_BIND_VERTEX_BUFFER;
 			vertexBufferDescription.CPUAccessFlags = D3D10_CPU_ACCESS_WRITE;
@@ -1025,31 +1014,32 @@ namespace game
 	
 	void SpriteBatch::DrawString(const SpriteFont &font, const std::string& Str, const int x, const int y, const Color& color)
 	{
-		int32_t CurX = x;
-		int32_t CurY = y;
-		uint32_t Width, Height;
-		Recti src, dest;
-		int16_t ch;
+		int32_t currentX = x;
+		int32_t currentY = y;
+		uint32_t widthOfLetter = 0;
+		uint32_t heightOfLetter = 0;
+		Recti source, destination;
+		int16_t letter;
 
 		for (unsigned int i = 0; i < Str.size(); ++i)
 		{
-			ch = Str[i];
-			Width = font._characterSet.chars[ch].width;
-			Height = font._characterSet.chars[ch].height;
+			letter = Str[i];
+			widthOfLetter = font._characterSet.letters[letter].width;
+			heightOfLetter = font._characterSet.letters[letter].height;
 
-			src.left = font._characterSet.chars[ch].x;
-			src.top = font._characterSet.chars[ch].y;
-			src.right = src.left + Width;
-			src.bottom = (src.top + Height);
+			source.left = font._characterSet.letters[letter].x;
+			source.top = font._characterSet.letters[letter].y;
+			source.right = source.left + widthOfLetter;
+			source.bottom = source.top + heightOfLetter;
 
-			dest.left = CurX + font._characterSet.chars[ch].xOffset;
-			dest.top = CurY + font._characterSet.chars[ch].yOffset;
-			dest.right = Width + dest.left;
-			dest.bottom = Height + dest.top;
+			destination.left = currentX + font._characterSet.letters[letter].xOffset;
+			destination.top = currentY + font._characterSet.letters[letter].yOffset;
+			destination.right = widthOfLetter + destination.left;
+			destination.bottom = heightOfLetter + destination.top;
 
-			Draw(font.Texture(), dest, src, color);
+			Draw(font.Texture(), destination, source, color);
 
-			CurX += font._characterSet.chars[ch].xAdvance;
+			currentX += font._characterSet.letters[letter].xAdvance;
 	}
 }
 
