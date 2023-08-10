@@ -41,7 +41,7 @@ namespace game
 		Texture2D _currentTexture;
 		void _Enable2D();
 		void _Disable2D();
-#if defined(GAME_OPENGL) | defined(GAME_DIRECTX9) //| defined(GAME_DIRECTX10)
+#if defined(GAME_OPENGL) | defined(GAME_DIRECTX9)
 		struct _spriteVertex
 		{
 			float_t x, y, z, rhw;
@@ -724,8 +724,8 @@ namespace game
 		if (enginePointer->geIsUsing(GAME_DIRECTX10))
 		{
 			_spriteVertex10* access = nullptr;
-			Vector2i window;
-			Rectf scaledpos;
+			Vector2i windowSize;
+			Rectf scaledPos;
 
 			// If texture changed, render and change texture/SRV
 			if (texture.textureInterface10 != _currentTexture.textureInterface10)
@@ -748,21 +748,21 @@ namespace game
 			}
 
 			access = &_spriteVertices10[_numberOfSpritesUsed * 6];
-			window = enginePointer->geGetWindowSize();
+			windowSize = enginePointer->geGetWindowSize();
 			// Homogenise coordinates to -1.0f to 1.0f
-			scaledpos.left = ((float_t)x * 2.0f / (float_t)window.width) - 1.0f;
-			scaledpos.top = ((float_t)y * 2.0f / (float_t)window.height) - 1.0f;
-			scaledpos.right = (((float_t)x + (float_t)texture.width) * 2.0f / (float)window.width) - 1.0f;
-			scaledpos.bottom = (((float_t)y + (float_t)texture.height) * 2.0f / (float)window.height) - 1.0f;
+			scaledPos.left = ((float_t)x * 2.0f / (float_t)windowSize.width) - 1.0f;
+			scaledPos.top = ((float_t)y * 2.0f / (float_t)windowSize.height) - 1.0f;
+			scaledPos.right = (((float_t)x + (float_t)texture.width) * 2.0f / (float)windowSize.width) - 1.0f;
+			scaledPos.bottom = (((float_t)y + (float_t)texture.height) * 2.0f / (float)windowSize.height) - 1.0f;
 			// Flip the y axis
-			scaledpos.top = -scaledpos.top;
-			scaledpos.bottom = -scaledpos.bottom;
+			scaledPos.top = -scaledPos.top;
+			scaledPos.bottom = -scaledPos.bottom;
 			
 			// Fill vertices
 
 			// Top left
-			access->x = scaledpos.left;
-			access->y = scaledpos.top;
+			access->x = scaledPos.left;
+			access->y = scaledPos.top;
 			access->u = 0.0f;
 			access->v = 0.0f;
 			access->r = color.rf;
@@ -773,8 +773,8 @@ namespace game
 			access++;
 
 			// Top right
-			access->x = scaledpos.right;
-			access->y = scaledpos.top;
+			access->x = scaledPos.right;
+			access->y = scaledPos.top;
 			access->u = 1.0f;
 			access->v = 0.0f;
 			access->r = color.rf;
@@ -784,8 +784,8 @@ namespace game
 			access++;
 
 			// Bottom left
-			access->x = scaledpos.left;
-			access->y = scaledpos.bottom;
+			access->x = scaledPos.left;
+			access->y = scaledPos.bottom;
 			access->u = 0.0f;
 			access->v = 1.0f;
 			access->r = color.rf;
@@ -795,8 +795,8 @@ namespace game
 			access++;
 
 			// Bottom right
-			access->x = scaledpos.right;
-			access->y = scaledpos.bottom;
+			access->x = scaledPos.right;
+			access->y = scaledPos.bottom;
 			access->u = 1.0f;
 			access->v = 1.0f;
 			access->r = color.rf;
@@ -974,8 +974,8 @@ namespace game
 			// Top left
 			access->x = scaledPosition.left;
 			access->y = scaledPosition.top;
-			access->u = (float_t)scaledUV.left;// 0.0f;
-			access->v = (float_t)scaledUV.top;// 0.0f;
+			access->u = (float_t)scaledUV.left;
+			access->v = (float_t)scaledUV.top;
 			access->r = color.rf;
 			access->g = color.gf;
 			access->b = color.bf;
@@ -986,8 +986,8 @@ namespace game
 			// Top right
 			access->x = scaledPosition.right;
 			access->y = scaledPosition.top;
-			access->u = (float_t)scaledUV.right;// 1.0f;
-			access->v = (float_t)scaledUV.top;// 0.0f;
+			access->u = scaledUV.right;
+			access->v = scaledUV.top;
 			access->r = color.rf;
 			access->g = color.gf;
 			access->b = color.bf;
@@ -997,8 +997,8 @@ namespace game
 			// Bottom left
 			access->x = scaledPosition.left;
 			access->y = scaledPosition.bottom;
-			access->u = (float_t)scaledUV.left;// 0.0f;
-			access->v = (float_t)scaledUV.bottom;// 1.0f;
+			access->u = scaledUV.left;
+			access->v = scaledUV.bottom;
 			access->r = color.rf;
 			access->g = color.gf;
 			access->b = color.bf;
@@ -1008,8 +1008,8 @@ namespace game
 			// Bottom right
 			access->x = scaledPosition.right;
 			access->y = scaledPosition.bottom;
-			access->u = (float_t)scaledUV.right;// 1.0f;
-			access->v = (float_t)scaledUV.bottom;// 1.0f;
+			access->u = scaledUV.right;
+			access->v = scaledUV.bottom;
 			access->r = color.rf;
 			access->g = color.gf;
 			access->b = color.bf;
@@ -1025,11 +1025,11 @@ namespace game
 	
 	void SpriteBatch::DrawString(const SpriteFont &font, const std::string& Str, const int x, const int y, const Color& color)
 	{
-		int CurX = x;
-		int CurY = y;
-		int Width, Height;
+		int32_t CurX = x;
+		int32_t CurY = y;
+		uint32_t Width, Height;
 		Recti src, dest;
-		short ch;
+		int16_t ch;
 
 		for (unsigned int i = 0; i < Str.size(); ++i)
 		{
