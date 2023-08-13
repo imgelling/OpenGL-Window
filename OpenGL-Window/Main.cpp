@@ -186,7 +186,7 @@ public:
 		pixelMode.Render();
 
 		spriteBatch.Begin();
-		for (int i = 0; i < 40; i++)
+		for (int i = 0; i < 2; i++)
 			spriteBatch.Draw(spriteTexture, { 10 + (i * 100), 10 }, game::Colors::White);
 		//double_t perSecond = (perftimer.LastRun("CircleClip") / 1000.0 / 1000.0 / 1000.0) * 500000.0;
 		//spriteBatch.DrawString(spriteFont, "Random PixelClip(s) : " + std::to_string(perSecond) + " billion per second.", 10, 200, game::Colors::Red);
