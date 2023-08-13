@@ -72,6 +72,7 @@ namespace game
 		ID3D10InputLayout* _vertexLayout10;
 		ID3D10SamplerState* _textureSamplerState10;
 		ID3D10Buffer* _indexBuffer;
+		ID3D10BlendState* _spriteBatchBlendState;
 		// not sure on how to handle the textures, maybe a dictionary
 		ID3D10ShaderResourceView* _currentTextureResourceView;
 
@@ -87,6 +88,9 @@ namespace game
 		ID3D10PixelShader* _oldPixelShader = nullptr;
 		ID3D10SamplerState* _oldTextureSamplerState = nullptr;
 		D3D10_PRIMITIVE_TOPOLOGY _oldPrimitiveTopology = {};
+		ID3D10BlendState* _oldBlendState = nullptr;
+		float_t _oldBlendFactor[4] = { 0 };
+		uint32_t _oldSampleMask = 0;
 #endif
 #if defined (GAME_DIRECTX11)
 #endif
@@ -120,6 +124,7 @@ namespace game
 			_vertexLayout10 = nullptr;
 			_textureSamplerState10 = nullptr;
 			_currentTextureResourceView = nullptr;
+			_spriteBatchBlendState = nullptr;
 		}
 #endif
 #if defined (GAME_DIRECTX11)
@@ -168,6 +173,7 @@ namespace game
 			SAFE_RELEASE(_textureSamplerState10);
 			SAFE_RELEASE(_currentTextureResourceView);
 			SAFE_RELEASE(_indexBuffer);
+			SAFE_RELEASE(_spriteBatchBlendState);
 			enginePointer->geUnLoadShader(_spriteBatchShader);
 		}
 #endif
@@ -249,9 +255,9 @@ namespace game
 			D3D10_BUFFER_DESC indexBufferDescription = { 0 }; 
 			D3D10_SUBRESOURCE_DATA vertexInitialData = { 0 };
 			D3D10_SUBRESOURCE_DATA indexInitialData = { 0 };  
-			//DWORD indices[] = { 0, 1, 2, 1, 3, 2, }; 
+			std::vector<DWORD> indices;
 
-			D3D10_INPUT_ELEMENT_DESC inputLayout[] = // seems wrong
+			D3D10_INPUT_ELEMENT_DESC inputLayout[] =
 			{
 				{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D10_APPEND_ALIGNED_ELEMENT, D3D10_INPUT_PER_VERTEX_DATA, 0 },
 				{ "COLOR",    0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D10_APPEND_ALIGNED_ELEMENT, D3D10_INPUT_PER_VERTEX_DATA, 0},
@@ -280,15 +286,14 @@ namespace game
 
 			// Create index buffer
 			//  0, 1, 2, 1, 3, 2
-			std::vector<DWORD> indices;
 			for (uint32_t index = 0; index < _maxSprites; index += 1)
 			{
-				indices.push_back(0 + (index * 6));
-				indices.push_back(1 + (index * 6));
-				indices.push_back(2 + (index * 6));
-				indices.push_back(1 + (index * 6));
-				indices.push_back(3 + (index * 6));
-				indices.push_back(2 + (index * 6));
+				indices.emplace_back(0 + (index * 6));
+				indices.emplace_back(1 + (index * 6));
+				indices.emplace_back(2 + (index * 6));
+				indices.emplace_back(1 + (index * 6));
+				indices.emplace_back(3 + (index * 6));
+				indices.emplace_back(2 + (index * 6));
 			}
 			indexBufferDescription.Usage = D3D10_USAGE_IMMUTABLE;
 			indexBufferDescription.ByteWidth = sizeof(DWORD) * 6 * _maxSprites;
@@ -326,6 +331,23 @@ namespace game
 				lastError = { GameErrors::GameDirectX10Specific,"Could not create sampler state for SpriteBatch." };
 				return false;
 			}
+
+			// Create blend state
+			D3D10_BLEND_DESC blendStateDesc = { 0 };
+			blendStateDesc.AlphaToCoverageEnable = FALSE;
+			blendStateDesc.BlendEnable[0] = TRUE;
+			blendStateDesc.SrcBlend = D3D10_BLEND_SRC_ALPHA;
+			blendStateDesc.DestBlend = D3D10_BLEND_INV_SRC_ALPHA;
+			blendStateDesc.BlendOp = D3D10_BLEND_OP_ADD;
+			blendStateDesc.SrcBlendAlpha = D3D10_BLEND_ONE;
+			blendStateDesc.DestBlendAlpha = D3D10_BLEND_ZERO;
+			blendStateDesc.BlendOpAlpha = D3D10_BLEND_OP_ADD;
+			blendStateDesc.RenderTargetWriteMask[0] = D3D10_COLOR_WRITE_ENABLE_ALL;
+			if (FAILED(enginePointer->d3d10Device->CreateBlendState(&blendStateDesc, &_spriteBatchBlendState)))
+			{
+				lastError = { GameErrors::GameDirectX10Specific, "Could not create blend state for SpriteBatch." };
+				return false;
+			}
 		}
 #endif
 #if defined (GAME_DIRECTX11)
@@ -359,6 +381,7 @@ namespace game
 		{
 			uint32_t stride = sizeof(_spriteVertex10);
 			uint32_t offset = 0;
+			float sampleMask[] = { 1.0f, 1.0f, 1.0f, 1.0f };
 
 			// need to save blend state check Render
 
@@ -370,6 +393,7 @@ namespace game
 			enginePointer->d3d10Device->PSGetShader(&_oldPixelShader);
 			enginePointer->d3d10Device->PSGetSamplers(0, 1, &_oldTextureSamplerState);
 			enginePointer->d3d10Device->IAGetPrimitiveTopology(&_oldPrimitiveTopology);
+			enginePointer->d3d10Device->OMGetBlendState(&_oldBlendState, _oldBlendFactor, &_oldSampleMask);
 
 			// Change what we need
 			enginePointer->d3d10Device->IASetIndexBuffer(_indexBuffer, DXGI_FORMAT_R32_UINT, 0);
@@ -380,6 +404,7 @@ namespace game
 			enginePointer->d3d10Device->PSSetSamplers(0, 1, &_textureSamplerState10);
 			enginePointer->d3d10Device->IASetPrimitiveTopology(D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 			enginePointer->d3d10Device->PSSetShaderResources(0, 1, &_currentTextureResourceView);
+			enginePointer->d3d10Device->OMSetBlendState(_spriteBatchBlendState, sampleMask, 0xffffffff);
 
 
 		// Disable multisampling
@@ -441,6 +466,7 @@ namespace game
 			enginePointer->d3d10Device->PSSetShader(_oldPixelShader);
 			enginePointer->d3d10Device->PSSetSamplers(0, 1, &_oldTextureSamplerState);
 			enginePointer->d3d10Device->IASetPrimitiveTopology(_oldPrimitiveTopology);
+			enginePointer->d3d10Device->OMSetBlendState(_oldBlendState, _oldBlendFactor, _oldSampleMask);
 		}
 #endif
 #if defined (GAME_DIRECTX11)
@@ -495,29 +521,10 @@ namespace game
 				_vertexBuffer10->Unmap();
 			}
 
-			D3D10_BLEND_DESC blendStateDesc = { 0 };
-			blendStateDesc.AlphaToCoverageEnable = FALSE;
-			blendStateDesc.BlendEnable[0] = TRUE;
-			blendStateDesc.SrcBlend = D3D10_BLEND_SRC_ALPHA;
-			blendStateDesc.DestBlend = D3D10_BLEND_INV_SRC_ALPHA;
-			blendStateDesc.BlendOp = D3D10_BLEND_OP_ADD;
-			blendStateDesc.SrcBlendAlpha = D3D10_BLEND_ONE;
-			blendStateDesc.DestBlendAlpha = D3D10_BLEND_ZERO;
-			blendStateDesc.BlendOpAlpha = D3D10_BLEND_OP_ADD;
-			blendStateDesc.RenderTargetWriteMask[0] = D3D10_COLOR_WRITE_ENABLE_ALL;
-
-			ID3D10BlendState* _spriteBatchBlendState = NULL;
-			HRESULT hr = enginePointer->d3d10Device->CreateBlendState(&blendStateDesc, &_spriteBatchBlendState);
-			float b[] = {1.0f, 1.0f, 1.0f, 1.0f};
-			enginePointer->d3d10Device->OMSetBlendState(_spriteBatchBlendState, b, 0xffffffff);
-
 			enginePointer->d3d10Device->DrawIndexed(_numberOfSpritesUsed * 6, 0, 0);
 
 			// need to save whatever was there
-			enginePointer->d3d10Device->OMSetBlendState(NULL, b, 0xffffffff);
-			SAFE_RELEASE(_spriteBatchBlendState);
-
-
+			//enginePointer->d3d10Device->OMSetBlendState(NULL, b, 0xffffffff);
 		}
 #endif
 #if defined (GAME_DIRECTX11)
