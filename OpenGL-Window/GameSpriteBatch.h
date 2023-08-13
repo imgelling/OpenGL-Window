@@ -495,28 +495,27 @@ namespace game
 				_vertexBuffer10->Unmap();
 			}
 
-			D3D10_BLEND_DESC BlendStateDesc;
-			ZeroMemory(&BlendStateDesc, sizeof(D3D10_BLEND_DESC));
-			BlendStateDesc.AlphaToCoverageEnable = FALSE;
-			BlendStateDesc.BlendEnable[0] = TRUE;
-			BlendStateDesc.SrcBlend = D3D10_BLEND_SRC_ALPHA;
-			BlendStateDesc.DestBlend = D3D10_BLEND_INV_SRC_ALPHA;
-			BlendStateDesc.BlendOp = D3D10_BLEND_OP_ADD;
-			BlendStateDesc.SrcBlendAlpha = D3D10_BLEND_ONE;
-			BlendStateDesc.DestBlendAlpha = D3D10_BLEND_ZERO;
-			BlendStateDesc.BlendOpAlpha = D3D10_BLEND_OP_ADD;
-			BlendStateDesc.RenderTargetWriteMask[0] = D3D10_COLOR_WRITE_ENABLE_ALL;
+			D3D10_BLEND_DESC blendStateDesc = { 0 };
+			blendStateDesc.AlphaToCoverageEnable = FALSE;
+			blendStateDesc.BlendEnable[0] = TRUE;
+			blendStateDesc.SrcBlend = D3D10_BLEND_SRC_ALPHA;
+			blendStateDesc.DestBlend = D3D10_BLEND_INV_SRC_ALPHA;
+			blendStateDesc.BlendOp = D3D10_BLEND_OP_ADD;
+			blendStateDesc.SrcBlendAlpha = D3D10_BLEND_ONE;
+			blendStateDesc.DestBlendAlpha = D3D10_BLEND_ZERO;
+			blendStateDesc.BlendOpAlpha = D3D10_BLEND_OP_ADD;
+			blendStateDesc.RenderTargetWriteMask[0] = D3D10_COLOR_WRITE_ENABLE_ALL;
 
-			ID3D10BlendState* pBlendState = NULL;
-			HRESULT hr = enginePointer->d3d10Device->CreateBlendState(&BlendStateDesc, &pBlendState);
+			ID3D10BlendState* _spriteBatchBlendState = NULL;
+			HRESULT hr = enginePointer->d3d10Device->CreateBlendState(&blendStateDesc, &_spriteBatchBlendState);
 			float b[] = {1.0f, 1.0f, 1.0f, 1.0f};
-			enginePointer->d3d10Device->OMSetBlendState(pBlendState, b, 0xffffffff);
+			enginePointer->d3d10Device->OMSetBlendState(_spriteBatchBlendState, b, 0xffffffff);
 
 			enginePointer->d3d10Device->DrawIndexed(_numberOfSpritesUsed * 6, 0, 0);
 
 			// need to save whatever was there
 			enginePointer->d3d10Device->OMSetBlendState(NULL, b, 0xffffffff);
-			SAFE_RELEASE(pBlendState);
+			SAFE_RELEASE(_spriteBatchBlendState);
 
 
 		}

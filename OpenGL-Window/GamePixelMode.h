@@ -885,9 +885,9 @@ namespace game
 
 		if (radius > 0)
 		{
-			int x0 = 0;
-			int y0 = radius;
-			int d = 3 - 2 * radius;
+			int32_t x0 = 0;
+			int32_t y0 = radius;
+			int32_t d = 3 - 2 * radius;
 
 			while (y0 >= x0) // only formulate 1/8 of circle
 			{
