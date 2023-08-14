@@ -9,6 +9,7 @@
 #include <d3d10.h>
 #endif
 
+#include <unordered_map>
 #include "GameEngine.h"
 #include "GameErrors.h"
 #include "GameMath.h"
@@ -39,7 +40,7 @@ namespace game
 		void Draw(const Texture2D& texture, const Recti& destination, const Recti& source, const Color& color);
 		void DrawString(const SpriteFont &font, const std::string &Str, const int x, const int y, const Color& color);
 	private:
-		const uint32_t _maxSprites = 2000000;
+		const uint32_t _maxSprites = 200000;
 		uint32_t _numberOfSpritesUsed;
 		Texture2D _currentTexture;
 		void _Enable2D();  // May not need
@@ -73,8 +74,8 @@ namespace game
 		ID3D10SamplerState* _textureSamplerState10;
 		ID3D10Buffer* _indexBuffer;
 		ID3D10BlendState* _spriteBatchBlendState;
-		// not sure on how to handle the textures, maybe a dictionary
-		ID3D10ShaderResourceView* _currentTextureResourceView;
+		// not sure how to store it, maybe name?
+		std::unordered_map<std::string, ID3D10ShaderResourceView*> _knownTextures;
 
 		// saves state of dx10 states we change to restore
 		uint32_t _oldStride = 0;
@@ -123,7 +124,6 @@ namespace game
 			_vertexBuffer10 = nullptr;
 			_vertexLayout10 = nullptr;
 			_textureSamplerState10 = nullptr;
-			_currentTextureResourceView = nullptr;
 			_spriteBatchBlendState = nullptr;
 		}
 #endif
@@ -171,10 +171,13 @@ namespace game
 			SAFE_RELEASE(_vertexBuffer10);
 			SAFE_RELEASE(_vertexLayout10);
 			SAFE_RELEASE(_textureSamplerState10);
-			SAFE_RELEASE(_currentTextureResourceView);
 			SAFE_RELEASE(_indexBuffer);
 			SAFE_RELEASE(_spriteBatchBlendState);
 			enginePointer->geUnLoadShader(_spriteBatchShader);
+			for (auto &textureIterator : _knownTextures)
+			{
+				SAFE_RELEASE(textureIterator.second);
+			}
 		}
 #endif
 #if defined (GAME_DIRECTX11)
@@ -273,11 +276,11 @@ namespace game
 
 			// Create the vertex buffer
 			vertexBufferDescription.ByteWidth = _maxSprites * (uint32_t)6 * (uint32_t)sizeof(_spriteVertex10);
-			std::cout << "SpriteBatch VertexBuffer size : " << sizeof(_spriteVertex10) * _maxSprites / 1024 << "kB\n";
+			std::cout << "SpriteBatch VertexBuffer size : " << sizeof(_spriteVertex10) * _maxSprites * 6 / 1024 << "kB\n";
 			vertexBufferDescription.Usage = D3D10_USAGE_DYNAMIC;
 			vertexBufferDescription.BindFlags = D3D10_BIND_VERTEX_BUFFER;
 			vertexBufferDescription.CPUAccessFlags = D3D10_CPU_ACCESS_WRITE;
-			vertexBufferDescription.MiscFlags = 0;
+			vertexBufferDescription.MiscFlags = 0;	
 			if (FAILED(enginePointer->d3d10Device->CreateBuffer(&vertexBufferDescription, NULL, &_vertexBuffer10)))
 			{
 				lastError = { GameErrors::GameDirectX10Specific, "Could not create vertex buffer for SpriteBatch." };
@@ -403,8 +406,7 @@ namespace game
 			enginePointer->d3d10Device->PSSetShader(_spriteBatchShader.pixelShader10);
 			enginePointer->d3d10Device->PSSetSamplers(0, 1, &_textureSamplerState10);
 			enginePointer->d3d10Device->IASetPrimitiveTopology(D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-			enginePointer->d3d10Device->PSSetShaderResources(0, 1, &_currentTextureResourceView);
-			//enginePointer->d3d10Device->OMSetBlendState(_spriteBatchBlendState, sampleMask, 0xffffffff);
+			enginePointer->d3d10Device->OMSetBlendState(_spriteBatchBlendState, sampleMask, 0xffffffff);
 
 
 		// Disable multisampling
@@ -722,24 +724,36 @@ namespace game
 			Vector2i windowSize;
 			Rectf scaledPos;
 
-			// If texture changed, render and change texture/SRV
+			// If texture changed, render and change SRV
 			if (texture.textureInterface10 != _currentTexture.textureInterface10)
 			{
 				Render();
 				_currentTexture = texture;
 				// Change shader texture to new one
-				//enginePointer->d3d10Device->PSSetShaderResources(0, 1, &_textureShaderResourceView0);
-				SAFE_RELEASE(_currentTextureResourceView);
-				D3D10_SHADER_RESOURCE_VIEW_DESC srDesc = {};
-				srDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-				srDesc.ViewDimension = D3D10_SRV_DIMENSION_TEXTURE2D;
-				srDesc.Texture2D.MostDetailedMip = 0;
-				srDesc.Texture2D.MipLevels = 1;
-				if (FAILED(enginePointer->d3d10Device->CreateShaderResourceView(texture.textureInterface10, &srDesc, &_currentTextureResourceView)))
+				auto foundTexture = _knownTextures.find(texture.name);
+				// Texture is known to us, so use the saved SRV
+				if (foundTexture != _knownTextures.end())
 				{
-					std::cout << "CreateSRV spritebatch failed!\n";
+					// SRV has been created before
+					// So use it
+					enginePointer->d3d10Device->PSSetShaderResources(0, 1, &foundTexture->second);
 				}
-				enginePointer->d3d10Device->PSSetShaderResources(0, 1, &_currentTextureResourceView);
+				else
+				{
+					ID3D10ShaderResourceView* newTextureSRV;
+					// New to us texture,so create a SRV for it and save it
+					D3D10_SHADER_RESOURCE_VIEW_DESC srDesc = {};
+					srDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+					srDesc.ViewDimension = D3D10_SRV_DIMENSION_TEXTURE2D;
+					srDesc.Texture2D.MostDetailedMip = 0;
+					srDesc.Texture2D.MipLevels = 1;
+					if (FAILED(enginePointer->d3d10Device->CreateShaderResourceView(texture.textureInterface10, &srDesc, &newTextureSRV)))
+					{
+						std::cout << "CreateSRV spritebatch failed!\n";
+					}
+					_knownTextures[texture.name] = newTextureSRV;
+					enginePointer->d3d10Device->PSSetShaderResources(0, 1, &newTextureSRV);
+				}
 			}
 
 			access = &_spriteVertices10[_numberOfSpritesUsed * 6];
@@ -932,20 +946,31 @@ namespace game
 				Render();
 				_currentTexture = texture;
 				// Change shader texture to new one
-				//enginePointer->d3d10Device->PSSetShaderResources(0, 1, &_textureShaderResourceView0);
-				{ if ((_currentTextureResourceView)) {
-					(_currentTextureResourceView)->Release(); (_currentTextureResourceView) = nullptr;
-				} };
-				D3D10_SHADER_RESOURCE_VIEW_DESC srDesc = {};
-				srDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-				srDesc.ViewDimension = D3D10_SRV_DIMENSION_TEXTURE2D;
-				srDesc.Texture2D.MostDetailedMip = 0;
-				srDesc.Texture2D.MipLevels = 1;
-				if (FAILED(enginePointer->d3d10Device->CreateShaderResourceView(texture.textureInterface10, &srDesc, &_currentTextureResourceView)))
+				auto foundTexture = _knownTextures.find(texture.name);
+				// Texture is known to us, so use the saved SRV
+				if (foundTexture != _knownTextures.end())
 				{
-					std::cout << "CreateSRV spritebatch failed!\n";
+					// Resource view has been created
+					// So use it
+					enginePointer->d3d10Device->PSSetShaderResources(0, 1, &foundTexture->second);
+					std::cout << "texture found\n";
 				}
-				enginePointer->d3d10Device->PSSetShaderResources(0, 1, &_currentTextureResourceView);
+				else
+				{
+					ID3D10ShaderResourceView* newTextureSRV;
+					// New to us texture,so create a SRV for it and save it
+					D3D10_SHADER_RESOURCE_VIEW_DESC srDesc = {};
+					srDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+					srDesc.ViewDimension = D3D10_SRV_DIMENSION_TEXTURE2D;
+					srDesc.Texture2D.MostDetailedMip = 0;
+					srDesc.Texture2D.MipLevels = 1;
+					if (FAILED(enginePointer->d3d10Device->CreateShaderResourceView(texture.textureInterface10, &srDesc, &newTextureSRV)))
+					{
+						std::cout << "CreateSRV spritebatch failed!\n";
+					}
+					_knownTextures[texture.name] = newTextureSRV;
+					enginePointer->d3d10Device->PSSetShaderResources(0, 1, &newTextureSRV);
+				}
 			}
 
 			access = &_spriteVertices10[_numberOfSpritesUsed * 6];
