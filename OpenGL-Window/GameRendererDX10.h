@@ -554,7 +554,14 @@ namespace game
 
 	inline void RendererDX10::Swap()
 	{
-		_d3d10SwapChain->Present(1, 0); // first is vsync, 0 for non, 1-4 interval, second is ???
+		if (_attributes.VsyncOn)
+		{
+			_d3d10SwapChain->Present(1, 0); // first is vsync, 0 for non, 1-4 interval, second is ???
+		}
+		else
+		{
+			_d3d10SwapChain->Present(0, 0);
+		}
 	}
 }
 
