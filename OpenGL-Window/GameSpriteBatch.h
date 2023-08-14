@@ -467,7 +467,10 @@ namespace game
 			enginePointer->d3d10Device->VSSetShader(_oldVertexShader);
 			enginePointer->d3d10Device->PSSetShader(_oldPixelShader);
 			enginePointer->d3d10Device->PSSetSamplers(0, 1, &_oldTextureSamplerState);
-			enginePointer->d3d10Device->IASetPrimitiveTopology(_oldPrimitiveTopology);
+			if (_oldPrimitiveTopology !=  D3D10_PRIMITIVE_TOPOLOGY_UNDEFINED)
+			{
+				enginePointer->d3d10Device->IASetPrimitiveTopology(_oldPrimitiveTopology);
+			}
 			enginePointer->d3d10Device->OMSetBlendState(_oldBlendState, _oldBlendFactor, _oldSampleMask);
 		}
 #endif
@@ -515,7 +518,7 @@ namespace game
 			VOID* pVoid = nullptr;
 			if (FAILED(_vertexBuffer10->Map(D3D10_MAP_WRITE_DISCARD, 0, &pVoid)))
 			{
-				std::cout << "Could not map vertex buffer\n";
+				std::cout << "Could not map vertex buffer in SpriteBatch\n";
 			}
 			else
 			{
@@ -524,9 +527,6 @@ namespace game
 			}
 
 			enginePointer->d3d10Device->DrawIndexed(_numberOfSpritesUsed * 6, 0, 0);
-
-			// need to save whatever was there
-			//enginePointer->d3d10Device->OMSetBlendState(NULL, b, 0xffffffff);
 		}
 #endif
 #if defined (GAME_DIRECTX11)
@@ -740,8 +740,9 @@ namespace game
 				}
 				else
 				{
-					ID3D10ShaderResourceView* newTextureSRV;
 					// New to us texture,so create a SRV for it and save it
+
+					ID3D10ShaderResourceView* newTextureSRV;
 					D3D10_SHADER_RESOURCE_VIEW_DESC srDesc = {};
 					srDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
 					srDesc.ViewDimension = D3D10_SRV_DIMENSION_TEXTURE2D;
@@ -953,12 +954,12 @@ namespace game
 					// Resource view has been created
 					// So use it
 					enginePointer->d3d10Device->PSSetShaderResources(0, 1, &foundTexture->second);
-					std::cout << "texture found\n";
 				}
 				else
 				{
-					ID3D10ShaderResourceView* newTextureSRV;
 					// New to us texture,so create a SRV for it and save it
+
+					ID3D10ShaderResourceView* newTextureSRV;
 					D3D10_SHADER_RESOURCE_VIEW_DESC srDesc = {};
 					srDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
 					srDesc.ViewDimension = D3D10_SRV_DIMENSION_TEXTURE2D;

@@ -196,7 +196,6 @@ public:
 		spriteBatch.End();
 
 		EndScene();
-		geStopEngine();
 	}
 
 	// Clears the screen

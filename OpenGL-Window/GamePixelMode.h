@@ -655,7 +655,10 @@ namespace game
 			enginePointer->d3d10Device->VSSetShader(oldVertexShader);
 			enginePointer->d3d10Device->PSSetShader(oldPixelShader);
 			enginePointer->d3d10Device->PSSetSamplers(0, 1, &oldTextureSamplerState);
-			enginePointer->d3d10Device->IASetPrimitiveTopology(oldPrimitiveTopology);
+			if (oldPrimitiveTopology != D3D10_PRIMITIVE_TOPOLOGY_UNDEFINED)
+			{
+				enginePointer->d3d10Device->IASetPrimitiveTopology(oldPrimitiveTopology);
+			}
 		}
 #endif
 
