@@ -78,20 +78,20 @@ namespace game
 		std::unordered_map<std::string, ID3D10ShaderResourceView*> _knownTextures;
 
 		// saves state of dx10 states we change to restore
-		uint32_t _oldStride = 0;
-		uint32_t _oldOffset = 0;
-		ID3D10Buffer* _oldVertexBuffer = nullptr;
-		ID3D10Buffer* _oldIndexBuffer = nullptr;
-		DXGI_FORMAT _oldIndexFormat = {};
-		uint32_t _oldIndexOffset = 0;
-		ID3D10InputLayout* _oldInputLayout = nullptr;
-		ID3D10VertexShader* _oldVertexShader = nullptr;
-		ID3D10PixelShader* _oldPixelShader = nullptr;
-		ID3D10SamplerState* _oldTextureSamplerState = nullptr;
-		D3D10_PRIMITIVE_TOPOLOGY _oldPrimitiveTopology = {};
-		ID3D10BlendState* _oldBlendState = nullptr;
-		float_t _oldBlendFactor[4] = { 0 };
-		uint32_t _oldSampleMask = 0;
+		uint32_t _oldStride;
+		uint32_t _oldOffset;
+		ID3D10Buffer* _oldVertexBuffer;
+		ID3D10Buffer* _oldIndexBuffer;
+		DXGI_FORMAT _oldIndexFormat;
+		uint32_t _oldIndexOffset;
+		ID3D10InputLayout* _oldInputLayout;
+		ID3D10VertexShader* _oldVertexShader;
+		ID3D10PixelShader* _oldPixelShader;
+		ID3D10SamplerState* _oldTextureSamplerState;
+		D3D10_PRIMITIVE_TOPOLOGY _oldPrimitiveTopology;
+		ID3D10BlendState* _oldBlendState;
+		float_t _oldBlendFactor[4];
+		uint32_t _oldSampleMask;
 #endif
 #if defined (GAME_DIRECTX11)
 #endif
@@ -125,6 +125,20 @@ namespace game
 			_vertexLayout10 = nullptr;
 			_textureSamplerState10 = nullptr;
 			_spriteBatchBlendState = nullptr;
+			_oldStride = 0;
+			_oldOffset = 0;
+			_oldVertexBuffer = nullptr;
+			_oldIndexBuffer = nullptr;
+			_oldIndexFormat = {};
+			_oldIndexOffset = 0;
+			_oldInputLayout = nullptr;
+			_oldVertexShader = nullptr;
+			_oldPixelShader = nullptr;
+			_oldTextureSamplerState = nullptr;
+			_oldPrimitiveTopology = {};
+			_oldBlendState = nullptr;
+			_oldBlendFactor[4] = { 0 };
+			_oldSampleMask = 0;
 		}
 #endif
 #if defined (GAME_DIRECTX11)
