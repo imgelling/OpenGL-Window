@@ -422,7 +422,8 @@ namespace game
 			enginePointer->d3d10Device->IASetPrimitiveTopology(D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 			enginePointer->d3d10Device->OMSetBlendState(_spriteBatchBlendState, sampleMask, 0xffffffff);
 
-
+			// Reset current texture
+			_currentTexture.name = "";
 		// Disable multisampling
 		// not now
 		}
@@ -739,7 +740,7 @@ namespace game
 			Rectf scaledPos;
 
 			// If texture changed, render and change SRV
-			if (texture.textureInterface10 != _currentTexture.textureInterface10)
+			if (texture.name != _currentTexture.name)
 			{
 				Render();
 				_currentTexture = texture;
@@ -956,7 +957,7 @@ namespace game
 			Rectf scaledUV;
 
 			// If texture changed, render and change texture/SRV
-			if (texture.textureInterface10 != _currentTexture.textureInterface10)
+			if (texture.name != _currentTexture.name)
 			{
 				Render();
 				_currentTexture = texture;
