@@ -7,9 +7,9 @@
 #endif
 #if defined(GAME_DIRECTX10)
 #include <d3d10.h>
+#include <unordered_map>
 #endif
 
-#include <unordered_map>
 #include "GameEngine.h"
 #include "GameErrors.h"
 #include "GameMath.h"
@@ -40,7 +40,7 @@ namespace game
 		void Draw(const Texture2D& texture, const Recti& destination, const Recti& source, const Color& color);
 		void DrawString(const SpriteFont &font, const std::string &Str, const int x, const int y, const Color& color);
 	private:
-		const uint32_t _maxSprites = 200000;
+		const uint32_t _maxSprites = 3000;  // Higher than 3000 sprites slows dx9 down, 200000 works for gl and dx10
 		uint32_t _numberOfSpritesUsed;
 		Texture2D _currentTexture;
 		void _Enable2D();  // May not need
@@ -515,7 +515,7 @@ namespace game
 
 			// Send sprite vertices to gpu
 			_vertexBuffer->Lock(0, 0, (void**)&pVoid, 0);
-			memcpy(pVoid, &_spriteVertices[0], sizeof(_spriteVertex) * 6 * _maxSprites);
+			memcpy(pVoid, &_spriteVertices[0], sizeof(_spriteVertex) * 6 * _numberOfSpritesUsed);
 			_vertexBuffer->Unlock();
 
 			// Draw the sprites
