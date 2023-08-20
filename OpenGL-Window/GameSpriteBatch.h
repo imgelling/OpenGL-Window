@@ -26,7 +26,7 @@ namespace game
 	public:
 		SpriteBatch();
 		~SpriteBatch();
-		bool Initialize();
+		bool Initialize(const uint32_t maxSprites);
 		// Sets up states for sprite rendering and saves old states
 		void Begin();
 		// Cleans up sprite rendering and restores previous states
@@ -40,7 +40,7 @@ namespace game
 		void Draw(const Texture2D& texture, const Recti& destination, const Recti& source, const Color& color);
 		void DrawString(const SpriteFont &font, const std::string &Str, const int x, const int y, const Color& color);
 	private:
-		const uint32_t _maxSprites = 3000;  // Higher than 3000 sprites slows dx9 down, 200000 works for gl and dx10
+		uint32_t _maxSprites;
 		uint32_t _numberOfSpritesUsed;
 		Texture2D _currentTexture;
 		void _Enable2D();  // May not need
@@ -99,6 +99,7 @@ namespace game
 
 	inline SpriteBatch::SpriteBatch()
 	{
+		_maxSprites = 0;
 #if defined(GAME_OPENGL)
 		//if (enginePointer->geIsUsing(GAME_OPENGL))
 		{
@@ -137,7 +138,7 @@ namespace game
 			_oldTextureSamplerState = nullptr;
 			_oldPrimitiveTopology = {};
 			_oldBlendState = nullptr;
-			_oldBlendFactor[4] = { 0 };
+			ZeroMemory(_oldBlendFactor, 4 * sizeof(float_t));
 			_oldSampleMask = 0;
 		}
 #endif
@@ -199,8 +200,10 @@ namespace game
 #endif
 	}
 
-	inline bool SpriteBatch::Initialize()
+	inline bool SpriteBatch::Initialize(const uint32_t maxSprites = 2000)
 	{
+		// Save max sprites
+		_maxSprites = maxSprites;
 		// OpenGL and DX9 implementation of vertices
 #if defined(GAME_OPENGL) || defined (GAME_DIRECTX9)
 		_spriteVertices = new _spriteVertex[_maxSprites * 6];
@@ -257,6 +260,7 @@ namespace game
 #if defined (GAME_DIRECTX9)
 		if (enginePointer->geIsUsing(GAME_DIRECTX9))
 		{
+			std::cout << "Vertex Buffer Size = " << _maxSprites * (uint32_t)6 * (uint32_t)sizeof(_spriteVertex) / 1024 << "kB.\n";
 			enginePointer->d3d9Device->CreateVertexBuffer(_maxSprites * (uint32_t)6 * (uint32_t)sizeof(_spriteVertex), 0, (D3DFVF_XYZRHW | D3DFVF_DIFFUSE | D3DFVF_TEX1), D3DPOOL_MANAGED, &_vertexBuffer, NULL);
 			if (_vertexBuffer == nullptr)
 			{

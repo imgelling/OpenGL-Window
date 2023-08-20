@@ -1,6 +1,10 @@
 #if !defined(GAMERENDERERDX9_H)
 #define GAMERENDERERDX9_H
 
+#if !defined(SAFE_RELEASE)
+#define SAFE_RELEASE(p) { if ( (p) ) { (p)->Release(); (p) = nullptr; } }
+#endif
+
 #include <d3d9.h>
 #include <d3dcompiler.h>
 #include <fstream>
@@ -79,14 +83,8 @@ namespace game
 
 	inline void RendererDX9::DestroyDevice()
 	{
-		if (_d3d9Device)
-		{
-			_d3d9Device->Release();
-		}
-		if (_d3d9)
-		{
-			_d3d9->Release();
-		}
+		SAFE_RELEASE(_d3d9Device);
+		SAFE_RELEASE(_d3d9);
 	}
 
 	inline bool RendererDX9::CreateDevice(Window& window)
@@ -327,11 +325,7 @@ namespace game
 
 	inline void RendererDX9::UnLoadTexture(Texture2D& texture)
 	{
-		if (texture.textureInterface9)
-		{
-			texture.textureInterface9->Release();
-			texture.textureInterface9 = nullptr;
-		}
+		SAFE_RELEASE(texture.textureInterface9);
 		texture.width = 0;
 		texture.height = 0;
 		texture.oneOverWidth = 0.0f;
@@ -368,16 +362,8 @@ namespace game
 				{
 					lastError.lastErrorString += p[bytes];
 				}
-				if (compilationMsgs)
-				{
-					compilationMsgs->Release();
-					compilationMsgs = nullptr;
-				}
-				if (compiledVertexShader)
-				{
-					compiledVertexShader->Release();
-					compiledVertexShader = nullptr;
-				}
+				SAFE_RELEASE(compilationMsgs);
+				SAFE_RELEASE(compiledVertexShader);
 				return false;
 			}
 
@@ -391,44 +377,21 @@ namespace game
 				{
 					lastError.lastErrorString += p[bytes];
 				}
-				if (compilationMsgs)
-				{
-					compilationMsgs->Release();
-					compilationMsgs = nullptr;
-				}
-				if (compiledVertexShader)
-				{
-					compiledVertexShader->Release();
-					compiledVertexShader = nullptr;
-				}
-				if (compiledPixelShader)
-				{
-					compiledPixelShader->Release();
-					compiledPixelShader = nullptr;
-				}
+				SAFE_RELEASE(compilationMsgs);
+				SAFE_RELEASE(compiledVertexShader);
+				SAFE_RELEASE(compiledPixelShader);
 				return false;
 			}
 
 			// Free up any messages from compilation if any
-			if (compilationMsgs)
-			{
-				compilationMsgs->Release();
-			}
+			SAFE_RELEASE(compilationMsgs);
 
 			// Create vertex shader
 			if (_d3d9Device->CreateVertexShader((DWORD*)(compiledVertexShader->GetBufferPointer()), &shader.vertexShader9) != D3D_OK)
 			{
 				lastError = { GameErrors::GameDirectX9Specific,"Could not create vertex shader from \"" + vertex + "\"." };
-				if (compiledVertexShader)
-				{
-					compiledVertexShader->Release();
-					compiledVertexShader = nullptr;
-				}
-				if (compiledPixelShader)
-				{
-					compiledPixelShader->Release();
-					compiledPixelShader = nullptr;
-				}
+				SAFE_RELEASE(compiledVertexShader);
+				SAFE_RELEASE(compiledPixelShader);
 				return false;
 			}
 
@@ -436,37 +399,15 @@ namespace game
 			if (_d3d9Device->CreatePixelShader((DWORD*)(compiledPixelShader->GetBufferPointer()), &shader.pixelShader9) != D3D_OK)
 			{
 				lastError = { GameErrors::GameDirectX9Specific,"Could not create pixel shader from \"" + fragment + "\"." };
-				if (compiledVertexShader)
-				{
-					compiledVertexShader->Release();
-					compiledVertexShader = nullptr;
-				}
-				if (compiledPixelShader)
-				{
-					compiledPixelShader->Release();
-					compiledPixelShader = nullptr;
-				}
-				if (shader.vertexShader9)
-				{
-					shader.vertexShader9->Release();
-					shader.vertexShader9 = nullptr;
-				}
+				SAFE_RELEASE(compiledVertexShader);
+				SAFE_RELEASE(compiledPixelShader);
+				SAFE_RELEASE(shader.vertexShader9);
 				return false;
 			}
 
 			// Shaders created, release the compiled code
-			if (compiledVertexShader)
-			{
-				compiledVertexShader->Release();
-				compiledVertexShader = nullptr;
-			}
-			if (compiledPixelShader)
-			{
-				compiledPixelShader->Release();
-				compiledPixelShader = nullptr;
-			}
-
-
+			SAFE_RELEASE(compiledVertexShader);
+			SAFE_RELEASE(compiledPixelShader);
 
 			return true;
 		}
@@ -545,10 +486,7 @@ namespace game
 						delete[] compiledPixelShader;
 						compiledPixelShader = nullptr;
 					}
-					if (shader.vertexShader9)
-					{
-						shader.vertexShader9->Release();
-					}
+					SAFE_RELEASE(shader.vertexShader9);
 					file.close();
 
 					return false;
@@ -570,11 +508,7 @@ namespace game
 						delete[] compiledPixelShader;
 						compiledPixelShader = nullptr;
 					}
-					if (shader.vertexShader9)
-					{
-						shader.vertexShader9->Release();
-						shader.vertexShader9 = nullptr;
-					}
+					SAFE_RELEASE(shader.vertexShader9);
 					return false;
 				}
 			}
@@ -591,10 +525,7 @@ namespace game
 					delete[] compiledPixelShader;
 					compiledPixelShader = nullptr;
 				}
-				if (shader.vertexShader9)
-				{
-					shader.vertexShader9->Release();
-				}
+				SAFE_RELEASE(shader.vertexShader9);
 				return false;
 			}
 
@@ -618,16 +549,8 @@ namespace game
 
 	inline void RendererDX9::UnLoadShader(Shader& shader)
 	{
-		if (shader.vertexShader9)
-		{
-			shader.vertexShader9->Release();
-			shader.vertexShader9 = nullptr;
-		}
-		if (shader.pixelShader9)
-		{
-			shader.pixelShader9->Release();
-			shader.pixelShader9 = nullptr;
-		}
+		SAFE_RELEASE(shader.vertexShader9);
+		SAFE_RELEASE(shader.pixelShader9);
 	}
 }
 

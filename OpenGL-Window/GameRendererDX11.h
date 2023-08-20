@@ -1,4 +1,5 @@
-#pragma once
+#if !defined(GAMERENDERERDX11_H)
+#define GAMERENDERERDX11_H
 #include <wrl.h>
 #include <d3d11.h>
 #include <d3dcompiler.h>
@@ -48,13 +49,13 @@ namespace game
 	{ 
 		D3D_FEATURE_LEVEL featureLevels[] =
 		{
-			//D3D_FEATURE_LEVEL_9_1,	// 0x9100
-			//D3D_FEATURE_LEVEL_9_2,	// 0x9200
-			//D3D_FEATURE_LEVEL_9_3,	// 0x9300
 			D3D_FEATURE_LEVEL_11_1,	// 0xb100
 			D3D_FEATURE_LEVEL_11_0, // 0xb00
 			D3D_FEATURE_LEVEL_10_1, // 0xa100
-			D3D_FEATURE_LEVEL_10_0	// 0xa000
+			D3D_FEATURE_LEVEL_10_0, // 0xa000
+			D3D_FEATURE_LEVEL_9_3,	// 0x9300
+			D3D_FEATURE_LEVEL_9_2,	// 0x9200
+			D3D_FEATURE_LEVEL_9_1,	// 0x9100
 		};
 		uint32_t deviceFlags = D3D11_CREATE_DEVICE_BGRA_SUPPORT;
 		HRESULT hr = 0;
@@ -182,3 +183,5 @@ namespace game
 		texture.anisotropyLevel = 1;
 	}
 }
+
+#endif
