@@ -187,8 +187,8 @@ public:
 
 		spriteBatch.Begin();
 		//double_t perSecond = (perftimer.LastRun("CircleClip") / 1000.0 / 1000.0 / 1000.0) * 500000.0;
-		//for (int i = 0; i < 40; i++)
-			//spriteBatch.Draw(spriteTexture, { 10 + (i * 100), 10 }, game::Colors::White);
+		for (int i = 0; i < 40; i++)
+			spriteBatch.Draw(spriteTexture, { 10 + (i * 100), 10 }, game::Colors::White);
 		//spriteBatch.DrawString(spriteFont, "Random PixelClip(s) : " + std::to_string(perSecond) + " billion per second.", 10, 200, game::Colors::Red);
 		spriteBatch.DrawString(spriteFont, "FPS : " + std::to_string(geGetFramesPerSecond()) + " UPS : " + std::to_string(geGetUpdatesPerSecond()) + " cpu : " + std::to_string(geGetCPUFrequency()) + "Mhz", 10, 200, game::Colors::Red);
 		spriteBatch.DrawString(spriteFont, "Window Pixel Size: " + std::to_string(geGetWindowSize().width) + "x" + std::to_string(geGetWindowSize().height), 10, 220, game::Colors::Red);
