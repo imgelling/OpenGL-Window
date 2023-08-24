@@ -234,8 +234,8 @@ namespace game
 #if defined(GAME_DIRECTX10)
 		if (enginePointer->geIsUsing(GAME_DIRECTX10))
 		{
-			_spriteVertices10 = new _spriteVertex10[_maxSprites * 6];
-			for (uint32_t vertex = 0; vertex < _maxSprites * 6; vertex++)
+			_spriteVertices10 = new _spriteVertex10[_maxSprites * 4];
+			for (uint32_t vertex = 0; vertex < _maxSprites * 4; vertex++)
 			{
 				_spriteVertices10[vertex].x = 0.0f;
 				_spriteVertices10[vertex].y = 0.0f;
@@ -293,8 +293,8 @@ namespace game
 			}
 
 			// Create the vertex buffer
-			vertexBufferDescription.ByteWidth = _maxSprites * (uint32_t)6 * (uint32_t)sizeof(_spriteVertex10);
-			std::cout << "SpriteBatch VertexBuffer size : " << sizeof(_spriteVertex10) * _maxSprites * 6 / 1024 << "kB\n";
+			vertexBufferDescription.ByteWidth = _maxSprites * (uint32_t)4 * (uint32_t)sizeof(_spriteVertex10);
+			std::cout << "SpriteBatch VertexBuffer size : " << sizeof(_spriteVertex10) * _maxSprites * 4 / 1024 << "kB\n";
 			vertexBufferDescription.Usage = D3D10_USAGE_DYNAMIC;
 			vertexBufferDescription.BindFlags = D3D10_BIND_VERTEX_BUFFER;
 			vertexBufferDescription.CPUAccessFlags = D3D10_CPU_ACCESS_WRITE;
@@ -307,14 +307,14 @@ namespace game
 
 			// Create index buffer
 			//  0, 1, 2, 1, 3, 2
-			for (uint32_t index = 0; index < _maxSprites; index += 1)
+			for (uint32_t index = 0; index < _maxSprites; index++)
 			{
-				indices.emplace_back(0 + (index * 6));
-				indices.emplace_back(1 + (index * 6));
-				indices.emplace_back(2 + (index * 6));
-				indices.emplace_back(1 + (index * 6));
-				indices.emplace_back(3 + (index * 6));
-				indices.emplace_back(2 + (index * 6));
+				indices.emplace_back(0 + (index * 4));  // 4 indices per quad, not 6 like I had
+				indices.emplace_back(1 + (index * 4));
+				indices.emplace_back(2 + (index * 4));
+				indices.emplace_back(1 + (index * 4));
+				indices.emplace_back(3 + (index * 4));
+				indices.emplace_back(2 + (index * 4));
 			}
 			indexBufferDescription.Usage = D3D10_USAGE_IMMUTABLE;
 			indexBufferDescription.ByteWidth = sizeof(DWORD) * 6 * _maxSprites;
@@ -541,11 +541,11 @@ namespace game
 			}
 			else
 			{
-				memcpy(pVoid, &_spriteVertices10[0], sizeof(_spriteVertex10) * 6 * _numberOfSpritesUsed);
+				memcpy(pVoid, &_spriteVertices10[0], sizeof(_spriteVertex10) * 4 * _numberOfSpritesUsed);
 				_vertexBuffer10->Unmap();
 			}
 
-			enginePointer->d3d10Device->DrawIndexed(_numberOfSpritesUsed * 6, 0, 0);
+			enginePointer->d3d10Device->DrawIndexed(_numberOfSpritesUsed * 6, 0,0);
 		}
 #endif
 #if defined (GAME_DIRECTX11)
@@ -776,7 +776,7 @@ namespace game
 				}
 			}
 
-			access = &_spriteVertices10[_numberOfSpritesUsed * 6];
+			access = &_spriteVertices10[_numberOfSpritesUsed * 4];
 			windowSize = enginePointer->geGetWindowSize();
 			// Homogenise coordinates to -1.0f to 1.0f
 			scaledPos.left = ((float_t)x * 2.0f / (float_t)windowSize.width) - 1.0f;
@@ -993,7 +993,7 @@ namespace game
 				}
 			}
 
-			access = &_spriteVertices10[_numberOfSpritesUsed * 6];
+			access = &_spriteVertices10[_numberOfSpritesUsed * 4];
 			window = enginePointer->geGetWindowSize();
 			// Homogenise coordinates to -1.0f to 1.0f
 			scaledPosition.left = ((float_t)destination.left * 2.0f / (float_t)window.width) - 1.0f;
