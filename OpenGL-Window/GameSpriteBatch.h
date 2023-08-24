@@ -341,9 +341,9 @@ namespace game
 
 			// Create texture sampler 
 			samplerDesc.Filter = D3D10_FILTER_MIN_MAG_MIP_POINT;
-			samplerDesc.AddressU = D3D10_TEXTURE_ADDRESS_WRAP;
-			samplerDesc.AddressV = D3D10_TEXTURE_ADDRESS_WRAP;
-			samplerDesc.AddressW = D3D10_TEXTURE_ADDRESS_WRAP;
+			samplerDesc.AddressU = D3D10_TEXTURE_ADDRESS_CLAMP;
+			samplerDesc.AddressV = D3D10_TEXTURE_ADDRESS_CLAMP;
+			samplerDesc.AddressW = D3D10_TEXTURE_ADDRESS_CLAMP;
 			samplerDesc.ComparisonFunc = D3D10_COMPARISON_NEVER;
 			samplerDesc.MinLOD = 0;
 			samplerDesc.MaxLOD = D3D10_FLOAT32_MAX;
@@ -1072,7 +1072,7 @@ namespace game
 		Recti source, destination;
 		int16_t letter;
 
-		for (unsigned int i = 0; i < Str.size(); ++i)
+		for (unsigned int i = 0; i < Str.size(); i++)
 		{
 			letter = Str[i];
 			widthOfLetter = font._characterSet.letters[letter].width;
