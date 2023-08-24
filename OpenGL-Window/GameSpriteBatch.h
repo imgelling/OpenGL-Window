@@ -207,7 +207,7 @@ namespace game
 		_maxSprites = maxSprites;
 		// OpenGL and DX9 implementation of vertices
 #if defined(GAME_OPENGL) || defined (GAME_DIRECTX9)  // OPENGL will break here, changed 6 to 4
-		_spriteVertices = new _spriteVertex[_maxSprites * 4];
+		_spriteVertices = new _spriteVertex[(uint64_t)(_maxSprites) * 4];
 		for (uint32_t vertex = 0; vertex < _maxSprites * 4; vertex++)
 		{
 			_spriteVertices[vertex].x = 0.0f;
