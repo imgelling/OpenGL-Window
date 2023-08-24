@@ -55,7 +55,8 @@ namespace game
 		_spriteVertex* _spriteVertices;
 #endif
 #if defined(GAME_DIRECTX9)
-		LPDIRECT3DVERTEXBUFFER9 _vertexBuffer;
+		LPDIRECT3DVERTEXBUFFER9 _vertexBuffer9;
+		LPDIRECT3DINDEXBUFFER9 _indexBuffer9;
 		DWORD _savedFVF;
 		DWORD _savedBlending;
 		IDirect3DBaseTexture9* _savedTexture;
@@ -110,8 +111,8 @@ namespace game
 		//if (enginePointer->geIsUsing(GAME_DIRECTX9))
 		{
 			_spriteVertices = nullptr;
-
-			_vertexBuffer = nullptr;
+			_indexBuffer9 = nullptr;
+			_vertexBuffer9 = nullptr;
 			_savedFVF = 0;
 			_savedBlending = 0;
 			_savedTexture = nullptr;
@@ -163,11 +164,13 @@ namespace game
 #if defined (GAME_DIRECTX9)
 		if (enginePointer->geIsUsing(GAME_DIRECTX9))
 		{
-			if (_vertexBuffer)
-			{
-				_vertexBuffer->Release();
-				_vertexBuffer = nullptr;
-			}
+			SAFE_RELEASE(_vertexBuffer9);
+			SAFE_RELEASE(_indexBuffer9);
+			//if (_vertexBuffer9)
+			//{
+			//	_vertexBuffer9->Release();
+			//	_vertexBuffer9 = nullptr;
+			//}
 			if (_spriteVertices)
 			{
 				delete[] _spriteVertices;
@@ -260,9 +263,9 @@ namespace game
 #if defined (GAME_DIRECTX9)
 		if (enginePointer->geIsUsing(GAME_DIRECTX9))
 		{
-			std::cout << "Vertex Buffer Size = " << _maxSprites * (uint32_t)6 * (uint32_t)sizeof(_spriteVertex) / 1024 << "kB.\n";
-			enginePointer->d3d9Device->CreateVertexBuffer(_maxSprites * (uint32_t)6 * (uint32_t)sizeof(_spriteVertex), 0, (D3DFVF_XYZRHW | D3DFVF_DIFFUSE | D3DFVF_TEX1), D3DPOOL_MANAGED, &_vertexBuffer, NULL);
-			if (_vertexBuffer == nullptr)
+			//std::cout << "Vertex Buffer Size = " << _maxSprites * (uint32_t)6 * (uint32_t)sizeof(_spriteVertex) / 1024 << "kB.\n";
+			enginePointer->d3d9Device->CreateVertexBuffer(_maxSprites * (uint32_t)6 * (uint32_t)sizeof(_spriteVertex), 0, (D3DFVF_XYZRHW | D3DFVF_DIFFUSE | D3DFVF_TEX1), D3DPOOL_MANAGED, &_vertexBuffer9, NULL);
+			if (_vertexBuffer9 == nullptr)
 			{
 				lastError = { GameErrors::GameDirectX9Specific, "Could not create vertex buffer for SpriteBatch." };
 				return false;
@@ -276,7 +279,7 @@ namespace game
 			D3D10_BUFFER_DESC indexBufferDescription = { 0 }; 
 			D3D10_SUBRESOURCE_DATA vertexInitialData = { 0 };
 			D3D10_SUBRESOURCE_DATA indexInitialData = { 0 };  
-			std::vector<DWORD> indices;
+			std::vector<uint32_t> indices;
 
 			D3D10_INPUT_ELEMENT_DESC inputLayout[] =
 			{
@@ -294,7 +297,7 @@ namespace game
 
 			// Create the vertex buffer
 			vertexBufferDescription.ByteWidth = _maxSprites * (uint32_t)4 * (uint32_t)sizeof(_spriteVertex10);
-			std::cout << "SpriteBatch VertexBuffer size : " << sizeof(_spriteVertex10) * _maxSprites * 4 / 1024 << "kB\n";
+			//std::cout << "SpriteBatch VertexBuffer size : " << sizeof(_spriteVertex10) * _maxSprites * 4 / 1024 << "kB\n";
 			vertexBufferDescription.Usage = D3D10_USAGE_DYNAMIC;
 			vertexBufferDescription.BindFlags = D3D10_BIND_VERTEX_BUFFER;
 			vertexBufferDescription.CPUAccessFlags = D3D10_CPU_ACCESS_WRITE;
@@ -519,14 +522,14 @@ namespace game
 
 
 			// Send sprite vertices to gpu
-			_vertexBuffer->Lock(0, 0, (void**)&pVoid, 0);
+			_vertexBuffer9->Lock(0, 0, (void**)&pVoid, 0);
 			memcpy(pVoid, &_spriteVertices[0], sizeof(_spriteVertex) * 6 * _numberOfSpritesUsed);
-			_vertexBuffer->Unlock();
+			_vertexBuffer9->Unlock();
 
 			// Draw the sprites
 			enginePointer->d3d9Device->SetTexture(0, _currentTexture.textureInterface9);
 			enginePointer->d3d9Device->SetFVF((D3DFVF_XYZRHW | D3DFVF_DIFFUSE | D3DFVF_TEX1));
-			enginePointer->d3d9Device->SetStreamSource(0, _vertexBuffer, 0, sizeof(_spriteVertex));
+			enginePointer->d3d9Device->SetStreamSource(0, _vertexBuffer9, 0, sizeof(_spriteVertex));
 			enginePointer->d3d9Device->DrawPrimitive(D3DPT_TRIANGLELIST, 0, _numberOfSpritesUsed * 2);
 		}
 #endif
