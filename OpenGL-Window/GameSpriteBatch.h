@@ -34,17 +34,15 @@ namespace game
 		// Render a complete batch of sprites
 		void Render();
 		// Will draw entire texture to location x,y
-		void Draw(const Texture2D &texture, const uint32_t x, const uint32_t y, const Color color);
+		void Draw(const Texture2D& texture, const uint32_t x, const uint32_t y, const Color color);
 		void Draw(const Texture2D& texture, const Pointi& position, const Color color);
 		// Will draw a specified rectangle portion of a texture to location x,y
 		void Draw(const Texture2D& texture, const Recti& destination, const Recti& source, const Color& color);
-		void DrawString(const SpriteFont &font, const std::string &Str, const int x, const int y, const Color& color);
+		void DrawString(const SpriteFont& font, const std::string& Str, const int x, const int y, const Color& color);
 	private:
 		uint32_t _maxSprites;
 		uint32_t _numberOfSpritesUsed;
 		Texture2D _currentTexture;
-		void _Enable2D();  // May not need
-		void _Disable2D();	// May not need
 #if defined(GAME_OPENGL) | defined(GAME_DIRECTX9)
 		struct _spriteVertex
 		{
@@ -192,7 +190,7 @@ namespace game
 			SAFE_RELEASE(_indexBuffer);
 			SAFE_RELEASE(_spriteBatchBlendState);
 			enginePointer->geUnLoadShader(_spriteBatchShader);
-			for (auto &textureIterator : _knownTextures)
+			for (auto& textureIterator : _knownTextures)
 			{
 				SAFE_RELEASE(textureIterator.second);
 			}
@@ -208,9 +206,9 @@ namespace game
 		// Save max sprites
 		_maxSprites = maxSprites;
 		// OpenGL and DX9 implementation of vertices
-#if defined(GAME_OPENGL) || defined (GAME_DIRECTX9)
-		_spriteVertices = new _spriteVertex[_maxSprites * 6];
-		for (uint32_t vertex = 0; vertex < _maxSprites * 6; vertex++)
+#if defined(GAME_OPENGL) || defined (GAME_DIRECTX9)  // OPENGL will break here, changed 6 to 4
+		_spriteVertices = new _spriteVertex[_maxSprites * 4];
+		for (uint32_t vertex = 0; vertex < _maxSprites * 4; vertex++)
 		{
 			_spriteVertices[vertex].x = 0.0f;
 			_spriteVertices[vertex].y = 0.0f;
@@ -263,22 +261,47 @@ namespace game
 #if defined (GAME_DIRECTX9)
 		if (enginePointer->geIsUsing(GAME_DIRECTX9))
 		{
+			uint32_t* indexMap = nullptr;
+			std::vector<uint32_t> indices;
+
 			//std::cout << "Vertex Buffer Size = " << _maxSprites * (uint32_t)6 * (uint32_t)sizeof(_spriteVertex) / 1024 << "kB.\n";
-			enginePointer->d3d9Device->CreateVertexBuffer(_maxSprites * (uint32_t)6 * (uint32_t)sizeof(_spriteVertex), 0, (D3DFVF_XYZRHW | D3DFVF_DIFFUSE | D3DFVF_TEX1), D3DPOOL_MANAGED, &_vertexBuffer9, NULL);
-			if (_vertexBuffer9 == nullptr)
+			if (enginePointer->d3d9Device->CreateVertexBuffer(_maxSprites * (uint32_t)4 * (uint32_t)sizeof(_spriteVertex), 0, (D3DFVF_XYZRHW | D3DFVF_DIFFUSE | D3DFVF_TEX1), D3DPOOL_MANAGED, &_vertexBuffer9, NULL) != D3D_OK)
 			{
 				lastError = { GameErrors::GameDirectX9Specific, "Could not create vertex buffer for SpriteBatch." };
 				return false;
 			}
+
+			if (enginePointer->d3d9Device->CreateIndexBuffer(_maxSprites * (uint32_t)6 * (uint32_t)sizeof(uint32_t), 0, D3DFMT_INDEX32, D3DPOOL_MANAGED, &_indexBuffer9, NULL) != D3D_OK)
+			{
+				lastError = { GameErrors::GameDirectX9Specific, "Could not create index buffer for SpriteBatch." };
+				return false;
+			}
+
+			// Fill index buffer
+			for (uint32_t index = 0; index < _maxSprites; index++)
+			{
+				indices.emplace_back(0 + (index * 4));  // 4 indices per quad, not 6 like I had
+				indices.emplace_back(1 + (index * 4));
+				indices.emplace_back(2 + (index * 4));
+				indices.emplace_back(1 + (index * 4));
+				indices.emplace_back(3 + (index * 4));
+				indices.emplace_back(2 + (index * 4));
+			}
+
+			// Copy data to gpu
+			_indexBuffer9->Lock(0, 0, (void**)&indexMap, 0);
+			memcpy(indexMap, indices.data(), sizeof(uint32_t) * 6 * _maxSprites);
+			_indexBuffer9->Unlock();
+
 		}
 #endif
 #if defined (GAME_DIRECTX10)
 		if (enginePointer->geIsUsing(GAME_DIRECTX10))
 		{
 			D3D10_BUFFER_DESC vertexBufferDescription = { 0 };
-			D3D10_BUFFER_DESC indexBufferDescription = { 0 }; 
+			D3D10_BUFFER_DESC indexBufferDescription = { 0 };
 			D3D10_SUBRESOURCE_DATA vertexInitialData = { 0 };
-			D3D10_SUBRESOURCE_DATA indexInitialData = { 0 };  
+			D3D10_SUBRESOURCE_DATA indexInitialData = { 0 };
 			std::vector<uint32_t> indices;
 
 			D3D10_INPUT_ELEMENT_DESC inputLayout[] =
@@ -301,7 +324,7 @@ namespace game
 			vertexBufferDescription.Usage = D3D10_USAGE_DYNAMIC;
 			vertexBufferDescription.BindFlags = D3D10_BIND_VERTEX_BUFFER;
 			vertexBufferDescription.CPUAccessFlags = D3D10_CPU_ACCESS_WRITE;
-			vertexBufferDescription.MiscFlags = 0;	
+			vertexBufferDescription.MiscFlags = 0;
 			if (FAILED(enginePointer->d3d10Device->CreateBuffer(&vertexBufferDescription, NULL, &_vertexBuffer10)))
 			{
 				lastError = { GameErrors::GameDirectX10Specific, "Could not create vertex buffer for SpriteBatch." };
@@ -398,6 +421,9 @@ namespace game
 
 			enginePointer->d3d9Device->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
 			enginePointer->d3d9Device->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
+			enginePointer->d3d9Device->SetFVF((D3DFVF_XYZRHW | D3DFVF_DIFFUSE | D3DFVF_TEX1));
+			enginePointer->d3d9Device->SetStreamSource(0, _vertexBuffer9, 0, sizeof(_spriteVertex));
+			enginePointer->d3d9Device->SetIndices(_indexBuffer9);
 		}
 #endif
 #if defined(GAME_DIRECTX10)
@@ -431,8 +457,8 @@ namespace game
 
 			// Reset current texture
 			_currentTexture.name = "";
-		// Disable multisampling
-		// not now
+			// Disable multisampling
+			// not now
 		}
 #endif
 #if defined(GAME_DIRECTX11)
@@ -489,7 +515,7 @@ namespace game
 			enginePointer->d3d10Device->VSSetShader(_oldVertexShader);
 			enginePointer->d3d10Device->PSSetShader(_oldPixelShader);
 			enginePointer->d3d10Device->PSSetSamplers(0, 1, &_oldTextureSamplerState);
-			if (_oldPrimitiveTopology !=  D3D10_PRIMITIVE_TOPOLOGY_UNDEFINED)
+			if (_oldPrimitiveTopology != D3D10_PRIMITIVE_TOPOLOGY_UNDEFINED)
 			{
 				enginePointer->d3d10Device->IASetPrimitiveTopology(_oldPrimitiveTopology);
 			}
@@ -502,7 +528,7 @@ namespace game
 		if (enginePointer->geIsUsing(GAME_OPENGL))
 		{
 			// restore saved this stuff
-			glBindTexture(GL_TEXTURE_2D,0);
+			glBindTexture(GL_TEXTURE_2D, 0);
 			glDisable(GL_TEXTURE_2D);
 		}
 #endif
@@ -523,14 +549,13 @@ namespace game
 
 			// Send sprite vertices to gpu
 			_vertexBuffer9->Lock(0, 0, (void**)&pVoid, 0);
-			memcpy(pVoid, &_spriteVertices[0], sizeof(_spriteVertex) * 6 * _numberOfSpritesUsed);
+			memcpy(pVoid, &_spriteVertices[0], sizeof(_spriteVertex) * 4 * _numberOfSpritesUsed);
 			_vertexBuffer9->Unlock();
 
 			// Draw the sprites
-			enginePointer->d3d9Device->SetTexture(0, _currentTexture.textureInterface9);
-			enginePointer->d3d9Device->SetFVF((D3DFVF_XYZRHW | D3DFVF_DIFFUSE | D3DFVF_TEX1));
-			enginePointer->d3d9Device->SetStreamSource(0, _vertexBuffer9, 0, sizeof(_spriteVertex));
-			enginePointer->d3d9Device->DrawPrimitive(D3DPT_TRIANGLELIST, 0, _numberOfSpritesUsed * 2);
+
+			//enginePointer->d3d9Device->DrawPrimitive(D3DPT_TRIANGLELIST, 0, _numberOfSpritesUsed * 2);
+			enginePointer->d3d9Device->DrawIndexedPrimitive(D3DPT_TRIANGLELIST, 0, 0, _numberOfSpritesUsed * 6, 0, _numberOfSpritesUsed * 2);
 		}
 #endif
 #if defined (GAME_DIRECTX10)
@@ -548,7 +573,7 @@ namespace game
 				_vertexBuffer10->Unmap();
 			}
 
-			enginePointer->d3d10Device->DrawIndexed(_numberOfSpritesUsed * 6, 0,0);
+			enginePointer->d3d10Device->DrawIndexed(_numberOfSpritesUsed * 6, 0, 0);
 		}
 #endif
 #if defined (GAME_DIRECTX11)
@@ -559,14 +584,14 @@ namespace game
 		{
 			float_t r, g, b, a = 0.0f;
 			Vector2i windowSize = enginePointer->geGetWindowSize();
-			
+
 			glBindTexture(GL_TEXTURE_2D, _currentTexture.bind);
-			
-			_spriteVertex *access = &_spriteVertices[0];
+
+			_spriteVertex* access = &_spriteVertices[0];
 
 			float pixelOffsetFixX = 1.0f + (1.0f / windowSize.width);
 			float pixelOffsetFixY = 1.0f + (1.0f / windowSize.height);
-			
+
 			glBegin(GL_QUADS);
 
 
@@ -578,7 +603,7 @@ namespace game
 				a = (access->color >> 24 & 0xff) / 255.0f;
 
 				// Bottom left
-				glTexCoord2f(access->u, 1.0f-access->v);
+				glTexCoord2f(access->u, 1.0f - access->v);
 				glColor4f(r, g, b, a);
 				access->x = (access->x * 2.0f / (float_t)windowSize.width) - pixelOffsetFixX;
 				access->y = (access->y * 2.0f / (float_t)windowSize.height) - pixelOffsetFixY;
@@ -688,8 +713,9 @@ namespace game
 			{
 				Render();
 				_currentTexture = texture;
+				enginePointer->d3d9Device->SetTexture(0, _currentTexture.textureInterface9);
 			}
-			_spriteVertex* access = &_spriteVertices[_numberOfSpritesUsed * 6];
+			_spriteVertex* access = &_spriteVertices[_numberOfSpritesUsed * 4];
 			// Top left
 			access->x = (float_t)x;
 			access->y = (float_t)y;
@@ -699,7 +725,7 @@ namespace game
 			access++;
 
 			// Top right
-			access->x = (float_t)x+(float_t)texture.width;
+			access->x = (float_t)x + (float_t)texture.width;
 			access->y = (float_t)y;
 			access->u = 1.0f;
 			access->v = 0.0f;
@@ -714,13 +740,13 @@ namespace game
 			access->color = color.packedARGB;
 			access++;
 
-			// Top right
-			access->x = (float_t)x + (float_t)texture.width;
-			access->y = (float_t)y;
-			access->u = 1.0f;
-			access->v = 0.0f;
-			access->color = color.packedARGB;
-			access++;
+			//// Top right
+			//access->x = (float_t)x + (float_t)texture.width;
+			//access->y = (float_t)y;
+			//access->u = 1.0f;
+			//access->v = 0.0f;
+			//access->color = color.packedARGB;
+			//access++;
 
 			// Bottom right
 			access->x = (float_t)x + (float_t)texture.width;
@@ -730,13 +756,13 @@ namespace game
 			access->color = color.packedARGB;
 			access++;
 
-			// Bottom left
-			access->x = (float_t)x;
-			access->y = (float_t)y + (float_t)texture.height;
-			access->u = 0.0f;
-			access->v = 1.0f;
-			access->color = color.packedARGB;
-			access++;
+			//// Bottom left
+			//access->x = (float_t)x;
+			//access->y = (float_t)y + (float_t)texture.height;
+			//access->u = 0.0f;
+			//access->v = 1.0f;
+			//access->color = color.packedARGB;
+			//access++;
 		}
 #endif
 #if defined (GAME_DIRECTX10)
@@ -789,7 +815,7 @@ namespace game
 			// Flip the y axis
 			scaledPos.top = -scaledPos.top;
 			scaledPos.bottom = -scaledPos.bottom;
-			
+
 			// Fill vertices
 
 			// Top left
@@ -903,9 +929,10 @@ namespace game
 			{
 				Render();
 				_currentTexture = texture;
+				enginePointer->d3d9Device->SetTexture(0, _currentTexture.textureInterface9);
 			}
 
-			_spriteVertex* access = &_spriteVertices[_numberOfSpritesUsed * 6];
+			_spriteVertex* access = &_spriteVertices[_numberOfSpritesUsed * 4];
 			// Top left
 			access->x = (float_t)destination.x - texture.oneOverWidth;
 			access->y = (float_t)destination.y - texture.oneOverHeight;
@@ -930,13 +957,13 @@ namespace game
 			access->color = color.packedARGB;
 			access++;
 
-			// Top right
-			access->x = (float_t)destination.right - texture.oneOverWidth;
-			access->y = (float_t)destination.y - texture.oneOverHeight;
-			access->u = (float_t)portion.right * texture.oneOverWidth;// 1.0f;
-			access->v = (float_t)portion.y * texture.oneOverHeight;
-			access->color = color.packedARGB;
-			access++;
+			//// Top right
+			//access->x = (float_t)destination.right - texture.oneOverWidth;
+			//access->y = (float_t)destination.y - texture.oneOverHeight;
+			//access->u = (float_t)portion.right * texture.oneOverWidth;// 1.0f;
+			//access->v = (float_t)portion.y * texture.oneOverHeight;
+			//access->color = color.packedARGB;
+			//access++;
 
 			// Bottom right
 			access->x = (float_t)destination.right - texture.oneOverWidth;
@@ -946,12 +973,12 @@ namespace game
 			access->color = color.packedARGB;
 			access++;
 
-			// Bottom left
-			access->x = (float_t)destination.x - texture.oneOverWidth;
-			access->y = (float_t)destination.bottom - texture.oneOverHeight;
-			access->u = (float_t)portion.x * texture.oneOverWidth;
-			access->v = (float_t)portion.bottom * texture.oneOverHeight;
-			access->color = color.packedARGB;
+			//// Bottom left
+			//access->x = (float_t)destination.x - texture.oneOverWidth;
+			//access->y = (float_t)destination.bottom - texture.oneOverHeight;
+			//access->u = (float_t)portion.x * texture.oneOverWidth;
+			//access->v = (float_t)portion.bottom * texture.oneOverHeight;
+			//access->color = color.packedARGB;
 
 		}
 #endif
@@ -1065,8 +1092,8 @@ namespace game
 
 		_numberOfSpritesUsed++;
 	}
-	
-	void SpriteBatch::DrawString(const SpriteFont &font, const std::string& Str, const int x, const int y, const Color& color)
+
+	void SpriteBatch::DrawString(const SpriteFont& font, const std::string& Str, const int x, const int y, const Color& color)
 	{
 		int32_t currentX = x;
 		int32_t currentY = y;
@@ -1094,30 +1121,7 @@ namespace game
 			Draw(font.Texture(), destination, source, color);
 
 			currentX += font._characterSet.letters[letter].xAdvance;
-	}
-}
-
-	inline void SpriteBatch::_Enable2D()
-	{
-#if defined(GAME_OPENGL)
-#endif
-#if defined (GAME_DIRECTX9)
-#endif
-#if defined (GAME_DIRECTX10)
-#endif
-#if defined (GAME_DIRECTX11)
-#endif
+		}
 	}
 
-	inline void SpriteBatch::_Disable2D()
-	{
-#if defined (GAME_OPENGL)
-#endif
-#if defined(GAME_DIRECTX9)
-#endif
-#if defined (GAME_DIRECTX10)
-#endif
-#if defined (GAME_DIRECTX11)
-#endif
-	}
 }
