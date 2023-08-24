@@ -340,7 +340,7 @@ namespace game
 			}
 
 			// Create texture sampler 
-			samplerDesc.Filter = D3D10_FILTER_MIN_MAG_MIP_POINT;
+			samplerDesc.Filter = D3D10_FILTER_MIN_MAG_MIP_POINT; //D3D10_FILTER_ANISOTROPIC
 			samplerDesc.AddressU = D3D10_TEXTURE_ADDRESS_CLAMP;
 			samplerDesc.AddressV = D3D10_TEXTURE_ADDRESS_CLAMP;
 			samplerDesc.AddressW = D3D10_TEXTURE_ADDRESS_CLAMP;
@@ -357,11 +357,11 @@ namespace game
 			D3D10_BLEND_DESC blendStateDesc = { 0 };
 			blendStateDesc.AlphaToCoverageEnable = FALSE;
 			blendStateDesc.BlendEnable[0] = TRUE;
-			blendStateDesc.SrcBlend = D3D10_BLEND_SRC_ALPHA;
-			blendStateDesc.DestBlend = D3D10_BLEND_INV_SRC_ALPHA;
+			blendStateDesc.SrcBlend = D3D10_BLEND_ONE;// _SRC_ALPHA;
+			blendStateDesc.DestBlend = D3D10_BLEND_ONE;// _INV_SRC_ALPHA;
 			blendStateDesc.BlendOp = D3D10_BLEND_OP_ADD;
-			blendStateDesc.SrcBlendAlpha = D3D10_BLEND_ONE;
-			blendStateDesc.DestBlendAlpha = D3D10_BLEND_ZERO;
+			blendStateDesc.SrcBlendAlpha = D3D10_BLEND_INV_SRC_ALPHA;
+			blendStateDesc.DestBlendAlpha = D3D10_BLEND_INV_SRC_ALPHA;
 			blendStateDesc.BlendOpAlpha = D3D10_BLEND_OP_ADD;
 			blendStateDesc.RenderTargetWriteMask[0] = D3D10_COLOR_WRITE_ENABLE_ALL;
 			if (FAILED(enginePointer->d3d10Device->CreateBlendState(&blendStateDesc, &_spriteBatchBlendState)))
@@ -1004,18 +1004,18 @@ namespace game
 			scaledPosition.top = -scaledPosition.top;
 			scaledPosition.bottom = -scaledPosition.bottom;
 			// Homogenise UV coords to 0.0f - 1.0f
-			scaledUV.left = portion.left * texture.oneOverWidth;
-			scaledUV.top = portion.top * texture.oneOverHeight;
-			scaledUV.right = portion.right * texture.oneOverWidth;
-			scaledUV.bottom = portion.bottom * texture.oneOverHeight;
+			scaledUV.left = (float_t)portion.left * texture.oneOverWidth;
+			scaledUV.top = (float_t)portion.top * texture.oneOverHeight;
+			scaledUV.right = (float_t)portion.right * texture.oneOverWidth;
+			scaledUV.bottom = (float_t)portion.bottom * texture.oneOverHeight;
 
 			// Fill vertices
 
 			// Top left
 			access->x = scaledPosition.left;
 			access->y = scaledPosition.top;
-			access->u = (float_t)scaledUV.left;
-			access->v = (float_t)scaledUV.top;
+			access->u = scaledUV.left;
+			access->v = scaledUV.top;
 			access->r = color.rf;
 			access->g = color.gf;
 			access->b = color.bf;
