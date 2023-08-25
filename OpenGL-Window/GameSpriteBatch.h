@@ -43,7 +43,7 @@ namespace game
 		uint32_t _maxSprites;
 		uint32_t _numberOfSpritesUsed;
 		Texture2D _currentTexture;
-#if defined(GAME_OPENGL) | defined(GAME_DIRECTX9)
+#if defined(GAME_OPENGL)
 		struct _spriteVertex
 		{
 			float_t x, y, z, rhw;
@@ -52,6 +52,17 @@ namespace game
 		};
 		_spriteVertex* _spriteVertices;
 #endif
+#if defined(GAME_DIRECTX9)
+		struct _spriteVertex9
+		{
+			float_t x, y, z, rhw;
+			uint32_t color;
+			float_t u, v;
+		};
+		_spriteVertex9* _spriteVertices9;
+#endif
+
+
 #if defined(GAME_DIRECTX9)
 		LPDIRECT3DVERTEXBUFFER9 _vertexBuffer9;
 		LPDIRECT3DINDEXBUFFER9 _indexBuffer9;
@@ -108,7 +119,7 @@ namespace game
 #if defined(GAME_DIRECTX9)  
 		//if (enginePointer->geIsUsing(GAME_DIRECTX9))
 		{
-			_spriteVertices = nullptr;
+			_spriteVertices9 = nullptr;
 			_indexBuffer9 = nullptr;
 			_vertexBuffer9 = nullptr;
 			_savedFVF = 0;
@@ -169,10 +180,10 @@ namespace game
 			//	_vertexBuffer9->Release();
 			//	_vertexBuffer9 = nullptr;
 			//}
-			if (_spriteVertices)
+			if (_spriteVertices9)
 			{
-				delete[] _spriteVertices;
-				_spriteVertices = nullptr;
+				delete[] _spriteVertices9;
+				_spriteVertices9 = nullptr;
 			}
 		}
 #endif
@@ -206,9 +217,9 @@ namespace game
 		// Save max sprites
 		_maxSprites = maxSprites;
 		// OpenGL and DX9 implementation of vertices
-#if defined(GAME_OPENGL) || defined (GAME_DIRECTX9)  // OPENGL will break here, changed 6 to 4
-		_spriteVertices = new _spriteVertex[(uint64_t)(_maxSprites) * 4];
-		for (uint32_t vertex = 0; vertex < _maxSprites * 4; vertex++)
+#if defined(GAME_OPENGL)  // OPENGL will break here, changed 6 to 4
+		_spriteVertices = new _spriteVertex[(uint64_t)(_maxSprites) * 6];
+		for (uint32_t vertex = 0; vertex < _maxSprites * 6; vertex++)
 		{
 			_spriteVertices[vertex].x = 0.0f;
 			_spriteVertices[vertex].y = 0.0f;
@@ -216,18 +227,21 @@ namespace game
 			_spriteVertices[vertex].rhw = 1.0f;
 			_spriteVertices[vertex].u = 0.0f;
 			_spriteVertices[vertex].v = 0.0f;
-#if defined(GAME_DIRECTX9)
-			if (enginePointer->geIsUsing(GAME_DIRECTX9))
-			{
-				_spriteVertices[vertex].color = Colors::White.packedARGB;
-			}
+			_spriteVertices[vertex].color = Colors::White.packedABGR;
+		}
 #endif
-#if defined(GAME_OPENGL)
-			if (enginePointer->geIsUsing(GAME_OPENGL))
-			{
-				_spriteVertices[vertex].color = Colors::White.packedABGR;
-			}
-#endif
+
+#if defined (GAME_DIRECTX9)  // OPENGL will break here, changed 6 to 4
+		_spriteVertices9 = new _spriteVertex9[(uint64_t)(_maxSprites) * 4];
+		for (uint32_t vertex = 0; vertex < _maxSprites * 4; vertex++)
+		{
+			_spriteVertices9[vertex].x = 0.0f;
+			_spriteVertices9[vertex].y = 0.0f;
+			_spriteVertices9[vertex].z = 0.0f;
+			_spriteVertices9[vertex].rhw = 1.0f;
+			_spriteVertices9[vertex].u = 0.0f;
+			_spriteVertices9[vertex].v = 0.0f;
+			_spriteVertices9[vertex].color = Colors::White.packedARGB;
 		}
 #endif
 
@@ -265,7 +279,7 @@ namespace game
 			std::vector<uint32_t> indices;
 
 			//std::cout << "Vertex Buffer Size = " << _maxSprites * (uint32_t)6 * (uint32_t)sizeof(_spriteVertex) / 1024 << "kB.\n";
-			if (enginePointer->d3d9Device->CreateVertexBuffer(_maxSprites * (uint32_t)4 * (uint32_t)sizeof(_spriteVertex), 0, (D3DFVF_XYZRHW | D3DFVF_DIFFUSE | D3DFVF_TEX1), D3DPOOL_MANAGED, &_vertexBuffer9, NULL) != D3D_OK)
+			if (enginePointer->d3d9Device->CreateVertexBuffer(_maxSprites * (uint32_t)4 * (uint32_t)sizeof(_spriteVertex9), 0, (D3DFVF_XYZRHW | D3DFVF_DIFFUSE | D3DFVF_TEX1), D3DPOOL_MANAGED, &_vertexBuffer9, NULL) != D3D_OK)
 			{
 				lastError = { GameErrors::GameDirectX9Specific, "Could not create vertex buffer for SpriteBatch." };
 				return false;
@@ -422,7 +436,7 @@ namespace game
 			enginePointer->d3d9Device->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
 			enginePointer->d3d9Device->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
 			enginePointer->d3d9Device->SetFVF((D3DFVF_XYZRHW | D3DFVF_DIFFUSE | D3DFVF_TEX1));
-			enginePointer->d3d9Device->SetStreamSource(0, _vertexBuffer9, 0, sizeof(_spriteVertex));
+			enginePointer->d3d9Device->SetStreamSource(0, _vertexBuffer9, 0, sizeof(_spriteVertex9));
 			enginePointer->d3d9Device->SetIndices(_indexBuffer9);
 		}
 #endif
@@ -549,7 +563,7 @@ namespace game
 
 			// Send sprite vertices to gpu
 			_vertexBuffer9->Lock(0, 0, (void**)&pVoid, 0);
-			memcpy(pVoid, &_spriteVertices[0], sizeof(_spriteVertex) * 4 * _numberOfSpritesUsed);
+			memcpy(pVoid, &_spriteVertices9[0], sizeof(_spriteVertex9) * 4 * _numberOfSpritesUsed);
 			_vertexBuffer9->Unlock();
 
 			// Draw the sprites
@@ -715,7 +729,7 @@ namespace game
 				_currentTexture = texture;
 				enginePointer->d3d9Device->SetTexture(0, _currentTexture.textureInterface9);
 			}
-			_spriteVertex* access = &_spriteVertices[_numberOfSpritesUsed * 4];
+			_spriteVertex9* access = &_spriteVertices9[_numberOfSpritesUsed * 4];
 			// Top left
 			access->x = (float_t)x;
 			access->y = (float_t)y;
@@ -932,7 +946,7 @@ namespace game
 				enginePointer->d3d9Device->SetTexture(0, _currentTexture.textureInterface9);
 			}
 
-			_spriteVertex* access = &_spriteVertices[_numberOfSpritesUsed * 4];
+			_spriteVertex9* access = &_spriteVertices9[_numberOfSpritesUsed * 4];
 			// Top left
 			access->x = (float_t)destination.x - texture.oneOverWidth;
 			access->y = (float_t)destination.y - texture.oneOverHeight;
