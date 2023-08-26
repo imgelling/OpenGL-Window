@@ -33,11 +33,11 @@ namespace game
 		void Pixel(const int32_t x, const int32_t y, const game::Color& color) noexcept;
 		void PixelClip(const int32_t x, const int32_t y, const game::Color& color) noexcept;
 		void Line(int32_t x1, int32_t y1, int32_t x2, int32_t y2, const Color& color) noexcept;
-		void LineClip(int32_t x1, int32_t y1,  int32_t x2,  int32_t y2, const Color& color) noexcept;
-		void Circle(int32_t x, int32_t y, int32_t radius, const Color& color) noexcept;
-		void CircleClip(int32_t x, int32_t y, int32_t radius, const Color& color) noexcept;
-		void CircleFilled(int32_t x, int32_t y, int32_t radius, const Color& color) noexcept;
-		void CircleFilledClip(int32_t x, int32_t y, int32_t radius, const Color& color) noexcept;
+		void LineClip(const int32_t x1, const int32_t y1, const int32_t x2,  int32_t y2, const Color& color) noexcept;
+		void Circle(const int32_t x, const int32_t y, const int32_t radius, const Color& color) noexcept;
+		void CircleClip(const int32_t x, const int32_t y, const int32_t radius, const Color& color) noexcept;
+		void CircleFilled(const int32_t x, const int32_t y, const int32_t radius, const Color& color) noexcept;
+		void CircleFilledClip(const int32_t x, const int32_t y, const int32_t radius, const Color& color) noexcept;
 		void Rect(const Recti& rectangle, const Color& color) noexcept;
 		void RectClip(const Recti& rectangle, const Color& color) noexcept;
 		void HorizontalPillClip(const int32_t x, const int32_t y, const int32_t length, const int32_t radius, const game::Color& color) noexcept;
@@ -762,7 +762,7 @@ namespace game
 #endif
 	}
 
-	inline void PixelMode::Line(int32_t x1, int32_t y1, int32_t x2, int32_t y2, const Color& color) noexcept
+	inline void PixelMode::Line(int32_t x1, int32_t y1, const int32_t x2, const int32_t y2, const Color& color) noexcept
 	{
 		int32_t delta_x(x2 - x1);
 		int32_t delta_y(y2 - y1);
@@ -819,7 +819,7 @@ namespace game
 		}
 	}
 
-	inline void PixelMode::LineClip(int32_t x1, int32_t y1, int32_t x2, int32_t y2, const Color& color) noexcept
+	inline void PixelMode::LineClip(const int32_t x1, const int32_t y1, const int32_t x2, const int32_t y2, const Color& color) noexcept
 	{
 		//Liang - Barsky Algorithm
 
@@ -881,7 +881,7 @@ namespace game
 			}
 	}
 
-	inline void PixelMode::Circle(int32_t x, int32_t y, int32_t radius, const Color& color) noexcept
+	inline void PixelMode::Circle(const int32_t x, const int32_t y, const int32_t radius, const Color& color) noexcept
 	{
 		if (radius < 0 || x < -radius || y < -radius || x - _bufferSize.width > radius || y - _bufferSize.height > radius)
 			return;
@@ -917,7 +917,7 @@ namespace game
 			Pixel(x, y, color);
 	}
 
-	inline void PixelMode::CircleClip(int32_t x, int32_t y, int32_t radius, const Color& color) noexcept
+	inline void PixelMode::CircleClip(const int32_t x, const int32_t y, const int32_t radius, const Color& color) noexcept
 	{
 		if (radius < 0 || x < -radius || y < -radius || x - _bufferSize.width > radius || y - _bufferSize.height > radius)
 			return;
@@ -953,7 +953,7 @@ namespace game
 			PixelClip(x, y, color);
 	}
 
-	inline void PixelMode::CircleFilled(int32_t x, int32_t y, int32_t radius, const Color& color) noexcept
+	inline void PixelMode::CircleFilled(const int32_t x, const int32_t y, const int32_t radius, const Color& color) noexcept
 	{
 		if (radius < 0 || x < -radius || y < -radius || x - _bufferSize.width > radius || y - _bufferSize.height > radius)
 			return;
@@ -992,7 +992,7 @@ namespace game
 			Pixel(x, y, color);
 	}
 
-	inline void PixelMode::CircleFilledClip(int32_t x, int32_t y, int32_t radius, const Color& color) noexcept
+	inline void PixelMode::CircleFilledClip(const int32_t x, const int32_t y, const int32_t radius, const Color& color) noexcept
 	{
 		if (radius < 0 || x < -radius || y < -radius || x - _bufferSize.width > radius || y - _bufferSize.height > radius)
 			return;
