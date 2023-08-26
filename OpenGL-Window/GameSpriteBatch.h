@@ -44,13 +44,13 @@ namespace game
 		uint32_t _numberOfSpritesUsed;
 		Texture2D _currentTexture;
 #if defined(GAME_OPENGL)
-		struct _spriteVertex
+		struct _spriteVertexGL
 		{
 			float_t x, y, z, rhw;
 			uint32_t color;
 			float_t u, v;
 		};
-		_spriteVertex* _spriteVertices;
+		_spriteVertexGL* _spriteVertices;
 #endif
 #if defined(GAME_DIRECTX9)
 		struct _spriteVertex9
@@ -218,7 +218,7 @@ namespace game
 		_maxSprites = maxSprites;
 		// OpenGL and DX9 implementation of vertices
 #if defined(GAME_OPENGL)  // OPENGL will break here, changed 6 to 4
-		_spriteVertices = new _spriteVertex[(uint64_t)(_maxSprites) * 6];
+		_spriteVertices = new _spriteVertexGL[(uint64_t)(_maxSprites) * 6];
 		for (uint32_t vertex = 0; vertex < _maxSprites * 6; vertex++)
 		{
 			_spriteVertices[vertex].x = 0.0f;
@@ -254,9 +254,9 @@ namespace game
 			{
 				_spriteVertices10[vertex].x = 0.0f;
 				_spriteVertices10[vertex].y = 0.0f;
-				_spriteVertices10[vertex].z = 0.0f;
-				_spriteVertices10[vertex].u = 0.0f;
-				_spriteVertices10[vertex].v = 0.0f;
+				_spriteVertices10[vertex].z = 0.01f;
+				_spriteVertices10[vertex].u = 0.01f;
+				_spriteVertices10[vertex].v = 0.01f;
 				_spriteVertices10[vertex].r = Colors::White.rf;
 				_spriteVertices10[vertex].g = Colors::White.gf;
 				_spriteVertices10[vertex].b = Colors::White.bf;
@@ -269,6 +269,8 @@ namespace game
 #if defined(GAME_OPENGL)
 		if (enginePointer->geIsUsing(GAME_OPENGL))
 		{
+			GLuint elementBuffer = 0;
+			//wglGetProcAddress
 
 		}
 #endif
@@ -397,10 +399,10 @@ namespace game
 			D3D10_BLEND_DESC blendStateDesc = { 0 };
 			blendStateDesc.AlphaToCoverageEnable = FALSE;
 			blendStateDesc.BlendEnable[0] = TRUE;
-			blendStateDesc.SrcBlend = D3D10_BLEND_ONE;// _SRC_ALPHA;
-			blendStateDesc.DestBlend = D3D10_BLEND_ONE;// _INV_SRC_ALPHA;
+			blendStateDesc.SrcBlend = D3D10_BLEND_SRC_ALPHA;
+			blendStateDesc.DestBlend = D3D10_BLEND_INV_SRC_ALPHA;
 			blendStateDesc.BlendOp = D3D10_BLEND_OP_ADD;
-			blendStateDesc.SrcBlendAlpha = D3D10_BLEND_INV_SRC_ALPHA;
+			blendStateDesc.SrcBlendAlpha = D3D10_BLEND_SRC_ALPHA;
 			blendStateDesc.DestBlendAlpha = D3D10_BLEND_INV_SRC_ALPHA;
 			blendStateDesc.BlendOpAlpha = D3D10_BLEND_OP_ADD;
 			blendStateDesc.RenderTargetWriteMask[0] = D3D10_COLOR_WRITE_ENABLE_ALL;
@@ -601,7 +603,7 @@ namespace game
 
 			glBindTexture(GL_TEXTURE_2D, _currentTexture.bind);
 
-			_spriteVertex* access = &_spriteVertices[0];
+			_spriteVertexGL* access = &_spriteVertices[0];
 
 			float pixelOffsetFixX = 1.0f + (1.0f / windowSize.width);
 			float pixelOffsetFixY = 1.0f + (1.0f / windowSize.height);
@@ -682,7 +684,7 @@ namespace game
 				Render();
 				_currentTexture = texture;
 			}
-			_spriteVertex* access = &_spriteVertices[_numberOfSpritesUsed * 4];
+			_spriteVertexGL* access = &_spriteVertices[_numberOfSpritesUsed * 4];
 
 			// bl
 			access->x = (float_t)x;
@@ -899,7 +901,7 @@ namespace game
 				Render();
 				_currentTexture = texture;
 			}
-			_spriteVertex* access = &_spriteVertices[_numberOfSpritesUsed * 4];
+			_spriteVertexGL* access = &_spriteVertices[_numberOfSpritesUsed * 4];
 
 			// Bottom left
 			access->x = (float_t)destination.x - texture.oneOverWidth;
