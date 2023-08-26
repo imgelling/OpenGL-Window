@@ -143,29 +143,29 @@ public:
 
 		pixelMode.Clear(game::Colors::Blue);
 
-		//// Top and bottom
-		//pixelMode.LineClip(340, 0, -1, 0, game::Colors::Pink);
-		//pixelMode.LineClip(-10, 239, 409, 239, game::Colors::Pink);
+		// Top and bottom
+		pixelMode.LineClip(340, 0, -1, 0, game::Colors::Pink);
+		pixelMode.LineClip(-10, 239, 409, 239, game::Colors::Pink);
 
-		//// Left and right
-		//pixelMode.LineClip(0, -10, 0, 300, game::Colors::Pink);
-		//pixelMode.LineClip(319, 500, 319, -10, game::Colors::Pink);
+		// Left and right
+		pixelMode.LineClip(0, -10, 0, 300, game::Colors::Pink);
+		pixelMode.LineClip(319, 500, 319, -10, game::Colors::Pink);
 
-		int32_t rx1 = random.RndRange(0, 340);
-		int32_t ry1 = random.RndRange(0, 340);
+		//int32_t rx1 = random.RndRange(0, 340);
+		//int32_t ry1 = random.RndRange(0, 340);
 
-		//int32_t rx2 = random.RndRange(0, 340);
-		//int32_t ry2 = random.RndRange(0, 340);
+		//int32_t rx2 = random.RndRange(11, 329);
+		//int32_t ry2 = random.RndRange(11, 329);
 		//game::Color rndColor;
 		//perftimer.Start("CircleClip");
 		//for (uint32_t count = 0; count < 500000; count++)
 		//{
+		//	rx1 = random.RndRange(10, 310);;
+		//	ry1 = random.RndRange(10, 240-11);;
 		//	rndColor.Set(random.RndRange(0, 255), random.RndRange(0, 255), random.RndRange(0, 255), 255);
-		//	pixelMode.PixelClip(rx1 - 10, ry1 - 10, game::Colors::White);
-		//	rx1 = random.RndRange(0, 340);
-		//	ry1 = random.RndRange(0, 340);
-		//	rx2 = random.RndRange(0, 340);
-		//	ry2 = random.RndRange(0, 340);
+		//	pixelMode.CircleClip(rx1, ry1, 10, rndColor);
+		//	//rx2 = random.RndRange(11, 329);;
+		//	//ry2 = random.RndRange(11, 329);;
 		//}
 		//perftimer.Stop("CircleClip");
 
@@ -186,10 +186,11 @@ public:
 		pixelMode.Render();
 
 		spriteBatch.Begin();
-		//double_t perSecond = (perftimer.LastRun("CircleClip") / 1000.0 / 1000.0 / 1000.0) * 500000.0;  // throws if not found
+		//double_t perSecond = 500000.0 / (perftimer.LastRun("CircleClip") / 1000000000.0);  // throws if not found
+		//double_t millionPerSecond = perSecond / 1000.0 / 1000.0;
 		for (int i = 0; i < 40; i++)
 			spriteBatch.Draw(spriteTexture, { 10 + (i * 100), 10 }, game::Colors::White);
-		//spriteBatch.DrawString(spriteFont, "Random PixelClip(s) : " + std::to_string(perSecond) + " billion per second.", 10, 200, game::Colors::Red);
+		//spriteBatch.DrawString(spriteFont, "Random Circle(s) : " + std::to_string(millionPerSecond) + " million per second.", 10, 0, game::Colors::Red);
 		spriteBatch.DrawString(spriteFont, "FPS : " + std::to_string(geGetFramesPerSecond()) + " UPS : " + std::to_string(geGetUpdatesPerSecond()) + " cpu : " + std::to_string(geGetCPUFrequency()) + "Mhz", 10, 200, game::Colors::Red);
 		spriteBatch.DrawString(spriteFont, "Window Pixel Size: " + std::to_string(geGetWindowSize().width) + "x" + std::to_string(geGetWindowSize().height), 10, 220, game::Colors::Red);
 		spriteBatch.DrawString(spriteFont, "PixelMode Pixel Size: " + std::to_string(pixelMode.GetPixelFrameBufferSize().width) + "x" + std::to_string(pixelMode.GetPixelFrameBufferSize().height), 10, 240, game::Colors::Red);
