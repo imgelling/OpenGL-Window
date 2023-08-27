@@ -141,6 +141,7 @@ namespace game
 			lastError = { GameErrors::GameDirectX11Specific, "Could not create depth stencil view." };
 			return false;
 		}
+		//_d3d11DeviceContext->OMSetDepthStencilState
 
 		// may be error here may work, if works, need to remove from class and just have it here
 		SAFE_RELEASE(_d3d11DepthStencilBuffer);
@@ -165,7 +166,7 @@ namespace game
 		SAFE_RELEASE(BackBuffer);
 
 		//Set our Render Target
-		_d3d11DeviceContext->OMSetRenderTargets(1, &_d3d11RenderTargetView, NULL);
+		_d3d11DeviceContext->OMSetRenderTargets(1, &_d3d11RenderTargetView, _d3d11DepthStencilView);
 
 		// Set the viewport
 		viewPort.TopLeftX = 0;
