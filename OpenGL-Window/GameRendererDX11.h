@@ -10,6 +10,10 @@
 #include "GameSystemInfo.h"
 #include "GameTexture2D.h"
 
+#if !defined(SAFE_RELEASE)
+#define SAFE_RELEASE(p) { if ( (p) ) { (p)->Release(); (p) = nullptr; } }
+#endif
+
 namespace game
 {
 	extern SystemInfo systemInfo;
@@ -32,17 +36,26 @@ namespace game
 			return false;
 		}
 		void UnLoadShader(Shader& shader) {};
-		void GetDevice(ID3D11Device*& device, ID3D11DeviceContext*& context, ID3D11RenderTargetView*& target);
+		void GetDevice(ID3D11Device*& device, ID3D11DeviceContext*& context, ID3D11RenderTargetView*& target, ID3D11DepthStencilView*& depth);
 	protected:
 		void _ReadExtensions() {};
 	private:
-		Microsoft::WRL::ComPtr<ID3D11Device> _d3d11Device;
-		Microsoft::WRL::ComPtr<ID3D11DeviceContext> _d3d11Context;
+		ID3D11Device* _d3d11Device;
+		ID3D11DeviceContext *_d3d11DeviceContext;
+		IDXGISwapChain* _d3d11SwapChain;
+		ID3D11RenderTargetView* _d3d11RenderTargetView;
+		ID3D11DepthStencilView* _d3d11DepthStencilView;
+		ID3D11Texture2D* _d3d11DepthStencilBuffer;
 	};
 
 	inline RendererDX11::RendererDX11()
 	{
-
+		_d3d11Device = nullptr;
+		_d3d11DeviceContext = nullptr;
+		_d3d11SwapChain = nullptr;
+		_d3d11RenderTargetView = nullptr;
+		_d3d11DepthStencilView = nullptr;
+		_d3d11DepthStencilBuffer = nullptr;
 	}
 
 	inline bool RendererDX11::CreateDevice(Window& window) 
@@ -58,63 +71,140 @@ namespace game
 			D3D_FEATURE_LEVEL_9_1,	// 0x9100
 		};
 		uint32_t deviceFlags = D3D11_CREATE_DEVICE_BGRA_SUPPORT;
-		HRESULT hr = 0;
 		D3D_FEATURE_LEVEL featureLevelCreated;
+		DXGI_SWAP_CHAIN_DESC scd = { 0 };
+		D3D11_VIEWPORT viewPort = { 0 };
+		ID3D11Texture2D* backBuffer = nullptr;
+		uint32_t debug = 0;
+		D3D11_TEXTURE2D_DESC depthStencilDesc = { 0 };
+
+		// back buffer stuff
+		scd.BufferDesc.Width = _attributes.WindowWidth;
+		scd.BufferDesc.Height = _attributes.WindowHeight;
+		scd.BufferDesc.RefreshRate.Numerator = 0; // 60
+		scd.BufferDesc.RefreshRate.Denominator = 1;
+		scd.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+		scd.BufferDesc.ScanlineOrdering = DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED;
+		scd.BufferDesc.Scaling = DXGI_MODE_SCALING_UNSPECIFIED;
+
+		// multisampling
+		scd.SampleDesc.Count = 1;
+		scd.SampleDesc.Quality = 0;
+
+		scd.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
+		scd.BufferCount = 1;
+
+		scd.OutputWindow = window.GetHandle();
+		scd.Windowed = true;
+		scd.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
+		scd.Flags = 0; //DXGI_SWAP_CHAIN_FLAG_ALLOW_TEARING for variable refresh rate, needs DXGI_SWAP_EFFECT_FLIP_DISCARD
 
 		if (_attributes.DebugMode)
 		{
 			deviceFlags |= D3D11_CREATE_DEVICE_DEBUG;
 		}
 
-
-		hr = D3D11CreateDevice(
-			nullptr,
-			D3D_DRIVER_TYPE_HARDWARE,
-			0,
-			deviceFlags,
-			featureLevels,
-			ARRAYSIZE(featureLevels),
-			D3D11_SDK_VERSION,
-			&_d3d11Device,
-			&featureLevelCreated,
-			&_d3d11Context
-		);
-
-		//_d3d11Device.As()
-
-		if (FAILED(hr))
+		// Create device and swap chain
+		if (FAILED(D3D11CreateDeviceAndSwapChain(NULL, D3D_DRIVER_TYPE_HARDWARE, 0, deviceFlags, featureLevels, ARRAYSIZE(featureLevels), D3D11_SDK_VERSION, &scd, &_d3d11SwapChain, &_d3d11Device, &featureLevelCreated, &_d3d11DeviceContext)))
 		{
-			lastError = { GameErrors::GameDirectX11Specific, "Could not create device." };
+			lastError = { GameErrors::GameDirectX10Specific, "Could not create device." };
 			return false;
 		}
 
-		std::cout << "Feat = " << featureLevelCreated << " in hex " << 0xb100 << ".\n"; // 0xb100 d3d11_1
-		systemInfo.gpuInfo.versionMajor = featureLevelCreated;
+		//std::cout << "Feat = " << featureLevelCreated << " in hex " << 0xb100 << ".\n"; // 0xb100 d3d11_1
+		//systemInfo.gpuInfo.versionMajor = featureLevelCreated;
+
+		// Describe depth stencil
+		depthStencilDesc.Width = _attributes.WindowWidth;
+		depthStencilDesc.Height = _attributes.WindowHeight;
+		depthStencilDesc.MipLevels = 1;
+		depthStencilDesc.ArraySize = 1;
+		depthStencilDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+		depthStencilDesc.SampleDesc.Count = 1;
+		depthStencilDesc.SampleDesc.Quality = 0;
+		depthStencilDesc.Usage = D3D11_USAGE_DEFAULT;
+		depthStencilDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
+		depthStencilDesc.CPUAccessFlags = 0;	// can change for reading or writing i think
+		depthStencilDesc.MiscFlags = 0;
+		
+		// Create depth stencil buffer texture
+		if (FAILED(_d3d11Device->CreateTexture2D(&depthStencilDesc, NULL, &_d3d11DepthStencilBuffer)))
+		{
+			lastError = { GameErrors::GameDirectX11Specific, "Could not create depth stencil buffer texture." };
+			DestroyDevice();
+			return false;
+		}
+
+		// Second param is states for depth stencil
+		if (FAILED(_d3d11Device->CreateDepthStencilView(_d3d11DepthStencilBuffer, NULL, &_d3d11DepthStencilView)))
+		{
+			lastError = { GameErrors::GameDirectX11Specific, "Could not create depth stencil view." };
+			return false;
+		}
+
+		// may be error here may work, if works, need to remove from class and just have it here
+		SAFE_RELEASE(_d3d11DepthStencilBuffer);
+
+		//Create our BackBuffer
+		ID3D11Texture2D* BackBuffer = nullptr;
+		HRESULT hr;
+		if (FAILED(_d3d11SwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (void**)&BackBuffer)))
+		{
+			lastError = { GameErrors::GameDirectX11Specific, "Could not create create back buffer." };
+			return false;
+		}
+
+		//Create our Render Target
+		hr = _d3d11Device->CreateRenderTargetView(BackBuffer, NULL, &_d3d11RenderTargetView);
+		if (FAILED(hr))
+		{
+			lastError = { GameErrors::GameDirectX11Specific, "Could not create render target view." };
+			return false;
+		}
+		// same as depthstencilbuffer
+		SAFE_RELEASE(BackBuffer);
+
+		//Set our Render Target
+		_d3d11DeviceContext->OMSetRenderTargets(1, &_d3d11RenderTargetView, NULL);
+
+		// Set the viewport
+		viewPort.TopLeftX = 0;
+		viewPort.TopLeftY = 0;
+		viewPort.Width = (float_t)_attributes.WindowWidth;
+		viewPort.Height = (float_t)_attributes.WindowHeight;
+		viewPort.MinDepth = 0.0f;
+		viewPort.MaxDepth = 1.0f;
+
+		_d3d11DeviceContext->RSSetViewports(1, &viewPort);
+
 		
 		return true; 
 	}
 	
-	inline void RendererDX11::GetDevice(ID3D11Device*& device, ID3D11DeviceContext*& context, ID3D11RenderTargetView*& target)
+	inline void RendererDX11::GetDevice(ID3D11Device*& device, ID3D11DeviceContext*& context, ID3D11RenderTargetView*& target, ID3D11DepthStencilView*& depth)
 	{
-		//_d3d11Device->AddRef();
-		//_d3d11Context->AddRef();
-		//_d3d11RenderTarget->AddRef();
-		//device = _d3d11Device;
-		//context = _d3d11Context;
-		//target = _d3d11RenderTarget;
+		device = _d3d11Device;
+		context = _d3d11DeviceContext;
+		target = _d3d11RenderTargetView;
+		depth = _d3d11DepthStencilView;
 	}
 
 	inline void RendererDX11::DestroyDevice()
 	{
-		if (_d3d11Device) _d3d11Device->Release();
-		if (_d3d11Context) _d3d11Context->Release();
+		//if (_d3d11Device) _d3d11Device->Release();
+		SAFE_RELEASE(_d3d11Device);
+		//if (_d3d11Context) _d3d11Context->Release();
+		SAFE_RELEASE(_d3d11DeviceContext);
 		//if (_d3d11SwapChain) _d3d11SwapChain->Release();
+		SAFE_RELEASE(_d3d11SwapChain);
 		//if (_d3d11RenderTarget) _d3d11RenderTarget->Release();
+		SAFE_RELEASE(_d3d11RenderTargetView);
+		SAFE_RELEASE(_d3d11DepthStencilView);
 	}
 
 	inline void RendererDX11::Swap()
 	{
-		//_d3d11SwapChain->Present(0, 0);
+		_d3d11SwapChain->Present(0, 0);
 	}
 
 	inline void RendererDX11::HandleWindowResize(const uint32_t width, const uint32_t height, const bool doReset)
@@ -131,7 +221,7 @@ namespace game
 		viewport.Width = (float_t)width;
 		viewport.Height = (float_t)height;
 
-		_d3d11Context->RSSetViewports(1, &viewport);
+		_d3d11DeviceContext->RSSetViewports(1, &viewport);
 	}
 
 	inline bool RendererDX11::CreateTexture(Texture2D& texture)

@@ -3,8 +3,8 @@
 //#define GAME_ENABLE_NETWORKING
 //#define GAME_ENABLE_SHADERS
 //#define GAME_SUPPORT_DIRECTX9
-#define GAME_SUPPORT_DIRECTX10
-//#define GAME_SUPPORT_DIRECTX11
+//#define GAME_SUPPORT_DIRECTX10
+#define GAME_SUPPORT_DIRECTX11
 //#define GAME_SUPPORT_DIRECTX12
 //#define GAME_SUPPORT_OPENGL
 //#define GAME_SUPPORT_VULKAN 
@@ -62,7 +62,7 @@ public:
 		attributes.MultiSamples = 8;
 		//attributes.RenderingAPI = game::RenderAPI::DirectX9; 
 		attributes.RenderingAPI = game::RenderAPI::DirectX10;
-		//attributes.RenderingAPI = game::RenderAPI::DirectX11;
+		attributes.RenderingAPI = game::RenderAPI::DirectX11;
 		//attributes.RenderingAPI = game::RenderAPI::DirectX12;
 		//attributes.RenderingAPI = game::RenderAPI::OpenGL;
 		
@@ -229,7 +229,8 @@ public:
 		if (geIsUsing(GAME_DIRECTX11))
 		{
 			float color[4] = { 0.25f, 0.25f, 0.25f, 1.0f };
-			//d3d11Context->ClearRenderTargetView(d3d11RenderTarget, color);
+			d3d11Context->ClearRenderTargetView(d3d11RenderTarget, color);
+			d3d11Context->ClearDepthStencilView(d3d11DepthStencilView, D3D10_CLEAR_DEPTH | D3D10_CLEAR_STENCIL, 1.0f, 0);
 		}
 #endif
 	}
