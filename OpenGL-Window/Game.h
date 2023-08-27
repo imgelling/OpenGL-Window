@@ -57,6 +57,7 @@
 #if defined(GAME_DIRECTX11)
 #include <d3d11.h>
 #pragma comment (lib, "d3d11.lib")
+#pragma comment(lib, "d3dcompiler.lib")
 #include "GameRendererDX11.h"
 #endif
 #pragma endregion

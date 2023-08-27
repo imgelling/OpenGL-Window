@@ -33,7 +33,15 @@ namespace game
 		ID3DBlob* compiledVertexShader10;
 		ID3DBlob* compiledGeometryShader10;
 #endif
-#if defined(GAME_DIRECTX9) || defined(GAME_DIRECTX10)
+#if defined(GAME_DIRECTX11)
+		ID3D11VertexShader* vertexShader11;
+		ID3D11PixelShader* pixelShader11;
+		ID3D11GeometryShader* geometryShader11;
+		ID3DBlob* compiledPixelShader11;
+		ID3DBlob* compiledVertexShader11;
+		ID3DBlob* compiledGeometryShader11;
+#endif
+#if defined(GAME_DIRECTX9) | defined(GAME_DIRECTX10) | defined(GAME_DIRECTX11)
 		bool isPrecompiled;
 #endif
 	private:
@@ -59,7 +67,15 @@ namespace game
 		compiledVertexShader10 = nullptr;
 		compiledGeometryShader10 = nullptr;
 #endif
-#if defined(GAME_DIRECTX9) || defined(GAME_DIRECTX10)
+#if defined(GAME_DIRECTX11)
+		vertexShader11 = nullptr;
+		pixelShader11 = nullptr;
+		geometryShader11 = nullptr;
+		compiledPixelShader11 = nullptr;
+		compiledVertexShader11 = nullptr;
+		compiledGeometryShader11 = nullptr;
+#endif
+#if defined(GAME_DIRECTX9) | defined(GAME_DIRECTX10) | defined(GAME_DIRECTX11)
 		isPrecompiled = false;
 #endif
 	}

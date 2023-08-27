@@ -29,13 +29,13 @@ namespace game
 		bool CreateTexture(Texture2D& texture);
 		bool LoadTexture(std::string fileName, Texture2D& texture) { lastError = { GameErrors::GameDirectX11Specific, "could not load texture" }; return false; }
 		void UnLoadTexture(Texture2D& texture);
-		bool LoadShader(const std::string vertex, const std::string fragment, Shader& shader) { return false; };
+		bool LoadShader(const std::string vertex, const std::string fragment, Shader& shader);
 		bool LoadShader(const std::string vertex, const std::string fragment, const std::string geometry, Shader& shader)
 		{
 			lastError = { GameErrors::GameDirectX11Specific, "Geometry shaders not implemented yet." };
 			return false;
 		}
-		void UnLoadShader(Shader& shader) {};
+		void UnLoadShader(Shader& shader);
 		void GetDevice(ID3D11Device*& device, ID3D11DeviceContext*& context, ID3D11RenderTargetView*& target, ID3D11DepthStencilView*& depth);
 	protected:
 		void _ReadExtensions() {};
@@ -243,7 +243,7 @@ namespace game
 		desc.MiscFlags = 0;
 
 
-		//if (_d3d11Device->CreateTexture2D(&desc, NULL, &texture.textureInterface11) != S_OK)
+		if (FAILED(_d3d11Device->CreateTexture2D(&desc, NULL, &texture.textureInterface11)))
 		{
 			lastError = { GameErrors::GameDirectX11Specific, "Could not create texture." };
 			return false;
@@ -255,11 +255,12 @@ namespace game
 
 	inline void RendererDX11::UnLoadTexture(Texture2D& texture)
 	{
-		if (texture.textureInterface11)
-		{
-			texture.textureInterface11->Release();
-			texture.textureInterface11 = nullptr;
-		}
+		SAFE_RELEASE(texture.textureInterface11);
+		//if (texture.textureInterface11)
+		//{
+		//	texture.textureInterface11->Release();
+		//	texture.textureInterface11 = nullptr;
+		//}
 		texture.width = 0;
 		texture.height = 0;
 		texture.oneOverWidth = 0.0f;
@@ -271,6 +272,147 @@ namespace game
 		texture.isMipMapped = true;
 		texture.filterType = TextureFilterType::Trilinear;
 		texture.anisotropyLevel = 1;
+	}
+
+	inline bool RendererDX11::LoadShader(const std::string vertex, const std::string fragment, Shader& shader)
+	{
+		if (!shader.isPrecompiled)
+		{
+			DWORD flags = D3DCOMPILE_ENABLE_STRICTNESS;
+			if (_attributes.DebugMode)
+			{
+				flags |= D3DCOMPILE_DEBUG;
+			}
+			ID3DBlob* compiledVertexShader = nullptr;
+			ID3DBlob* compiledPixelShader = nullptr;
+			ID3DBlob* compilationMsgs = nullptr;
+
+			// Compile the vertex shader
+			if (FAILED(D3DCompileFromFile(ConvertToWide(vertex).c_str(), NULL, NULL, "main", "vs_4_0", flags, NULL, &compiledVertexShader, &compilationMsgs)))
+			{
+				SIZE_T size = compilationMsgs->GetBufferSize();
+				uint8_t* p = reinterpret_cast<unsigned char*>(compilationMsgs->GetBufferPointer());
+				lastError = { GameErrors::GameDirectX11Specific,"Could not compile shader \"" + vertex + "\".\n" };
+				for (uint32_t bytes = 0; bytes < size; bytes++)
+				{
+					lastError.lastErrorString += p[bytes];
+				}
+				SAFE_RELEASE(compilationMsgs);
+				SAFE_RELEASE(compiledVertexShader);
+				return false;
+			}
+
+			// Compile the pixel shader
+			if (FAILED(D3DCompileFromFile(ConvertToWide(fragment).c_str(), NULL, NULL, "main", "ps_4_0", flags, NULL, &compiledPixelShader, &compilationMsgs)))
+			{
+				SIZE_T size = compilationMsgs->GetBufferSize();
+				auto* p = reinterpret_cast<unsigned char*>(compilationMsgs->GetBufferPointer());
+				lastError = { GameErrors::GameDirectX11Specific,"Could not compile shader \"" + fragment + "\".\n" };
+				for (uint32_t bytes = 0; bytes < size; bytes++)
+				{
+					lastError.lastErrorString += p[bytes];
+				}
+				SAFE_RELEASE(compilationMsgs);
+				SAFE_RELEASE(compiledVertexShader);
+				SAFE_RELEASE(compiledPixelShader);
+				return false;
+			}
+
+			// Free up any messages from compilation if any
+			SAFE_RELEASE(compilationMsgs);
+
+			// Create vertex shader
+			if (FAILED(_d3d11Device->CreateVertexShader(compiledVertexShader->GetBufferPointer(), compiledVertexShader->GetBufferSize(), NULL, &shader.vertexShader11)))
+			{
+				lastError = { GameErrors::GameDirectX11Specific,"Could not create vertex shader from \"" + vertex + "\"." };
+				SAFE_RELEASE(compiledVertexShader);
+				SAFE_RELEASE(compiledPixelShader);
+				SAFE_RELEASE(shader.pixelShader11);
+
+				return false;
+			}
+
+			// Create pixel shader
+			if (FAILED(_d3d11Device->CreatePixelShader((DWORD*)(compiledPixelShader->GetBufferPointer()), compiledPixelShader->GetBufferSize(), NULL, &shader.pixelShader11)))
+			{
+				lastError = { GameErrors::GameDirectX11Specific,"Could not create pixel shader from \"" + fragment + "\"." };
+				SAFE_RELEASE(compiledVertexShader);
+				SAFE_RELEASE(compiledPixelShader);
+				SAFE_RELEASE(shader.vertexShader11);
+				return false;
+			}
+
+			// Shaders created, save a reference and release this one
+			compiledVertexShader->AddRef();
+			shader.compiledVertexShader11 = compiledVertexShader;
+			SAFE_RELEASE(compiledVertexShader);
+
+			compiledPixelShader->AddRef();
+			shader.compiledPixelShader11 = compiledPixelShader;
+			SAFE_RELEASE(compiledPixelShader);
+
+			return true;
+		}
+		else
+		{
+			// Load compiled vertex shader
+			ID3DBlob* compiledPixelShader = nullptr;
+			ID3DBlob* compiledVertexShader = nullptr;
+
+			// Create vertex shader
+			if (FAILED(D3DReadFileToBlob((ConvertToWide(vertex).c_str()), &compiledVertexShader)))
+			{
+				lastError = { GameErrors::GameDirectX11Specific,"Could not read vertex file \"" + vertex + "\"." };
+				SAFE_RELEASE(compiledVertexShader);
+				return false;
+			}
+			HRESULT hr = _d3d11Device->CreateVertexShader((DWORD*)compiledVertexShader->GetBufferPointer(), compiledVertexShader->GetBufferSize(), NULL, &shader.vertexShader11);
+			if (FAILED(hr))
+			{
+				lastError = { GameErrors::GameDirectX11Specific,"Could not create vertex shader from \"" + vertex + "\"." };
+				SAFE_RELEASE(compiledVertexShader);
+				return false;
+			}
+
+			// Create pixel shader
+			if (FAILED(D3DReadFileToBlob((ConvertToWide(fragment).c_str()), &compiledPixelShader)))
+			{
+				lastError = { GameErrors::GameDirectX11Specific,"Could not read pixel file \"" + fragment + "\"." };
+				SAFE_RELEASE(compiledVertexShader);
+				SAFE_RELEASE(shader.vertexShader11);
+				SAFE_RELEASE(compiledPixelShader);
+			}
+
+			if (FAILED(_d3d11Device->CreatePixelShader((DWORD*)compiledPixelShader->GetBufferPointer(), compiledPixelShader->GetBufferSize(), NULL, &shader.pixelShader11)))
+			{
+				lastError = { GameErrors::GameDirectX11Specific,"Could not create pixel shader from \"" + fragment + "\"." };
+				SAFE_RELEASE(compiledVertexShader);
+				SAFE_RELEASE(shader.vertexShader11);
+				SAFE_RELEASE(compiledPixelShader);
+				SAFE_RELEASE(shader.pixelShader11);
+				return false;
+			}
+
+			// Shaders created, save a reference and release this one
+			compiledVertexShader->AddRef();
+			shader.compiledVertexShader11 = compiledVertexShader;
+			SAFE_RELEASE(compiledVertexShader);
+
+			compiledPixelShader->AddRef();
+			shader.compiledPixelShader11 = compiledPixelShader;
+			SAFE_RELEASE(compiledPixelShader);
+		}
+		return true;
+	}
+
+	inline void RendererDX11::UnLoadShader(Shader& shader)
+	{
+		SAFE_RELEASE(shader.compiledVertexShader11);
+		SAFE_RELEASE(shader.vertexShader11);
+		SAFE_RELEASE(shader.compiledPixelShader11);
+		SAFE_RELEASE(shader.pixelShader11);
+		SAFE_RELEASE(shader.compiledGeometryShader11);
+		SAFE_RELEASE(shader.geometryShader11);
 	}
 }
 

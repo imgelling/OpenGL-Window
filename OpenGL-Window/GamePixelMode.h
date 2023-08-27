@@ -99,14 +99,37 @@ namespace game
 		};
 		ID3D10Buffer* _vertexBuffer10;
 		ID3D10Buffer* _indexBuffer;
-		Shader _pixelModeShader;
+		Shader _pixelModeShader10;
 		ID3D10InputLayout* _vertexLayout10;
-		ID3D10ShaderResourceView* _textureShaderResourceView0;
-		ID3D10ShaderResourceView* _textureShaderResourceView1;
+		ID3D10ShaderResourceView* _textureShaderResourceView0_10;
+		ID3D10ShaderResourceView* _textureShaderResourceView1_10;
 		ID3D10SamplerState* _textureSamplerState10;
 #endif
 #if defined(GAME_DIRECTX11)
-
+		struct _vertex11
+		{
+			float_t x, y, z;
+			float_t r, g, b, a;
+			float_t u, v;
+		};
+		_vertex11 _quadVertices11[4] =
+		{
+			// tl
+			{0.0f, 1.5f, 0.1f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f},
+			// tr
+			{0.5f, -0.5f, 0.1f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, .0f},
+			// bl
+			{-0.5f, -0.5f, 0.1f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f},
+			// br
+			{0.5f, 0.5f, 0.1f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f},
+		};
+		ID3D11Buffer* _vertexBuffer11;
+		ID3D11Buffer* _indexBuffer11;
+		Shader _pixelModeShader11;
+		ID3D11InputLayout* _vertexLayout11;
+		ID3D11ShaderResourceView* _textureShaderResourceView0_11;
+		ID3D11ShaderResourceView* _textureShaderResourceView1_11;
+		ID3D11SamplerState* _textureSamplerState11;
 #endif
 	};
 
@@ -124,12 +147,17 @@ namespace game
 		_vertexBuffer10 = nullptr;
 		_vertexLayout10 = nullptr;
 		_indexBuffer = nullptr;
-		_textureShaderResourceView0 = nullptr;
-		_textureShaderResourceView1 = nullptr;
+		_textureShaderResourceView0_10 = nullptr;
+		_textureShaderResourceView1_10 = nullptr;
 		_textureSamplerState10 = nullptr;
 #endif
 #if defined(GAME_DIRECTX11)
-
+		_vertexBuffer11 = nullptr;
+		_vertexLayout11 = nullptr;
+		_indexBuffer11 = nullptr;
+		_textureShaderResourceView0_11 = nullptr;
+		_textureShaderResourceView1_11 = nullptr;
+		_textureSamplerState11 = nullptr;
 #endif
 	}
 
@@ -149,25 +177,55 @@ namespace game
 #if defined(GAME_DIRECTX10)
 		if (enginePointer->geIsUsing(GAME_DIRECTX10))
 		{
-			if (_vertexBuffer10)
-			{
-				_vertexBuffer10->Release();
-				_vertexBuffer10 = nullptr;
-			}
-			if (_vertexLayout10)
-			{
-				_vertexLayout10->Release();
-				_vertexLayout10 = nullptr;
-			}
-			if (_indexBuffer)
-			{
-				_indexBuffer->Release();
-				_indexBuffer = nullptr;
-			}
-			enginePointer->geUnLoadShader(_pixelModeShader);
-			SAFE_RELEASE(_textureShaderResourceView0);
-			SAFE_RELEASE(_textureShaderResourceView1);
+			SAFE_RELEASE(_vertexBuffer10);
+			SAFE_RELEASE(_vertexLayout10);
+			SAFE_RELEASE(_indexBuffer10);
+			//if (_vertexBuffer10)
+			//{
+			//	_vertexBuffer10->Release();
+			//	_vertexBuffer10 = nullptr;
+			//}
+			//if (_vertexLayout10)
+			//{
+			//	_vertexLayout10->Release();
+			//	_vertexLayout10 = nullptr;
+			//}
+			//if (_indexBuffer)
+			//{
+			//	_indexBuffer->Release();
+			//	_indexBuffer = nullptr;
+			//}
+			enginePointer->geUnLoadShader(_pixelModeShader10);
+			SAFE_RELEASE(_textureShaderResourceView0_10);
+			SAFE_RELEASE(_textureShaderResourceView1_10);
 			SAFE_RELEASE(_textureSamplerState10);
+		}
+#endif
+#if defined(GAME_DIRECTX11)
+		if (enginePointer->geIsUsing(GAME_DIRECTX11))
+		{
+			SAFE_RELEASE(_vertexBuffer11);
+			SAFE_RELEASE(_vertexLayout11);
+			SAFE_RELEASE(_indexBuffer11);
+			//if (_vertexBuffer11)
+			//{
+			//	_vertexBuffer11->Release();
+			//	_vertexBuffer11 = nullptr;
+			//}
+			//if (_vertexLayout11)
+			//{
+			//	_vertexLayout11->Release();
+			//	_vertexLayout11 = nullptr;
+			//}
+			//if (_indexBuffer11)
+			//{
+			//	_indexBuffer11->Release();
+			//	_indexBuffer11 = nullptr;
+			//}
+			enginePointer->geUnLoadShader(_pixelModeShader11);
+			SAFE_RELEASE(_textureShaderResourceView0_11);
+			SAFE_RELEASE(_textureShaderResourceView1_11);
+			SAFE_RELEASE(_textureSamplerState11);
 		}
 #endif
 		enginePointer->geUnLoadTexture(_frameBuffer[0]);
@@ -240,7 +298,7 @@ namespace game
 			};
 			
 			// Load shaders for sprite mode
-			if (!enginePointer->geLoadShader("Content/VertexShader.hlsl", "Content/PixelShader.hlsl", _pixelModeShader))
+			if (!enginePointer->geLoadShader("Content/VertexShader.hlsl", "Content/PixelShader.hlsl", _pixelModeShader10))
 			{
 				return false;
 			}
@@ -255,7 +313,7 @@ namespace game
 			if (FAILED(enginePointer->d3d10Device->CreateBuffer(&vertexBufferDescription, &vertexInitialData, &_vertexBuffer10)))
 			{
 				lastError = { GameErrors::GameDirectX10Specific,"Could not create vertex buffer for PixelMode." };
-				enginePointer->geUnLoadShader(_pixelModeShader);
+				enginePointer->geUnLoadShader(_pixelModeShader10);
 				return false;
 			}
 
@@ -271,19 +329,19 @@ namespace game
 				lastError = { GameErrors::GameDirectX10Specific,"Could not create index buffer for PixelMode." };
 				_vertexBuffer10->Release();
 				_vertexBuffer10 = nullptr;
-				enginePointer->geUnLoadShader(_pixelModeShader);
+				enginePointer->geUnLoadShader(_pixelModeShader10);
 				return false;
 			}
 
 			// Create input layout for shaders
-			if (FAILED(enginePointer->d3d10Device->CreateInputLayout(inputLayout, 3, _pixelModeShader.compiledVertexShader10->GetBufferPointer(), _pixelModeShader.compiledVertexShader10->GetBufferSize(), &_vertexLayout10)))
+			if (FAILED(enginePointer->d3d10Device->CreateInputLayout(inputLayout, 3, _pixelModeShader10.compiledVertexShader10->GetBufferPointer(), _pixelModeShader10.compiledVertexShader10->GetBufferSize(), &_vertexLayout10)))
 			{
 				lastError = { GameErrors::GameDirectX10Specific,"Could not create input layout for PixelMode." };
 				_indexBuffer->Release();
 				_indexBuffer = nullptr;
 				_vertexBuffer10->Release();
 				_vertexBuffer10 = nullptr;
-				enginePointer->geUnLoadShader(_pixelModeShader);
+				enginePointer->geUnLoadShader(_pixelModeShader10);
 				return false;
 			}
 
@@ -307,11 +365,11 @@ namespace game
 			srDesc.ViewDimension = D3D10_SRV_DIMENSION_TEXTURE2D;
 			srDesc.Texture2D.MostDetailedMip = 0;
 			srDesc.Texture2D.MipLevels = 1;
-			if (FAILED(enginePointer->d3d10Device->CreateShaderResourceView(_frameBuffer[0].textureInterface10, &srDesc, &_textureShaderResourceView0)))
+			if (FAILED(enginePointer->d3d10Device->CreateShaderResourceView(_frameBuffer[0].textureInterface10, &srDesc, &_textureShaderResourceView0_10)))
 			{
 				std::cout << "CreateSRV0 failed!\n";
 			}
-			if (FAILED(enginePointer->d3d10Device->CreateShaderResourceView(_frameBuffer[1].textureInterface10, &srDesc, &_textureShaderResourceView1)))
+			if (FAILED(enginePointer->d3d10Device->CreateShaderResourceView(_frameBuffer[1].textureInterface10, &srDesc, &_textureShaderResourceView1_10)))
 			{
 				std::cout << "CreateSRV1 failed!\n";
 			}
@@ -321,6 +379,23 @@ namespace game
 		if (enginePointer->geIsUsing(GAME_DIRECTX11))
 		{
 			//enginePointer->d3d11Device->CreateBuffer()
+			D3D11_BUFFER_DESC vertexBufferDescription = { 0 };
+			D3D11_BUFFER_DESC indexBufferDescription = { 0 };
+			D3D11_SUBRESOURCE_DATA vertexInitialData = { 0 };
+			D3D11_SUBRESOURCE_DATA indexInitialData = { 0 };
+			DWORD indices[] = { 0, 1, 2, 1, 3, 2, };
+			D3D11_INPUT_ELEMENT_DESC inputLayout[] =
+			{
+				{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+				{ "COLOR",    0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0},
+				{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT,    0, 28, D3D11_INPUT_PER_VERTEX_DATA, 0},
+			};
+
+			// Load shaders for sprite mode
+			if (!enginePointer->geLoadShader("Content/VertexShader.hlsl", "Content/PixelShader.hlsl", _pixelModeShader11))
+			{
+				return false;
+			}
 		}
 #endif
 
@@ -632,18 +707,18 @@ namespace game
 			enginePointer->d3d10Device->IASetIndexBuffer(_indexBuffer, DXGI_FORMAT_R32_UINT, 0);
 			enginePointer->d3d10Device->IASetVertexBuffers(0, 1, &_vertexBuffer10, &stride, &offset);
 			enginePointer->d3d10Device->IASetInputLayout(_vertexLayout10);
-			enginePointer->d3d10Device->VSSetShader(_pixelModeShader.vertexShader10);
-			enginePointer->d3d10Device->PSSetShader(_pixelModeShader.pixelShader10);
+			enginePointer->d3d10Device->VSSetShader(_pixelModeShader10.vertexShader10);
+			enginePointer->d3d10Device->PSSetShader(_pixelModeShader10.pixelShader10);
 			enginePointer->d3d10Device->PSSetSamplers(0, 1, &_textureSamplerState10);
 			enginePointer->d3d10Device->IASetPrimitiveTopology(D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 			if (!_currentBuffer)
 			{
-				enginePointer->d3d10Device->PSSetShaderResources(0, 1, &_textureShaderResourceView0);
+				enginePointer->d3d10Device->PSSetShaderResources(0, 1, &_textureShaderResourceView0_10);
 			}
 			else
 			{
-				enginePointer->d3d10Device->PSSetShaderResources(0, 1, &_textureShaderResourceView1);
+				enginePointer->d3d10Device->PSSetShaderResources(0, 1, &_textureShaderResourceView1_10);
 			}
 
 			enginePointer->d3d10Device->DrawIndexed(6, 0, 0);

@@ -218,30 +218,36 @@ namespace game
 		_maxSprites = maxSprites;
 		// OpenGL and DX9 implementation of vertices
 #if defined(GAME_OPENGL)  // OPENGL will break here, changed 6 to 4
-		_spriteVertices = new _spriteVertexGL[(uint64_t)(_maxSprites) * 6];
-		for (uint32_t vertex = 0; vertex < _maxSprites * 6; vertex++)
+		if (enginePointer->geIsUsing(GAME_OPENGL))
 		{
-			_spriteVertices[vertex].x = 0.0f;
-			_spriteVertices[vertex].y = 0.0f;
-			_spriteVertices[vertex].z = 0.0f;
-			_spriteVertices[vertex].rhw = 1.0f;
-			_spriteVertices[vertex].u = 0.0f;
-			_spriteVertices[vertex].v = 0.0f;
-			_spriteVertices[vertex].color = Colors::White.packedABGR;
+			_spriteVertices = new _spriteVertexGL[(uint64_t)(_maxSprites) * 6];
+			for (uint32_t vertex = 0; vertex < _maxSprites * 6; vertex++)
+			{
+				_spriteVertices[vertex].x = 0.0f;
+				_spriteVertices[vertex].y = 0.0f;
+				_spriteVertices[vertex].z = 0.0f;
+				_spriteVertices[vertex].rhw = 1.0f;
+				_spriteVertices[vertex].u = 0.0f;
+				_spriteVertices[vertex].v = 0.0f;
+				_spriteVertices[vertex].color = Colors::White.packedABGR;
+			}
 		}
 #endif
 
 #if defined (GAME_DIRECTX9)  // OPENGL will break here, changed 6 to 4
-		_spriteVertices9 = new _spriteVertex9[(uint64_t)(_maxSprites) * 4];
-		for (uint32_t vertex = 0; vertex < _maxSprites * 4; vertex++)
+		if (enginePointer->geIsUsing(GAME_DIRECTX9))
 		{
-			_spriteVertices9[vertex].x = 0.0f;
-			_spriteVertices9[vertex].y = 0.0f;
-			_spriteVertices9[vertex].z = 0.0f;
-			_spriteVertices9[vertex].rhw = 1.0f;
-			_spriteVertices9[vertex].u = 0.0f;
-			_spriteVertices9[vertex].v = 0.0f;
-			_spriteVertices9[vertex].color = Colors::White.packedARGB;
+			_spriteVertices9 = new _spriteVertex9[(uint64_t)(_maxSprites) * 4];
+			for (uint32_t vertex = 0; vertex < _maxSprites * 4; vertex++)
+			{
+				_spriteVertices9[vertex].x = 0.0f;
+				_spriteVertices9[vertex].y = 0.0f;
+				_spriteVertices9[vertex].z = 0.0f;
+				_spriteVertices9[vertex].rhw = 1.0f;
+				_spriteVertices9[vertex].u = 0.0f;
+				_spriteVertices9[vertex].v = 0.0f;
+				_spriteVertices9[vertex].color = Colors::White.packedARGB;
+			}
 		}
 #endif
 

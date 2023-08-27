@@ -23,7 +23,7 @@ namespace game
 #if defined(GAME_DIRECTX9)
 		uint32_t packedARGB;
 #endif
-#if defined(GAME_DIRECTX10)
+#if defined(GAME_DIRECTX10) | defined(GAME_DIRECTX11)
 		float rgba[4];
 #endif
 
@@ -56,7 +56,7 @@ namespace game
 #if defined(GAME_DIRECTX9)
 		packedARGB = a << 24;
 #endif
-#if defined(GAME_DIRECTX10)
+#if defined(GAME_DIRECTX10) | defined(GAME_DIRECTX11)
 		rgba[0] = 0.0f;
 		rgba[1] = 0.0f;
 		rgba[2] = 0.0f;
@@ -94,7 +94,7 @@ namespace game
 		packedB = this->b << 0;
 		packedARGB = ((packedA) | (packedR) | (packedG) | (packedB));
 #endif
-#if defined(GAME_DIRECTX10)
+#if defined(GAME_DIRECTX10) | defined(GAME_DIRECTX11)
 		rgba[0] = rf;
 		rgba[1] = gf;
 		rgba[2] = bf;
@@ -132,7 +132,7 @@ namespace game
 		packedB = this->b << 0;
 		packedARGB = ((packedA) | (packedR) | (packedG) | (packedB));
 #endif
-#if defined(GAME_DIRECTX10)
+#if defined(GAME_DIRECTX10) | defined(GAME_DIRECTX11)
 		rgba[0] = rf;
 		rgba[1] = gf;
 		rgba[2] = bf;
@@ -170,7 +170,7 @@ namespace game
 		packedB = this->b << 0;
 		packedARGB = ((packedA) | (packedR) | (packedG) | (packedB));
 #endif
-#if defined(GAME_DIRECTX10)
+#if defined(GAME_DIRECTX10) | defined(GAME_DIRECTX11)
 		rgba[0] = rf;
 		rgba[1] = gf;
 		rgba[2] = bf;

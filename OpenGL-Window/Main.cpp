@@ -50,7 +50,7 @@ public:
 		// Enable run-time memory check for debug builds.
 #if defined(DEBUG) | defined(_DEBUG)
 		_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
-		//_CrtSetBreakAlloc(678);
+		//_CrtSetBreakAlloc(613);
 #endif
 		
 		attributes.WindowTitle = "PixelMode tests";
@@ -229,7 +229,7 @@ public:
 		if (geIsUsing(GAME_DIRECTX11))
 		{
 			float color[4] = { 0.25f, 0.25f, 0.25f, 1.0f };
-			d3d11Context->ClearRenderTargetView(d3d11RenderTarget, color);
+			d3d11Context->ClearRenderTargetView(d3d11RenderTarget, game::Colors::DarkGray.rgba);
 			d3d11Context->ClearDepthStencilView(d3d11DepthStencilView, D3D10_CLEAR_DEPTH | D3D10_CLEAR_STENCIL, 1.0f, 0);
 		}
 #endif
