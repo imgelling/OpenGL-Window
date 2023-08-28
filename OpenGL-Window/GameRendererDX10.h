@@ -91,7 +91,7 @@ namespace game
 		{
 			lastError = { GameErrors::GameDirectX10Specific, "Could not create depth stencil buffer texture on resize." };
 			DestroyDevice();
-			return ;
+			return;
 		}
 
 		// Second param is states for depth stencil
@@ -99,7 +99,7 @@ namespace game
 		{
 			lastError = { GameErrors::GameDirectX10Specific, "Could not create depth stencil view on resize." };
 			DestroyDevice();
-			return ;
+			return;
 		}
 
 		// Create the back buffer texture
@@ -107,7 +107,7 @@ namespace game
 		{
 			lastError = { GameErrors::GameDirectX10Specific, "Could not create back buffer on resize." };
 			DestroyDevice();
-			return ;
+			return;
 		}
 
 		// Create the render target
@@ -115,7 +115,7 @@ namespace game
 		{
 			lastError = { GameErrors::GameDirectX10Specific, "Could not create render target on resize." };
 			DestroyDevice();
-			return ;
+			return;
 		}
 
 		// And release the texture
@@ -145,10 +145,10 @@ namespace game
 
 	inline void RendererDX10::GetDevice(ID3D10Device*& device, IDXGISwapChain*& swapChain, ID3D10RenderTargetView*& renderTargetView, ID3D10DepthStencilView*& depthStencilView)
 	{
-//		_d3d10Device->AddRef();
-		//_d3d10SwapChain->AddRef();
-		//_d3d10RenderTargetView->AddRef();
-		//_d3d10DepthStencilView->AddRef();
+		//		_d3d10Device->AddRef();
+				//_d3d10SwapChain->AddRef();
+				//_d3d10RenderTargetView->AddRef();
+				//_d3d10DepthStencilView->AddRef();
 		device = _d3d10Device;
 		swapChain = _d3d10SwapChain;
 		renderTargetView = _d3d10RenderTargetView;
@@ -254,7 +254,7 @@ namespace game
 		// Set the render target
 		_d3d10Device->OMSetRenderTargets(1, &_d3d10RenderTargetView, _d3d10DepthStencilView);
 
-		
+
 		// Set the viewport
 		viewPort.TopLeftX = 0;
 		viewPort.TopLeftY = 0;
@@ -264,7 +264,7 @@ namespace game
 		viewPort.MaxDepth = 1.0f;
 
 		_d3d10Device->RSSetViewports(1, &viewPort);
-		
+
 		return true;
 	};
 
@@ -277,7 +277,7 @@ namespace game
 		SAFE_RELEASE(_d3d10Device);
 	}
 
-	inline bool RendererDX10::CreateTexture(Texture2D& texture) 
+	inline bool RendererDX10::CreateTexture(Texture2D& texture)
 	{
 		D3D10_TEXTURE2D_DESC desc = { 0 };
 		desc.Width = texture.width;
@@ -300,11 +300,11 @@ namespace game
 			return false;
 		}
 
-		return true; 
+		return true;
 	};
 
-	inline bool RendererDX10::LoadTexture(std::string fileName, Texture2D& texture) 
-	{ 
+	inline bool RendererDX10::LoadTexture(std::string fileName, Texture2D& texture)
+	{
 		ImageLoader loader;
 		void* data = nullptr;
 		int32_t width = 0;
@@ -344,7 +344,7 @@ namespace game
 		}
 
 		// Copy texture data to the memory
-		if (FAILED(texture.textureInterface10->Map(D3D10CalcSubresource(0,0,1), D3D10_MAP_WRITE_DISCARD, 0, &lockedRectangle)))
+		if (FAILED(texture.textureInterface10->Map(D3D10CalcSubresource(0, 0, 1), D3D10_MAP_WRITE_DISCARD, 0, &lockedRectangle)))
 		{
 			lastError = { GameErrors::GameDirectX10Specific,"Could not map texture, \"" + fileName + "\"." };
 			UnLoadTexture(texture);
