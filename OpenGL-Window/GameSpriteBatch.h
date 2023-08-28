@@ -79,29 +79,29 @@ namespace game
 		};
 		_spriteVertex10* _spriteVertices10;
 		ID3D10Buffer* _vertexBuffer10;
-		Shader _spriteBatchShader;
+		Shader _spriteBatchShader10;
 		ID3D10InputLayout* _vertexLayout10;
 		ID3D10SamplerState* _textureSamplerState10;
-		ID3D10Buffer* _indexBuffer;
-		ID3D10BlendState* _spriteBatchBlendState;
+		ID3D10Buffer* _indexBuffer10;
+		ID3D10BlendState* _spriteBatchBlendState10;
 		// not sure how to store it, maybe name?
-		std::unordered_map<std::string, ID3D10ShaderResourceView*> _knownTextures;
+		std::unordered_map<std::string, ID3D10ShaderResourceView*> _knownTextures10;
 
 		// saves state of dx10 states we change to restore
-		uint32_t _oldStride;
-		uint32_t _oldOffset;
-		ID3D10Buffer* _oldVertexBuffer;
-		ID3D10Buffer* _oldIndexBuffer;
-		DXGI_FORMAT _oldIndexFormat;
-		uint32_t _oldIndexOffset;
-		ID3D10InputLayout* _oldInputLayout;
-		ID3D10VertexShader* _oldVertexShader;
-		ID3D10PixelShader* _oldPixelShader;
-		ID3D10SamplerState* _oldTextureSamplerState;
-		D3D10_PRIMITIVE_TOPOLOGY _oldPrimitiveTopology;
-		ID3D10BlendState* _oldBlendState;
-		float_t _oldBlendFactor[4];
-		uint32_t _oldSampleMask;
+		uint32_t _oldStride10;
+		uint32_t _oldOffset10;
+		ID3D10Buffer* _oldVertexBuffer10;
+		ID3D10Buffer* _oldIndexBuffer10;
+		DXGI_FORMAT _oldIndexFormat10;
+		uint32_t _oldIndexOffset10;
+		ID3D10InputLayout* _oldInputLayout10;
+		ID3D10VertexShader* _oldVertexShader10;
+		ID3D10PixelShader* _oldPixelShader10;
+		ID3D10SamplerState* _oldTextureSamplerState10;
+		D3D10_PRIMITIVE_TOPOLOGY _oldPrimitiveTopology10;
+		ID3D10BlendState* _oldBlendState10;
+		float_t _oldBlendFactor10[4];
+		uint32_t _oldSampleMask10;
 #endif
 #if defined (GAME_DIRECTX11)
 		struct _spriteVertex11
@@ -162,25 +162,25 @@ namespace game
 		//if (enginePointer->geIsUsing(GAME_DIRECTX10))
 		{
 			_spriteVertices10 = nullptr;
-			_indexBuffer = nullptr;
+			_indexBuffer10 = nullptr;
 			_vertexBuffer10 = nullptr;
 			_vertexLayout10 = nullptr;
 			_textureSamplerState10 = nullptr;
-			_spriteBatchBlendState = nullptr;
-			_oldStride = 0;
-			_oldOffset = 0;
-			_oldVertexBuffer = nullptr;
-			_oldIndexBuffer = nullptr;
-			_oldIndexFormat = {};
-			_oldIndexOffset = 0;
-			_oldInputLayout = nullptr;
-			_oldVertexShader = nullptr;
-			_oldPixelShader = nullptr;
-			_oldTextureSamplerState = nullptr;
-			_oldPrimitiveTopology = {};
-			_oldBlendState = nullptr;
-			ZeroMemory(_oldBlendFactor, 4 * sizeof(float_t));
-			_oldSampleMask = 0;
+			_spriteBatchBlendState10 = nullptr;
+			_oldStride10 = 0;
+			_oldOffset10 = 0;
+			_oldVertexBuffer10 = nullptr;
+			_oldIndexBuffer10 = nullptr;
+			_oldIndexFormat10 = {};
+			_oldIndexOffset10 = 0;
+			_oldInputLayout10 = nullptr;
+			_oldVertexShader10 = nullptr;
+			_oldPixelShader10 = nullptr;
+			_oldTextureSamplerState10 = nullptr;
+			_oldPrimitiveTopology10 = {};
+			_oldBlendState10 = nullptr;
+			ZeroMemory(_oldBlendFactor10, 4 * sizeof(float_t));
+			_oldSampleMask10 = 0;
 		}
 #endif
 #if defined (GAME_DIRECTX11)
@@ -249,10 +249,10 @@ namespace game
 			SAFE_RELEASE(_vertexBuffer10);
 			SAFE_RELEASE(_vertexLayout10);
 			SAFE_RELEASE(_textureSamplerState10);
-			SAFE_RELEASE(_indexBuffer);
-			SAFE_RELEASE(_spriteBatchBlendState);
-			enginePointer->geUnLoadShader(_spriteBatchShader);
-			for (auto& textureIterator : _knownTextures)
+			SAFE_RELEASE(_indexBuffer10);
+			SAFE_RELEASE(_spriteBatchBlendState10);
+			enginePointer->geUnLoadShader(_spriteBatchShader10);
+			for (auto& textureIterator : _knownTextures10)
 			{
 				SAFE_RELEASE(textureIterator.second);
 			}
@@ -423,7 +423,7 @@ namespace game
 			D3D10_SAMPLER_DESC samplerDesc = { };
 
 			// Load shaders for spriteBatch
-			if (!enginePointer->geLoadShader("Content/VertexShader.hlsl", "Content/PixelShader.hlsl", _spriteBatchShader))
+			if (!enginePointer->geLoadShader("Content/VertexShader.hlsl", "Content/PixelShader.hlsl", _spriteBatchShader10))
 			{
 				return false;
 			}
@@ -458,18 +458,19 @@ namespace game
 			indexBufferDescription.CPUAccessFlags = 0;
 			indexBufferDescription.MiscFlags = 0;
 			indexInitialData.pSysMem = indices.data();
-			if (FAILED(enginePointer->d3d10Device->CreateBuffer(&indexBufferDescription, &indexInitialData, &_indexBuffer)))
+			if (FAILED(enginePointer->d3d10Device->CreateBuffer(&indexBufferDescription, &indexInitialData, &_indexBuffer10)))
 			{
 				lastError = { GameErrors::GameDirectX10Specific,"Could not create index buffer for SpriteBatch." };
-				_vertexBuffer10->Release();
-				_vertexBuffer10 = nullptr;
-				enginePointer->geUnLoadShader(_spriteBatchShader);
+				//_vertexBuffer10->Release();
+				//_vertexBuffer10 = nullptr;
+				SAFE_RELEASE(_vertexBuffer10);
+				enginePointer->geUnLoadShader(_spriteBatchShader10);
 				return false;
 			}
 
 
 			// Create input layout for shaders
-			if (FAILED(enginePointer->d3d10Device->CreateInputLayout(inputLayout, 3, _spriteBatchShader.compiledVertexShader10->GetBufferPointer(), _spriteBatchShader.compiledVertexShader10->GetBufferSize(), &_vertexLayout10)))
+			if (FAILED(enginePointer->d3d10Device->CreateInputLayout(inputLayout, 3, _spriteBatchShader10.compiledVertexShader10->GetBufferPointer(), _spriteBatchShader10.compiledVertexShader10->GetBufferSize(), &_vertexLayout10)))
 			{
 				lastError = { GameErrors::GameDirectX10Specific, "Could not create input layout for SpriteBatch." };
 				return false;
@@ -500,7 +501,7 @@ namespace game
 			blendStateDesc.DestBlendAlpha = D3D10_BLEND_INV_SRC_ALPHA;
 			blendStateDesc.BlendOpAlpha = D3D10_BLEND_OP_ADD;
 			blendStateDesc.RenderTargetWriteMask[0] = D3D10_COLOR_WRITE_ENABLE_ALL;
-			if (FAILED(enginePointer->d3d10Device->CreateBlendState(&blendStateDesc, &_spriteBatchBlendState)))
+			if (FAILED(enginePointer->d3d10Device->CreateBlendState(&blendStateDesc, &_spriteBatchBlendState10)))
 			{
 				lastError = { GameErrors::GameDirectX10Specific, "Could not create blend state for SpriteBatch." };
 				return false;
@@ -648,24 +649,24 @@ namespace game
 			// need to save blend state check Render
 
 			// Save everything we modify
-			enginePointer->d3d10Device->IAGetIndexBuffer(&_oldIndexBuffer, &_oldIndexFormat, &_oldIndexOffset);
-			enginePointer->d3d10Device->IAGetVertexBuffers(0, 1, &_oldVertexBuffer, &_oldStride, &_oldOffset);
-			enginePointer->d3d10Device->IAGetInputLayout(&_oldInputLayout);
-			enginePointer->d3d10Device->VSGetShader(&_oldVertexShader);
-			enginePointer->d3d10Device->PSGetShader(&_oldPixelShader);
-			enginePointer->d3d10Device->PSGetSamplers(0, 1, &_oldTextureSamplerState);
-			enginePointer->d3d10Device->IAGetPrimitiveTopology(&_oldPrimitiveTopology);
-			enginePointer->d3d10Device->OMGetBlendState(&_oldBlendState, _oldBlendFactor, &_oldSampleMask);
+			enginePointer->d3d10Device->IAGetIndexBuffer(&_oldIndexBuffer10, &_oldIndexFormat10, &_oldIndexOffset10);
+			enginePointer->d3d10Device->IAGetVertexBuffers(0, 1, &_oldVertexBuffer10, &_oldStride10, &_oldOffset10);
+			enginePointer->d3d10Device->IAGetInputLayout(&_oldInputLayout10);
+			enginePointer->d3d10Device->VSGetShader(&_oldVertexShader10);
+			enginePointer->d3d10Device->PSGetShader(&_oldPixelShader10);
+			enginePointer->d3d10Device->PSGetSamplers(0, 1, &_oldTextureSamplerState10);
+			enginePointer->d3d10Device->IAGetPrimitiveTopology(&_oldPrimitiveTopology10);
+			enginePointer->d3d10Device->OMGetBlendState(&_oldBlendState10, _oldBlendFactor10, &_oldSampleMask10);
 
 			// Change what we need
-			enginePointer->d3d10Device->IASetIndexBuffer(_indexBuffer, DXGI_FORMAT_R32_UINT, 0);
+			enginePointer->d3d10Device->IASetIndexBuffer(_indexBuffer10, DXGI_FORMAT_R32_UINT, 0);
 			enginePointer->d3d10Device->IASetVertexBuffers(0, 1, &_vertexBuffer10, &stride, &offset);
 			enginePointer->d3d10Device->IASetInputLayout(_vertexLayout10);
-			enginePointer->d3d10Device->VSSetShader(_spriteBatchShader.vertexShader10);
-			enginePointer->d3d10Device->PSSetShader(_spriteBatchShader.pixelShader10);
+			enginePointer->d3d10Device->VSSetShader(_spriteBatchShader10.vertexShader10);
+			enginePointer->d3d10Device->PSSetShader(_spriteBatchShader10.pixelShader10);
 			enginePointer->d3d10Device->PSSetSamplers(0, 1, &_textureSamplerState10);
 			enginePointer->d3d10Device->IASetPrimitiveTopology(D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-			enginePointer->d3d10Device->OMSetBlendState(_spriteBatchBlendState, sampleMask, 0xffffffff);
+			enginePointer->d3d10Device->OMSetBlendState(_spriteBatchBlendState10, sampleMask, 0xffffffff);
 
 			// Reset current texture
 			_currentTexture.name = "";
@@ -754,17 +755,17 @@ namespace game
 		if (enginePointer->geIsUsing(GAME_DIRECTX10))
 		{
 			// restore everything
-			enginePointer->d3d10Device->IASetIndexBuffer(_oldIndexBuffer, _oldIndexFormat, _oldIndexOffset);
-			enginePointer->d3d10Device->IASetVertexBuffers(0, 1, &_oldVertexBuffer, &_oldStride, &_oldOffset);
-			enginePointer->d3d10Device->IASetInputLayout(_oldInputLayout);
-			enginePointer->d3d10Device->VSSetShader(_oldVertexShader);
-			enginePointer->d3d10Device->PSSetShader(_oldPixelShader);
-			enginePointer->d3d10Device->PSSetSamplers(0, 1, &_oldTextureSamplerState);
-			if (_oldPrimitiveTopology != D3D10_PRIMITIVE_TOPOLOGY_UNDEFINED)
+			enginePointer->d3d10Device->IASetIndexBuffer(_oldIndexBuffer10, _oldIndexFormat10, _oldIndexOffset10);
+			enginePointer->d3d10Device->IASetVertexBuffers(0, 1, &_oldVertexBuffer10, &_oldStride10, &_oldOffset10);
+			enginePointer->d3d10Device->IASetInputLayout(_oldInputLayout10);
+			enginePointer->d3d10Device->VSSetShader(_oldVertexShader10);
+			enginePointer->d3d10Device->PSSetShader(_oldPixelShader10);
+			enginePointer->d3d10Device->PSSetSamplers(0, 1, &_oldTextureSamplerState10);
+			if (_oldPrimitiveTopology10 != D3D10_PRIMITIVE_TOPOLOGY_UNDEFINED)
 			{
-				enginePointer->d3d10Device->IASetPrimitiveTopology(_oldPrimitiveTopology);
+				enginePointer->d3d10Device->IASetPrimitiveTopology(_oldPrimitiveTopology10);
 			}
-			enginePointer->d3d10Device->OMSetBlendState(_oldBlendState, _oldBlendFactor, _oldSampleMask);
+			enginePointer->d3d10Device->OMSetBlendState(_oldBlendState10, _oldBlendFactor10, _oldSampleMask10);
 		}
 #endif
 #if defined (GAME_DIRECTX11)
@@ -1062,9 +1063,9 @@ namespace game
 				Render();
 				_currentTexture = texture;
 				// Change shader texture to new one
-				auto foundTexture = _knownTextures.find(texture.name);
+				auto foundTexture = _knownTextures10.find(texture.name);
 				// Texture is known to us, so use the saved SRV
-				if (foundTexture != _knownTextures.end())
+				if (foundTexture != _knownTextures10.end())
 				{
 					// SRV has been created before
 					// So use it
@@ -1084,7 +1085,7 @@ namespace game
 					{
 						std::cout << "CreateSRV spritebatch failed!\n";
 					}
-					_knownTextures[texture.name] = newTextureSRV;
+					_knownTextures10[texture.name] = newTextureSRV;
 					enginePointer->d3d10Device->PSSetShaderResources(0, 1, &newTextureSRV);
 				}
 			}
@@ -1377,9 +1378,9 @@ namespace game
 				Render();
 				_currentTexture = texture;
 				// Change shader texture to new one
-				auto foundTexture = _knownTextures.find(texture.name);
+				auto foundTexture = _knownTextures10.find(texture.name);
 				// Texture is known to us, so use the saved SRV
-				if (foundTexture != _knownTextures.end())
+				if (foundTexture != _knownTextures10.end())
 				{
 					// Resource view has been created
 					// So use it
@@ -1399,7 +1400,7 @@ namespace game
 					{
 						std::cout << "CreateSRV spritebatch failed!\n";
 					}
-					_knownTextures[texture.name] = newTextureSRV;
+					_knownTextures10[texture.name] = newTextureSRV;
 					enginePointer->d3d10Device->PSSetShaderResources(0, 1, &newTextureSRV);
 				}
 			}
