@@ -104,6 +104,37 @@ namespace game
 		uint32_t _oldSampleMask;
 #endif
 #if defined (GAME_DIRECTX11)
+		struct _spriteVertex11
+		{
+			float_t x, y, z;
+			float_t r, g, b, a;
+			float_t u, v;
+		};
+		_spriteVertex11* _spriteVertices11;
+		ID3D11Buffer* _vertexBuffer11;
+		Shader _spriteBatchShader11;
+		ID3D11InputLayout* _vertexLayout11;
+		ID3D11SamplerState* _textureSamplerState11;
+		ID3D11Buffer* _indexBuffer11;
+		ID3D11BlendState* _spriteBatchBlendState11;
+		// not sure how to store it, maybe name?
+		std::unordered_map<std::string, ID3D11ShaderResourceView*> _knownTextures11;
+
+		// saves state of dx10 states we change to restore
+		uint32_t _oldStride11;
+		uint32_t _oldOffset11;
+		ID3D11Buffer* _oldVertexBuffer11;
+		ID3D11Buffer* _oldIndexBuffer11;
+		DXGI_FORMAT _oldIndexFormat11;
+		uint32_t _oldIndexOffset11;
+		ID3D11InputLayout* _oldInputLayout11;
+		ID3D11VertexShader* _oldVertexShader11;
+		ID3D11PixelShader* _oldPixelShader11;
+		ID3D11SamplerState* _oldTextureSamplerState11;
+		D3D11_PRIMITIVE_TOPOLOGY _oldPrimitiveTopology11;
+		ID3D11BlendState* _oldBlendState11;
+		float_t _oldBlendFactor11[4];
+		uint32_t _oldSampleMask11;
 #endif
 	};
 
@@ -153,6 +184,26 @@ namespace game
 		}
 #endif
 #if defined (GAME_DIRECTX11)
+		_spriteVertices11 = nullptr;
+		_indexBuffer11 = nullptr;
+		_vertexBuffer11 = nullptr;
+		_vertexLayout11 = nullptr;
+		_textureSamplerState11 = nullptr;
+		_spriteBatchBlendState11 = nullptr;
+		_oldStride11 = 0;
+		_oldOffset11 = 0;
+		_oldVertexBuffer11 = nullptr;
+		_oldIndexBuffer11 = nullptr;
+		_oldIndexFormat11 = {};
+		_oldIndexOffset11 = 0;
+		_oldInputLayout11 = nullptr;
+		_oldVertexShader11 = nullptr;
+		_oldPixelShader11 = nullptr;
+		_oldTextureSamplerState11 = nullptr;
+		_oldPrimitiveTopology11 = {};
+		_oldBlendState11 = nullptr;
+		ZeroMemory(_oldBlendFactor11, 4 * sizeof(float_t));
+		_oldSampleMask11 = 0;
 #endif
 		_numberOfSpritesUsed = 0;
 	}
@@ -208,7 +259,24 @@ namespace game
 		}
 #endif
 #if defined (GAME_DIRECTX11)
-
+		if (enginePointer->geIsUsing(GAME_DIRECTX11))
+		{
+			if (_spriteVertices11)
+			{
+				delete[] _spriteVertices11;
+				_spriteVertices11 = nullptr;
+			}
+			SAFE_RELEASE(_vertexBuffer11);
+			SAFE_RELEASE(_vertexLayout11);
+			SAFE_RELEASE(_textureSamplerState11);
+			SAFE_RELEASE(_indexBuffer11);
+			SAFE_RELEASE(_spriteBatchBlendState11);
+			enginePointer->geUnLoadShader(_spriteBatchShader11);
+			for (auto& textureIterator : _knownTextures11)
+			{
+				SAFE_RELEASE(textureIterator.second);
+			}
+		}
 #endif
 	}
 
@@ -267,6 +335,26 @@ namespace game
 				_spriteVertices10[vertex].g = Colors::White.gf;
 				_spriteVertices10[vertex].b = Colors::White.bf;
 				_spriteVertices10[vertex].a = Colors::White.af;
+			}
+		}
+#endif
+
+		// DX10 impementation of vertices
+#if defined(GAME_DIRECTX11)
+		if (enginePointer->geIsUsing(GAME_DIRECTX11))
+		{
+			_spriteVertices11 = new _spriteVertex11[_maxSprites * 4];
+			for (uint32_t vertex = 0; vertex < _maxSprites * 4; vertex++)
+			{
+				_spriteVertices11[vertex].x = 0.0f;
+				_spriteVertices11[vertex].y = 0.0f;
+				_spriteVertices11[vertex].z = 0.01f;
+				_spriteVertices11[vertex].u = 0.01f;
+				_spriteVertices11[vertex].v = 0.01f;
+				_spriteVertices11[vertex].r = Colors::White.rf;
+				_spriteVertices11[vertex].g = Colors::White.gf;
+				_spriteVertices11[vertex].b = Colors::White.bf;
+				_spriteVertices11[vertex].a = Colors::White.af;
 			}
 		}
 #endif
@@ -420,6 +508,108 @@ namespace game
 		}
 #endif
 #if defined (GAME_DIRECTX11)
+		if (enginePointer->geIsUsing(GAME_DIRECTX11))
+		{
+			D3D11_BUFFER_DESC vertexBufferDescription = { 0 };
+			D3D11_BUFFER_DESC indexBufferDescription = { 0 };
+			D3D11_SUBRESOURCE_DATA vertexInitialData = { 0 };
+			D3D11_SUBRESOURCE_DATA indexInitialData = { 0 };
+			std::vector<uint32_t> indices;
+
+			D3D11_INPUT_ELEMENT_DESC inputLayout[] =
+			{
+				{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+				{ "COLOR",    0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0},
+				{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT,    0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0},
+			};
+			D3D11_SAMPLER_DESC samplerDesc = { };
+
+			// Load shaders for spriteBatch
+			if (!enginePointer->geLoadShader("Content/VertexShader.hlsl", "Content/PixelShader.hlsl", _spriteBatchShader11))
+			{
+				return false;
+			}
+
+			// Create the vertex buffer
+			vertexBufferDescription.ByteWidth = _maxSprites * (uint32_t)4 * (uint32_t)sizeof(_spriteVertex11);
+			//std::cout << "SpriteBatch VertexBuffer size : " << sizeof(_spriteVertex10) * _maxSprites * 4 / 1024 << "kB\n";
+			vertexBufferDescription.Usage = D3D11_USAGE_DYNAMIC;
+			vertexBufferDescription.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+			vertexBufferDescription.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+			vertexBufferDescription.MiscFlags = 0;
+			if (FAILED(enginePointer->d3d11Device->CreateBuffer(&vertexBufferDescription, NULL, &_vertexBuffer11)))
+			{
+				lastError = { GameErrors::GameDirectX11Specific, "Could not create vertex buffer for SpriteBatch." };
+				return false;
+			}
+
+			// Create index buffer
+			//  0, 1, 2, 1, 3, 2
+			for (uint32_t index = 0; index < _maxSprites; index++)
+			{
+				indices.emplace_back(0 + (index * 4));  // 4 indices per quad, not 6 like I had
+				indices.emplace_back(1 + (index * 4));
+				indices.emplace_back(2 + (index * 4));
+				indices.emplace_back(1 + (index * 4));
+				indices.emplace_back(3 + (index * 4));
+				indices.emplace_back(2 + (index * 4));
+			}
+			indexBufferDescription.Usage = D3D11_USAGE_IMMUTABLE;
+			indexBufferDescription.ByteWidth = sizeof(DWORD) * 6 * _maxSprites;
+			indexBufferDescription.BindFlags = D3D11_BIND_INDEX_BUFFER;
+			indexBufferDescription.CPUAccessFlags = 0;
+			indexBufferDescription.MiscFlags = 0;
+			indexInitialData.pSysMem = indices.data();
+			if (FAILED(enginePointer->d3d11Device->CreateBuffer(&indexBufferDescription, &indexInitialData, &_indexBuffer11)))
+			{
+				lastError = { GameErrors::GameDirectX10Specific,"Could not create index buffer for SpriteBatch." };
+				SAFE_RELEASE(_vertexBuffer11);
+				//_vertexBuffer10->Release();
+				//_vertexBuffer10 = nullptr;
+				enginePointer->geUnLoadShader(_spriteBatchShader11);
+				return false;
+			}
+
+
+			// Create input layout for shaders
+			if (FAILED(enginePointer->d3d11Device->CreateInputLayout(inputLayout, 3, _spriteBatchShader11.compiledVertexShader11->GetBufferPointer(), _spriteBatchShader11.compiledVertexShader11->GetBufferSize(), &_vertexLayout11)))
+			{
+				lastError = { GameErrors::GameDirectX11Specific, "Could not create input layout for SpriteBatch." };
+				return false;
+			}
+
+			// Create texture sampler 
+			samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_POINT; //D3D10_FILTER_ANISOTROPIC
+			samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_CLAMP;
+			samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_CLAMP;
+			samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_CLAMP;
+			samplerDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;
+			samplerDesc.MinLOD = 0;
+			samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
+			if (FAILED(enginePointer->d3d11Device->CreateSamplerState(&samplerDesc, &_textureSamplerState11)))
+			{
+				lastError = { GameErrors::GameDirectX10Specific,"Could not create sampler state for SpriteBatch." };
+				return false;
+			}
+
+			// Create blend state
+			D3D11_BLEND_DESC blendStateDesc = { 0 };
+			blendStateDesc.AlphaToCoverageEnable = FALSE;
+			blendStateDesc.IndependentBlendEnable = FALSE;
+			blendStateDesc.RenderTarget[0].BlendEnable = TRUE;
+			blendStateDesc.RenderTarget[0].SrcBlend = D3D11_BLEND_SRC_ALPHA;
+			blendStateDesc.RenderTarget[0].DestBlend = D3D11_BLEND_INV_SRC_ALPHA;
+			blendStateDesc.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
+			blendStateDesc.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_SRC_ALPHA;
+			blendStateDesc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_INV_SRC_ALPHA;
+			blendStateDesc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
+			blendStateDesc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
+			if (FAILED(enginePointer->d3d11Device->CreateBlendState(&blendStateDesc, &_spriteBatchBlendState11)))
+			{
+				lastError = { GameErrors::GameDirectX11Specific, "Could not create blend state for SpriteBatch." };
+				return false;
+			}
+		}
 #endif 
 		return true;
 	}
@@ -484,6 +674,39 @@ namespace game
 		}
 #endif
 #if defined(GAME_DIRECTX11)
+		if (enginePointer->geIsUsing(GAME_DIRECTX11))
+		{
+			uint32_t stride = sizeof(_spriteVertex11);
+			uint32_t offset = 0;
+			float sampleMask[] = { 1.0f, 1.0f, 1.0f, 1.0f };
+
+			// need to save blend state check Render
+
+			// Save everything we modify
+			enginePointer->d3d11DeviceContext->IAGetIndexBuffer(&_oldIndexBuffer11, &_oldIndexFormat11, &_oldIndexOffset11);
+			enginePointer->d3d11DeviceContext->IAGetVertexBuffers(0, 1, &_oldVertexBuffer11, &_oldStride11, &_oldOffset11);
+			enginePointer->d3d11DeviceContext->IAGetInputLayout(&_oldInputLayout11);
+			enginePointer->d3d11DeviceContext->VSGetShader(&_oldVertexShader11, NULL, NULL);
+			enginePointer->d3d11DeviceContext->PSGetShader(&_oldPixelShader11, NULL, NULL);
+			enginePointer->d3d11DeviceContext->PSGetSamplers(0, 1, &_oldTextureSamplerState11);
+			enginePointer->d3d11DeviceContext->IAGetPrimitiveTopology(&_oldPrimitiveTopology11);
+			enginePointer->d3d11DeviceContext->OMGetBlendState(&_oldBlendState11, _oldBlendFactor11, &_oldSampleMask11);
+
+			// Change what we need
+			enginePointer->d3d11DeviceContext->IASetIndexBuffer(_indexBuffer11, DXGI_FORMAT_R32_UINT, 0);
+			enginePointer->d3d11DeviceContext->IASetVertexBuffers(0, 1, &_vertexBuffer11, &stride, &offset);
+			enginePointer->d3d11DeviceContext->IASetInputLayout(_vertexLayout11);
+			enginePointer->d3d11DeviceContext->VSSetShader(_spriteBatchShader11.vertexShader11, NULL, NULL);
+			enginePointer->d3d11DeviceContext->PSSetShader(_spriteBatchShader11.pixelShader11, NULL, NULL);
+			enginePointer->d3d11DeviceContext->PSSetSamplers(0, 1, &_textureSamplerState11);
+			enginePointer->d3d11DeviceContext->IASetPrimitiveTopology(D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+			enginePointer->d3d11DeviceContext->OMSetBlendState(_spriteBatchBlendState11, sampleMask, 0xffffffff);
+
+			// Reset current texture
+			_currentTexture.name = "";
+			// Disable multisampling
+			// not now
+		}
 #endif
 
 
@@ -545,6 +768,21 @@ namespace game
 		}
 #endif
 #if defined (GAME_DIRECTX11)
+		if (enginePointer->geIsUsing(GAME_DIRECTX11))
+		{
+			// restore everything
+			enginePointer->d3d11DeviceContext->IASetIndexBuffer(_oldIndexBuffer11, _oldIndexFormat11, _oldIndexOffset11);
+			enginePointer->d3d11DeviceContext->IASetVertexBuffers(0, 1, &_oldVertexBuffer11, &_oldStride11, &_oldOffset11);
+			enginePointer->d3d11DeviceContext->IASetInputLayout(_oldInputLayout11);
+			enginePointer->d3d11DeviceContext->VSSetShader(_oldVertexShader11, NULL, NULL);
+			enginePointer->d3d11DeviceContext->PSSetShader(_oldPixelShader11, NULL, NULL);
+			enginePointer->d3d11DeviceContext->PSSetSamplers(0, 1, &_oldTextureSamplerState11);
+			if (_oldPrimitiveTopology11 != D3D10_PRIMITIVE_TOPOLOGY_UNDEFINED)
+			{
+				enginePointer->d3d11DeviceContext->IASetPrimitiveTopology(_oldPrimitiveTopology11);
+			}
+			enginePointer->d3d11DeviceContext->OMSetBlendState(_oldBlendState11, _oldBlendFactor11, _oldSampleMask11);
+		}
 #endif
 #if defined (GAME_OPENGL)
 		if (enginePointer->geIsUsing(GAME_OPENGL))
@@ -599,6 +837,30 @@ namespace game
 		}
 #endif
 #if defined (GAME_DIRECTX11)
+		if (enginePointer->geIsUsing(GAME_DIRECTX11))
+		{
+			// Send vertices to card
+			//VOID* pVoid = nullptr;
+			//if (FAILED(_vertexBuffer10->Map(D3D10_MAP_WRITE_DISCARD, 0, &pVoid)))
+			//{
+			//	std::cout << "Could not map vertex buffer in SpriteBatch\n";
+			//}
+			//else
+			//{
+			//	memcpy(pVoid, &_spriteVertices10[0], sizeof(_spriteVertex10) * 4 * _numberOfSpritesUsed);
+			//	_vertexBuffer10->Unmap();
+			//}
+
+			D3D11_MAPPED_SUBRESOURCE data;
+			if (FAILED(enginePointer->d3d11DeviceContext->Map(_vertexBuffer11, 0, D3D11_MAP_WRITE_DISCARD, 0, &data)))
+			{
+				std::cout << "Could not map framebuffer in spritebatch\n.";
+			}
+			memcpy(data.pData, &_spriteVertices11[0], sizeof(_spriteVertex11) * _numberOfSpritesUsed * 4);
+			enginePointer->d3d11DeviceContext->Unmap(_vertexBuffer11, 0);
+
+			enginePointer->d3d11DeviceContext->DrawIndexed(_numberOfSpritesUsed * 6, 0, 0);
+		}
 #endif
 
 #if defined(GAME_OPENGL)
@@ -887,6 +1149,103 @@ namespace game
 		}
 #endif
 #if defined (GAME_DIRECTX11)
+		if (enginePointer->geIsUsing(GAME_DIRECTX11))
+		{
+			_spriteVertex11* access = nullptr;
+			Vector2i windowSize;
+			Rectf scaledPos;
+
+			// If texture changed, render and change SRV
+			if (texture.name != _currentTexture.name)
+			{
+				Render();
+				_currentTexture = texture;
+				// Change shader texture to new one
+				auto foundTexture = _knownTextures11.find(texture.name);
+				// Texture is known to us, so use the saved SRV
+				if (foundTexture != _knownTextures11.end())
+				{
+					// SRV has been created before
+					// So use it
+					enginePointer->d3d11DeviceContext->PSSetShaderResources(0, 1, &foundTexture->second);
+				}
+				else
+				{
+					// New to us texture,so create a SRV for it and save it
+
+					ID3D11ShaderResourceView* newTextureSRV;
+					D3D11_SHADER_RESOURCE_VIEW_DESC srDesc = {};
+					srDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+					srDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+					srDesc.Texture2D.MostDetailedMip = 0;
+					srDesc.Texture2D.MipLevels = 1;
+					if (FAILED(enginePointer->d3d11Device->CreateShaderResourceView(texture.textureInterface11, &srDesc, &newTextureSRV)))
+					{
+						std::cout << "CreateSRV spritebatch failed!\n";
+					}
+					_knownTextures11[texture.name] = newTextureSRV;
+					enginePointer->d3d11DeviceContext->PSSetShaderResources(0, 1, &newTextureSRV);
+				}
+			}
+
+			access = &_spriteVertices11[_numberOfSpritesUsed * 4];
+			windowSize = enginePointer->geGetWindowSize();
+			// Homogenise coordinates to -1.0f to 1.0f
+			scaledPos.left = ((float_t)x * 2.0f / (float_t)windowSize.width) - 1.0f;
+			scaledPos.top = ((float_t)y * 2.0f / (float_t)windowSize.height) - 1.0f;
+			scaledPos.right = (((float_t)x + (float_t)texture.width) * 2.0f / (float)windowSize.width) - 1.0f;
+			scaledPos.bottom = (((float_t)y + (float_t)texture.height) * 2.0f / (float)windowSize.height) - 1.0f;
+			// Flip the y axis
+			scaledPos.top = -scaledPos.top;
+			scaledPos.bottom = -scaledPos.bottom;
+
+			// Fill vertices
+
+			// Top left
+			access->x = scaledPos.left;
+			access->y = scaledPos.top;
+			access->u = 0.0f;
+			access->v = 0.0f;
+			access->r = color.rf;
+			access->g = color.gf;
+			access->b = color.bf;
+			access->a = color.af;
+
+			access++;
+
+			// Top right
+			access->x = scaledPos.right;
+			access->y = scaledPos.top;
+			access->u = 1.0f;
+			access->v = 0.0f;
+			access->r = color.rf;
+			access->g = color.gf;
+			access->b = color.bf;
+			access->a = color.af;
+			access++;
+
+			// Bottom left
+			access->x = scaledPos.left;
+			access->y = scaledPos.bottom;
+			access->u = 0.0f;
+			access->v = 1.0f;
+			access->r = color.rf;
+			access->g = color.gf;
+			access->b = color.bf;
+			access->a = color.af;
+			access++;
+
+			// Bottom right
+			access->x = scaledPos.right;
+			access->y = scaledPos.bottom;
+			access->u = 1.0f;
+			access->v = 1.0f;
+			access->r = color.rf;
+			access->g = color.gf;
+			access->b = color.bf;
+			access->a = color.af;
+			access++;
+		}
 #endif
 
 		_numberOfSpritesUsed++;
@@ -1110,6 +1469,109 @@ namespace game
 		}
 #endif
 #if defined (GAME_DIRECTX11)
+		if (enginePointer->geIsUsing(GAME_DIRECTX11))
+		{
+			_spriteVertex11* access = nullptr;
+			Vector2i window;
+			Rectf scaledPosition;
+			Rectf scaledUV;
+
+			// If texture changed, render and change texture/SRV
+			if (texture.name != _currentTexture.name)
+			{
+				Render();
+				_currentTexture = texture;
+				// Change shader texture to new one
+				auto foundTexture = _knownTextures11.find(texture.name);
+				// Texture is known to us, so use the saved SRV
+				if (foundTexture != _knownTextures11.end())
+				{
+					// Resource view has been created
+					// So use it
+					enginePointer->d3d11DeviceContext->PSSetShaderResources(0, 1, &foundTexture->second);
+				}
+				else
+				{
+					// New to us texture,so create a SRV for it and save it
+
+					ID3D11ShaderResourceView* newTextureSRV;
+					D3D11_SHADER_RESOURCE_VIEW_DESC srDesc = {};
+					srDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+					srDesc.ViewDimension = D3D10_SRV_DIMENSION_TEXTURE2D;
+					srDesc.Texture2D.MostDetailedMip = 0;
+					srDesc.Texture2D.MipLevels = 1;
+					if (FAILED(enginePointer->d3d11Device->CreateShaderResourceView(texture.textureInterface11, &srDesc, &newTextureSRV)))
+					{
+						std::cout << "CreateSRV spritebatch failed!\n";
+					}
+					_knownTextures11[texture.name] = newTextureSRV;
+					enginePointer->d3d11DeviceContext->PSSetShaderResources(0, 1, &newTextureSRV);
+				}
+			}
+
+			access = &_spriteVertices11[_numberOfSpritesUsed * 4];
+			window = enginePointer->geGetWindowSize();
+			// Homogenise coordinates to -1.0f to 1.0f
+			scaledPosition.left = ((float_t)destination.left * 2.0f / (float_t)window.width) - 1.0f;
+			scaledPosition.top = ((float_t)destination.top * 2.0f / (float_t)window.height) - 1.0f;
+			scaledPosition.right = (((float_t)destination.right) * 2.0f / (float)window.width) - 1.0f;
+			scaledPosition.bottom = (((float_t)destination.bottom) * 2.0f / (float)window.height) - 1.0f;
+			// Flip the y axis
+			scaledPosition.top = -scaledPosition.top;
+			scaledPosition.bottom = -scaledPosition.bottom;
+			// Homogenise UV coords to 0.0f - 1.0f
+			scaledUV.left = (float_t)portion.left * texture.oneOverWidth;
+			scaledUV.top = (float_t)portion.top * texture.oneOverHeight;
+			scaledUV.right = (float_t)portion.right * texture.oneOverWidth;
+			scaledUV.bottom = (float_t)portion.bottom * texture.oneOverHeight;
+
+			// Fill vertices
+
+			// Top left
+			access->x = scaledPosition.left;
+			access->y = scaledPosition.top;
+			access->u = scaledUV.left;
+			access->v = scaledUV.top;
+			access->r = color.rf;
+			access->g = color.gf;
+			access->b = color.bf;
+			access->a = color.af;
+
+			access++;
+
+			// Top right
+			access->x = scaledPosition.right;
+			access->y = scaledPosition.top;
+			access->u = scaledUV.right;
+			access->v = scaledUV.top;
+			access->r = color.rf;
+			access->g = color.gf;
+			access->b = color.bf;
+			access->a = color.af;
+			access++;
+
+			// Bottom left
+			access->x = scaledPosition.left;
+			access->y = scaledPosition.bottom;
+			access->u = scaledUV.left;
+			access->v = scaledUV.bottom;
+			access->r = color.rf;
+			access->g = color.gf;
+			access->b = color.bf;
+			access->a = color.af;
+			access++;
+
+			// Bottom right
+			access->x = scaledPosition.right;
+			access->y = scaledPosition.bottom;
+			access->u = scaledUV.right;
+			access->v = scaledUV.bottom;
+			access->r = color.rf;
+			access->g = color.gf;
+			access->b = color.bf;
+			access->a = color.af;
+			access++;
+		}
 #endif
 
 		_numberOfSpritesUsed++;

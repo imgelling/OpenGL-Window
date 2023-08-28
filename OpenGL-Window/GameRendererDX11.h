@@ -27,7 +27,7 @@ namespace game
 		void HandleWindowResize(const uint32_t width, const uint32_t height, const bool doReset);
 		void FillOutRendererInfo() {}
 		bool CreateTexture(Texture2D& texture);
-		bool LoadTexture(std::string fileName, Texture2D& texture) { lastError = { GameErrors::GameDirectX11Specific, "could not load texture" }; return false; }
+		bool LoadTexture(std::string fileName, Texture2D& texture);
 		void UnLoadTexture(Texture2D& texture);
 		bool LoadShader(const std::string vertex, const std::string fragment, Shader& shader);
 		bool LoadShader(const std::string vertex, const std::string fragment, const std::string geometry, Shader& shader)
@@ -304,6 +304,53 @@ namespace game
 		viewPort.MinDepth = 0.0f;
 		viewPort.MaxDepth = 1.0f;
 		_d3d11DeviceContext->RSSetViewports(1, &viewPort);
+	}
+
+	inline bool RendererDX11::LoadTexture(std::string fileName, Texture2D& texture)
+	{
+		ImageLoader loader;
+		void* data = nullptr;
+		int32_t width = 0;
+		int32_t height = 0;
+		int32_t componentsPerPixel = 0;
+		//D3D11_MAPPED_TEXTURE2D  lockedRectangle = { 0 };
+
+		data = loader.Load(fileName.c_str(), width, height, componentsPerPixel, false);
+		if (data == nullptr)
+		{
+			lastError = { GameErrors::GameContent, "Failed to load texture : " + fileName };
+			return false;
+		}
+
+		texture.width = width;
+		texture.height = height;
+		texture.oneOverWidth = 1.0f / (float_t)texture.width;
+		texture.oneOverHeight = 1.0f / (float_t)texture.height;
+		texture.isCopy = false;
+		texture.name = fileName;
+
+		D3D11_TEXTURE2D_DESC desc = { 0 };
+		desc.Width = texture.width;
+		desc.Height = texture.height;
+		desc.MipLevels = desc.ArraySize = 1; // change for mipmapping
+		desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+		desc.SampleDesc.Count = 1;
+		desc.Usage = D3D11_USAGE_DYNAMIC;
+		desc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+		desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+
+		D3D11_SUBRESOURCE_DATA initialData = { 0 };
+		initialData.pSysMem = data;
+		initialData.SysMemPitch = desc.Width * sizeof(uint8_t) * 4;
+
+		// Create texture memory
+		if (FAILED(_d3d11Device->CreateTexture2D(&desc, &initialData, &texture.textureInterface11)))
+		{
+			lastError = { GameErrors::GameDirectX11Specific, "Could not create texture, \"" + fileName + "\"." };
+			return false;
+		}
+
+		return true;
 	}
 
 	inline bool RendererDX11::CreateTexture(Texture2D& texture)
