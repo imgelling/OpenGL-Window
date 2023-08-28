@@ -518,12 +518,12 @@ namespace game
 		if (enginePointer->geIsUsing(GAME_DIRECTX11))
 		{
 			D3D11_MAPPED_SUBRESOURCE data;
-			if (FAILED(enginePointer->d3d11Context->Map(_frameBuffer[_currentBuffer].textureInterface11, 0, D3D11_MAP_WRITE_DISCARD, 0, &data)))
+			if (FAILED(enginePointer->d3d11DeviceContext->Map(_frameBuffer[_currentBuffer].textureInterface11, 0, D3D11_MAP_WRITE_DISCARD, 0, &data)))
 			{
 				std::cout << "Could not map framebuffer in spritebatch\n.";
 			}
 			memcpy(data.pData, (unsigned char*)_video, sizeof(unsigned char) * _frameBuffer[_currentBuffer].width * _frameBuffer[_currentBuffer].height * 4);
-			enginePointer->d3d11Context->Unmap(_frameBuffer[_currentBuffer].textureInterface11, 0);
+			enginePointer->d3d11DeviceContext->Unmap(_frameBuffer[_currentBuffer].textureInterface11, 0);
 		}
 #endif
 	}
@@ -704,12 +704,12 @@ namespace game
 			//_vertexBuffer11->Unmap();
 
 			D3D11_MAPPED_SUBRESOURCE data;
-			if (FAILED(enginePointer->d3d11Context->Map(_vertexBuffer11, 0, D3D11_MAP_WRITE_DISCARD, 0, &data)))
+			if (FAILED(enginePointer->d3d11DeviceContext->Map(_vertexBuffer11, 0, D3D11_MAP_WRITE_DISCARD, 0, &data)))
 			{
 				std::cout << "Could not map vertexbuffer in spritebatch\n.";
 			}
 			memcpy(data.pData, _quadVertices11, sizeof(_quadVertices11));
-			enginePointer->d3d11Context->Unmap(_vertexBuffer11, 0);
+			enginePointer->d3d11DeviceContext->Unmap(_vertexBuffer11, 0);
 		}
 #endif
 
@@ -870,45 +870,45 @@ namespace game
 
 
 			// Save everything we modify
-			enginePointer->d3d11Context->IAGetIndexBuffer(&oldIndexBuffer, &oldIndexFormat, &oldIndexOffset);
-			enginePointer->d3d11Context->IAGetVertexBuffers(0, 1, &oldVertexBuffer, &oldStride, &oldOffset);
-			enginePointer->d3d11Context->IAGetInputLayout(&oldInputLayout);
-			enginePointer->d3d11Context->VSGetShader(&oldVertexShader,NULL,NULL);
-			enginePointer->d3d11Context->PSGetShader(&oldPixelShader,NULL,NULL);
-			enginePointer->d3d11Context->PSGetSamplers(0, 1, &oldTextureSamplerState);
-			enginePointer->d3d11Context->IAGetPrimitiveTopology(&oldPrimitiveTopology);
+			enginePointer->d3d11DeviceContext->IAGetIndexBuffer(&oldIndexBuffer, &oldIndexFormat, &oldIndexOffset);
+			enginePointer->d3d11DeviceContext->IAGetVertexBuffers(0, 1, &oldVertexBuffer, &oldStride, &oldOffset);
+			enginePointer->d3d11DeviceContext->IAGetInputLayout(&oldInputLayout);
+			enginePointer->d3d11DeviceContext->VSGetShader(&oldVertexShader,NULL,NULL);
+			enginePointer->d3d11DeviceContext->PSGetShader(&oldPixelShader,NULL,NULL);
+			enginePointer->d3d11DeviceContext->PSGetSamplers(0, 1, &oldTextureSamplerState);
+			enginePointer->d3d11DeviceContext->IAGetPrimitiveTopology(&oldPrimitiveTopology);
 
 
 			// Change what we need
-			enginePointer->d3d11Context->IASetIndexBuffer(_indexBuffer11, DXGI_FORMAT_R32_UINT, 0);
-			enginePointer->d3d11Context->IASetVertexBuffers(0, 1, &_vertexBuffer11, &stride, &offset);
-			enginePointer->d3d11Context->IASetInputLayout(_vertexLayout11);
-			enginePointer->d3d11Context->VSSetShader(_pixelModeShader11.vertexShader11,NULL,NULL);
-			enginePointer->d3d11Context->PSSetShader(_pixelModeShader11.pixelShader11,NULL,NULL);
-			enginePointer->d3d11Context->PSSetSamplers(0, 1, &_textureSamplerState11);
-			enginePointer->d3d11Context->IASetPrimitiveTopology(D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+			enginePointer->d3d11DeviceContext->IASetIndexBuffer(_indexBuffer11, DXGI_FORMAT_R32_UINT, 0);
+			enginePointer->d3d11DeviceContext->IASetVertexBuffers(0, 1, &_vertexBuffer11, &stride, &offset);
+			enginePointer->d3d11DeviceContext->IASetInputLayout(_vertexLayout11);
+			enginePointer->d3d11DeviceContext->VSSetShader(_pixelModeShader11.vertexShader11,NULL,NULL);
+			enginePointer->d3d11DeviceContext->PSSetShader(_pixelModeShader11.pixelShader11,NULL,NULL);
+			enginePointer->d3d11DeviceContext->PSSetSamplers(0, 1, &_textureSamplerState11);
+			enginePointer->d3d11DeviceContext->IASetPrimitiveTopology(D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 			if (!_currentBuffer)
 			{
-				enginePointer->d3d11Context->PSSetShaderResources(0, 1, &_textureShaderResourceView0_11);
+				enginePointer->d3d11DeviceContext->PSSetShaderResources(0, 1, &_textureShaderResourceView0_11);
 			}
 			else
 			{
-				enginePointer->d3d11Context->PSSetShaderResources(0, 1, &_textureShaderResourceView1_11);
+				enginePointer->d3d11DeviceContext->PSSetShaderResources(0, 1, &_textureShaderResourceView1_11);
 			}
 
-			enginePointer->d3d11Context->DrawIndexed(6, 0, 0);
+			enginePointer->d3d11DeviceContext->DrawIndexed(6, 0, 0);
 
 			// Restore old states
-			enginePointer->d3d11Context->IASetIndexBuffer(oldIndexBuffer, oldIndexFormat, oldIndexOffset);
-			enginePointer->d3d11Context->IASetVertexBuffers(0, 1, &oldVertexBuffer, &oldStride, &oldOffset);
-			enginePointer->d3d11Context->IASetInputLayout(oldInputLayout);
-			enginePointer->d3d11Context->VSSetShader(oldVertexShader,NULL,NULL);
-			enginePointer->d3d11Context->PSSetShader(oldPixelShader,NULL,NULL);
-			enginePointer->d3d11Context->PSSetSamplers(0, 1, &oldTextureSamplerState);
+			enginePointer->d3d11DeviceContext->IASetIndexBuffer(oldIndexBuffer, oldIndexFormat, oldIndexOffset);
+			enginePointer->d3d11DeviceContext->IASetVertexBuffers(0, 1, &oldVertexBuffer, &oldStride, &oldOffset);
+			enginePointer->d3d11DeviceContext->IASetInputLayout(oldInputLayout);
+			enginePointer->d3d11DeviceContext->VSSetShader(oldVertexShader,NULL,NULL);
+			enginePointer->d3d11DeviceContext->PSSetShader(oldPixelShader,NULL,NULL);
+			enginePointer->d3d11DeviceContext->PSSetSamplers(0, 1, &oldTextureSamplerState);
 			if (oldPrimitiveTopology != D3D11_PRIMITIVE_TOPOLOGY_UNDEFINED)
 			{
-				enginePointer->d3d11Context->IASetPrimitiveTopology(oldPrimitiveTopology);
+				enginePointer->d3d11DeviceContext->IASetPrimitiveTopology(oldPrimitiveTopology);
 			}
 		}
 #endif

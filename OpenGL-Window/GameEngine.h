@@ -88,7 +88,7 @@ namespace game
 		ID3D10DepthStencilView* d3d10DepthStencilView;
 #endif
 #if defined(GAME_DIRECTX11)
-		ID3D11DeviceContext* d3d11Context;
+		ID3D11DeviceContext* d3d11DeviceContext;
 		ID3D11RenderTargetView* d3d11RenderTarget;
 		ID3D11Device* d3d11Device;
 		ID3D11DepthStencilView* d3d11DepthStencilView;
@@ -184,7 +184,7 @@ namespace game
 		d3d10DepthStencilView = nullptr;
 #endif
 #if defined(GAME_DIRECTX11)
-		d3d11Context = nullptr;
+		d3d11DeviceContext = nullptr;
 		d3d11RenderTarget = nullptr;
 		d3d11Device = nullptr;
 		d3d11DepthStencilView = nullptr;
@@ -651,7 +651,7 @@ namespace game
 		{
 			if (_renderer)
 			{
-				dynamic_cast<RendererDX11*>(_renderer)->GetDevice(d3d11Device, d3d11Context, d3d11RenderTarget, d3d11DepthStencilView);
+				dynamic_cast<RendererDX11*>(_renderer)->GetDevice(d3d11Device, d3d11DeviceContext, d3d11RenderTarget, d3d11DepthStencilView);
 			}
 		}
 #endif
@@ -701,7 +701,7 @@ namespace game
 		{
 			if (_renderer)
 			{
-				dynamic_cast<RendererDX11*>(_renderer)->GetDevice(d3d11Device, d3d11Context, d3d11RenderTarget, d3d11DepthStencilView);
+				dynamic_cast<RendererDX11*>(_renderer)->GetDevice(d3d11Device, d3d11DeviceContext, d3d11RenderTarget, d3d11DepthStencilView);
 			}
 		}
 #endif

@@ -230,8 +230,8 @@ public:
 		if (geIsUsing(GAME_DIRECTX11))
 		{
 			float color[4] = { 0.25f, 0.25f, 0.25f, 1.0f };
-			d3d11Context->ClearRenderTargetView(d3d11RenderTarget, game::Colors::DarkGray.rgba);
-			d3d11Context->ClearDepthStencilView(d3d11DepthStencilView, D3D10_CLEAR_DEPTH | D3D10_CLEAR_STENCIL, 1.0f, 0);
+			d3d11DeviceContext->ClearRenderTargetView(d3d11RenderTarget, game::Colors::DarkGray.rgba);
+			d3d11DeviceContext->ClearDepthStencilView(d3d11DepthStencilView, D3D10_CLEAR_DEPTH | D3D10_CLEAR_STENCIL, 1.0f, 0);
 		}
 #endif
 	}
