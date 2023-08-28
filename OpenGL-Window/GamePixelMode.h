@@ -932,6 +932,12 @@ namespace game
 			std::fill_n(_video, _bufferSize.width * _bufferSize.height, color.packedABGR);
 		}
 #endif
+#if defined(GAME_DIRECTX11)
+		if (enginePointer->geIsUsing(GAME_DIRECTX11))
+		{
+			std::fill_n(_video, _bufferSize.width * _bufferSize.height, color.packedABGR);
+		}
+#endif
 #if defined(GAME_OPENGL)
 		if (enginePointer->geIsUsing(GAME_OPENGL))
 		{
@@ -979,6 +985,13 @@ namespace game
 			return;
 		}
 #endif
+#if defined(GAME_DIRECTX11)
+		if (enginePointer->geIsUsing(GAME_DIRECTX11))
+		{
+			_video[y * _bufferSize.width + x] = color.packedABGR;
+			return;
+		}
+#endif
 #if defined(GAME_OPENGL)
 		if (enginePointer->geIsUsing(GAME_OPENGL))
 		{
@@ -1000,6 +1013,13 @@ namespace game
 #endif
 #if defined(GAME_DIRECTX10)
 		if (enginePointer->geIsUsing(GAME_DIRECTX10))
+		{
+			_video[y * _bufferSize.width + x] = color.packedABGR;
+			return;
+	}
+#endif
+#if defined(GAME_DIRECTX11)
+		if (enginePointer->geIsUsing(GAME_DIRECTX11))
 		{
 			_video[y * _bufferSize.width + x] = color.packedABGR;
 			return;

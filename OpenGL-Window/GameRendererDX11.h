@@ -210,19 +210,100 @@ namespace game
 
 	inline void RendererDX11::HandleWindowResize(const uint32_t width, const uint32_t height, const bool doReset)
 	{
-		float color[4] = { 0 };
-		D3D11_VIEWPORT viewport = { 0 };
-		
+		//float color[4] = { 0 };
+		//D3D11_VIEWPORT viewport = { 0 };
+		//
+		//if (!width || !height) return;
+
+		////_d3d11Context->ClearRenderTargetView(_d3d11RenderTarget, color);
+
+		//viewport.TopLeftX = 0;
+		//viewport.TopLeftY = 0;
+		//viewport.Width = (float_t)width;
+		//viewport.Height = (float_t)height;
+
+		//_d3d11DeviceContext->RSSetViewports(1, &viewport);
+		D3D11_VIEWPORT viewPort = { 0 };
+		ID3D11Texture2D* backBuffer = nullptr;
+		D3D11_TEXTURE2D_DESC depthStencilDesc = { 0 };
+
 		if (!width || !height) return;
 
-		//_d3d11Context->ClearRenderTargetView(_d3d11RenderTarget, color);
+		//_d3d10Device->ClearState();
 
-		viewport.TopLeftX = 0;
-		viewport.TopLeftY = 0;
-		viewport.Width = (float_t)width;
-		viewport.Height = (float_t)height;
+		// Save new size
+		_attributes.WindowWidth = width;
+		_attributes.WindowHeight = height;
 
-		_d3d11DeviceContext->RSSetViewports(1, &viewport);
+		// Destory old buffers
+		_d3d11DeviceContext->OMSetRenderTargets(NULL, NULL, NULL);
+		SAFE_RELEASE(_d3d11RenderTargetView);
+		SAFE_RELEASE(_d3d11DepthStencilView);
+		SAFE_RELEASE(_d3d11DepthStencilBuffer);
+		_d3d11DeviceContext->Flush();
+
+		// Resize the new buffers
+		_d3d11SwapChain->ResizeBuffers(1, 0, 0, DXGI_FORMAT_UNKNOWN, 0);
+
+		// Create depth and stencil buffer
+		depthStencilDesc.Width = _attributes.WindowWidth;
+		depthStencilDesc.Height = _attributes.WindowHeight;
+		depthStencilDesc.MipLevels = 1;
+		depthStencilDesc.ArraySize = 1;
+		depthStencilDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+		depthStencilDesc.SampleDesc.Count = 1;
+		depthStencilDesc.SampleDesc.Quality = 0;
+		depthStencilDesc.Usage = D3D11_USAGE_DEFAULT;
+		depthStencilDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
+		depthStencilDesc.CPUAccessFlags = 0;	// can change for reading or writing i think
+		depthStencilDesc.MiscFlags = 0;
+
+		// Create depth stencil buffer texture
+		if (FAILED(_d3d11Device->CreateTexture2D(&depthStencilDesc, NULL, &_d3d11DepthStencilBuffer)))
+		{
+			lastError = { GameErrors::GameDirectX11Specific, "Could not create depth stencil buffer texture on resize." };
+			DestroyDevice();
+			return;
+		}
+
+		// Second param is states for depth stencil
+		if (FAILED(_d3d11Device->CreateDepthStencilView(_d3d11DepthStencilBuffer, NULL, &_d3d11DepthStencilView)))
+		{
+			lastError = { GameErrors::GameDirectX11Specific, "Could not create depth stencil view on resize." };
+			DestroyDevice();
+			return;
+		}
+
+		// Create the back buffer texture
+		if (FAILED(_d3d11SwapChain->GetBuffer(0, _uuidof(ID3D11Texture2D), reinterpret_cast<void**>(&backBuffer))))
+		{
+			lastError = { GameErrors::GameDirectX11Specific, "Could not create back buffer on resize." };
+			DestroyDevice();
+			return;
+		}
+
+		// Create the render target
+		if (FAILED(_d3d11Device->CreateRenderTargetView(backBuffer, 0, &_d3d11RenderTargetView)))
+		{
+			lastError = { GameErrors::GameDirectX11Specific, "Could not create render target on resize." };
+			DestroyDevice();
+			return;
+		}
+
+		// And release the texture
+		SAFE_RELEASE(backBuffer);
+
+		// Set the render target
+		_d3d11DeviceContext->OMSetRenderTargets(1, &_d3d11RenderTargetView, _d3d11DepthStencilView);
+
+		// Set the viewport
+		viewPort.TopLeftX = 0;
+		viewPort.TopLeftY = 0;
+		viewPort.Width = (float_t)_attributes.WindowWidth;
+		viewPort.Height = (float_t)_attributes.WindowHeight;
+		viewPort.MinDepth = 0.0f;
+		viewPort.MaxDepth = 1.0f;
+		_d3d11DeviceContext->RSSetViewports(1, &viewPort);
 	}
 
 	inline bool RendererDX11::CreateTexture(Texture2D& texture)
