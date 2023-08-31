@@ -98,7 +98,7 @@ public:
 		// Setup pixel mode
 		if (!pixelMode.Initialize({ 320, 240 }))
 		{
-			std::cout << "failt!\n";
+			//std::cout << "failt!\n";
 			geLogLastError();
 		}
 
