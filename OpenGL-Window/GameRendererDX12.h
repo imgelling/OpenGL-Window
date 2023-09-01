@@ -1,10 +1,10 @@
 #pragma once
 
-#include <wrl.h>
+//#include <wrl.h>
 #include <d3d12.h>
-#include <dxgi1_6.h>
 #include <d3dcompiler.h>
-#include <DirectXMath.h>
+#include <dxgi1_6.h>
+//#include <DirectXMath.h>
 #include <vector>
 
 #include "GameErrors.h"
@@ -18,6 +18,8 @@
 #define SAFE_RELEASE(p) { if ( (p) ) { (p)->Release(); (p) = nullptr; } }
 #endif
 
+#define frameBufferCount  3 
+
 namespace game
 {
 	extern SystemInfo systemInfo;
@@ -30,7 +32,8 @@ namespace game
 		void Swap() {};
 		void HandleWindowResize(const uint32_t width, const uint32_t height, const bool doReset) {};
 		void FillOutRendererInfo() {};
-		bool CreateTexture(Texture2D& texture) { lastError = { GameErrors::GameDirectX12Specific,"Texture not implemented " }; return false;
+		bool CreateTexture(Texture2D& texture) {
+			lastError = { GameErrors::GameDirectX12Specific,"Texture not implemented " }; return false;
 		};
 		bool LoadTexture(std::string fileName, Texture2D& texture) {
 			lastError = { GameErrors::GameDirectX12Specific,"Texture not implemented " }; return false;
@@ -45,14 +48,10 @@ namespace game
 		void UnLoadShader(Shader& shader) {};
 	protected:
 		void _ReadExtensions() {};
-		// direct3d stuff
-		#define frameBufferCount  3 // number of buffers we want, 2 for double buffering, 3 for tripple buffering;
 
 		ID3D12Device2* _d3d12Device; // direct3d device
-
-		IDXGISwapChain3* swapChain; // swapchain used to switch between render targets
-
-		ID3D12CommandQueue* commandQueue; // container for command lists
+		ID3D12CommandQueue* _commandQueue; // container for command lists
+		IDXGISwapChain3* _swapChain; // swapchain used to switch between render targets
 
 		ID3D12DescriptorHeap* rtvDescriptorHeap; // a descriptor heap to hold resources like the render targets
 
@@ -90,18 +89,25 @@ int rtvDescriptorSize; // size of the rtv descriptor on the device (all front an
 	inline RendererDX12::RendererDX12()
 	{
 		_d3d12Device = nullptr;
+		_commandQueue = nullptr;
+		_swapChain = nullptr;
 	}
 
 	inline void RendererDX12::DestroyDevice()
 	{
 		SAFE_RELEASE(_d3d12Device);
+		SAFE_RELEASE(_commandQueue);
+		SAFE_RELEASE(_swapChain);
 	}
 
 	inline bool RendererDX12::CreateDevice(Window& window)
 	{
-		// -- Create the Device -- //
-
-		UINT createFactoryFlags = 0;
+		uint32_t createFactoryFlags = 0;
+		std::vector<IDXGIAdapter1*> adapterList;  // needs in class
+		IDXGIAdapter1* adapter = nullptr;
+		uint32_t adapterIndex = 0;
+		
+		
 		if (_attributes.DebugMode)
 		{
 			createFactoryFlags = DXGI_CREATE_FACTORY_DEBUG;
@@ -126,10 +132,6 @@ int rtvDescriptorSize; // size of the rtv descriptor on the device (all front an
 			debugInterface->EnableDebugLayer();
 		}
 
-		std::vector<IDXGIAdapter1*> adapterList;  // needs in class
-		IDXGIAdapter1* adapter;
-
-		uint32_t adapterIndex = 0;
 
 		// Enumerate all adapters for dx12 support
 		while (dxgiFactory->EnumAdapters1(adapterIndex, &adapter) != DXGI_ERROR_NOT_FOUND)
@@ -143,11 +145,12 @@ int rtvDescriptorSize; // size of the rtv descriptor on the device (all front an
 				adapterIndex++;
 				continue;
 			}
-			//std::cout << "description : ";
-			//std::wcout << desc.Description;
-			//std::cout << "\n";
-			//std::cout << "RAM : " << desc.DedicatedVideoMemory / 1024 / 1024 << "MB\n";
-			//std::cout << "sys RAM : " << desc.DedicatedSystemMemory / 1024 / 1024 << "MB\n";
+			std::cout << "description : ";
+			std::wcout << desc.Description;
+			std::cout << "\n";
+			std::cout << "RAM : " << desc.DedicatedVideoMemory / 1024 / 1024 << "MB\n";
+			std::cout << "sys RAM : " << desc.DedicatedSystemMemory / 1024 / 1024 << "MB\n";
+			std::cout << "Vendor id : " << desc.VendorId << "\n";
 
 			// Check for dx12 support on current adapter
 			if (SUCCEEDED(D3D12CreateDevice(adapter, D3D_FEATURE_LEVEL_11_0, _uuidof(ID3D12Device), nullptr)))
@@ -220,7 +223,22 @@ int rtvDescriptorSize; // size of the rtv descriptor on the device (all front an
 			}
 		}
 
+		// Create the command queue
+		D3D12_COMMAND_QUEUE_DESC commandQueueDesc = { }; // Use defaults
+		if (FAILED(_d3d12Device->CreateCommandQueue(&commandQueueDesc, IID_PPV_ARGS(&_commandQueue))))
+		{
+			lastError = { GameErrors::GameDirectX12Specific, "Could not create command queue." };
+			return false;
+		}
+
+		// Create the swap chain
+
+
+
 
 		return true;
 	};
+
 }
+
+#undef frameBufferCount
