@@ -52,25 +52,19 @@ namespace game
 		ID3D12Device2* _d3d12Device; // direct3d device
 		ID3D12CommandQueue* _commandQueue; // container for command lists
 		IDXGISwapChain3* _swapChain; // swapchain used to switch between render targets
-
-		ID3D12DescriptorHeap* rtvDescriptorHeap; // a descriptor heap to hold resources like the render targets
-
-ID3D12Resource* renderTargets[frameBufferCount]; // number of render targets equal to buffer count
-
-ID3D12CommandAllocator* commandAllocator[frameBufferCount]; // we want enough allocators for each buffer * number of threads (we only have one thread)
-
-ID3D12GraphicsCommandList* commandList; // a command list we can record commands into, then execute them to render the frame
-
-ID3D12Fence* fence[frameBufferCount];    // an object that is locked while our command list is being executed by the gpu. We need as many 
+		uint32_t _frameIndex; // current rtv we are on
+		ID3D12DescriptorHeap* _rtvDescriptorHeap; // a descriptor heap to hold resources like the render targets
+		uint32_t _rtvDescriptorSize; // size of the rtv descriptor on the device (all front and back buffers will be the same size)
+		ID3D12Resource* _renderTargets[frameBufferCount]; // number of render targets equal to buffer count
+		ID3D12CommandAllocator* _commandAllocator[frameBufferCount]; // we want enough allocators for each buffer * number of threads (we only have one thread)
+		ID3D12GraphicsCommandList* _commandList; // a command list we can record commands into, then execute them to render the frame
+		ID3D12Fence* _fence[frameBufferCount];    // an object that is locked while our command list is being executed by the gpu. We need as many 
 //as we have allocators (more if we want to know when the gpu is finished with an asset)
+		HANDLE _fenceEvent; // a handle to an event when our fence is unlocked by the gpu
+		UINT64 _fenceValue[frameBufferCount]; // this value is incremented each frame. each fence will have its own value
 
-HANDLE fenceEvent; // a handle to an event when our fence is unlocked by the gpu
 
-UINT64 fenceValue[frameBufferCount]; // this value is incremented each frame. each fence will have its own value
 
-int frameIndex; // current rtv we are on
-
-int rtvDescriptorSize; // size of the rtv descriptor on the device (all front and back buffers will be the same size)
 
 //// function declarations
 //bool InitD3D(); // initializes direct3d 12
@@ -91,6 +85,14 @@ int rtvDescriptorSize; // size of the rtv descriptor on the device (all front an
 		_d3d12Device = nullptr;
 		_commandQueue = nullptr;
 		_swapChain = nullptr;
+		_rtvDescriptorHeap = nullptr;
+		for (uint32_t buffer = 0; buffer < frameBufferCount; buffer++)
+		{
+			_renderTargets[buffer] = nullptr;
+			_commandAllocator[buffer] = nullptr;
+			_fence[buffer] = nullptr;
+		}
+		_commandList = nullptr;
 	}
 
 	inline void RendererDX12::DestroyDevice()
@@ -98,6 +100,14 @@ int rtvDescriptorSize; // size of the rtv descriptor on the device (all front an
 		SAFE_RELEASE(_d3d12Device);
 		SAFE_RELEASE(_commandQueue);
 		SAFE_RELEASE(_swapChain);
+		SAFE_RELEASE(_rtvDescriptorHeap);
+		for (uint32_t buffer = 0; buffer < frameBufferCount; buffer++)
+		{
+			SAFE_RELEASE(_renderTargets[buffer]);
+			SAFE_RELEASE(_commandAllocator[buffer]);
+			SAFE_RELEASE(_fence[buffer]);
+		}
+		SAFE_RELEASE(_commandList);
 	}
 
 	inline bool RendererDX12::CreateDevice(Window& window)
@@ -233,8 +243,121 @@ int rtvDescriptorSize; // size of the rtv descriptor on the device (all front an
 
 		// Create the swap chain
 
+		DXGI_MODE_DESC backBufferDesc = {}; // this is to describe our display mode
+		backBufferDesc.Width = _attributes.WindowWidth; // buffer width
+		backBufferDesc.Height = _attributes.WindowHeight; // buffer height
+		backBufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM; // format of the buffer (rgba 32 bits, 8 bits for each chanel)
 
+		// describe our multi-sampling. We are not multi-sampling, so we set the count to 1 (we need at least one sample of course)
+		DXGI_SAMPLE_DESC sampleDesc = {};
+		sampleDesc.Count = 1; // multisample count (no multisampling, so we just put 1, since we still need 1 sample)
 
+		// Describe and create the swap chain.
+		DXGI_SWAP_CHAIN_DESC swapChainDesc = {};
+		swapChainDesc.BufferCount = frameBufferCount; // number of buffers we have
+		swapChainDesc.BufferDesc = backBufferDesc; // our back buffer description
+		swapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT; // this says the pipeline will render to this swap chain
+		swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD; // dxgi will discard the buffer (data) after we call present
+		swapChainDesc.OutputWindow = window.GetHandle(); // handle to our window
+		swapChainDesc.SampleDesc = sampleDesc; // our multi-sampling description
+		swapChainDesc.Windowed = !_attributes.WindowFullscreen; // set to true, then if in fullscreen must call SetFullScreenState with true for full screen to get uncapped fps
+
+		IDXGISwapChain* tempSwapChain;
+
+		if (FAILED(dxgiFactory->CreateSwapChain(
+			_commandQueue, // the queue will be flushed once the swap chain is created
+			&swapChainDesc, // give it the swap chain description we created above
+			&tempSwapChain // store the created swap chain in a temp IDXGISwapChain interface
+		)))
+		{
+			lastError = { GameErrors::GameDirectX12Specific, "Could not create swap chain." };
+			return false;
+		}
+
+		// need to cast to IDXGISwapChain3 for GetCurrentBackBufferIndex
+		_swapChain = static_cast<IDXGISwapChain3*>(tempSwapChain);
+		_frameIndex = _swapChain->GetCurrentBackBufferIndex();
+
+		// -- Create the Back Buffers (render target views) Descriptor Heap -- //
+
+		// describe an rtv descriptor heap and create
+		D3D12_DESCRIPTOR_HEAP_DESC rtvHeapDesc = {};
+		rtvHeapDesc.NumDescriptors = frameBufferCount; // number of descriptors for this heap.
+		rtvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV; // this heap is a render target view heap
+
+		// This heap will not be directly referenced by the shaders (not shader visible), as this will store the output from the pipeline
+		// otherwise we would set the heap's flag to D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE
+		rtvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
+		if (FAILED(_d3d12Device->CreateDescriptorHeap(&rtvHeapDesc, IID_PPV_ARGS(&_rtvDescriptorHeap))))
+		{
+			lastError = { GameErrors::GameDirectX12Specific, "Could not create descriptor heap." };
+			return false;
+		}
+
+		// get the size of a descriptor in this heap (this is a rtv heap, so only rtv descriptors should be stored in it.
+		// descriptor sizes may vary from device to device, which is why there is no set size and we must ask the 
+		// device to give us the size. we will use this size to increment a descriptor handle offset
+		_rtvDescriptorSize = _d3d12Device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
+
+		// get a handle to the first descriptor in the descriptor heap. a handle is basically a pointer,
+		// but we cannot literally use it like a c++ pointer.
+		D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle = _rtvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
+
+		// Create a RTV for each buffer (double buffering is two buffers, tripple buffering is 3).
+		for (int i = 0; i < frameBufferCount; i++)
+		{
+			// first we get the n'th buffer in the swap chain and store it in the n'th
+			// position of our ID3D12Resource array
+			if (FAILED(_swapChain->GetBuffer(i, IID_PPV_ARGS(&_renderTargets[i]))))
+			{
+				lastError = { GameErrors::GameDirectX12Specific, "Could not get buffer for RTV " + std::to_string(i) };
+				return false;
+			}
+
+			// the we "create" a render target view which binds the swap chain buffer (ID3D12Resource[n]) to the rtv handle
+			_d3d12Device->CreateRenderTargetView(_renderTargets[i], nullptr, rtvHandle);
+
+			// we increment the rtv handle by the rtv descriptor size we got above
+			rtvHandle.ptr += (SIZE_T)i * _rtvDescriptorSize;
+		}
+
+		// -- Create the Command Allocators -- //
+		for (int i = 0; i < frameBufferCount; i++)
+		{
+			if (FAILED(_d3d12Device->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&_commandAllocator[i]))))
+			{
+				lastError = { GameErrors::GameDirectX12Specific, "Could not create command allocator " + std::to_string(i) };
+				return false;
+			}
+		}
+
+		// create the command list with the first allocator
+		if (FAILED(_d3d12Device->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, _commandAllocator[0], NULL, IID_PPV_ARGS(&_commandList))))
+		{
+			lastError = { GameErrors::GameDirectX12Specific,"Could not create command list." };
+			return false;
+		}
+
+		// -- Create a Fence & Fence Event -- //
+
+// create the fences
+		for (int i = 0; i < frameBufferCount; i++)
+		{
+			if (FAILED(_d3d12Device->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&_fence[i]))))
+			{
+				lastError = { GameErrors::GameDirectX12Specific, "Could not create fence " + std::to_string(i) };
+				return false;
+			}
+			_fenceValue[i] = 0; // set the initial fence value to 0
+		}
+
+		// create a handle to a fence event
+		_fenceEvent = CreateEvent(nullptr, FALSE, FALSE, nullptr);
+		if (_fenceEvent == nullptr)
+		{
+			lastError = { GameErrors::GameDirectX12Specific, "Could not create fence event" };
+			return false;
+		}
 
 		return true;
 	};
