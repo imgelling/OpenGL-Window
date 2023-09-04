@@ -48,7 +48,7 @@ namespace game
 		void UnLoadShader(Shader& shader) {};
 		void StartFrame();
 		void EndFrame();
-		void GetDevice(Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> &commandList);
+		void GetDevice(Microsoft::WRL::ComPtr<ID3D12Device2> &d3d12Device, Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> &commandList);
 
 		void Clear();
 		D3D12_CPU_DESCRIPTOR_HANDLE currentFrameBuffer;
@@ -71,8 +71,9 @@ namespace game
 		UINT64 _fenceValue[frameBufferCount]; // this value is incremented each frame. each fence will have its own value
 	};
 
-	inline void RendererDX12::GetDevice(Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> &commandList)
+	inline void RendererDX12::GetDevice(Microsoft::WRL::ComPtr<ID3D12Device2> &d3d12Device, Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> &commandList)
 	{
+		d3d12Device = _d3d12Device;
 		commandList = _commandList;
 	}
 

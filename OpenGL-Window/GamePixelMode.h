@@ -131,6 +131,27 @@ namespace game
 		ID3D11ShaderResourceView* _textureShaderResourceView1_11;
 		ID3D11SamplerState* _textureSamplerState11;
 #endif
+#if defined(GAME_DIRECTX12)
+		struct _vertex12
+		{
+			float_t x, y, z;
+			float_t r, g, b, a;
+			float_t u, v;
+		};
+		//ID3D12PipelineState* pipelineStateObject; // pso containing a pipeline state
+
+		Microsoft::WRL::ComPtr<ID3D12RootSignature> rootSignature; // root signature defines data shaders will access
+
+		//D3D12_VIEWPORT viewport; // area that output from rasterizer will be stretched to.
+
+		//D3D12_RECT scissorRect; // the area to draw in. pixels outside that area will not be drawn onto
+
+		ID3D12Resource* vertexBuffer; // a default buffer in GPU memory that we will load vertex data for our triangle into
+
+		D3D12_VERTEX_BUFFER_VIEW vertexBufferView; // a structure containing a pointer to the vertex data in gpu memory
+		// the total size of the buffer, and the size of each element (vertex)
+
+#endif
 	};
 
 	inline PixelMode::PixelMode()
@@ -261,7 +282,7 @@ namespace game
 			if (!enginePointer->geCreateTexture(_frameBuffer[loop]))
 			{
 				lastError = { GameErrors::GameRenderer, "Could not create textures for PixelMode frame buffers." };
-				return false;
+				//return false;
 			}
 		}
 
@@ -468,6 +489,34 @@ namespace game
 			if (FAILED(enginePointer->d3d11Device->CreateShaderResourceView(_frameBuffer[1].textureInterface11, &srDesc, &_textureShaderResourceView1_11)))
 			{
 				std::cout << "CreateSRV1 failed!\n";
+			}
+		}
+#endif
+#if defined (GAME_DIRECTX12)
+		if (enginePointer->geIsUsing(GAME_DIRECTX12))
+		{
+			// create root signature
+
+			D3D12_ROOT_SIGNATURE_DESC rootSignatureDesc = {};
+			rootSignatureDesc.Flags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
+			rootSignatureDesc.NumParameters = 0;
+			rootSignatureDesc.pParameters = nullptr;
+			rootSignatureDesc.NumStaticSamplers = 0;
+			rootSignatureDesc.pStaticSamplers = nullptr;
+			//rootSignatureDesc.Init(0, nullptr, 0, nullptr, D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT);
+
+			Microsoft::WRL::ComPtr<ID3DBlob> signature;
+			if (FAILED(D3D12SerializeRootSignature(&rootSignatureDesc, D3D_ROOT_SIGNATURE_VERSION_1, &signature, nullptr)))
+			{
+				lastError = { GameErrors::GameDirectX12Specific, "Could not serialize root signature in PixleMode." };
+				std::cout << "serialize failed!\n";
+				return false;
+			}
+
+			if (FAILED(enginePointer->d3d12Device->CreateRootSignature(0, signature->GetBufferPointer(), signature->GetBufferSize(), IID_PPV_ARGS(&rootSignature))))
+			{
+				lastError = { GameErrors::GameDirectX12Specific, "Could not create root signature in PixleMode." };
+				return false;
 			}
 		}
 #endif

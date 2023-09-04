@@ -95,6 +95,7 @@ namespace game
 #endif
 #if defined (GAME_DIRECTX12)
 		Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> commandList;
+		Microsoft::WRL::ComPtr<ID3D12Device2> d3d12Device;
 #endif
 
 		// Engine setup
@@ -669,7 +670,11 @@ namespace game
 		{
 			if (_renderer)
 			{
-				dynamic_cast<RendererDX12*>(_renderer)->GetDevice(commandList);
+				dynamic_cast<RendererDX12*>(_renderer)->GetDevice(d3d12Device,commandList);
+				if (!d3d12Device)
+				{
+					std::cout << "device not copied\n";
+				}
 			}
 		}
 #endif
