@@ -234,6 +234,15 @@ public:
 			d3d11DeviceContext->ClearDepthStencilView(d3d11DepthStencilView, D3D10_CLEAR_DEPTH | D3D10_CLEAR_STENCIL, 1.0f, 0);
 		}
 #endif
+#if defined(GAME_DIRECTX12)
+		if (geIsUsing(GAME_DIRECTX12))
+		{
+			game::RendererDX12 *temp = geGetRenderer();
+			temp->Render();
+
+
+		}
+#endif
 	}
 
 	// Ends the scene

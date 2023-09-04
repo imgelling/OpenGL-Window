@@ -111,6 +111,7 @@ namespace game
 		void geSetFrameLock(const uint32_t limit) noexcept;
 		void geSetUpdateLock(const uint32_t limit) noexcept;
 		void geSetGameLocks(const uint32_t fps, const uint32_t ups) noexcept;
+
 		
 		// Renderer specific
 		
@@ -121,6 +122,10 @@ namespace game
 		bool geLoadShader(const std::string vertex, const std::string fragment, const std::string geometry, Shader& shader);
 		void geUnLoadShader(Shader& shader);
 		bool geIsUsing(const uint32_t renderer);
+		RendererDX12* geGetRenderer()
+		{
+			return static_cast<RendererDX12*>(_renderer);
+		}
 
 		// Window stuff	
 

@@ -46,6 +46,9 @@ namespace game
 			return false;
 		}
 		void UnLoadShader(Shader& shader) {};
+		void WaitForPreviousFrame(bool getcurrent);
+		void UpdatePipeline();
+		void Render();
 	protected:
 		void _ReadExtensions() {};
 
@@ -86,26 +89,42 @@ namespace game
 		_commandQueue = nullptr;
 		_swapChain = nullptr;
 		_rtvDescriptorHeap = nullptr;
+		_frameIndex = 0;
+		_rtvDescriptorSize = 0;
 		for (uint32_t buffer = 0; buffer < frameBufferCount; buffer++)
 		{
 			_renderTargets[buffer] = nullptr;
 			_commandAllocator[buffer] = nullptr;
 			_fence[buffer] = nullptr;
+			_fenceValue[buffer] = 0;
 		}
 		_commandList = nullptr;
+		_fenceEvent = nullptr;
 	}
 
 	inline void RendererDX12::DestroyDevice()
 	{
+		// wait for the gpu to finish all frames
+		for (int i = 0; i < frameBufferCount; ++i)
+		{
+			_frameIndex = i;
+			WaitForPreviousFrame(false);
+		}
+
+		// get swapchain out of full screen before exiting
+		BOOL fs = false;
+		if (_swapChain->GetFullscreenState(&fs, NULL))
+			_swapChain->SetFullscreenState(false, NULL);
+
 		SAFE_RELEASE(_d3d12Device);
 		SAFE_RELEASE(_commandQueue);
 		SAFE_RELEASE(_swapChain);
 		SAFE_RELEASE(_rtvDescriptorHeap);
 		for (uint32_t buffer = 0; buffer < frameBufferCount; buffer++)
 		{
-			SAFE_RELEASE(_renderTargets[buffer]);
-			SAFE_RELEASE(_commandAllocator[buffer]);
-			SAFE_RELEASE(_fence[buffer]);
+			//SAFE_RELEASE(_renderTargets[buffer]);
+			//SAFE_RELEASE(_commandAllocator[buffer]);
+			//SAFE_RELEASE(_fence[buffer]);
 		}
 		SAFE_RELEASE(_commandList);
 	}
@@ -318,7 +337,7 @@ namespace game
 			_d3d12Device->CreateRenderTargetView(_renderTargets[i], nullptr, rtvHandle);
 
 			// we increment the rtv handle by the rtv descriptor size we got above
-			rtvHandle.ptr += (SIZE_T)i * _rtvDescriptorSize;
+			rtvHandle.ptr += _rtvDescriptorSize;
 		}
 
 		// -- Create the Command Allocators -- //
@@ -337,6 +356,8 @@ namespace game
 			lastError = { GameErrors::GameDirectX12Specific,"Could not create command list." };
 			return false;
 		}
+
+		_commandList->Close();
 
 		// -- Create a Fence & Fence Event -- //
 
@@ -361,6 +382,138 @@ namespace game
 
 		return true;
 	};
+
+	inline void RendererDX12::WaitForPreviousFrame(bool getcurrent)
+	{
+		HRESULT hr;
+
+		// swap the current rtv buffer index so we draw on the correct buffer
+		if (getcurrent)
+			_frameIndex = _swapChain->GetCurrentBackBufferIndex();
+
+		// if the current fence value is still less than "fenceValue", then we know the GPU has not finished executing
+		// the command queue since it has not reached the "commandQueue->Signal(fence, fenceValue)" command
+		if (_fence[_frameIndex]->GetCompletedValue() < _fenceValue[_frameIndex])
+		{
+			// we have the fence create an event which is signaled once the fence's current value is "fenceValue"
+			hr = _fence[_frameIndex]->SetEventOnCompletion(_fenceValue[_frameIndex], _fenceEvent);
+			if (FAILED(hr))
+			{
+				lastError = { GameErrors::GameDirectX12Specific,"Fence event completion failed." };
+				//enginePointer->geLogLastError();// Running = false;
+			}
+
+			// We will wait until the fence has triggered the event that it's current value has reached "fenceValue". once it's value
+			// has reached "fenceValue", we know the command queue has finished executing
+			WaitForSingleObject(_fenceEvent, INFINITE);
+		}
+
+		// increment fenceValue for next frame
+		_fenceValue[_frameIndex]++;
+		if (getcurrent)
+			_frameIndex = _swapChain->GetCurrentBackBufferIndex();
+	}
+
+	inline void RendererDX12::UpdatePipeline()
+	{
+
+		// We have to wait for the gpu to finish with the command allocator before we reset it
+		WaitForPreviousFrame(true);
+
+		// we can only reset an allocator once the gpu is done with it
+		// resetting an allocator frees the memory that the command list was stored in
+		if (FAILED(_commandAllocator[_frameIndex]->Reset()))
+		{
+			//Running = false;
+			std::cout << "Command allocator reset failed\n";
+		}
+
+		// reset the command list. by resetting the command list we are putting it into
+		// a recording state so we can start recording commands into the command allocator.
+		// the command allocator that we reference here may have multiple command lists
+		// associated with it, but only one can be recording at any time. Make sure
+		// that any other command lists associated to this command allocator are in
+		// the closed state (not recording).
+		// Here you will pass an initial pipeline state object as the second parameter,
+		// but in this tutorial we are only clearing the rtv, and do not actually need
+		// anything but an initial default pipeline, which is what we get by setting
+		// the second parameter to NULL
+		if (FAILED(_commandList->Reset(_commandAllocator[_frameIndex], NULL)))
+		{
+			std::cout << "command list reset failed\n";
+			//Running = false;
+		}
+
+		// here we start recording commands into the commandList (which all the commands will be stored in the commandAllocator)
+
+		// transition the "frameIndex" render target from the present state to the render target state so the command list draws to it starting from here
+		D3D12_RESOURCE_BARRIER barrier = {};
+		barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+		barrier.Transition.pResource = _renderTargets[_frameIndex];// pResource;
+		barrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
+		barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_PRESENT;
+		barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_RENDER_TARGET;
+		barrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
+		barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+
+		_commandList->ResourceBarrier(1, &barrier);
+
+		D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle = _rtvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
+		rtvHandle.ptr += ((SIZE_T)_frameIndex * _rtvDescriptorSize);
+		// set the render target for the output merger stage (the output of the pipeline)
+		_commandList->OMSetRenderTargets(1, &rtvHandle, FALSE, nullptr);
+
+		// Clear the render target by using the ClearRenderTargetView command
+		//const float clearColor[] = ;
+		_commandList->ClearRenderTargetView(rtvHandle, Colors::DarkGray.rgba, 0, nullptr);
+
+		// transition the "frameIndex" render target from the render target state to the present state. If the debug layer is enabled, you will receive a
+		// warning if present is called on the render target when it's not in the present state
+		D3D12_RESOURCE_BARRIER barrier2 = {};
+		barrier2.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+		barrier2.Transition.pResource = _renderTargets[_frameIndex];// pResource;
+		barrier2.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
+		barrier2.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
+		barrier2.Transition.StateAfter = D3D12_RESOURCE_STATE_PRESENT;
+		barrier2.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
+		barrier2.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+		_commandList->ResourceBarrier(1, &barrier2);//a &CD3DX12_RESOURCE_BARRIER::Transition(_renderTargets[_frameIndex], D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT));
+
+		if (FAILED(_commandList->Close()))
+		{
+			//Running = false;
+			std::cout << "Commandlist close failed\n";
+		}
+	}
+
+	inline void RendererDX12::Render()
+	{
+		HRESULT hr;
+
+		UpdatePipeline(); // update the pipeline by sending commands to the commandqueue
+
+		// create an array of command lists (only one command list here)
+		ID3D12CommandList* ppCommandLists[] = { _commandList };
+
+		// execute the array of command lists
+		_commandQueue->ExecuteCommandLists(_countof(ppCommandLists), ppCommandLists);
+
+		// this command goes in at the end of our command queue. we will know when our command queue 
+		// has finished because the fence value will be set to "fenceValue" from the GPU since the command
+		// queue is being executed on the GPU
+		hr = _commandQueue->Signal(_fence[_frameIndex], _fenceValue[_frameIndex]);
+		if (FAILED(hr))
+		{
+			//Running = false;
+		}
+
+		// present the current backbuffer
+		hr = _swapChain->Present(0, 0);
+		if (FAILED(hr))
+		{
+			//Running = false;
+		}
+	}
 
 }
 
