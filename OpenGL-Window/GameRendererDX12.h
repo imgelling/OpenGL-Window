@@ -144,7 +144,7 @@ namespace game
 			createFactoryFlags = DXGI_CREATE_FACTORY_DEBUG;
 		}
 
-		IDXGIFactory4* dxgiFactory;
+		Microsoft::WRL::ComPtr <IDXGIFactory4> dxgiFactory;
 		if (FAILED(CreateDXGIFactory2(createFactoryFlags, IID_PPV_ARGS(&dxgiFactory))))
 		{
 			lastError = { GameErrors::GameDirectX12Specific, "Could not create DXGIFactory." };
@@ -214,7 +214,7 @@ namespace game
 		// Filter debug messages 
 		if (_attributes.DebugMode)
 		{
-			ID3D12InfoQueue* infoQueue = nullptr;
+			Microsoft::WRL::ComPtr <ID3D12InfoQueue> infoQueue = nullptr;
 			if (FAILED(_d3d12Device->QueryInterface(IID_PPV_ARGS(&infoQueue))))
 			{
 				lastError = { GameErrors::GameDirectX12Specific, "Could not get info queue." };
@@ -283,7 +283,7 @@ namespace game
 		swapChainDesc.SampleDesc = sampleDesc; // our multi-sampling description
 		swapChainDesc.Windowed = !_attributes.WindowFullscreen; // set to true, then if in fullscreen must call SetFullScreenState with true for full screen to get uncapped fps
 
-		IDXGISwapChain* tempSwapChain;
+		Microsoft::WRL::ComPtr <IDXGISwapChain> tempSwapChain;
 
 		if (FAILED(dxgiFactory->CreateSwapChain(
 			_commandQueue.Get(), // the queue will be flushed once the swap chain is created
@@ -296,7 +296,8 @@ namespace game
 		}
 
 		// need to cast to IDXGISwapChain3 for GetCurrentBackBufferIndex
-		_swapChain = static_cast<IDXGISwapChain3*>(tempSwapChain);
+		tempSwapChain.As(&_swapChain);
+		//_swapChain = tempSwapChain.As(IDXGISwapChain3);// static_cast<IDXGISwapChain3*>(tempSwapChain);
 		_frameIndex = _swapChain->GetCurrentBackBufferIndex();
 
 		// -- Create the Back Buffers (render target views) Descriptor Heap -- //
