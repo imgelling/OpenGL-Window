@@ -1,6 +1,6 @@
 #pragma once
 
-//#include <wrl.h>
+#include <wrl.h>
 #include <d3d12.h>
 #include <d3dcompiler.h>
 #include <dxgi1_6.h>
@@ -18,7 +18,7 @@
 #define SAFE_RELEASE(p) { if ( (p) ) { (p)->Release(); (p) = nullptr; } }
 #endif
 
-#define frameBufferCount  3 
+#define frameBufferCount  3
 
 namespace game
 {
@@ -52,16 +52,16 @@ namespace game
 	protected:
 		void _ReadExtensions() {};
 
-		ID3D12Device2* _d3d12Device; // direct3d device
-		ID3D12CommandQueue* _commandQueue; // container for command lists
-		IDXGISwapChain3* _swapChain; // swapchain used to switch between render targets
+		Microsoft::WRL::ComPtr<ID3D12Device2> _d3d12Device; // direct3d device
+		Microsoft::WRL::ComPtr <ID3D12CommandQueue> _commandQueue; // container for command lists
+		Microsoft::WRL::ComPtr <IDXGISwapChain3> _swapChain; // swapchain used to switch between render targets
 		uint32_t _frameIndex; // current rtv we are on
-		ID3D12DescriptorHeap* _rtvDescriptorHeap; // a descriptor heap to hold resources like the render targets
+		Microsoft::WRL::ComPtr <ID3D12DescriptorHeap> _rtvDescriptorHeap; // a descriptor heap to hold resources like the render targets
 		uint32_t _rtvDescriptorSize; // size of the rtv descriptor on the device (all front and back buffers will be the same size)
-		ID3D12Resource* _renderTargets[frameBufferCount]; // number of render targets equal to buffer count
-		ID3D12CommandAllocator* _commandAllocator[frameBufferCount]; // we want enough allocators for each buffer * number of threads (we only have one thread)
-		ID3D12GraphicsCommandList* _commandList; // a command list we can record commands into, then execute them to render the frame
-		ID3D12Fence* _fence[frameBufferCount];    // an object that is locked while our command list is being executed by the gpu. We need as many 
+		Microsoft::WRL::ComPtr <ID3D12Resource> _renderTargets[frameBufferCount]; // number of render targets equal to buffer count
+		Microsoft::WRL::ComPtr<ID3D12CommandAllocator> _commandAllocator[frameBufferCount]; // we want enough allocators for each buffer * number of threads (we only have one thread)
+		Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> _commandList; // a command list we can record commands into, then execute them to render the frame
+		Microsoft::WRL::ComPtr<ID3D12Fence> _fence[frameBufferCount];    // an object that is locked while our command list is being executed by the gpu. We need as many 
 //as we have allocators (more if we want to know when the gpu is finished with an asset)
 		HANDLE _fenceEvent; // a handle to an event when our fence is unlocked by the gpu
 		UINT64 _fenceValue[frameBufferCount]; // this value is incremented each frame. each fence will have its own value
@@ -102,8 +102,15 @@ namespace game
 		_fenceEvent = nullptr;
 	}
 
+
 	inline void RendererDX12::DestroyDevice()
 	{
+		// get swapchain out of full screen before exiting
+		BOOL fs = false;
+		_swapChain->GetFullscreenState(&fs, NULL);
+		if (fs)
+			_swapChain->SetFullscreenState(false, NULL);
+		
 		// wait for the gpu to finish all frames
 		for (int i = 0; i < frameBufferCount; ++i)
 		{
@@ -111,22 +118,17 @@ namespace game
 			WaitForPreviousFrame(false);
 		}
 
-		// get swapchain out of full screen before exiting
-		BOOL fs = false;
-		if (_swapChain->GetFullscreenState(&fs, NULL))
-			_swapChain->SetFullscreenState(false, NULL);
-
-		SAFE_RELEASE(_d3d12Device);
-		SAFE_RELEASE(_commandQueue);
-		SAFE_RELEASE(_swapChain);
-		SAFE_RELEASE(_rtvDescriptorHeap);
-		for (uint32_t buffer = 0; buffer < frameBufferCount; buffer++)
-		{
-			//SAFE_RELEASE(_renderTargets[buffer]);
-			//SAFE_RELEASE(_commandAllocator[buffer]);
-			//SAFE_RELEASE(_fence[buffer]);
-		}
-		SAFE_RELEASE(_commandList);
+		////SAFE_RELEASE(_d3d12Device);
+		//SAFE_RELEASE(_commandQueue);
+		//SAFE_RELEASE(_swapChain);
+		//SAFE_RELEASE(_rtvDescriptorHeap);
+		//for (uint32_t buffer = 0; buffer < frameBufferCount; buffer++)
+		//{
+		//	SAFE_RELEASE(_renderTargets[buffer]);
+		//	SAFE_RELEASE(_commandAllocator[buffer]);
+		//	SAFE_RELEASE(_fence[buffer]);
+		//}
+		//SAFE_RELEASE(_commandList);
 	}
 
 	inline bool RendererDX12::CreateDevice(Window& window)
@@ -284,7 +286,7 @@ namespace game
 		IDXGISwapChain* tempSwapChain;
 
 		if (FAILED(dxgiFactory->CreateSwapChain(
-			_commandQueue, // the queue will be flushed once the swap chain is created
+			_commandQueue.Get(), // the queue will be flushed once the swap chain is created
 			&swapChainDesc, // give it the swap chain description we created above
 			&tempSwapChain // store the created swap chain in a temp IDXGISwapChain interface
 		)))
@@ -334,7 +336,7 @@ namespace game
 			}
 
 			// the we "create" a render target view which binds the swap chain buffer (ID3D12Resource[n]) to the rtv handle
-			_d3d12Device->CreateRenderTargetView(_renderTargets[i], nullptr, rtvHandle);
+			_d3d12Device->CreateRenderTargetView(_renderTargets[i].Get(), nullptr, rtvHandle);
 
 			// we increment the rtv handle by the rtv descriptor size we got above
 			rtvHandle.ptr += _rtvDescriptorSize;
@@ -351,7 +353,7 @@ namespace game
 		}
 
 		// create the command list with the first allocator
-		if (FAILED(_d3d12Device->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, _commandAllocator[0], NULL, IID_PPV_ARGS(&_commandList))))
+		if (FAILED(_d3d12Device->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, _commandAllocator[0].Get(), NULL, IID_PPV_ARGS(&_commandList))))
 		{
 			lastError = { GameErrors::GameDirectX12Specific,"Could not create command list." };
 			return false;
@@ -438,7 +440,7 @@ namespace game
 		// but in this tutorial we are only clearing the rtv, and do not actually need
 		// anything but an initial default pipeline, which is what we get by setting
 		// the second parameter to NULL
-		if (FAILED(_commandList->Reset(_commandAllocator[_frameIndex], NULL)))
+		if (FAILED(_commandList->Reset(_commandAllocator[_frameIndex].Get(), NULL)))
 		{
 			std::cout << "command list reset failed\n";
 			//Running = false;
@@ -449,7 +451,7 @@ namespace game
 		// transition the "frameIndex" render target from the present state to the render target state so the command list draws to it starting from here
 		D3D12_RESOURCE_BARRIER barrier = {};
 		barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-		barrier.Transition.pResource = _renderTargets[_frameIndex];// pResource;
+		barrier.Transition.pResource = _renderTargets[_frameIndex].Get();// pResource;
 		barrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
 		barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_PRESENT;
 		barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_RENDER_TARGET;
@@ -471,7 +473,7 @@ namespace game
 		// warning if present is called on the render target when it's not in the present state
 		D3D12_RESOURCE_BARRIER barrier2 = {};
 		barrier2.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-		barrier2.Transition.pResource = _renderTargets[_frameIndex];// pResource;
+		barrier2.Transition.pResource = _renderTargets[_frameIndex].Get();// pResource;
 		barrier2.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
 		barrier2.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
 		barrier2.Transition.StateAfter = D3D12_RESOURCE_STATE_PRESENT;
@@ -493,7 +495,7 @@ namespace game
 		UpdatePipeline(); // update the pipeline by sending commands to the commandqueue
 
 		// create an array of command lists (only one command list here)
-		ID3D12CommandList* ppCommandLists[] = { _commandList };
+		ID3D12CommandList* ppCommandLists[] = { _commandList.Get()};
 
 		// execute the array of command lists
 		_commandQueue->ExecuteCommandLists(_countof(ppCommandLists), ppCommandLists);
@@ -501,7 +503,7 @@ namespace game
 		// this command goes in at the end of our command queue. we will know when our command queue 
 		// has finished because the fence value will be set to "fenceValue" from the GPU since the command
 		// queue is being executed on the GPU
-		hr = _commandQueue->Signal(_fence[_frameIndex], _fenceValue[_frameIndex]);
+		hr = _commandQueue->Signal(_fence[_frameIndex].Get(), _fenceValue[_frameIndex]);
 		if (FAILED(hr))
 		{
 			//Running = false;
