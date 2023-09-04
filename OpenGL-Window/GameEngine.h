@@ -93,6 +93,9 @@ namespace game
 		ID3D11Device* d3d11Device;
 		ID3D11DepthStencilView* d3d11DepthStencilView;
 #endif
+#if defined (GAME_DIRECTX12)
+		Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> commandList;
+#endif
 
 		// Engine setup
 
@@ -657,6 +660,16 @@ namespace game
 			if (_renderer)
 			{
 				dynamic_cast<RendererDX11*>(_renderer)->GetDevice(d3d11Device, d3d11DeviceContext, d3d11RenderTarget, d3d11DepthStencilView);
+			}
+		}
+#endif
+
+#if defined(GAME_DIRECTX12)
+		if (geIsUsing(GAME_DIRECTX12))
+		{
+			if (_renderer)
+			{
+				dynamic_cast<RendererDX12*>(_renderer)->GetDevice(commandList);
 			}
 		}
 #endif

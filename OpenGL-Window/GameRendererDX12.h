@@ -29,7 +29,7 @@ namespace game
 		RendererDX12();
 		bool CreateDevice(Window& window);
 		void DestroyDevice();
-		void Swap() {};
+		void Swap();
 		void HandleWindowResize(const uint32_t width, const uint32_t height, const bool doReset) {};
 		void FillOutRendererInfo() {};
 		bool CreateTexture(Texture2D& texture) {
@@ -46,11 +46,15 @@ namespace game
 			return false;
 		}
 		void UnLoadShader(Shader& shader) {};
-		void WaitForPreviousFrame(bool getcurrent);
-		void UpdatePipeline();
-		void Render();
+		void StartFrame();
+		void EndFrame();
+		void GetDevice(Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> &commandList);
+
+		void Clear();
+		D3D12_CPU_DESCRIPTOR_HANDLE currentFrameBuffer;
 	protected:
 		void _ReadExtensions() {};
+		void _WaitForPreviousFrame(bool getcurrent);
 
 		Microsoft::WRL::ComPtr<ID3D12Device2> _d3d12Device; // direct3d device
 		Microsoft::WRL::ComPtr <ID3D12CommandQueue> _commandQueue; // container for command lists
@@ -65,23 +69,12 @@ namespace game
 //as we have allocators (more if we want to know when the gpu is finished with an asset)
 		HANDLE _fenceEvent; // a handle to an event when our fence is unlocked by the gpu
 		UINT64 _fenceValue[frameBufferCount]; // this value is incremented each frame. each fence will have its own value
-
-
-
-
-//// function declarations
-//bool InitD3D(); // initializes direct3d 12
-
-//void Update(); // update the game logic
-
-//void UpdatePipeline(); // update the direct3d pipeline (update command lists)
-
-//void Render(); // execute the command list
-
-//void Cleanup(); // release com ojects and clean up memory
-
-//void WaitForPreviousFrame(); // wait until gpu is finished with command list
 	};
+
+	inline void RendererDX12::GetDevice(Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> &commandList)
+	{
+		commandList = _commandList;
+	}
 
 	inline RendererDX12::RendererDX12()
 	{
@@ -115,7 +108,7 @@ namespace game
 		for (int i = 0; i < frameBufferCount; ++i)
 		{
 			_frameIndex = i;
-			WaitForPreviousFrame(false);
+			_WaitForPreviousFrame(false);
 		}
 
 		////SAFE_RELEASE(_d3d12Device);
@@ -297,7 +290,6 @@ namespace game
 
 		// need to cast to IDXGISwapChain3 for GetCurrentBackBufferIndex
 		tempSwapChain.As(&_swapChain);
-		//_swapChain = tempSwapChain.As(IDXGISwapChain3);// static_cast<IDXGISwapChain3*>(tempSwapChain);
 		_frameIndex = _swapChain->GetCurrentBackBufferIndex();
 
 		// -- Create the Back Buffers (render target views) Descriptor Heap -- //
@@ -386,7 +378,7 @@ namespace game
 		return true;
 	};
 
-	inline void RendererDX12::WaitForPreviousFrame(bool getcurrent)
+	inline void RendererDX12::_WaitForPreviousFrame(bool getcurrent)
 	{
 		HRESULT hr;
 
@@ -417,11 +409,19 @@ namespace game
 			_frameIndex = _swapChain->GetCurrentBackBufferIndex();
 	}
 
-	inline void RendererDX12::UpdatePipeline()
+	inline void RendererDX12::Clear()
+	{
+
+		// Clear the render target by using the ClearRenderTargetView command
+		_commandList->ClearRenderTargetView(currentFrameBuffer, Colors::DarkGray.rgba, 0, nullptr);
+
+	}
+
+	inline void RendererDX12::StartFrame()
 	{
 
 		// We have to wait for the gpu to finish with the command allocator before we reset it
-		WaitForPreviousFrame(true);
+		_WaitForPreviousFrame(true);
 
 		// we can only reset an allocator once the gpu is done with it
 		// resetting an allocator frees the memory that the command list was stored in
@@ -450,6 +450,8 @@ namespace game
 		// here we start recording commands into the commandList (which all the commands will be stored in the commandAllocator)
 
 		// transition the "frameIndex" render target from the present state to the render target state so the command list draws to it starting from here
+
+		// start frame
 		D3D12_RESOURCE_BARRIER barrier = {};
 		barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
 		barrier.Transition.pResource = _renderTargets[_frameIndex].Get();// pResource;
@@ -461,17 +463,17 @@ namespace game
 
 		_commandList->ResourceBarrier(1, &barrier);
 
-		D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle = _rtvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
-		rtvHandle.ptr += ((SIZE_T)_frameIndex * _rtvDescriptorSize);
+		currentFrameBuffer = _rtvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
+		currentFrameBuffer.ptr += ((SIZE_T)_frameIndex * _rtvDescriptorSize);
 		// set the render target for the output merger stage (the output of the pipeline)
-		_commandList->OMSetRenderTargets(1, &rtvHandle, FALSE, nullptr);
+		_commandList->OMSetRenderTargets(1, &currentFrameBuffer, FALSE, nullptr);
+	}
 
-		// Clear the render target by using the ClearRenderTargetView command
-		//const float clearColor[] = ;
-		_commandList->ClearRenderTargetView(rtvHandle, Colors::DarkGray.rgba, 0, nullptr);
-
-		// transition the "frameIndex" render target from the render target state to the present state. If the debug layer is enabled, you will receive a
-		// warning if present is called on the render target when it's not in the present state
+	inline void RendererDX12::EndFrame()
+	{
+		// end frame
+// transition the "frameIndex" render target from the render target state to the present state. If the debug layer is enabled, you will receive a
+// warning if present is called on the render target when it's not in the present state
 		D3D12_RESOURCE_BARRIER barrier2 = {};
 		barrier2.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
 		barrier2.Transition.pResource = _renderTargets[_frameIndex].Get();// pResource;
@@ -489,14 +491,14 @@ namespace game
 		}
 	}
 
-	inline void RendererDX12::Render()
+	inline void RendererDX12::Swap()
 	{
 		HRESULT hr;
 
-		UpdatePipeline(); // update the pipeline by sending commands to the commandqueue
+		//Clear(); // update the pipeline by sending commands to the commandqueue
 
 		// create an array of command lists (only one command list here)
-		ID3D12CommandList* ppCommandLists[] = { _commandList.Get()};
+		ID3D12CommandList* ppCommandLists[] = { _commandList.Get() };
 
 		// execute the array of command lists
 		_commandQueue->ExecuteCommandLists(_countof(ppCommandLists), ppCommandLists);
@@ -507,11 +509,12 @@ namespace game
 		hr = _commandQueue->Signal(_fence[_frameIndex].Get(), _fenceValue[_frameIndex]);
 		if (FAILED(hr))
 		{
+			std::cout << "Signal failed in DX12 swap\n";
 			//Running = false;
 		}
 
 		// present the current backbuffer
-		hr = _swapChain->Present(0, 0);
+		hr = _swapChain->Present(_attributes.VsyncOn ? 1 : 0, 0);
 		if (FAILED(hr))
 		{
 			//Running = false;
