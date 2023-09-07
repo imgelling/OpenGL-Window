@@ -126,10 +126,12 @@ namespace game
 		bool geLoadShader(const std::string vertex, const std::string fragment, const std::string geometry, Shader& shader);
 		void geUnLoadShader(Shader& shader);
 		bool geIsUsing(const uint32_t renderer);
+#if defined (GAME_DIRECTX12)
 		RendererDX12* geGetRenderer()
 		{
 			return static_cast<RendererDX12*>(_renderer);
 		}
+#endif
 
 		// Window stuff	
 
@@ -671,10 +673,6 @@ namespace game
 			if (_renderer)
 			{
 				dynamic_cast<RendererDX12*>(_renderer)->GetDevice(d3d12Device,commandList);
-				if (!d3d12Device)
-				{
-					std::cout << "device not copied\n";
-				}
 			}
 		}
 #endif

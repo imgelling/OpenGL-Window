@@ -237,7 +237,7 @@ public:
 #if defined(GAME_DIRECTX12)
 		if (geIsUsing(GAME_DIRECTX12))
 		{
-			game::RendererDX12 *temp = geGetRenderer();
+			game::RendererDX12* temp = geGetRenderer();
 			temp->StartFrame();
 			//temp->Clear();
 			commandList->ClearRenderTargetView(temp->currentFrameBuffer, game::Colors::DarkGray.rgba, 0, nullptr);

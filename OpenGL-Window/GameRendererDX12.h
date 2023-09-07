@@ -39,13 +39,13 @@ namespace game
 			lastError = { GameErrors::GameDirectX12Specific,"Texture not implemented " }; return false;
 		};
 		void UnLoadTexture(Texture2D& texture) {};
-		bool LoadShader(const std::string vertex, const std::string fragment, Shader& shader) { lastError = { GameErrors::GameDirectX12Specific,"shader not implemented " }; return false; };
+		bool LoadShader(const std::string vertex, const std::string fragment, Shader& shader);
 		bool LoadShader(const std::string vertex, const std::string fragment, const std::string geometry, Shader& shader)
 		{
 			lastError = { GameErrors::GameDirectX12Specific, "Geometry shaders not implemented yet." };
 			return false;
 		}
-		void UnLoadShader(Shader& shader) {};
+		void UnLoadShader(Shader& shader);
 		void StartFrame();
 		void EndFrame();
 		void GetDevice(Microsoft::WRL::ComPtr<ID3D12Device2> &d3d12Device, Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> &commandList);
@@ -68,7 +68,7 @@ namespace game
 		Microsoft::WRL::ComPtr<ID3D12Fence> _fence[frameBufferCount];    // an object that is locked while our command list is being executed by the gpu. We need as many 
 //as we have allocators (more if we want to know when the gpu is finished with an asset)
 		HANDLE _fenceEvent; // a handle to an event when our fence is unlocked by the gpu
-		UINT64 _fenceValue[frameBufferCount]; // this value is incremented each frame. each fence will have its own value
+		uint64_t _fenceValue[frameBufferCount]; // this value is incremented each frame. each fence will have its own value
 	};
 
 	inline void RendererDX12::GetDevice(Microsoft::WRL::ComPtr<ID3D12Device2> &d3d12Device, Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> &commandList)
@@ -96,7 +96,6 @@ namespace game
 		_fenceEvent = nullptr;
 	}
 
-
 	inline void RendererDX12::DestroyDevice()
 	{
 		// get swapchain out of full screen before exiting
@@ -112,7 +111,7 @@ namespace game
 			_WaitForPreviousFrame(false);
 		}
 
-		////SAFE_RELEASE(_d3d12Device);
+		//SAFE_RELEASE(_d3d12Device);
 		//SAFE_RELEASE(_commandQueue);
 		//SAFE_RELEASE(_swapChain);
 		//SAFE_RELEASE(_rtvDescriptorHeap);
@@ -276,7 +275,7 @@ namespace game
 		swapChainDesc.OutputWindow = window.GetHandle(); // handle to our window
 		swapChainDesc.SampleDesc = sampleDesc; // our multi-sampling description
 		swapChainDesc.Windowed = !_attributes.WindowFullscreen; // set to true, then if in fullscreen must call SetFullScreenState with true for full screen to get uncapped fps
-
+		swapChainDesc.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_TEARING;
 		Microsoft::WRL::ComPtr <IDXGISwapChain> tempSwapChain;
 
 		if (FAILED(dxgiFactory->CreateSwapChain(
@@ -303,6 +302,7 @@ namespace game
 		// This heap will not be directly referenced by the shaders (not shader visible), as this will store the output from the pipeline
 		// otherwise we would set the heap's flag to D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE
 		rtvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
+		rtvHeapDesc.NodeMask = 0;
 		if (FAILED(_d3d12Device->CreateDescriptorHeap(&rtvHeapDesc, IID_PPV_ARGS(&_rtvDescriptorHeap))))
 		{
 			lastError = { GameErrors::GameDirectX12Specific, "Could not create descriptor heap." };
@@ -515,13 +515,98 @@ namespace game
 		}
 
 		// present the current backbuffer
-		hr = _swapChain->Present(_attributes.VsyncOn ? 1 : 0, 0);
+		hr = _swapChain->Present(_attributes.VsyncOn ? 1 : 0, DXGI_PRESENT_ALLOW_TEARING);
 		if (FAILED(hr))
 		{
 			//Running = false;
 		}
 	}
 
+	inline bool RendererDX12::LoadShader(const std::string vertex, const std::string fragment, Shader& shader)
+	{
+		if (!shader.isPrecompiled)
+		{
+			DWORD flags = D3DCOMPILE_ENABLE_STRICTNESS;
+			if (_attributes.DebugMode)
+			{
+				flags |= D3DCOMPILE_DEBUG;
+				flags |= D3DCOMPILE_SKIP_OPTIMIZATION;
+			}
+			ID3DBlob* compiledVertexShader = nullptr;
+			ID3DBlob* compiledPixelShader = nullptr;
+			ID3DBlob* compilationMsgs = nullptr;
+
+			// Compile the vertex shader
+			if (FAILED(D3DCompileFromFile(ConvertToWide(vertex).c_str(), NULL, NULL, "main", "vs_5_0", flags, NULL, &compiledVertexShader, &compilationMsgs)))
+			{
+				SIZE_T size = compilationMsgs->GetBufferSize();
+				uint8_t* p = reinterpret_cast<unsigned char*>(compilationMsgs->GetBufferPointer());
+				lastError = { GameErrors::GameDirectX12Specific,"Could not compile shader \"" + vertex + "\".\n" };
+				for (uint32_t bytes = 0; bytes < size; bytes++)
+				{
+					lastError.lastErrorString += p[bytes];
+				}
+				SAFE_RELEASE(compilationMsgs);
+				SAFE_RELEASE(compiledVertexShader);
+				return false;
+			}
+
+			// Compile the pixel shader
+			if (FAILED(D3DCompileFromFile(ConvertToWide(fragment).c_str(), NULL, NULL, "main", "ps_5_0", flags, NULL, &compiledPixelShader, &compilationMsgs)))
+			{
+				SIZE_T size = compilationMsgs->GetBufferSize();
+				uint8_t* p = reinterpret_cast<unsigned char*>(compilationMsgs->GetBufferPointer());
+				lastError = { GameErrors::GameDirectX12Specific,"Could not compile shader \"" + fragment + "\".\n" };
+				for (uint32_t bytes = 0; bytes < size; bytes++)
+				{
+					lastError.lastErrorString += p[bytes];
+				}
+				SAFE_RELEASE(compilationMsgs);
+				SAFE_RELEASE(compiledVertexShader);
+				SAFE_RELEASE(compiledPixelShader);
+				return false;
+			}
+
+			// Free up any messages from compilation if any
+			SAFE_RELEASE(compilationMsgs);
+
+			//bytecode stuff
+
+			return true;
+		}
+		else
+		{
+			// Load compiled vertex shader
+			ID3DBlob* compiledPixelShader = nullptr;
+			ID3DBlob* compiledVertexShader = nullptr;
+
+			// Load vertex shader
+			if (FAILED(D3DReadFileToBlob((ConvertToWide(vertex).c_str()), &compiledVertexShader)))
+			{
+				lastError = { GameErrors::GameDirectX11Specific,"Could not read vertex file \"" + vertex + "\"." };
+				SAFE_RELEASE(compiledVertexShader);
+				return false;
+			}
+
+			// Load pixel shader
+			if (FAILED(D3DReadFileToBlob((ConvertToWide(fragment).c_str()), &compiledPixelShader)))
+			{
+				lastError = { GameErrors::GameDirectX11Specific,"Could not read pixel file \"" + fragment + "\"." };
+				SAFE_RELEASE(compiledVertexShader);
+				//SAFE_RELEASE(shader.vertexShader11);
+				SAFE_RELEASE(compiledPixelShader);
+			}
+
+			// byte code stuff
+
+		}
+		return true;
+	}
+
+	inline void RendererDX12::UnLoadShader(Shader& shader)
+	{
+
+	}
 }
 
 #undef frameBufferCount

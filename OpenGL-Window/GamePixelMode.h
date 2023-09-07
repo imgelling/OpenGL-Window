@@ -138,6 +138,7 @@ namespace game
 			float_t r, g, b, a;
 			float_t u, v;
 		};
+		Shader _pixelModeShader12;
 		//ID3D12PipelineState* pipelineStateObject; // pso containing a pipeline state
 
 		Microsoft::WRL::ComPtr<ID3D12RootSignature> rootSignature; // root signature defines data shaders will access
@@ -146,7 +147,7 @@ namespace game
 
 		//D3D12_RECT scissorRect; // the area to draw in. pixels outside that area will not be drawn onto
 
-		ID3D12Resource* vertexBuffer; // a default buffer in GPU memory that we will load vertex data for our triangle into
+		Microsoft::WRL::ComPtr<ID3D12Resource> vertexBuffer; // a default buffer in GPU memory that we will load vertex data for our triangle into
 
 		D3D12_VERTEX_BUFFER_VIEW vertexBufferView; // a structure containing a pointer to the vertex data in gpu memory
 		// the total size of the buffer, and the size of each element (vertex)
@@ -247,6 +248,12 @@ namespace game
 			SAFE_RELEASE(_textureShaderResourceView0_11);
 			SAFE_RELEASE(_textureShaderResourceView1_11);
 			SAFE_RELEASE(_textureSamplerState11);
+		}
+#endif
+#if defined(GAME_DIRECTX12)
+		if (enginePointer->geIsUsing(GAME_DIRECTX12))
+		{
+			enginePointer->geUnLoadShader(_pixelModeShader12);
 		}
 #endif
 		enginePointer->geUnLoadTexture(_frameBuffer[0]);
@@ -503,21 +510,28 @@ namespace game
 			rootSignatureDesc.pParameters = nullptr;
 			rootSignatureDesc.NumStaticSamplers = 0;
 			rootSignatureDesc.pStaticSamplers = nullptr;
-			//rootSignatureDesc.Init(0, nullptr, 0, nullptr, D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT);
+			
 
-			Microsoft::WRL::ComPtr<ID3DBlob> signature;
-			if (FAILED(D3D12SerializeRootSignature(&rootSignatureDesc, D3D_ROOT_SIGNATURE_VERSION_1, &signature, nullptr)))
-			{
-				lastError = { GameErrors::GameDirectX12Specific, "Could not serialize root signature in PixleMode." };
-				std::cout << "serialize failed!\n";
-				return false;
-			}
+			//Microsoft::WRL::ComPtr<ID3DBlob> signature;
+			//if (FAILED(D3D12SerializeRootSignature(&rootSignatureDesc, D3D_ROOT_SIGNATURE_VERSION_1, &signature, nullptr)))
+			//{
+			//	lastError = { GameErrors::GameDirectX12Specific, "Could not serialize root signature in PixleMode." };
+			//	std::cout << "Serialize of root signature failed in PixelMode!\n";
+			//	return false;
+			//}
 
-			if (FAILED(enginePointer->d3d12Device->CreateRootSignature(0, signature->GetBufferPointer(), signature->GetBufferSize(), IID_PPV_ARGS(&rootSignature))))
-			{
-				lastError = { GameErrors::GameDirectX12Specific, "Could not create root signature in PixleMode." };
-				return false;
-			}
+			//if (FAILED(enginePointer->d3d12Device->CreateRootSignature(0, signature->GetBufferPointer(), signature->GetBufferSize(), IID_PPV_ARGS(&rootSignature))))
+			//{
+			//	lastError = { GameErrors::GameDirectX12Specific, "Could not create root signature in PixelMode." };
+			//	return false;
+			//}
+
+			//// Load shaders for sprite mode
+			//if (!enginePointer->geLoadShader("Content/VertexShader.hlsl", "Content/PixelShader.hlsl", _pixelModeShader12))
+			//{
+			//	return false;
+			//}
+
 		}
 #endif
 
