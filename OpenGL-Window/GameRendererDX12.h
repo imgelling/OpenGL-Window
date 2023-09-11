@@ -52,6 +52,7 @@ namespace game
 
 		void Clear();
 		D3D12_CPU_DESCRIPTOR_HANDLE currentFrameBuffer;
+		Microsoft::WRL::ComPtr<ID3D12Debug> debugInterface;
 	protected:
 		void _ReadExtensions() {};
 		void _WaitForPreviousFrame(bool getcurrent);
@@ -100,15 +101,18 @@ namespace game
 	{
 		// get swapchain out of full screen before exiting
 		BOOL fs = false;
-		_swapChain->GetFullscreenState(&fs, NULL);
-		if (fs)
-			_swapChain->SetFullscreenState(false, NULL);
-		
-		// wait for the gpu to finish all frames
-		for (int i = 0; i < frameBufferCount; ++i)
+		if (_swapChain)
 		{
-			_frameIndex = i;
-			_WaitForPreviousFrame(false);
+			_swapChain->GetFullscreenState(&fs, NULL);
+			if (fs)
+				_swapChain->SetFullscreenState(false, NULL);
+
+			// wait for the gpu to finish all frames
+			for (int i = 0; i < frameBufferCount; ++i)
+			{
+				_frameIndex = i;
+				_WaitForPreviousFrame(false);
+			}
 		}
 
 		//SAFE_RELEASE(_d3d12Device);
@@ -117,9 +121,9 @@ namespace game
 		//SAFE_RELEASE(_rtvDescriptorHeap);
 		//for (uint32_t buffer = 0; buffer < frameBufferCount; buffer++)
 		//{
-		//	SAFE_RELEASE(_renderTargets[buffer]);
-		//	SAFE_RELEASE(_commandAllocator[buffer]);
-		//	SAFE_RELEASE(_fence[buffer]);
+			//SAFE_RELEASE(_renderTargets[buffer]);
+			//SAFE_RELEASE(_commandAllocator[buffer]);
+			//SAFE_RELEASE(_fence[buffer]);
 		//}
 		//SAFE_RELEASE(_commandList);
 	}
@@ -131,11 +135,11 @@ namespace game
 		IDXGIAdapter1* adapter = nullptr;
 		uint32_t adapterIndex = 0;
 		
-		
-		if (_attributes.DebugMode)
-		{
-			createFactoryFlags = DXGI_CREATE_FACTORY_DEBUG;
-		}
+		//
+		//if (_attributes.DebugMode)
+		//{
+		//	createFactoryFlags = DXGI_CREATE_FACTORY_DEBUG;
+		//}
 
 		Microsoft::WRL::ComPtr <IDXGIFactory4> dxgiFactory;
 		if (FAILED(CreateDXGIFactory2(createFactoryFlags, IID_PPV_ARGS(&dxgiFactory))))
@@ -144,17 +148,17 @@ namespace game
 			return false;
 		}
 
-		// Enable debug mode if needed
-		if (_attributes.DebugMode)
-		{
-			Microsoft::WRL::ComPtr<ID3D12Debug> debugInterface;  // Do I need to hold onto this?
-			if (FAILED(D3D12GetDebugInterface(IID_PPV_ARGS(&debugInterface))))
-			{
-				lastError = { GameErrors::GameDirectX12Specific, "Could not get debug layer." };
-				return false;
-			}
-			debugInterface->EnableDebugLayer();
-		}
+		//// Enable debug mode if needed
+		//if (_attributes.DebugMode)
+		//{
+		//	/*Microsoft::WRL::ComPtr<ID3D12Debug> debugInterface;*/  // Do I need to hold onto this?
+		//	if (FAILED(D3D12GetDebugInterface(IID_PPV_ARGS(&debugInterface))))
+		//	{
+		//		lastError = { GameErrors::GameDirectX12Specific, "Could not get debug layer." };
+		//		return false;
+		//	}
+		//	debugInterface->EnableDebugLayer();
+		//}
 
 
 		// Enumerate all adapters for dx12 support
@@ -205,47 +209,47 @@ namespace game
 		}
 
 		// Filter debug messages 
-		if (_attributes.DebugMode)
-		{
-			Microsoft::WRL::ComPtr <ID3D12InfoQueue> infoQueue = nullptr;
-			if (FAILED(_d3d12Device->QueryInterface(IID_PPV_ARGS(&infoQueue))))
-			{
-				lastError = { GameErrors::GameDirectX12Specific, "Could not get info queue." };
-				return false;
-			}
-			infoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_CORRUPTION, TRUE);
-			infoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_ERROR, TRUE);
-			infoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_WARNING, TRUE);
-			// Suppress whole categories of messages
-			//D3D12_MESSAGE_CATEGORY Categories[] = {};
+		//if (_attributes.DebugMode)
+		//{
+		//	Microsoft::WRL::ComPtr <ID3D12InfoQueue> infoQueue = nullptr;
+		//	if (FAILED(_d3d12Device->QueryInterface(IID_PPV_ARGS(&infoQueue))))
+		//	{
+		//		lastError = { GameErrors::GameDirectX12Specific, "Could not get info queue." };
+		//		return false;
+		//	}
+		//	infoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_CORRUPTION, TRUE);
+		//	infoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_ERROR, TRUE);
+		//	infoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_WARNING, TRUE);
+		//	// Suppress whole categories of messages
+		//	//D3D12_MESSAGE_CATEGORY Categories[] = {};
 
-			// Suppress messages based on their severity level
-			D3D12_MESSAGE_SEVERITY severities[] =
-			{
-				D3D12_MESSAGE_SEVERITY_INFO
-			};
+		//	// Suppress messages based on their severity level
+		//	D3D12_MESSAGE_SEVERITY severities[] =
+		//	{
+		//		D3D12_MESSAGE_SEVERITY_INFO
+		//	};
 
-			// Suppress individual messages by their ID
-			D3D12_MESSAGE_ID denyIds[] = {
-				D3D12_MESSAGE_ID_CLEARRENDERTARGETVIEW_MISMATCHINGCLEARVALUE,   // I'm really not sure how to avoid this message.
-				D3D12_MESSAGE_ID_MAP_INVALID_NULLRANGE,                         // This warning occurs when using capture frame while graphics debugging.
-				D3D12_MESSAGE_ID_UNMAP_INVALID_NULLRANGE,                       // This warning occurs when using capture frame while graphics debugging.
-			};
+		//	// Suppress individual messages by their ID
+		//	D3D12_MESSAGE_ID denyIds[] = {
+		//		D3D12_MESSAGE_ID_CLEARRENDERTARGETVIEW_MISMATCHINGCLEARVALUE,   // I'm really not sure how to avoid this message.
+		//		D3D12_MESSAGE_ID_MAP_INVALID_NULLRANGE,                         // This warning occurs when using capture frame while graphics debugging.
+		//		D3D12_MESSAGE_ID_UNMAP_INVALID_NULLRANGE,                       // This warning occurs when using capture frame while graphics debugging.
+		//	};
 
-			D3D12_INFO_QUEUE_FILTER newFilter = {};
-			//NewFilter.DenyList.NumCategories = _countof(Categories);
-			//NewFilter.DenyList.pCategoryList = Categories;
-			newFilter.DenyList.NumSeverities = _countof(severities);
-			newFilter.DenyList.pSeverityList = severities;
-			newFilter.DenyList.NumIDs = _countof(denyIds);
-			newFilter.DenyList.pIDList = denyIds;
+		//	D3D12_INFO_QUEUE_FILTER newFilter = {};
+		//	newFilter.DenyList.NumCategories = 0;// _countof(Categories);
+		//	newFilter.DenyList.pCategoryList = NULL;// Categories;
+		//	newFilter.DenyList.NumSeverities = 0;// _countof(severities);
+		//	newFilter.DenyList.pSeverityList = NULL;// severities;
+		//	newFilter.DenyList.NumIDs = _countof(denyIds);
+		//	newFilter.DenyList.pIDList = denyIds;
 
-			if (FAILED(infoQueue->PushStorageFilter(&newFilter)))
-			{
-				lastError = { GameErrors::GameDirectX12Specific,"Could not update debug filter." };
-				return false;
-			}
-		}
+		//	if (FAILED(infoQueue->PushStorageFilter(&newFilter)))
+		//	{
+		//		lastError = { GameErrors::GameDirectX12Specific,"Could not update debug filter." };
+		//		return false;
+		//	}
+		//}
 
 		// Create the command queue
 		D3D12_COMMAND_QUEUE_DESC commandQueueDesc = { }; // Use defaults
@@ -527,14 +531,14 @@ namespace game
 		if (!shader.isPrecompiled)
 		{
 			DWORD flags = D3DCOMPILE_ENABLE_STRICTNESS;
-			if (_attributes.DebugMode)
-			{
-				flags |= D3DCOMPILE_DEBUG;
-				flags |= D3DCOMPILE_SKIP_OPTIMIZATION;
-			}
-			ID3DBlob* compiledVertexShader = nullptr;
-			ID3DBlob* compiledPixelShader = nullptr;
-			ID3DBlob* compilationMsgs = nullptr;
+			//if (_attributes.DebugMode)
+			//{
+			//	flags |= D3DCOMPILE_DEBUG;
+			//	flags |= D3DCOMPILE_SKIP_OPTIMIZATION;
+			//}
+			Microsoft::WRL::ComPtr<ID3DBlob> compiledVertexShader = nullptr;
+			Microsoft::WRL::ComPtr<ID3DBlob> compiledPixelShader = nullptr;
+			Microsoft::WRL::ComPtr<ID3DBlob> compilationMsgs = nullptr;
 
 			// Compile the vertex shader
 			if (FAILED(D3DCompileFromFile(ConvertToWide(vertex).c_str(), NULL, NULL, "main", "vs_5_0", flags, NULL, &compiledVertexShader, &compilationMsgs)))
@@ -546,8 +550,8 @@ namespace game
 				{
 					lastError.lastErrorString += p[bytes];
 				}
-				SAFE_RELEASE(compilationMsgs);
-				SAFE_RELEASE(compiledVertexShader);
+				//SAFE_RELEASE(compilationMsgs);
+				//SAFE_RELEASE(compiledVertexShader);
 				return false;
 			}
 
@@ -561,14 +565,21 @@ namespace game
 				{
 					lastError.lastErrorString += p[bytes];
 				}
-				SAFE_RELEASE(compilationMsgs);
-				SAFE_RELEASE(compiledVertexShader);
-				SAFE_RELEASE(compiledPixelShader);
+				//SAFE_RELEASE(compilationMsgs);
+				//SAFE_RELEASE(compiledVertexShader);
+				//SAFE_RELEASE(compiledPixelShader);
 				return false;
 			}
 
 			// Free up any messages from compilation if any
-			SAFE_RELEASE(compilationMsgs);
+			//SAFE_RELEASE(compilationMsgs);
+			shader.vertexShader12.BytecodeLength = compiledVertexShader.Get()->GetBufferSize();
+			shader.vertexShader12.pShaderBytecode = compiledVertexShader.Get()->GetBufferPointer();
+			shader.compiledVertexShader12 = compiledVertexShader;
+			shader.pixelShader12.BytecodeLength = compiledPixelShader.Get()->GetBufferSize();
+			shader.pixelShader12.pShaderBytecode = compiledPixelShader.Get()->GetBufferPointer();
+			shader.compiledVertexShader12 = compiledPixelShader;
+
 
 			//bytecode stuff
 
@@ -577,14 +588,14 @@ namespace game
 		else
 		{
 			// Load compiled vertex shader
-			ID3DBlob* compiledPixelShader = nullptr;
-			ID3DBlob* compiledVertexShader = nullptr;
+			Microsoft::WRL::ComPtr<ID3DBlob> compiledPixelShader = nullptr;
+			Microsoft::WRL::ComPtr<ID3DBlob> compiledVertexShader = nullptr;
 
 			// Load vertex shader
 			if (FAILED(D3DReadFileToBlob((ConvertToWide(vertex).c_str()), &compiledVertexShader)))
 			{
 				lastError = { GameErrors::GameDirectX11Specific,"Could not read vertex file \"" + vertex + "\"." };
-				SAFE_RELEASE(compiledVertexShader);
+				//SAFE_RELEASE(compiledVertexShader);
 				return false;
 			}
 
@@ -592,12 +603,18 @@ namespace game
 			if (FAILED(D3DReadFileToBlob((ConvertToWide(fragment).c_str()), &compiledPixelShader)))
 			{
 				lastError = { GameErrors::GameDirectX11Specific,"Could not read pixel file \"" + fragment + "\"." };
-				SAFE_RELEASE(compiledVertexShader);
+				//SAFE_RELEASE(compiledVertexShader);
 				//SAFE_RELEASE(shader.vertexShader11);
 				SAFE_RELEASE(compiledPixelShader);
 			}
 
 			// byte code stuff
+			shader.vertexShader12.BytecodeLength = compiledVertexShader.Get()->GetBufferSize();
+			shader.vertexShader12.pShaderBytecode = compiledVertexShader.Get()->GetBufferPointer();
+			shader.compiledVertexShader12 = compiledVertexShader;
+			shader.pixelShader12.BytecodeLength = compiledPixelShader.Get()->GetBufferSize();
+			shader.pixelShader12.pShaderBytecode = compiledPixelShader.Get()->GetBufferPointer();
+			shader.compiledVertexShader12 = compiledPixelShader;
 
 		}
 		return true;

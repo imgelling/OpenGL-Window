@@ -1,5 +1,5 @@
 // Engine header
-#define GAME_USE_DEDICATED_GPU
+//#define GAME_USE_DEDICATED_GPU
 //#define GAME_ENABLE_NETWORKING
 //#define GAME_ENABLE_SHADERS
 //#define GAME_SUPPORT_DIRECTX9
@@ -49,7 +49,7 @@ public:
 
 		// Enable run-time memory check for debug builds.
 #if defined(DEBUG) | defined(_DEBUG)
-		_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
+		//_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 		//_CrtSetBreakAlloc(613);
 #endif
 		
@@ -102,17 +102,17 @@ public:
 			geLogLastError();
 		}
 
-		// Setup sprite batch
-		if (!spriteBatch.Initialize())
-		{
-			geLogLastError();
-		}
+		//// Setup sprite batch
+		//if (!spriteBatch.Initialize())
+		//{
+		//	geLogLastError();
+		//}
 
-		// Load font for output to screen
-		if (!spriteFont.Load("Content/new.fnt", "Content/new.png"))
-		{
-			geLogLastError();
-		}		
+		//// Load font for output to screen
+		//if (!spriteFont.Load("Content/new.fnt", "Content/new.png"))
+		//{
+		//	geLogLastError();
+		//}		
 	}
 
 	void Shutdown()

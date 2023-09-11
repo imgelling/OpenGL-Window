@@ -7,6 +7,9 @@
 #if defined(GAME_DIRECTX9)
 #include <d3d9.h>
 #endif
+#if defined(GAME_DIRECTX12)
+#include "d3dx12.h"
+#endif
 #include "GameErrors.h"
 #include "GameEngine.h"
 #include "GameMath.h"
@@ -139,9 +142,9 @@ namespace game
 			float_t u, v;
 		};
 		Shader _pixelModeShader12;
-		//ID3D12PipelineState* pipelineStateObject; // pso containing a pipeline state
+		Microsoft::WRL::ComPtr<ID3D12PipelineState> _pipelineStateObject; // pso containing a pipeline state
 
-		Microsoft::WRL::ComPtr<ID3D12RootSignature> rootSignature; // root signature defines data shaders will access
+		Microsoft::WRL::ComPtr<ID3D12RootSignature> _rootSignature; // root signature defines data shaders will access
 
 		//D3D12_VIEWPORT viewport; // area that output from rasterizer will be stretched to.
 
@@ -149,7 +152,7 @@ namespace game
 
 		Microsoft::WRL::ComPtr<ID3D12Resource> vertexBuffer; // a default buffer in GPU memory that we will load vertex data for our triangle into
 
-		D3D12_VERTEX_BUFFER_VIEW vertexBufferView; // a structure containing a pointer to the vertex data in gpu memory
+		D3D12_VERTEX_BUFFER_VIEW vertexBufferView = {}; // a structure containing a pointer to the vertex data in gpu memory
 		// the total size of the buffer, and the size of each element (vertex)
 
 #endif
@@ -512,25 +515,87 @@ namespace game
 			rootSignatureDesc.pStaticSamplers = nullptr;
 			
 
-			//Microsoft::WRL::ComPtr<ID3DBlob> signature;
-			//if (FAILED(D3D12SerializeRootSignature(&rootSignatureDesc, D3D_ROOT_SIGNATURE_VERSION_1, &signature, nullptr)))
-			//{
-			//	lastError = { GameErrors::GameDirectX12Specific, "Could not serialize root signature in PixleMode." };
-			//	std::cout << "Serialize of root signature failed in PixelMode!\n";
-			//	return false;
-			//}
+			Microsoft::WRL::ComPtr<ID3DBlob> signature;
+			if (FAILED(D3D12SerializeRootSignature(&rootSignatureDesc, D3D_ROOT_SIGNATURE_VERSION_1, &signature, nullptr)))
+			{
+				lastError = { GameErrors::GameDirectX12Specific, "Could not serialize root signature in PixleMode." };
+				//std::cout << "Serialize of root signature failed in PixelMode!\n";
+				return false;
+			}
 
-			//if (FAILED(enginePointer->d3d12Device->CreateRootSignature(0, signature->GetBufferPointer(), signature->GetBufferSize(), IID_PPV_ARGS(&rootSignature))))
-			//{
-			//	lastError = { GameErrors::GameDirectX12Specific, "Could not create root signature in PixelMode." };
-			//	return false;
-			//}
+			if (FAILED(enginePointer->d3d12Device->CreateRootSignature(0, signature->GetBufferPointer(), signature->GetBufferSize(), IID_PPV_ARGS(&_rootSignature))))
+			{
+				lastError = { GameErrors::GameDirectX12Specific, "Could not create root signature in PixelMode." };
+				return false;
+			}
 
-			//// Load shaders for sprite mode
-			//if (!enginePointer->geLoadShader("Content/VertexShader.hlsl", "Content/PixelShader.hlsl", _pixelModeShader12))
+			// Load shaders for sprite mode
+			if (!enginePointer->geLoadShader("Content/VertexShader.hlsl", "Content/PixelShader.hlsl", _pixelModeShader12))
+			{
+				return false;
+			}
+
+			// create input layout
+			//D3D12_INPUT_ELEMENT_DESC inputLayout[] =
 			//{
-			//	return false;
-			//}
+			//	{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
+			//	{ "COLOR",    0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 12, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0},
+			//	{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT,    0, 28, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0},
+			//};
+			D3D12_INPUT_ELEMENT_DESC inputLayout[] =
+			{
+				{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 }
+			};
+
+			// fill out an input layout description structure
+			D3D12_INPUT_LAYOUT_DESC inputLayoutDesc = {};
+
+			// we can get the number of elements in an array by "sizeof(array) / sizeof(arrayElementType)"
+			inputLayoutDesc.NumElements = sizeof(inputLayout) / sizeof(D3D12_INPUT_ELEMENT_DESC);
+			inputLayoutDesc.pInputElementDescs = inputLayout;
+
+			D3D12_GRAPHICS_PIPELINE_STATE_DESC psoDesc = {}; // a structure to define a pso
+			psoDesc.InputLayout = inputLayoutDesc; // the structure describing our input layout
+			psoDesc.pRootSignature = _rootSignature.Get(); // the root signature that describes the input data this pso needs
+			psoDesc.VS = _pixelModeShader12.vertexShader12; // structure describing where to find the vertex shader bytecode and how large it is
+			psoDesc.PS = _pixelModeShader12.pixelShader12; // same as VS but for pixel shader
+			psoDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE; // type of topology we are drawing
+			psoDesc.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM; // format of the render target
+			DXGI_SAMPLE_DESC sampleDesc = {};
+			sampleDesc.Count = 1;
+			psoDesc.SampleDesc = sampleDesc; // must be the same sample description as the swapchain and depth/stencil buffer
+			psoDesc.SampleMask = 0xffffffff; // sample mask has to do with multi-sampling. 0xffffffff means point sampling is done
+			psoDesc.RasterizerState = CD3DX12_RASTERIZER_DESC(D3D12_DEFAULT); // a default rasterizer state.
+			psoDesc.BlendState = CD3DX12_BLEND_DESC(D3D12_DEFAULT); // a default blent state.
+			psoDesc.NumRenderTargets = 1; // we are only binding one render target
+			
+			//psoDesc.Flags = D3D12_PIPELINE_STATE_FLAG_TOOL_DEBUG; only works with warp
+
+			// create the pso
+			HRESULT hr = 0;
+			hr = enginePointer->d3d12Device->CreateGraphicsPipelineState(&psoDesc, IID_PPV_ARGS(&_pipelineStateObject));
+			if (FAILED(hr))
+			{
+				//lastError = { GameErrors::GameDirectX12Specific,"Could not create pipline state for PixelMode." };
+				if (hr == D3D12_ERROR_ADAPTER_NOT_FOUND)
+					lastError = { GameErrors::GameDirectX12Specific, "D3D12_ERROR_ADAPTER_NOT_FOUND" };
+				else if (hr == D3D12_ERROR_DRIVER_VERSION_MISMATCH)
+					lastError = { GameErrors::GameDirectX12Specific, "D3D12_ERROR_DRIVER_VERSION_MISMATCH" };
+				else if (hr == DXGI_ERROR_INVALID_CALL)
+					lastError = { GameErrors::GameDirectX12Specific, "DXGI_ERROR_INVALID_CALL" };
+				else if (hr == DXGI_ERROR_WAS_STILL_DRAWING)
+					lastError = { GameErrors::GameDirectX12Specific, "DXGI_ERROR_WAS_STILL_DRAWING" };
+				else if (hr == E_FAIL)
+					lastError = { GameErrors::GameDirectX12Specific, "E_FAIL" };
+				else if (hr == E_INVALIDARG)
+					lastError = { GameErrors::GameDirectX12Specific, "E_INVALIDARG" };
+				else if (hr == E_OUTOFMEMORY)
+					lastError = { GameErrors::GameDirectX12Specific, "E_OUTOFMEMORY" };
+				else if (hr == E_NOTIMPL)
+					lastError = { GameErrors::GameDirectX12Specific, "E_NOTIMPL" };
+				//lastError = { GameErrors::GameDirectX12Specific, "Could not create graphics pipeline state." };
+				return false;
+			}
 
 		}
 #endif
