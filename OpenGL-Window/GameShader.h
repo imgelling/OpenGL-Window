@@ -45,9 +45,9 @@ namespace game
 		D3D12_SHADER_BYTECODE vertexShader12;
 		D3D12_SHADER_BYTECODE pixelShader12;
 		D3D12_SHADER_BYTECODE geometryShader12;
-		//ID3DBlob* compiledPixelShader12;
-		//ID3DBlob* compiledVertexShader12;
-		//ID3DBlob* compiledGeometryShader12;
+		Microsoft::WRL::ComPtr<ID3DBlob> compiledPixelShader12;
+		Microsoft::WRL::ComPtr<ID3DBlob> compiledVertexShader12;
+		Microsoft::WRL::ComPtr<ID3DBlob> compiledGeometryShader12;
 #endif
 #if defined(GAME_DIRECTX9) | defined(GAME_DIRECTX10) | defined(GAME_DIRECTX11) | defined(GAME_DIRECTX12)
 		bool isPrecompiled;

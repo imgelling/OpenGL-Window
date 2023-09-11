@@ -400,3 +400,4 @@ FodyWeavers.xsd
 *.sln.iml
 *.html
 
+OpenGL-Window/d3dx12.h
