@@ -312,6 +312,7 @@ namespace game
 			lastError = { GameErrors::GameDirectX12Specific, "Could not create descriptor heap." };
 			return false;
 		}
+		_rtvDescriptorHeap->SetName(L"RTV descriptor heap");
 
 		// get the size of a descriptor in this heap (this is a rtv heap, so only rtv descriptors should be stored in it.
 		// descriptor sizes may vary from device to device, which is why there is no set size and we must ask the 
@@ -332,6 +333,7 @@ namespace game
 				lastError = { GameErrors::GameDirectX12Specific, "Could not get buffer for RTV " + std::to_string(i) };
 				return false;
 			}
+			_renderTargets[i]->SetName(L"FrameBuffer");
 
 			// the we "create" a render target view which binds the swap chain buffer (ID3D12Resource[n]) to the rtv handle
 			_d3d12Device->CreateRenderTargetView(_renderTargets[i].Get(), nullptr, rtvHandle);
@@ -358,6 +360,7 @@ namespace game
 		}
 
 		_commandList->Close();
+		_commandList->SetName(L"CommandList");
 
 		// -- Create a Fence & Fence Event -- //
 
@@ -376,7 +379,7 @@ namespace game
 		_fenceEvent = CreateEvent(nullptr, FALSE, FALSE, nullptr);
 		if (_fenceEvent == nullptr)
 		{
-			lastError = { GameErrors::GameDirectX12Specific, "Could not create fence event" };
+			lastError = { GameErrors::GameDirectX12Specific, "Could not create fence event handle" };
 			return false;
 		}
 
