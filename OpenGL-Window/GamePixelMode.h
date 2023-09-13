@@ -564,8 +564,6 @@ namespace game
 			psoDesc.PS = _pixelModeShader12.pixelShader12; // same as VS but for pixel shader
 			psoDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE; // type of topology we are drawing
 			psoDesc.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM; // format of the render target
-
-			// seems to be fine
 			DXGI_SAMPLE_DESC sampleDesc = {};
 			sampleDesc.Count = 1;
 			psoDesc.SampleDesc = sampleDesc; // must be the same sample description as the swapchain and depth/stencil buffer
@@ -605,28 +603,30 @@ namespace game
 			hr = enginePointer->d3d12Device->CreateGraphicsPipelineState(&psoDesc, IID_PPV_ARGS(&_pipelineStateObject));
 			if (FAILED(hr))
 			{
-				//lastError = { GameErrors::GameDirectX12Specific,"Could not create pipline state for PixelMode." };
+				lastError = { GameErrors::GameDirectX12Specific,"Could not create pipline state for PixelMode." };
 				// lastError.string += the hr error
 				if (hr == D3D12_ERROR_ADAPTER_NOT_FOUND)
-					lastError = { GameErrors::GameDirectX12Specific, "D3D12_ERROR_ADAPTER_NOT_FOUND" };
+					lastError.lastErrorString  += ": D3D12_ERROR_ADAPTER_NOT_FOUND";
 				else if (hr == D3D12_ERROR_DRIVER_VERSION_MISMATCH)
-					lastError = { GameErrors::GameDirectX12Specific, "D3D12_ERROR_DRIVER_VERSION_MISMATCH" };
+					lastError.lastErrorString += ": D3D12_ERROR_DRIVER_VERSION_MISMATCH";
 				else if (hr == DXGI_ERROR_INVALID_CALL)
-					lastError = { GameErrors::GameDirectX12Specific, "DXGI_ERROR_INVALID_CALL" };
+					lastError.lastErrorString += ": DXGI_ERROR_INVALID_CALL";
 				else if (hr == DXGI_ERROR_WAS_STILL_DRAWING)
-					lastError = { GameErrors::GameDirectX12Specific, "DXGI_ERROR_WAS_STILL_DRAWING" };
+					lastError.lastErrorString += ": DXGI_ERROR_WAS_STILL_DRAWING";
 				else if (hr == E_FAIL)
-					lastError = { GameErrors::GameDirectX12Specific, "E_FAIL" };
+					lastError.lastErrorString += ": E_FAIL";
 				else if (hr == E_INVALIDARG)
-					lastError = { GameErrors::GameDirectX12Specific, "E_INVALIDARG" };
+					lastError.lastErrorString += ": E_INVALIDARG";
 				else if (hr == E_OUTOFMEMORY)
-					lastError = { GameErrors::GameDirectX12Specific, "E_OUTOFMEMORY" };
+					lastError.lastErrorString += ": E_OUTOFMEMORY";
 				else if (hr == E_NOTIMPL)
-					lastError = { GameErrors::GameDirectX12Specific, "E_NOTIMPL" };
+					lastError.lastErrorString += ": E_NOTIMPL";
 				//lastError = { GameErrors::GameDirectX12Specific, "Could not create graphics pipeline state." };
 				return false;
 			}
 			_pipelineStateObject->SetName(L"PixelMode PSO");
+
+
 
 		}
 #endif
