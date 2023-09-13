@@ -1,11 +1,10 @@
 #pragma once
 
-#include <wrl.h>
 #include <d3d12.h>
 #include <d3dcompiler.h>
 #include <dxgi1_6.h>
-//#include <DirectXMath.h>
 #include <vector>
+#include <wrl.h>
 
 #include "GameErrors.h"
 #include "GameImageLoader.h"
@@ -52,11 +51,11 @@ namespace game
 
 		void Clear();
 		D3D12_CPU_DESCRIPTOR_HANDLE currentFrameBuffer;
-		Microsoft::WRL::ComPtr<ID3D12Debug> debugInterface;
 	protected:
 		void _ReadExtensions() {};
 		void _WaitForPreviousFrame(bool getcurrent);
 
+		//Microsoft::WRL::ComPtr<ID3D12Debug> debugInterface;
 		Microsoft::WRL::ComPtr<ID3D12Device2> _d3d12Device; // direct3d device
 		Microsoft::WRL::ComPtr <ID3D12CommandQueue> _commandQueue; // container for command lists
 		Microsoft::WRL::ComPtr <IDXGISwapChain3> _swapChain; // swapchain used to switch between render targets

@@ -8,7 +8,7 @@
 #include <d3d9.h>
 #endif
 #if defined(GAME_DIRECTX12)
-#include "d3dx12.h"
+#include "d3d12.h"
 #endif
 #include "GameErrors.h"
 #include "GameEngine.h"
@@ -528,6 +528,7 @@ namespace game
 				lastError = { GameErrors::GameDirectX12Specific, "Could not create root signature in PixelMode." };
 				return false;
 			}
+			_rootSignature->SetName(L"PixelMode Root Signature");
 
 			// Load shaders for sprite mode
 			if (!enginePointer->geLoadShader("Content/VertexShader.hlsl", "Content/PixelShader.hlsl", _pixelModeShader12))
@@ -554,6 +555,8 @@ namespace game
 			inputLayoutDesc.NumElements = sizeof(inputLayout) / sizeof(D3D12_INPUT_ELEMENT_DESC);
 			inputLayoutDesc.pInputElementDescs = inputLayout;
 
+			
+			
 			D3D12_GRAPHICS_PIPELINE_STATE_DESC psoDesc = {}; // a structure to define a pso
 			psoDesc.InputLayout = inputLayoutDesc; // the structure describing our input layout
 			psoDesc.pRootSignature = _rootSignature.Get(); // the root signature that describes the input data this pso needs
@@ -561,14 +564,40 @@ namespace game
 			psoDesc.PS = _pixelModeShader12.pixelShader12; // same as VS but for pixel shader
 			psoDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE; // type of topology we are drawing
 			psoDesc.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM; // format of the render target
+
+			// seems to be fine
 			DXGI_SAMPLE_DESC sampleDesc = {};
 			sampleDesc.Count = 1;
 			psoDesc.SampleDesc = sampleDesc; // must be the same sample description as the swapchain and depth/stencil buffer
 			psoDesc.SampleMask = 0xffffffff; // sample mask has to do with multi-sampling. 0xffffffff means point sampling is done
-			psoDesc.RasterizerState = CD3DX12_RASTERIZER_DESC(D3D12_DEFAULT); // a default rasterizer state.
-			psoDesc.BlendState = CD3DX12_BLEND_DESC(D3D12_DEFAULT); // a default blent state.
+			D3D12_RASTERIZER_DESC rasterDesc = {};
+			rasterDesc.FillMode = D3D12_FILL_MODE_SOLID;
+			rasterDesc.CullMode = D3D12_CULL_MODE_BACK;
+			rasterDesc.FrontCounterClockwise = FALSE;
+			rasterDesc.DepthBias = D3D12_DEFAULT_DEPTH_BIAS;
+			rasterDesc.DepthBiasClamp = D3D12_DEFAULT_DEPTH_BIAS_CLAMP;
+			rasterDesc.SlopeScaledDepthBias = D3D12_DEFAULT_SLOPE_SCALED_DEPTH_BIAS;
+			rasterDesc.DepthClipEnable = TRUE;
+			rasterDesc.MultisampleEnable = FALSE;
+			rasterDesc.AntialiasedLineEnable = FALSE;
+			rasterDesc.ForcedSampleCount = 0;
+			rasterDesc.ConservativeRaster = D3D12_CONSERVATIVE_RASTERIZATION_MODE_OFF;
+			psoDesc.RasterizerState = rasterDesc;
+			D3D12_BLEND_DESC blendDesc = {};
+			blendDesc.AlphaToCoverageEnable = FALSE;
+			blendDesc.IndependentBlendEnable = FALSE;
+			const D3D12_RENDER_TARGET_BLEND_DESC defaultRenderTargetBlendDesc =
+			{
+				FALSE,FALSE,
+				D3D12_BLEND_ONE, D3D12_BLEND_ZERO, D3D12_BLEND_OP_ADD,
+				D3D12_BLEND_ONE, D3D12_BLEND_ZERO, D3D12_BLEND_OP_ADD,
+				D3D12_LOGIC_OP_NOOP,
+				D3D12_COLOR_WRITE_ENABLE_ALL,
+			};
+			for (uint32_t target = 0; target < D3D12_SIMULTANEOUS_RENDER_TARGET_COUNT; target++)
+				blendDesc.RenderTarget[target] = defaultRenderTargetBlendDesc;
+			psoDesc.BlendState = blendDesc;
 			psoDesc.NumRenderTargets = 1; // we are only binding one render target
-			
 			//psoDesc.Flags = D3D12_PIPELINE_STATE_FLAG_TOOL_DEBUG; only works with warp
 
 			// create the pso
@@ -577,6 +606,7 @@ namespace game
 			if (FAILED(hr))
 			{
 				//lastError = { GameErrors::GameDirectX12Specific,"Could not create pipline state for PixelMode." };
+				// lastError.string += the hr error
 				if (hr == D3D12_ERROR_ADAPTER_NOT_FOUND)
 					lastError = { GameErrors::GameDirectX12Specific, "D3D12_ERROR_ADAPTER_NOT_FOUND" };
 				else if (hr == D3D12_ERROR_DRIVER_VERSION_MISMATCH)
@@ -596,6 +626,7 @@ namespace game
 				//lastError = { GameErrors::GameDirectX12Specific, "Could not create graphics pipeline state." };
 				return false;
 			}
+			_pipelineStateObject->SetName(L"PixelMode PSO");
 
 		}
 #endif
