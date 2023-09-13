@@ -55,7 +55,7 @@ namespace game
 		void _ReadExtensions() {};
 		void _WaitForPreviousFrame(bool getcurrent);
 
-		//Microsoft::WRL::ComPtr<ID3D12Debug> debugInterface;
+		Microsoft::WRL::ComPtr<ID3D12Debug> debugInterface;
 		Microsoft::WRL::ComPtr<ID3D12Device2> _d3d12Device; // direct3d device
 		Microsoft::WRL::ComPtr <ID3D12CommandQueue> _commandQueue; // container for command lists
 		Microsoft::WRL::ComPtr <IDXGISwapChain3> _swapChain; // swapchain used to switch between render targets
@@ -134,11 +134,11 @@ namespace game
 		IDXGIAdapter1* adapter = nullptr;
 		uint32_t adapterIndex = 0;
 		
-		//
-		//if (_attributes.DebugMode)
-		//{
-		//	createFactoryFlags = DXGI_CREATE_FACTORY_DEBUG;
-		//}
+		
+		if (_attributes.DebugMode)
+		{
+			createFactoryFlags = DXGI_CREATE_FACTORY_DEBUG;
+		}
 
 		Microsoft::WRL::ComPtr <IDXGIFactory4> dxgiFactory;
 		if (FAILED(CreateDXGIFactory2(createFactoryFlags, IID_PPV_ARGS(&dxgiFactory))))
@@ -147,17 +147,17 @@ namespace game
 			return false;
 		}
 
-		//// Enable debug mode if needed
-		//if (_attributes.DebugMode)
-		//{
-		//	/*Microsoft::WRL::ComPtr<ID3D12Debug> debugInterface;*/  // Do I need to hold onto this?
-		//	if (FAILED(D3D12GetDebugInterface(IID_PPV_ARGS(&debugInterface))))
-		//	{
-		//		lastError = { GameErrors::GameDirectX12Specific, "Could not get debug layer." };
-		//		return false;
-		//	}
-		//	debugInterface->EnableDebugLayer();
-		//}
+		// Enable debug mode if needed
+		if (_attributes.DebugMode)
+		{
+			/*Microsoft::WRL::ComPtr<ID3D12Debug> debugInterface;*/  // Do I need to hold onto this?
+			if (FAILED(D3D12GetDebugInterface(IID_PPV_ARGS(&debugInterface))))
+			{
+				lastError = { GameErrors::GameDirectX12Specific, "Could not get debug layer." };
+				return false;
+			}
+			debugInterface->EnableDebugLayer();
+		}
 
 
 		// Enumerate all adapters for dx12 support
@@ -208,47 +208,47 @@ namespace game
 		}
 
 		// Filter debug messages 
-		//if (_attributes.DebugMode)
-		//{
-		//	Microsoft::WRL::ComPtr <ID3D12InfoQueue> infoQueue = nullptr;
-		//	if (FAILED(_d3d12Device->QueryInterface(IID_PPV_ARGS(&infoQueue))))
-		//	{
-		//		lastError = { GameErrors::GameDirectX12Specific, "Could not get info queue." };
-		//		return false;
-		//	}
-		//	infoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_CORRUPTION, TRUE);
-		//	infoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_ERROR, TRUE);
-		//	infoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_WARNING, TRUE);
-		//	// Suppress whole categories of messages
-		//	//D3D12_MESSAGE_CATEGORY Categories[] = {};
+		if (_attributes.DebugMode)
+		{
+			Microsoft::WRL::ComPtr <ID3D12InfoQueue> infoQueue = nullptr;
+			if (FAILED(_d3d12Device->QueryInterface(IID_PPV_ARGS(&infoQueue))))
+			{
+				lastError = { GameErrors::GameDirectX12Specific, "Could not get info queue." };
+				return false;
+			}
+			infoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_CORRUPTION, TRUE);
+			infoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_ERROR, TRUE);
+			infoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_WARNING, TRUE);
+			// Suppress whole categories of messages
+			//D3D12_MESSAGE_CATEGORY Categories[] = {};
 
-		//	// Suppress messages based on their severity level
-		//	D3D12_MESSAGE_SEVERITY severities[] =
-		//	{
-		//		D3D12_MESSAGE_SEVERITY_INFO
-		//	};
+			// Suppress messages based on their severity level
+			D3D12_MESSAGE_SEVERITY severities[] =
+			{
+				D3D12_MESSAGE_SEVERITY_INFO
+			};
 
-		//	// Suppress individual messages by their ID
-		//	D3D12_MESSAGE_ID denyIds[] = {
-		//		D3D12_MESSAGE_ID_CLEARRENDERTARGETVIEW_MISMATCHINGCLEARVALUE,   // I'm really not sure how to avoid this message.
-		//		D3D12_MESSAGE_ID_MAP_INVALID_NULLRANGE,                         // This warning occurs when using capture frame while graphics debugging.
-		//		D3D12_MESSAGE_ID_UNMAP_INVALID_NULLRANGE,                       // This warning occurs when using capture frame while graphics debugging.
-		//	};
+			// Suppress individual messages by their ID
+			D3D12_MESSAGE_ID denyIds[] = {
+				D3D12_MESSAGE_ID_CLEARRENDERTARGETVIEW_MISMATCHINGCLEARVALUE,   // I'm really not sure how to avoid this message.
+				D3D12_MESSAGE_ID_MAP_INVALID_NULLRANGE,                         // This warning occurs when using capture frame while graphics debugging.
+				D3D12_MESSAGE_ID_UNMAP_INVALID_NULLRANGE,                       // This warning occurs when using capture frame while graphics debugging.
+			};
 
-		//	D3D12_INFO_QUEUE_FILTER newFilter = {};
-		//	newFilter.DenyList.NumCategories = 0;// _countof(Categories);
-		//	newFilter.DenyList.pCategoryList = NULL;// Categories;
-		//	newFilter.DenyList.NumSeverities = 0;// _countof(severities);
-		//	newFilter.DenyList.pSeverityList = NULL;// severities;
-		//	newFilter.DenyList.NumIDs = _countof(denyIds);
-		//	newFilter.DenyList.pIDList = denyIds;
+			D3D12_INFO_QUEUE_FILTER newFilter = {};
+			newFilter.DenyList.NumCategories = 0;// _countof(Categories);
+			newFilter.DenyList.pCategoryList = NULL;// Categories;
+			newFilter.DenyList.NumSeverities = 0;// _countof(severities);
+			newFilter.DenyList.pSeverityList = NULL;// severities;
+			newFilter.DenyList.NumIDs = _countof(denyIds);
+			newFilter.DenyList.pIDList = denyIds;
 
-		//	if (FAILED(infoQueue->PushStorageFilter(&newFilter)))
-		//	{
-		//		lastError = { GameErrors::GameDirectX12Specific,"Could not update debug filter." };
-		//		return false;
-		//	}
-		//}
+			if (FAILED(infoQueue->PushStorageFilter(&newFilter)))
+			{
+				lastError = { GameErrors::GameDirectX12Specific,"Could not update debug filter." };
+				return false;
+			}
+		}
 
 		// Create the command queue
 		D3D12_COMMAND_QUEUE_DESC commandQueueDesc = { }; // Use defaults
