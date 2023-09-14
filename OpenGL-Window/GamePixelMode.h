@@ -599,7 +599,7 @@ namespace game
 				blendDesc.RenderTarget[target] = defaultRenderTargetBlendDesc;
 			psoDesc.BlendState = blendDesc;
 			psoDesc.NumRenderTargets = 1; // we are only binding one render target
-			//psoDesc.Flags = D3D12_PIPELINE_STATE_FLAG_TOOL_DEBUG; only works with warp
+			psoDesc.Flags = D3D12_PIPELINE_STATE_FLAG_NONE;// D3D12_PIPELINE_STATE_FLAG_TOOL_DEBUG; only works with warp
 
 			// create the pso
 			HRESULT hr = 0;
@@ -659,7 +659,7 @@ namespace game
 				&heapProp, // a default heap
 				D3D12_HEAP_FLAG_NONE, // no flags
 				&resDesc, // resource description for a buffer
-				D3D12_RESOURCE_STATE_COPY_DEST, // we will start this heap in the copy destination state since we will copy data
+				D3D12_RESOURCE_STATE_COMMON,//D3D12_RESOURCE_STATE_COPY_DEST, // we will start this heap in the copy destination state since we will copy data
 				// from the upload heap to this heap
 				nullptr, // optimized clear value must be null for this type of resource. used for render targets and depth/stencil buffers
 				IID_PPV_ARGS(&_vertexBuffer));
