@@ -58,7 +58,7 @@ public:
 		attributes.FrameLock = MAX_FRAMES;
 		attributes.UpdateLock = MAX_UPDATES;
 		attributes.VsyncOn = false;
-		attributes.DebugMode = false;
+		attributes.DebugMode = true;
 		attributes.MultiSamples = 8;
 		//attributes.RenderingAPI = game::RenderAPI::DirectX9; 
 		attributes.RenderingAPI = game::RenderAPI::DirectX10;

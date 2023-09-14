@@ -181,6 +181,10 @@ namespace game
 		_textureShaderResourceView1_11 = nullptr;
 		_textureSamplerState11 = nullptr;
 #endif
+#if defined(GAME_DIRECTX12)
+		_scissorRect = {};
+		_viewport = {};
+#endif
 	}
 
 	inline PixelMode::~PixelMode()
@@ -543,7 +547,8 @@ namespace game
 			// D3D12_APPEND_ALIGNED_ELEMENT
 			D3D12_INPUT_ELEMENT_DESC inputLayout[] =
 			{
-				{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 }
+				{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT,    0,  0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
+				{ "COLOR"   , 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 12, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
 			};
 
 			// fill out an input layout description structure
@@ -627,15 +632,19 @@ namespace game
 			// a triangle
 			struct Vertextemp
 			{
-				float x;
-				float y;
-				float z;
+				float_t x;
+				float_t y;
+				float_t z;
+				float_t r;
+				float_t g;
+				float_t b;
+				float_t a;
 			};
-			Vertextemp vList[3] = 
+			Vertextemp vList[3] =
 			{
-				{ 0.0f, 0.5f, 0.5f },
-				{ 0.5f, -0.5f, 0.5f },
-				{ -0.5f, -0.5f, 0.5f },
+				{ 0.0f, 0.5f, 0.5f, 1.0f, 0.0f, 0.0f, 1.0f },
+				{0.5f, -0.5f, 0.5f, 0.0f, 1.0f, 0.0f, 1.0f },
+				{-0.5f, -0.5f, 0.5f, 0.0f, 0.0f, 1.0f, 1.0f }
 			};
 
 			int vBufferSize = sizeof(vList);
@@ -1249,31 +1258,6 @@ namespace game
 #if defined(GAME_DIRECTX12)
 		if (enginePointer->geIsUsing(GAME_DIRECTX12))
 		{
-			RendererDX12* temp = enginePointer->geGetRenderer();
-			//enginePointer->commandList->Close();
-			//temp->_WaitForPreviousFrame(false);
-			//if (FAILED(temp->_commandAllocator[temp->_frameIndex]->Reset()))
-			//{
-			//	//Running = false;
-			//	std::cout << "Command allocator reset failed\n";
-			//}
-
-			//// reset the command list. by resetting the command list we are putting it into
-			//// a recording state so we can start recording commands into the command allocator.
-			//// the command allocator that we reference here may have multiple command lists
-			//// associated with it, but only one can be recording at any time. Make sure
-			//// that any other command lists associated to this command allocator are in
-			//// the closed state (not recording).
-			//// Here you will pass an initial pipeline state object as the second parameter,
-			//// but in this tutorial we are only clearing the rtv, and do not actually need
-			//// anything but an initial default pipeline, which is what we get by setting
-			//// the second parameter to NULL
-			//if (FAILED(enginePointer->commandList->Reset(temp->_commandAllocator[temp->_frameIndex].Get(), _pipelineStateObject.Get())))
-			//{
-			//	std::cout << "command list reset failed\n";
-			//	//Running = false;
-			//}
-
 			// draw triangle
 			enginePointer->commandList->SetPipelineState(_pipelineStateObject.Get());
 			enginePointer->commandList->SetGraphicsRootSignature(_rootSignature.Get()); // set the root signature
@@ -1282,40 +1266,6 @@ namespace game
 			enginePointer->commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST); // set the primitive topology
 			enginePointer->commandList->IASetVertexBuffers(0, 1, &vertexBufferView); // set the vertex buffer (using the vertex buffer view)
 			enginePointer->commandList->DrawInstanced(3, 1, 0, 0); // finally draw 3 vertices (draw the triangle)
-			// Now we execute the command list to upload the initial assets (triangle data)
-			//enginePointer->commandList->Close();
-			//ID3D12CommandList* ppCommandLists[] = { enginePointer->commandList.Get() };
-			//enginePointer->commandQueue->ExecuteCommandLists(_countof(ppCommandLists), ppCommandLists);
-
-			// increment the fence value now, otherwise the buffer might not be uploaded by the time we start drawing
-
-			//temp->_fenceValue[temp->_frameIndex]++;
-
-			//HRESULT hr = enginePointer->commandQueue->Signal(temp->_fence[temp->_frameIndex].Get(), temp->_fenceValue[temp->_frameIndex]);
-			//if (FAILED(hr))
-			//{
-			//	lastError = { GameErrors::GameDirectX12Specific,"Pixel mode signal failed." };
-			//	// lastError.string += the hr error
-			//	if (hr == D3D12_ERROR_ADAPTER_NOT_FOUND)
-			//		lastError.lastErrorString += ": D3D12_ERROR_ADAPTER_NOT_FOUND";
-			//	else if (hr == D3D12_ERROR_DRIVER_VERSION_MISMATCH)
-			//		lastError.lastErrorString += ": D3D12_ERROR_DRIVER_VERSION_MISMATCH";
-			//	else if (hr == DXGI_ERROR_INVALID_CALL)
-			//		lastError.lastErrorString += ": DXGI_ERROR_INVALID_CALL";
-			//	else if (hr == DXGI_ERROR_WAS_STILL_DRAWING)
-			//		lastError.lastErrorString += ": DXGI_ERROR_WAS_STILL_DRAWING";
-			//	else if (hr == E_FAIL)
-			//		lastError.lastErrorString += ": E_FAIL";
-			//	else if (hr == E_INVALIDARG)
-			//		lastError.lastErrorString += ": E_INVALIDARG";
-			//	else if (hr == E_OUTOFMEMORY)
-			//		lastError.lastErrorString += ": E_OUTOFMEMORY";
-			//	else if (hr == E_NOTIMPL)
-			//		lastError.lastErrorString += ": E_NOTIMPL";
-			//	//lastError = { GameErrors::GameDirectX12Specific, "Could not create graphics pipeline state." };
-			//	//return false;
-			//}
-
 		}
 #endif
 
