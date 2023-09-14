@@ -47,34 +47,37 @@ namespace game
 		void UnLoadShader(Shader& shader);
 		void StartFrame();
 		void EndFrame();
-		void GetDevice(Microsoft::WRL::ComPtr<ID3D12Device2> &d3d12Device, Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> &commandList);
+		void GetDevice(Microsoft::WRL::ComPtr<ID3D12Device2> &d3d12Device, Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> &commandList, Microsoft::WRL::ComPtr <ID3D12CommandQueue> &commandQueue);
 
 		void Clear();
 		D3D12_CPU_DESCRIPTOR_HANDLE currentFrameBuffer;
+
+		Microsoft::WRL::ComPtr<ID3D12Fence> _fence[frameBufferCount];    // an object that is locked while our command list is being executed by the gpu. We need as many 
+		//as we have allocators (more if we want to know when the gpu is finished with an asset)
+		HANDLE _fenceEvent; // a handle to an event when our fence is unlocked by the gpu
+		uint64_t _fenceValue[frameBufferCount]; // this value is incremented each frame. each fence will have its own value
+		uint32_t _frameIndex; // current rtv we are on
+		Microsoft::WRL::ComPtr<ID3D12CommandAllocator> _commandAllocator[frameBufferCount]; // we want enough allocators for each buffer * number of threads (we only have one thread)
+		void _WaitForPreviousFrame(bool getcurrent);
 	protected:
 		void _ReadExtensions() {};
-		void _WaitForPreviousFrame(bool getcurrent);
 
 		Microsoft::WRL::ComPtr<ID3D12Debug> debugInterface;
 		Microsoft::WRL::ComPtr<ID3D12Device2> _d3d12Device; // direct3d device
 		Microsoft::WRL::ComPtr <ID3D12CommandQueue> _commandQueue; // container for command lists
 		Microsoft::WRL::ComPtr <IDXGISwapChain3> _swapChain; // swapchain used to switch between render targets
-		uint32_t _frameIndex; // current rtv we are on
 		Microsoft::WRL::ComPtr <ID3D12DescriptorHeap> _rtvDescriptorHeap; // a descriptor heap to hold resources like the render targets
 		uint32_t _rtvDescriptorSize; // size of the rtv descriptor on the device (all front and back buffers will be the same size)
 		Microsoft::WRL::ComPtr <ID3D12Resource> _renderTargets[frameBufferCount]; // number of render targets equal to buffer count
-		Microsoft::WRL::ComPtr<ID3D12CommandAllocator> _commandAllocator[frameBufferCount]; // we want enough allocators for each buffer * number of threads (we only have one thread)
 		Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> _commandList; // a command list we can record commands into, then execute them to render the frame
-		Microsoft::WRL::ComPtr<ID3D12Fence> _fence[frameBufferCount];    // an object that is locked while our command list is being executed by the gpu. We need as many 
-//as we have allocators (more if we want to know when the gpu is finished with an asset)
-		HANDLE _fenceEvent; // a handle to an event when our fence is unlocked by the gpu
-		uint64_t _fenceValue[frameBufferCount]; // this value is incremented each frame. each fence will have its own value
+
 	};
 
-	inline void RendererDX12::GetDevice(Microsoft::WRL::ComPtr<ID3D12Device2> &d3d12Device, Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> &commandList)
+	inline void RendererDX12::GetDevice(Microsoft::WRL::ComPtr<ID3D12Device2> &d3d12Device, Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> &commandList, Microsoft::WRL::ComPtr <ID3D12CommandQueue> &commandQueue)
 	{
 		d3d12Device = _d3d12Device;
 		commandList = _commandList;
+		commandQueue = _commandQueue;
 	}
 
 	inline RendererDX12::RendererDX12()

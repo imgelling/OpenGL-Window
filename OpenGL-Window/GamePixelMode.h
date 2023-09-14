@@ -8,7 +8,7 @@
 #include <d3d9.h>
 #endif
 #if defined(GAME_DIRECTX12)
-#include "d3d12.h"
+#include "d3dx12.h"
 #endif
 #include "GameErrors.h"
 #include "GameEngine.h"
@@ -143,14 +143,11 @@ namespace game
 		};
 		Shader _pixelModeShader12;
 		Microsoft::WRL::ComPtr<ID3D12PipelineState> _pipelineStateObject; // pso containing a pipeline state
-
 		Microsoft::WRL::ComPtr<ID3D12RootSignature> _rootSignature; // root signature defines data shaders will access
+		Microsoft::WRL::ComPtr<ID3D12Resource> _vertexBuffer; // a default buffer in GPU memory that we will load vertex data for our triangle into
+		D3D12_VIEWPORT _viewport; // area that output from rasterizer will be stretched to.
+		D3D12_RECT _scissorRect; // the area to draw in. pixels outside that area will not be drawn onto
 
-		//D3D12_VIEWPORT viewport; // area that output from rasterizer will be stretched to.
-
-		//D3D12_RECT scissorRect; // the area to draw in. pixels outside that area will not be drawn onto
-
-		Microsoft::WRL::ComPtr<ID3D12Resource> vertexBuffer; // a default buffer in GPU memory that we will load vertex data for our triangle into
 
 		D3D12_VERTEX_BUFFER_VIEW vertexBufferView = {}; // a structure containing a pointer to the vertex data in gpu memory
 		// the total size of the buffer, and the size of each element (vertex)
@@ -626,6 +623,198 @@ namespace game
 			}
 			_pipelineStateObject->SetName(L"PixelMode PSO");
 
+			// Create vertex buffer
+
+			// a triangle
+			struct Vertextemp
+			{
+				float x;
+				float y;
+				float z;
+			};
+			Vertextemp vList[3] = 
+			{
+				{ 0.0f, 0.5f, 0.5f },
+				{ 0.5f, -0.5f, 0.5f },
+				{ -0.5f, -0.5f, 0.5f },
+			};
+
+			int vBufferSize = sizeof(vList);
+
+			// create default heap
+			// default heap is memory on the GPU. Only the GPU has access to this memory
+			// To get data into this heap, we will have to upload the data using
+			// an upload heap
+			D3D12_HEAP_PROPERTIES heapProp = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT);
+			D3D12_RESOURCE_DESC resDesc = CD3DX12_RESOURCE_DESC::Buffer(vBufferSize);
+			hr = enginePointer->d3d12Device->CreateCommittedResource(
+				&heapProp, // a default heap
+				D3D12_HEAP_FLAG_NONE, // no flags
+				&resDesc, // resource description for a buffer
+				D3D12_RESOURCE_STATE_COPY_DEST, // we will start this heap in the copy destination state since we will copy data
+				// from the upload heap to this heap
+				nullptr, // optimized clear value must be null for this type of resource. used for render targets and depth/stencil buffers
+				IID_PPV_ARGS(&_vertexBuffer));
+			if (FAILED(hr))
+			{
+				lastError = { GameErrors::GameDirectX12Specific,"Could not create vertex buffer resource heap for PixelMode." };
+				// lastError.string += the hr error
+				if (hr == D3D12_ERROR_ADAPTER_NOT_FOUND)
+					lastError.lastErrorString += ": D3D12_ERROR_ADAPTER_NOT_FOUND";
+				else if (hr == D3D12_ERROR_DRIVER_VERSION_MISMATCH)
+					lastError.lastErrorString += ": D3D12_ERROR_DRIVER_VERSION_MISMATCH";
+				else if (hr == DXGI_ERROR_INVALID_CALL)
+					lastError.lastErrorString += ": DXGI_ERROR_INVALID_CALL";
+				else if (hr == DXGI_ERROR_WAS_STILL_DRAWING)
+					lastError.lastErrorString += ": DXGI_ERROR_WAS_STILL_DRAWING";
+				else if (hr == E_FAIL)
+					lastError.lastErrorString += ": E_FAIL";
+				else if (hr == E_INVALIDARG)
+					lastError.lastErrorString += ": E_INVALIDARG";
+				else if (hr == E_OUTOFMEMORY)
+					lastError.lastErrorString += ": E_OUTOFMEMORY";
+				else if (hr == E_NOTIMPL)
+					lastError.lastErrorString += ": E_NOTIMPL";
+				//lastError = { GameErrors::GameDirectX12Specific, "Could not create graphics pipeline state." };
+				return false;
+			}
+			// we can give resource heaps a name so when we debug with the graphics debugger we know what resource we are looking at
+			_vertexBuffer->SetName(L"Vertex Buffer Resource Heap");
+
+			// PROBABLY NEED TO KEEP THIS
+			// create upload heap
+			// upload heaps are used to upload data to the GPU. CPU can write to it, GPU can read from it
+			// We will upload the vertex buffer using this heap to the default heap
+			heapProp = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
+			resDesc = CD3DX12_RESOURCE_DESC::Buffer(vBufferSize);
+			ID3D12Resource* vBufferUploadHeap;
+			hr = enginePointer->d3d12Device->CreateCommittedResource(
+				&heapProp, // upload heap
+				D3D12_HEAP_FLAG_NONE, // no flags
+				&resDesc, // resource description for a buffer
+				D3D12_RESOURCE_STATE_GENERIC_READ, // GPU will read from this buffer and copy its contents to the default heap
+				nullptr,
+				IID_PPV_ARGS(&vBufferUploadHeap));
+			if (FAILED(hr))
+			{
+				lastError = { GameErrors::GameDirectX12Specific,"Could not create vertex buffer upload heap for PixelMode." };
+				// lastError.string += the hr error
+				if (hr == D3D12_ERROR_ADAPTER_NOT_FOUND)
+					lastError.lastErrorString += ": D3D12_ERROR_ADAPTER_NOT_FOUND";
+				else if (hr == D3D12_ERROR_DRIVER_VERSION_MISMATCH)
+					lastError.lastErrorString += ": D3D12_ERROR_DRIVER_VERSION_MISMATCH";
+				else if (hr == DXGI_ERROR_INVALID_CALL)
+					lastError.lastErrorString += ": DXGI_ERROR_INVALID_CALL";
+				else if (hr == DXGI_ERROR_WAS_STILL_DRAWING)
+					lastError.lastErrorString += ": DXGI_ERROR_WAS_STILL_DRAWING";
+				else if (hr == E_FAIL)
+					lastError.lastErrorString += ": E_FAIL";
+				else if (hr == E_INVALIDARG)
+					lastError.lastErrorString += ": E_INVALIDARG";
+				else if (hr == E_OUTOFMEMORY)
+					lastError.lastErrorString += ": E_OUTOFMEMORY";
+				else if (hr == E_NOTIMPL)
+					lastError.lastErrorString += ": E_NOTIMPL";
+				//lastError = { GameErrors::GameDirectX12Specific, "Could not create graphics pipeline state." };
+				return false;
+			}
+			vBufferUploadHeap->SetName(L"Vertex Buffer Upload Resource Heap");
+
+			RendererDX12* temp = enginePointer->geGetRenderer();
+
+
+			// resets the command list -----------------------------
+			if (FAILED(temp->_commandAllocator[temp->_frameIndex]->Reset()))
+			{
+				//Running = false;
+				std::cout << "Command allocator reset failed\n";
+			}
+
+			// reset the command list. by resetting the command list we are putting it into
+			// a recording state so we can start recording commands into the command allocator.
+			// the command allocator that we reference here may have multiple command lists
+			// associated with it, but only one can be recording at any time. Make sure
+			// that any other command lists associated to this command allocator are in
+			// the closed state (not recording).
+			// Here you will pass an initial pipeline state object as the second parameter,
+			// but in this tutorial we are only clearing the rtv, and do not actually need
+			// anything but an initial default pipeline, which is what we get by setting
+			// the second parameter to NULL
+			if (FAILED(enginePointer->commandList->Reset(temp->_commandAllocator[temp->_frameIndex].Get(), _pipelineStateObject.Get())))
+			{
+				std::cout << "command list reset failed\n";
+				//Running = false;
+			}
+
+			// end of command list reset ---------------------------------------
+			
+			// store vertex buffer in upload heap
+			D3D12_SUBRESOURCE_DATA vertexData = {};
+			vertexData.pData = reinterpret_cast<BYTE*>(vList); // pointer to our vertex array
+			vertexData.RowPitch = vBufferSize; // size of all our triangle vertex data
+			vertexData.SlicePitch = vBufferSize; // also the size of our triangle vertex data
+
+			// we are now creating a command with the command list to copy the data from
+			// the upload heap to the default heap
+			UpdateSubresources(enginePointer->commandList.Get(), _vertexBuffer.Get(), vBufferUploadHeap, 0, 0, 1, &vertexData);
+
+			// transition the vertex buffer data from copy destination state to vertex buffer state
+			D3D12_RESOURCE_BARRIER resBar = CD3DX12_RESOURCE_BARRIER::Transition(_vertexBuffer.Get(), D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER);
+			enginePointer->commandList->ResourceBarrier(1, &resBar);
+
+			// Now we execute the command list to upload the initial assets (triangle data)
+			enginePointer->commandList->Close();
+			ID3D12CommandList* ppCommandLists[] = { enginePointer->commandList.Get() };
+			enginePointer->commandQueue->ExecuteCommandLists(_countof(ppCommandLists), ppCommandLists);
+
+			// increment the fence value now, otherwise the buffer might not be uploaded by the time we start drawing
+
+			temp->_fenceValue[temp->_frameIndex]++;
+			hr = enginePointer->commandQueue->Signal(temp->_fence[temp->_frameIndex].Get(), temp->_fenceValue[temp->_frameIndex]);
+			if (FAILED(hr))
+			{
+				lastError = { GameErrors::GameDirectX12Specific,"Pixel mode signal failed." };
+				// lastError.string += the hr error
+				if (hr == D3D12_ERROR_ADAPTER_NOT_FOUND)
+					lastError.lastErrorString += ": D3D12_ERROR_ADAPTER_NOT_FOUND";
+				else if (hr == D3D12_ERROR_DRIVER_VERSION_MISMATCH)
+					lastError.lastErrorString += ": D3D12_ERROR_DRIVER_VERSION_MISMATCH";
+				else if (hr == DXGI_ERROR_INVALID_CALL)
+					lastError.lastErrorString += ": DXGI_ERROR_INVALID_CALL";
+				else if (hr == DXGI_ERROR_WAS_STILL_DRAWING)
+					lastError.lastErrorString += ": DXGI_ERROR_WAS_STILL_DRAWING";
+				else if (hr == E_FAIL)
+					lastError.lastErrorString += ": E_FAIL";
+				else if (hr == E_INVALIDARG)
+					lastError.lastErrorString += ": E_INVALIDARG";
+				else if (hr == E_OUTOFMEMORY)
+					lastError.lastErrorString += ": E_OUTOFMEMORY";
+				else if (hr == E_NOTIMPL)
+					lastError.lastErrorString += ": E_NOTIMPL";
+				//lastError = { GameErrors::GameDirectX12Specific, "Could not create graphics pipeline state." };
+				return false;
+			}
+
+			// create a vertex buffer view for the triangle. We get the GPU memory address to the vertex pointer using the GetGPUVirtualAddress() method
+			vertexBufferView.BufferLocation = _vertexBuffer->GetGPUVirtualAddress();
+			vertexBufferView.StrideInBytes = sizeof(Vertextemp);
+			vertexBufferView.SizeInBytes = vBufferSize;
+
+			// Fill out the Viewport
+			_viewport.TopLeftX = 0;
+			_viewport.TopLeftY = 0;
+			Vector2i t = enginePointer->geGetWindowSize();
+			_viewport.Width = (float_t)t.width;
+			_viewport.Height = (float_t)t.height;
+			_viewport.MinDepth = 0.0f;
+			_viewport.MaxDepth = 1.0f;
+
+			// Fill out a scissor rect
+			_scissorRect.left = 0;
+			_scissorRect.top = 0;
+			_scissorRect.right = t.width;
+			_scissorRect.bottom = t.height;
+
 
 
 		}
@@ -1069,6 +1258,78 @@ namespace game
 			{
 				enginePointer->d3d11DeviceContext->IASetPrimitiveTopology(oldPrimitiveTopology);
 			}
+		}
+#endif
+#if defined(GAME_DIRECTX12)
+		if (enginePointer->geIsUsing(GAME_DIRECTX12))
+		{
+			RendererDX12* temp = enginePointer->geGetRenderer();
+			//enginePointer->commandList->Close();
+			//temp->_WaitForPreviousFrame(false);
+			//if (FAILED(temp->_commandAllocator[temp->_frameIndex]->Reset()))
+			//{
+			//	//Running = false;
+			//	std::cout << "Command allocator reset failed\n";
+			//}
+
+			//// reset the command list. by resetting the command list we are putting it into
+			//// a recording state so we can start recording commands into the command allocator.
+			//// the command allocator that we reference here may have multiple command lists
+			//// associated with it, but only one can be recording at any time. Make sure
+			//// that any other command lists associated to this command allocator are in
+			//// the closed state (not recording).
+			//// Here you will pass an initial pipeline state object as the second parameter,
+			//// but in this tutorial we are only clearing the rtv, and do not actually need
+			//// anything but an initial default pipeline, which is what we get by setting
+			//// the second parameter to NULL
+			//if (FAILED(enginePointer->commandList->Reset(temp->_commandAllocator[temp->_frameIndex].Get(), _pipelineStateObject.Get())))
+			//{
+			//	std::cout << "command list reset failed\n";
+			//	//Running = false;
+			//}
+
+			// draw triangle
+			enginePointer->commandList->SetPipelineState(_pipelineStateObject.Get());
+			enginePointer->commandList->SetGraphicsRootSignature(_rootSignature.Get()); // set the root signature
+			enginePointer->commandList->RSSetViewports(1, &_viewport); // set the viewports
+			enginePointer->commandList->RSSetScissorRects(1, &_scissorRect); // set the scissor rects
+			enginePointer->commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST); // set the primitive topology
+			enginePointer->commandList->IASetVertexBuffers(0, 1, &vertexBufferView); // set the vertex buffer (using the vertex buffer view)
+			enginePointer->commandList->DrawInstanced(3, 1, 0, 0); // finally draw 3 vertices (draw the triangle)
+			// Now we execute the command list to upload the initial assets (triangle data)
+			//enginePointer->commandList->Close();
+			//ID3D12CommandList* ppCommandLists[] = { enginePointer->commandList.Get() };
+			//enginePointer->commandQueue->ExecuteCommandLists(_countof(ppCommandLists), ppCommandLists);
+
+			// increment the fence value now, otherwise the buffer might not be uploaded by the time we start drawing
+
+			//temp->_fenceValue[temp->_frameIndex]++;
+
+			//HRESULT hr = enginePointer->commandQueue->Signal(temp->_fence[temp->_frameIndex].Get(), temp->_fenceValue[temp->_frameIndex]);
+			//if (FAILED(hr))
+			//{
+			//	lastError = { GameErrors::GameDirectX12Specific,"Pixel mode signal failed." };
+			//	// lastError.string += the hr error
+			//	if (hr == D3D12_ERROR_ADAPTER_NOT_FOUND)
+			//		lastError.lastErrorString += ": D3D12_ERROR_ADAPTER_NOT_FOUND";
+			//	else if (hr == D3D12_ERROR_DRIVER_VERSION_MISMATCH)
+			//		lastError.lastErrorString += ": D3D12_ERROR_DRIVER_VERSION_MISMATCH";
+			//	else if (hr == DXGI_ERROR_INVALID_CALL)
+			//		lastError.lastErrorString += ": DXGI_ERROR_INVALID_CALL";
+			//	else if (hr == DXGI_ERROR_WAS_STILL_DRAWING)
+			//		lastError.lastErrorString += ": DXGI_ERROR_WAS_STILL_DRAWING";
+			//	else if (hr == E_FAIL)
+			//		lastError.lastErrorString += ": E_FAIL";
+			//	else if (hr == E_INVALIDARG)
+			//		lastError.lastErrorString += ": E_INVALIDARG";
+			//	else if (hr == E_OUTOFMEMORY)
+			//		lastError.lastErrorString += ": E_OUTOFMEMORY";
+			//	else if (hr == E_NOTIMPL)
+			//		lastError.lastErrorString += ": E_NOTIMPL";
+			//	//lastError = { GameErrors::GameDirectX12Specific, "Could not create graphics pipeline state." };
+			//	//return false;
+			//}
+
 		}
 #endif
 

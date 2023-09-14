@@ -1,5 +1,5 @@
 // Engine header
-//#define GAME_USE_DEDICATED_GPU
+#define GAME_USE_DEDICATED_GPU
 //#define GAME_ENABLE_NETWORKING
 //#define GAME_ENABLE_SHADERS
 //#define GAME_SUPPORT_DIRECTX9
@@ -58,7 +58,7 @@ public:
 		attributes.FrameLock = MAX_FRAMES;
 		attributes.UpdateLock = MAX_UPDATES;
 		attributes.VsyncOn = false;
-		attributes.DebugMode = true;
+		attributes.DebugMode = false;
 		attributes.MultiSamples = 8;
 		//attributes.RenderingAPI = game::RenderAPI::DirectX9; 
 		attributes.RenderingAPI = game::RenderAPI::DirectX10;
@@ -122,6 +122,7 @@ public:
 
 	void Update(const float_t msElapsed)
 	{
+		geSetWindowTitle("FPS = " + std::to_string(geGetFramesPerSecond()));
 		// Handle Input
 		if (geKeyboard.WasKeyReleased(geK_F11))
 		{
@@ -184,7 +185,7 @@ public:
 		//rect.bottom = 238;
 		//pixelMode.Rect(rect, game::Colors::White);
 
-		//pixelMode.Render();
+		pixelMode.Render();
 
 		//spriteBatch.Begin();
 		////double_t perSecond = 500000.0 / (perftimer.LastRun("CircleClip") / 1000000000.0);  // throws if not found
