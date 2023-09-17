@@ -16,7 +16,22 @@
 //    return output;
 //}
 // simple vertex shader
-float4 main(float3 pos : POSITION) : SV_POSITION
+//float4 main(float3 pos : POSITION) : SV_POSITION
+//{
+//    return float4(pos, 1.0f);
+//}
+struct PSInput
 {
-    return float4(pos, 1.0f);
+    float4 position : SV_POSITION;
+    float4 color : COLOR;
+};
+
+PSInput main(float4 position : POSITION, float4 color : COLOR)
+{
+    PSInput result;
+
+    result.position = position;
+    result.color = color;
+
+    return result;
 }

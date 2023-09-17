@@ -17,7 +17,18 @@
 //    return diffuse; // input.Color;
 //}
 // simple pixel shader
-float4 main() : SV_TARGET
+//float4 main() : SV_TARGET
+//{
+//    return float4(0.0f, 1.0f, 0.0f, 1.0f); // Red, Green, Blue, Alpha
+//}
+
+struct PSInput
 {
-    return float4(0.0f, 1.0f, 0.0f, 1.0f); // Red, Green, Blue, Alpha
+    float4 position : SV_POSITION;
+    float4 color : COLOR;
+};
+
+float4 main(PSInput input) : SV_TARGET
+{
+    return input.color;
 }

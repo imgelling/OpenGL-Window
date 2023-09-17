@@ -8,6 +8,8 @@
 #include <d3d9.h>
 #endif
 #if defined(GAME_DIRECTX12)
+#include <d3d12.h>
+#include <initguid.h>
 #include "d3dx12.h"
 #endif
 #include "GameErrors.h"
@@ -542,25 +544,30 @@ namespace game
 			//	{ "COLOR",    0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 12, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0},
 			//	{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT,    0, 28, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0},
 			//};
-			D3D12_INPUT_ELEMENT_DESC inputLayout[] =
+			//D3D12_INPUT_ELEMENT_DESC inputLayout[] =
+			//{
+			//	{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 }
+			//};
+			D3D12_INPUT_ELEMENT_DESC inputElementDescs[] =
 			{
-				{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 }
+				{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
+				{ "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 12, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 }
 			};
 
 			// fill out an input layout description structure
 			D3D12_INPUT_LAYOUT_DESC inputLayoutDesc = {};
 
 			// we can get the number of elements in an array by "sizeof(array) / sizeof(arrayElementType)"
-			inputLayoutDesc.NumElements = sizeof(inputLayout) / sizeof(D3D12_INPUT_ELEMENT_DESC);
-			inputLayoutDesc.pInputElementDescs = inputLayout;
+			inputLayoutDesc.NumElements = sizeof(inputElementDescs) / sizeof(D3D12_INPUT_ELEMENT_DESC);
+			inputLayoutDesc.pInputElementDescs = inputElementDescs;
 
 			
 			
 			D3D12_GRAPHICS_PIPELINE_STATE_DESC psoDesc = {}; // a structure to define a pso
 			psoDesc.InputLayout = inputLayoutDesc; // the structure describing our input layout
 			psoDesc.pRootSignature = _rootSignature.Get(); // the root signature that describes the input data this pso needs
-			psoDesc.VS = _pixelModeShader12.vertexShader12; // structure describing where to find the vertex shader bytecode and how large it is
-			psoDesc.PS = _pixelModeShader12.pixelShader12; // same as VS but for pixel shader
+			psoDesc.VS = CD3DX12_SHADER_BYTECODE(_pixelModeShader12.compiledVertexShader12.Get()); // structure describing where to find the vertex shader bytecode and how large it is
+			psoDesc.PS = CD3DX12_SHADER_BYTECODE(_pixelModeShader12.compiledPixelShader12.Get()); // same as VS but for pixel shader
 			psoDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE; // type of topology we are drawing
 			psoDesc.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM; // format of the render target
 			DXGI_SAMPLE_DESC sampleDesc = {};
@@ -633,12 +640,21 @@ namespace game
 				float x;
 				float y;
 				float z;
+				float r;
+				float g;
+				float b;
+				float a;
 			};
-			Vertextemp vList[3] = 
-			{
-				{ 0.0f, 0.5f, 0.5f },
-				{ 0.5f, -0.5f, 0.5f },
-				{ -0.5f, -0.5f, 0.5f },
+			//Vertextemp vList[3] = 
+			//{
+			//	{ 0.0f, 0.5f, 0.5f },
+			//	{ 0.5f, -0.5f, 0.5f },
+			//	{ -0.5f, -0.5f, 0.5f },
+			//};
+			Vertextemp vList[3] = {
+	{ 0.0f, 0.5f, 0.5f, 1.0f, 0.0f, 0.0f, 1.0f },
+	{ 0.5f, -0.5f, 0.5f, 0.0f, 1.0f, 0.0f, 1.0f },
+	{ -0.5f, -0.5f, 0.5f, 0.0f, 0.0f, 1.0f, 1.0f },
 			};
 
 			int vBufferSize = sizeof(vList);

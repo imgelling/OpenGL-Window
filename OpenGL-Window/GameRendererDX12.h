@@ -590,7 +590,7 @@ namespace game
 			shader.compiledVertexShader12 = compiledVertexShader;
 			shader.pixelShader12.BytecodeLength = compiledPixelShader.Get()->GetBufferSize();
 			shader.pixelShader12.pShaderBytecode = compiledPixelShader.Get()->GetBufferPointer();
-			shader.compiledVertexShader12 = compiledPixelShader;
+			shader.compiledPixelShader12 = compiledPixelShader;
 
 
 			//bytecode stuff
@@ -626,7 +626,7 @@ namespace game
 			shader.compiledVertexShader12 = compiledVertexShader;
 			shader.pixelShader12.BytecodeLength = compiledPixelShader.Get()->GetBufferSize();
 			shader.pixelShader12.pShaderBytecode = compiledPixelShader.Get()->GetBufferPointer();
-			shader.compiledVertexShader12 = compiledPixelShader;
+			shader.compiledPixelShader12 = compiledPixelShader;
 
 		}
 		return true;
