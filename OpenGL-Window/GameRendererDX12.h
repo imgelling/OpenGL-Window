@@ -241,8 +241,8 @@ namespace game
 			D3D12_INFO_QUEUE_FILTER newFilter = {};
 			newFilter.DenyList.NumCategories = 0;// _countof(Categories);
 			newFilter.DenyList.pCategoryList = NULL;// Categories;
-			newFilter.DenyList.NumSeverities = _countof(severities);
-			newFilter.DenyList.pSeverityList = severities;
+			newFilter.DenyList.NumSeverities = 0;// _countof(severities);
+			newFilter.DenyList.pSeverityList = NULL;// severities;
 			newFilter.DenyList.NumIDs = _countof(denyIds);
 			newFilter.DenyList.pIDList = denyIds;
 
