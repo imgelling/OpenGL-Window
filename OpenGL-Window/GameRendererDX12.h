@@ -101,10 +101,28 @@ namespace game
 
 	inline void RendererDX12::DestroyDevice()
 	{
-		// get swapchain out of full screen before exiting
 		BOOL fs = false;
+		// wait for gpu
+		if (_commandQueue && _fence && _fenceEvent)
+		{
+			// Schedule a Signal command in the GPU queue.
+			const UINT64 fenceValue = _fenceValue[_frameIndex];
+			if ((_commandQueue->Signal(_fence->Get(), fenceValue)))
+			{
+				// Wait until the Signal has been processed.
+				if (SUCCEEDED(_fence->Get()->SetEventOnCompletion(fenceValue, _fenceEvent)))
+				{
+					std::ignore = WaitForSingleObjectEx(_fenceEvent, 1000, FALSE);
+
+					// Increment the fence value for the current frame.
+					_fenceValue[_frameIndex]++;
+				}
+			}
+		}
+		// end wait for gpu
 		if (_swapChain)
 		{
+		// get swapchain out of full screen before exiting
 			_swapChain->GetFullscreenState(&fs, NULL);
 			if (fs)
 				_swapChain->SetFullscreenState(false, NULL);
@@ -410,7 +428,7 @@ namespace game
 
 			// We will wait until the fence has triggered the event that it's current value has reached "fenceValue". once it's value
 			// has reached "fenceValue", we know the command queue has finished executing
-			WaitForSingleObject(_fenceEvent, INFINITE);
+			WaitForSingleObject(_fenceEvent, 1000);
 		}
 
 		// increment fenceValue for next frame
@@ -538,8 +556,14 @@ namespace game
 			DWORD flags = D3DCOMPILE_ENABLE_STRICTNESS;
 			if (_attributes.DebugMode)
 			{
-				flags |= D3DCOMPILE_DEBUG;
+				flags |= D3DCOMPILE_WARNINGS_ARE_ERRORS;
+				//flags |= D3DCOMPILE_ENABLE_STRICTNESS;
 				flags |= D3DCOMPILE_SKIP_OPTIMIZATION;
+			}
+			else
+			{
+				flags |= D3DCOMPILE_DEBUG;
+				flags |= D3DCOMPILE_OPTIMIZATION_LEVEL3;
 			}
 			Microsoft::WRL::ComPtr<ID3DBlob> compiledVertexShader = nullptr;
 			Microsoft::WRL::ComPtr<ID3DBlob> compiledPixelShader = nullptr;

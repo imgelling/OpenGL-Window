@@ -600,7 +600,8 @@ namespace game
 			psoDesc.BlendState = blendDesc;
 			psoDesc.NumRenderTargets = 1; // we are only binding one render target
 			psoDesc.Flags = D3D12_PIPELINE_STATE_FLAG_NONE;// D3D12_PIPELINE_STATE_FLAG_TOOL_DEBUG; only works with warp
-
+			psoDesc.CachedPSO.CachedBlobSizeInBytes = 0;
+			psoDesc.CachedPSO.pCachedBlob = NULL;
 			// create the pso
 			HRESULT hr = 0;
 			hr = enginePointer->d3d12Device->CreateGraphicsPipelineState(&psoDesc, IID_PPV_ARGS(&_pipelineStateObject));
