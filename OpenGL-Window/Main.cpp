@@ -1,5 +1,5 @@
 // Engine header
-//#define GAME_USE_DEDICATED_GPU
+#define GAME_USE_DEDICATED_GPU
 //#define GAME_ENABLE_NETWORKING
 //#define GAME_ENABLE_SHADERS
 //#define GAME_SUPPORT_DIRECTX9
@@ -58,7 +58,7 @@ public:
 		attributes.FrameLock = MAX_FRAMES;
 		attributes.UpdateLock = MAX_UPDATES;
 		attributes.VsyncOn = false;
-		attributes.DebugMode = false;
+		attributes.DebugMode = true;
 		attributes.MultiSamples = 8;
 		//attributes.RenderingAPI = game::RenderAPI::DirectX9; 
 		attributes.RenderingAPI = game::RenderAPI::DirectX10;

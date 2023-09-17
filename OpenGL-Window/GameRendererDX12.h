@@ -1,6 +1,6 @@
 #pragma once
 
-#include <d3d12.h>
+#include "d3dx12.h"
 #include <d3dcompiler.h>
 #include <dxgi1_6.h>
 #include <vector>
@@ -116,6 +116,7 @@ namespace game
 				_WaitForPreviousFrame(false);
 			}
 		}
+		CloseHandle(_fenceEvent);
 
 		//SAFE_RELEASE(_d3d12Device);
 		//SAFE_RELEASE(_commandQueue);
@@ -143,13 +144,6 @@ namespace game
 			createFactoryFlags = DXGI_CREATE_FACTORY_DEBUG;
 		}
 
-		Microsoft::WRL::ComPtr <IDXGIFactory4> dxgiFactory;
-		if (FAILED(CreateDXGIFactory2(createFactoryFlags, IID_PPV_ARGS(&dxgiFactory))))
-		{
-			lastError = { GameErrors::GameDirectX12Specific, "Could not create DXGIFactory." };
-			return false;
-		}
-
 		// Enable debug mode if needed
 		if (_attributes.DebugMode)
 		{
@@ -160,6 +154,13 @@ namespace game
 				return false;
 			}
 			debugInterface->EnableDebugLayer();
+		}
+
+		Microsoft::WRL::ComPtr <IDXGIFactory4> dxgiFactory;
+		if (FAILED(CreateDXGIFactory2(createFactoryFlags, IID_PPV_ARGS(&dxgiFactory))))
+		{
+			lastError = { GameErrors::GameDirectX12Specific, "Could not create DXGIFactory." };
+			return false;
 		}
 
 
@@ -200,60 +201,12 @@ namespace game
 			return false;
 		}
 
-
-
-
 		// Create the device
 		if (FAILED(D3D12CreateDevice(adapter, D3D_FEATURE_LEVEL_12_0, IID_PPV_ARGS(&_d3d12Device))))
 		{
 			lastError = { GameErrors::GameDirectX12Specific, "Could not create device." };
 			return false;
 		}
-
-
-
-		//// Filter debug messages 
-		//if (_attributes.DebugMode)
-		//{
-		//	Microsoft::WRL::ComPtr <ID3D12InfoQueue> infoQueue = nullptr;
-		//	if (FAILED(_d3d12Device->QueryInterface(IID_PPV_ARGS(&infoQueue))))
-		//	{
-		//		lastError = { GameErrors::GameDirectX12Specific, "Could not get info queue." };
-		//		return false;
-		//	}
-		//	infoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_CORRUPTION, TRUE);
-		//	infoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_ERROR, TRUE);
-		//	infoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_WARNING, TRUE);
-		//	// Suppress whole categories of messages
-		//	//D3D12_MESSAGE_CATEGORY Categories[] = {};
-
-		//	// Suppress messages based on their severity level
-		//	D3D12_MESSAGE_SEVERITY severities[] =
-		//	{
-		//		D3D12_MESSAGE_SEVERITY_INFO
-		//	};
-
-		//	// Suppress individual messages by their ID
-		//	D3D12_MESSAGE_ID denyIds[] = {
-		//		D3D12_MESSAGE_ID_CLEARRENDERTARGETVIEW_MISMATCHINGCLEARVALUE,   // I'm really not sure how to avoid this message.
-		//		D3D12_MESSAGE_ID_MAP_INVALID_NULLRANGE,                         // This warning occurs when using capture frame while graphics debugging.
-		//		D3D12_MESSAGE_ID_UNMAP_INVALID_NULLRANGE,                       // This warning occurs when using capture frame while graphics debugging.
-		//	};
-
-		//	D3D12_INFO_QUEUE_FILTER newFilter = {};
-		//	newFilter.DenyList.NumCategories = 0;// _countof(Categories);
-		//	newFilter.DenyList.pCategoryList = NULL;// Categories;
-		//	newFilter.DenyList.NumSeverities = 0;// _countof(severities);
-		//	newFilter.DenyList.pSeverityList = NULL;// severities;
-		//	newFilter.DenyList.NumIDs = _countof(denyIds);
-		//	newFilter.DenyList.pIDList = denyIds;
-
-		//	if (FAILED(infoQueue->PushStorageFilter(&newFilter)))
-		//	{
-		//		lastError = { GameErrors::GameDirectX12Specific,"Could not update debug filter." };
-		//		return false;
-		//	}
-		//}
 
 		// Create the command queue
 		D3D12_COMMAND_QUEUE_DESC commandQueueDesc = { }; // Use defaults
@@ -264,74 +217,65 @@ namespace game
 		}
 
 		// Create the swap chain
-
 		DXGI_MODE_DESC backBufferDesc = {}; // this is to describe our display mode
 		backBufferDesc.Width = _attributes.WindowWidth; // buffer width
 		backBufferDesc.Height = _attributes.WindowHeight; // buffer height
 		backBufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM; // format of the buffer (rgba 32 bits, 8 bits for each chanel)
-
-		// describe our multi-sampling. We are not multi-sampling, so we set the count to 1 (we need at least one sample of course)
-		DXGI_SAMPLE_DESC sampleDesc = {};
-		sampleDesc.Count = 1; // multisample count (no multisampling, so we just put 1, since we still need 1 sample)
-
 		// Describe and create the swap chain.
-		DXGI_SWAP_CHAIN_DESC swapChainDesc = {};
-		swapChainDesc.BufferCount = frameBufferCount; // number of buffers we have
-		swapChainDesc.BufferDesc = backBufferDesc; // our back buffer description
-		swapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT; // this says the pipeline will render to this swap chain
-		swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD; // dxgi will discard the buffer (data) after we call present
-		swapChainDesc.OutputWindow = window.GetHandle(); // handle to our window
-		swapChainDesc.SampleDesc = sampleDesc; // our multi-sampling description
-		swapChainDesc.Windowed = !_attributes.WindowFullscreen; // set to true, then if in fullscreen must call SetFullScreenState with true for full screen to get uncapped fps
+		DXGI_SWAP_CHAIN_DESC1 swapChainDesc = {};
+		swapChainDesc.BufferCount = frameBufferCount;
+		swapChainDesc.Width = _attributes.WindowWidth;
+		swapChainDesc.Height = _attributes.WindowHeight;
+		swapChainDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+		swapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
+		swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
+		swapChainDesc.SampleDesc.Count = 1;
 		swapChainDesc.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_TEARING;
-		Microsoft::WRL::ComPtr <IDXGISwapChain> tempSwapChain;
 
-		if (FAILED(dxgiFactory->CreateSwapChain(
-			_commandQueue.Get(), // the queue will be flushed once the swap chain is created
-			&swapChainDesc, // give it the swap chain description we created above
-			&tempSwapChain // store the created swap chain in a temp IDXGISwapChain interface
+		Microsoft::WRL::ComPtr<IDXGISwapChain1> tempSwapChain;
+		if (FAILED(dxgiFactory->CreateSwapChainForHwnd(
+			_commandQueue.Get(),        // Swap chain needs the queue so that it can force a flush on it.
+			window.GetHandle(),
+			&swapChainDesc,
+			nullptr,
+			nullptr,
+			&tempSwapChain
 		)))
 		{
 			lastError = { GameErrors::GameDirectX12Specific, "Could not create swap chain." };
 			return false;
 		}
 
-		// need to cast to IDXGISwapChain3 for GetCurrentBackBufferIndex
-		tempSwapChain.As(&_swapChain);
+		// Need to cast to IDXGISwapChain3 for GetCurrentBackBufferIndex
+		if (FAILED(tempSwapChain.As(&_swapChain)))
+		{
+			lastError = { GameErrors::GameDirectX12Specific, "Could not cast to IDXGISwapChain3." };
+			return false;
+		}
 		_frameIndex = _swapChain->GetCurrentBackBufferIndex();
 
-		// -- Create the Back Buffers (render target views) Descriptor Heap -- //
+		// Create RTV Descriptor Heap -- //
 
 		// describe an rtv descriptor heap and create
 		D3D12_DESCRIPTOR_HEAP_DESC rtvHeapDesc = {};
-		rtvHeapDesc.NumDescriptors = frameBufferCount; // number of descriptors for this heap.
-		rtvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV; // this heap is a render target view heap
-
-		// This heap will not be directly referenced by the shaders (not shader visible), as this will store the output from the pipeline
-		// otherwise we would set the heap's flag to D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE
+		rtvHeapDesc.NumDescriptors = frameBufferCount; 
+		rtvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV; 
 		rtvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
 		rtvHeapDesc.NodeMask = 0;
 		if (FAILED(_d3d12Device->CreateDescriptorHeap(&rtvHeapDesc, IID_PPV_ARGS(&_rtvDescriptorHeap))))
 		{
-			lastError = { GameErrors::GameDirectX12Specific, "Could not create descriptor heap." };
+			lastError = { GameErrors::GameDirectX12Specific, "Could not create RTV descriptor heap." };
 			return false;
 		}
 		_rtvDescriptorHeap->SetName(L"RTV descriptor heap");
-
-		// get the size of a descriptor in this heap (this is a rtv heap, so only rtv descriptors should be stored in it.
-		// descriptor sizes may vary from device to device, which is why there is no set size and we must ask the 
-		// device to give us the size. we will use this size to increment a descriptor handle offset
 		_rtvDescriptorSize = _d3d12Device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
 
-		// get a handle to the first descriptor in the descriptor heap. a handle is basically a pointer,
-		// but we cannot literally use it like a c++ pointer.
-		D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle = _rtvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
+		// Handle to start of RTV heap
+		D3D12_CPU_DESCRIPTOR_HANDLE  rtvHandle = _rtvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
 
-		// Create a RTV for each buffer (double buffering is two buffers, tripple buffering is 3).
+		// Create a RTV for each buffer
 		for (int i = 0; i < frameBufferCount; i++)
 		{
-			// first we get the n'th buffer in the swap chain and store it in the n'th
-			// position of our ID3D12Resource array
 			if (FAILED(_swapChain->GetBuffer(i, IID_PPV_ARGS(&_renderTargets[i]))))
 			{
 				lastError = { GameErrors::GameDirectX12Specific, "Could not get buffer for RTV " + std::to_string(i) };
@@ -339,13 +283,14 @@ namespace game
 			}
 			_renderTargets[i]->SetName(L"FrameBuffer");
 
-			// the we "create" a render target view which binds the swap chain buffer (ID3D12Resource[n]) to the rtv handle
+			// Create RTV
 			_d3d12Device->CreateRenderTargetView(_renderTargets[i].Get(), nullptr, rtvHandle);
 
-			// we increment the rtv handle by the rtv descriptor size we got above
+			// Increment the rtv handle by the rtv descriptor size
 			rtvHandle.ptr += _rtvDescriptorSize;
 		}
 
+		// MS only makes 1
 		// -- Create the Command Allocators -- //
 		for (int i = 0; i < frameBufferCount; i++)
 		{
@@ -362,13 +307,12 @@ namespace game
 			lastError = { GameErrors::GameDirectX12Specific,"Could not create command list." };
 			return false;
 		}
-
-		_commandList->Close();
 		_commandList->SetName(L"CommandList");
 
-		// -- Create a Fence & Fence Event -- //
+		_commandList->Close();
 
-// create the fences
+		// MS creates only 1
+		// Create the fences
 		for (int i = 0; i < frameBufferCount; i++)
 		{
 			if (FAILED(_d3d12Device->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&_fence[i]))))
@@ -393,6 +337,10 @@ namespace game
 	inline void RendererDX12::_WaitForPreviousFrame(bool getcurrent)
 	{
 		HRESULT hr;
+// WAITING FOR THE FRAME TO COMPLETE BEFORE CONTINUING IS NOT BEST PRACTICE.
+// This is code implemented as such for simplicity. The D3D12HelloFrameBuffering
+// sample illustrates how to use fences for efficient resource usage and to
+// maximize GPU utilization.
 
 		// swap the current rtv buffer index so we draw on the correct buffer
 		if (getcurrent)
@@ -443,58 +391,29 @@ namespace game
 			std::cout << "Command allocator reset failed\n";
 		}
 
-		// reset the command list. by resetting the command list we are putting it into
-		// a recording state so we can start recording commands into the command allocator.
-		// the command allocator that we reference here may have multiple command lists
-		// associated with it, but only one can be recording at any time. Make sure
-		// that any other command lists associated to this command allocator are in
-		// the closed state (not recording).
-		// Here you will pass an initial pipeline state object as the second parameter,
-		// but in this tutorial we are only clearing the rtv, and do not actually need
-		// anything but an initial default pipeline, which is what we get by setting
-		// the second parameter to NULL
+		// reset the command list. 
 		if (FAILED(_commandList->Reset(_commandAllocator[_frameIndex].Get(), NULL)))
 		{
 			std::cout << "command list reset failed\n";
 			//Running = false;
 		}
 
-		// here we start recording commands into the commandList (which all the commands will be stored in the commandAllocator)
-
-		// transition the "frameIndex" render target from the present state to the render target state so the command list draws to it starting from here
-
-		// start frame
-		D3D12_RESOURCE_BARRIER barrier = {};
-		barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-		barrier.Transition.pResource = _renderTargets[_frameIndex].Get();// pResource;
-		barrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
-		barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_PRESENT;
-		barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_RENDER_TARGET;
-		barrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
-		barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-
+		// Transition current rendertarget to render target state
+		CD3DX12_RESOURCE_BARRIER barrier = CD3DX12_RESOURCE_BARRIER::Transition(_renderTargets[_frameIndex].Get(), D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET);
 		_commandList->ResourceBarrier(1, &barrier);
 
+		// Set the current render target
 		currentFrameBuffer = _rtvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
 		currentFrameBuffer.ptr += ((SIZE_T)_frameIndex * _rtvDescriptorSize);
-		// set the render target for the output merger stage (the output of the pipeline)
 		_commandList->OMSetRenderTargets(1, &currentFrameBuffer, FALSE, nullptr);
 	}
 
 	inline void RendererDX12::EndFrame()
 	{
-		// end frame
-// transition the "frameIndex" render target from the render target state to the present state. If the debug layer is enabled, you will receive a
-// warning if present is called on the render target when it's not in the present state
-		D3D12_RESOURCE_BARRIER barrier2 = {};
-		barrier2.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-		barrier2.Transition.pResource = _renderTargets[_frameIndex].Get();// pResource;
-		barrier2.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
-		barrier2.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
-		barrier2.Transition.StateAfter = D3D12_RESOURCE_STATE_PRESENT;
-		barrier2.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
-		barrier2.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-		_commandList->ResourceBarrier(1, &barrier2);//a &CD3DX12_RESOURCE_BARRIER::Transition(_renderTargets[_frameIndex], D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT));
+		// transition the "frameIndex" render target from the render target state to the present state. If the debug layer is enabled, you will receive a
+
+		CD3DX12_RESOURCE_BARRIER t = CD3DX12_RESOURCE_BARRIER::Transition(_renderTargets[_frameIndex].Get(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT);
+		_commandList->ResourceBarrier(1, &t);
 
 		if (FAILED(_commandList->Close()))
 		{
@@ -528,6 +447,7 @@ namespace game
 		{
 			//Running = false;
 		}
+		//_WaitForPreviousFrame(true);
 	}
 
 	inline bool RendererDX12::LoadShader(const std::string vertex, const std::string fragment, Shader& shader)
