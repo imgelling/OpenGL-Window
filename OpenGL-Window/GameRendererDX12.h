@@ -536,11 +536,11 @@ namespace game
 		if (!shader.isPrecompiled)
 		{
 			DWORD flags = D3DCOMPILE_ENABLE_STRICTNESS;
-			if (_attributes.DebugMode)
-			{
-				flags |= D3DCOMPILE_DEBUG;
-				flags |= D3DCOMPILE_SKIP_OPTIMIZATION;
-			}
+			//if (_attributes.DebugMode)
+			//{
+			//	flags |= D3DCOMPILE_DEBUG;
+			//	flags |= D3DCOMPILE_SKIP_OPTIMIZATION;
+			//}
 			Microsoft::WRL::ComPtr<ID3DBlob> compiledVertexShader = nullptr;
 			Microsoft::WRL::ComPtr<ID3DBlob> compiledPixelShader = nullptr;
 			Microsoft::WRL::ComPtr<ID3DBlob> compilationMsgs = nullptr;
