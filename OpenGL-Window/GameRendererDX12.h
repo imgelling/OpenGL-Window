@@ -507,8 +507,6 @@ namespace game
 	{
 		HRESULT hr;
 
-		//Clear(); // update the pipeline by sending commands to the commandqueue
-
 		// create an array of command lists (only one command list here)
 		ID3D12CommandList* ppCommandLists[] = { _commandList.Get() };
 
@@ -521,7 +519,6 @@ namespace game
 		hr = _commandQueue->Signal(_fence[_frameIndex].Get(), _fenceValue[_frameIndex]);
 		if (FAILED(hr))
 		{
-			std::cout << "Signal failed in DX12 swap\n";
 			//Running = false;
 		}
 
@@ -540,7 +537,7 @@ namespace game
 			DWORD flags = D3DCOMPILE_ENABLE_STRICTNESS;
 			if (_attributes.DebugMode)
 			{
-				//flags |= D3DCOMPILE_DEBUG;
+				flags |= D3DCOMPILE_DEBUG;
 				flags |= D3DCOMPILE_SKIP_OPTIMIZATION;
 			}
 			else
@@ -562,8 +559,6 @@ namespace game
 				{
 					lastError.lastErrorString += p[bytes];
 				}
-				//SAFE_RELEASE(compilationMsgs);
-				//SAFE_RELEASE(compiledVertexShader);
 				return false;
 			}
 
@@ -577,23 +572,13 @@ namespace game
 				{
 					lastError.lastErrorString += p[bytes];
 				}
-				//SAFE_RELEASE(compilationMsgs);
-				//SAFE_RELEASE(compiledVertexShader);
-				//SAFE_RELEASE(compiledPixelShader);
 				return false;
 			}
-
-			// Free up any messages from compilation if any
-			//SAFE_RELEASE(compilationMsgs);
-			shader.vertexShader12.BytecodeLength = compiledVertexShader.Get()->GetBufferSize();
-			shader.vertexShader12.pShaderBytecode = compiledVertexShader.Get()->GetBufferPointer();
+			
+			// Cache the compiled code
 			shader.compiledVertexShader12 = compiledVertexShader;
-			shader.pixelShader12.BytecodeLength = compiledPixelShader.Get()->GetBufferSize();
-			shader.pixelShader12.pShaderBytecode = compiledPixelShader.Get()->GetBufferPointer();
 			shader.compiledPixelShader12 = compiledPixelShader;
 
-
-			//bytecode stuff
 
 			return true;
 		}
@@ -607,7 +592,6 @@ namespace game
 			if (FAILED(D3DReadFileToBlob((ConvertToWide(vertex).c_str()), &compiledVertexShader)))
 			{
 				lastError = { GameErrors::GameDirectX11Specific,"Could not read vertex file \"" + vertex + "\"." };
-				//SAFE_RELEASE(compiledVertexShader);
 				return false;
 			}
 
@@ -615,17 +599,11 @@ namespace game
 			if (FAILED(D3DReadFileToBlob((ConvertToWide(fragment).c_str()), &compiledPixelShader)))
 			{
 				lastError = { GameErrors::GameDirectX11Specific,"Could not read pixel file \"" + fragment + "\"." };
-				//SAFE_RELEASE(compiledVertexShader);
-				//SAFE_RELEASE(shader.vertexShader11);
-				SAFE_RELEASE(compiledPixelShader);
+				return false;
 			}
 
-			// byte code stuff
-			shader.vertexShader12.BytecodeLength = compiledVertexShader.Get()->GetBufferSize();
-			shader.vertexShader12.pShaderBytecode = compiledVertexShader.Get()->GetBufferPointer();
+			// Cache the compiled code
 			shader.compiledVertexShader12 = compiledVertexShader;
-			shader.pixelShader12.BytecodeLength = compiledPixelShader.Get()->GetBufferSize();
-			shader.pixelShader12.pShaderBytecode = compiledPixelShader.Get()->GetBufferPointer();
 			shader.compiledPixelShader12 = compiledPixelShader;
 
 		}
