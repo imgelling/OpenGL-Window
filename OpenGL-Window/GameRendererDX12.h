@@ -183,7 +183,7 @@ namespace game
 			std::cout << "Vendor id : " << desc.VendorId << "\n";
 
 			// Check for dx12 support on current adapter
-			if (SUCCEEDED(D3D12CreateDevice(adapter, D3D_FEATURE_LEVEL_11_0, _uuidof(ID3D12Device), nullptr)))
+			if (SUCCEEDED(D3D12CreateDevice(adapter, D3D_FEATURE_LEVEL_12_0, _uuidof(ID3D12Device), nullptr)))
 			{
 				// Save the adapter
 				adapterList.emplace_back(adapter);
@@ -204,54 +204,56 @@ namespace game
 
 
 		// Create the device
-		if (FAILED(D3D12CreateDevice(adapter, D3D_FEATURE_LEVEL_11_0, IID_PPV_ARGS(&_d3d12Device))))
+		if (FAILED(D3D12CreateDevice(adapter, D3D_FEATURE_LEVEL_12_0, IID_PPV_ARGS(&_d3d12Device))))
 		{
 			lastError = { GameErrors::GameDirectX12Specific, "Could not create device." };
 			return false;
 		}
 
-		// Filter debug messages 
-		if (_attributes.DebugMode)
-		{
-			Microsoft::WRL::ComPtr <ID3D12InfoQueue> infoQueue = nullptr;
-			if (FAILED(_d3d12Device->QueryInterface(IID_PPV_ARGS(&infoQueue))))
-			{
-				lastError = { GameErrors::GameDirectX12Specific, "Could not get info queue." };
-				return false;
-			}
-			infoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_CORRUPTION, TRUE);
-			infoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_ERROR, TRUE);
-			infoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_WARNING, TRUE);
-			// Suppress whole categories of messages
-			//D3D12_MESSAGE_CATEGORY Categories[] = {};
 
-			// Suppress messages based on their severity level
-			D3D12_MESSAGE_SEVERITY severities[] =
-			{
-				D3D12_MESSAGE_SEVERITY_INFO
-			};
 
-			// Suppress individual messages by their ID
-			D3D12_MESSAGE_ID denyIds[] = {
-				D3D12_MESSAGE_ID_CLEARRENDERTARGETVIEW_MISMATCHINGCLEARVALUE,   // I'm really not sure how to avoid this message.
-				D3D12_MESSAGE_ID_MAP_INVALID_NULLRANGE,                         // This warning occurs when using capture frame while graphics debugging.
-				D3D12_MESSAGE_ID_UNMAP_INVALID_NULLRANGE,                       // This warning occurs when using capture frame while graphics debugging.
-			};
+		//// Filter debug messages 
+		//if (_attributes.DebugMode)
+		//{
+		//	Microsoft::WRL::ComPtr <ID3D12InfoQueue> infoQueue = nullptr;
+		//	if (FAILED(_d3d12Device->QueryInterface(IID_PPV_ARGS(&infoQueue))))
+		//	{
+		//		lastError = { GameErrors::GameDirectX12Specific, "Could not get info queue." };
+		//		return false;
+		//	}
+		//	infoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_CORRUPTION, TRUE);
+		//	infoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_ERROR, TRUE);
+		//	infoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_WARNING, TRUE);
+		//	// Suppress whole categories of messages
+		//	//D3D12_MESSAGE_CATEGORY Categories[] = {};
 
-			D3D12_INFO_QUEUE_FILTER newFilter = {};
-			newFilter.DenyList.NumCategories = 0;// _countof(Categories);
-			newFilter.DenyList.pCategoryList = NULL;// Categories;
-			newFilter.DenyList.NumSeverities = 0;// _countof(severities);
-			newFilter.DenyList.pSeverityList = NULL;// severities;
-			newFilter.DenyList.NumIDs = _countof(denyIds);
-			newFilter.DenyList.pIDList = denyIds;
+		//	// Suppress messages based on their severity level
+		//	D3D12_MESSAGE_SEVERITY severities[] =
+		//	{
+		//		D3D12_MESSAGE_SEVERITY_INFO
+		//	};
 
-			if (FAILED(infoQueue->PushStorageFilter(&newFilter)))
-			{
-				lastError = { GameErrors::GameDirectX12Specific,"Could not update debug filter." };
-				return false;
-			}
-		}
+		//	// Suppress individual messages by their ID
+		//	D3D12_MESSAGE_ID denyIds[] = {
+		//		D3D12_MESSAGE_ID_CLEARRENDERTARGETVIEW_MISMATCHINGCLEARVALUE,   // I'm really not sure how to avoid this message.
+		//		D3D12_MESSAGE_ID_MAP_INVALID_NULLRANGE,                         // This warning occurs when using capture frame while graphics debugging.
+		//		D3D12_MESSAGE_ID_UNMAP_INVALID_NULLRANGE,                       // This warning occurs when using capture frame while graphics debugging.
+		//	};
+
+		//	D3D12_INFO_QUEUE_FILTER newFilter = {};
+		//	newFilter.DenyList.NumCategories = 0;// _countof(Categories);
+		//	newFilter.DenyList.pCategoryList = NULL;// Categories;
+		//	newFilter.DenyList.NumSeverities = 0;// _countof(severities);
+		//	newFilter.DenyList.pSeverityList = NULL;// severities;
+		//	newFilter.DenyList.NumIDs = _countof(denyIds);
+		//	newFilter.DenyList.pIDList = denyIds;
+
+		//	if (FAILED(infoQueue->PushStorageFilter(&newFilter)))
+		//	{
+		//		lastError = { GameErrors::GameDirectX12Specific,"Could not update debug filter." };
+		//		return false;
+		//	}
+		//}
 
 		// Create the command queue
 		D3D12_COMMAND_QUEUE_DESC commandQueueDesc = { }; // Use defaults
@@ -536,14 +538,19 @@ namespace game
 		if (!shader.isPrecompiled)
 		{
 			DWORD flags = D3DCOMPILE_ENABLE_STRICTNESS;
-			//if (_attributes.DebugMode)
-			//{
-			//	flags |= D3DCOMPILE_DEBUG;
-			//	flags |= D3DCOMPILE_SKIP_OPTIMIZATION;
-			//}
-			Microsoft::WRL::ComPtr<ID3DBlob> compiledVertexShader = nullptr;
-			Microsoft::WRL::ComPtr<ID3DBlob> compiledPixelShader = nullptr;
-			Microsoft::WRL::ComPtr<ID3DBlob> compilationMsgs = nullptr;
+			if (_attributes.DebugMode)
+			{
+				//flags |= D3DCOMPILE_DEBUG;
+				flags |= D3DCOMPILE_SKIP_OPTIMIZATION;
+			}
+			else
+			{
+				//flags |= D3DCOMPILE_OPTIMIZATION_LEVEL3;
+				flags = 0;
+			}
+			Microsoft::WRL::ComPtr<ID3DBlob> compiledVertexShader;// = nullptr;
+			Microsoft::WRL::ComPtr<ID3DBlob> compiledPixelShader;// = nullptr;
+			Microsoft::WRL::ComPtr<ID3DBlob> compilationMsgs;// = nullptr;
 
 			// Compile the vertex shader
 			if (FAILED(D3DCompileFromFile(ConvertToWide(vertex).c_str(), NULL, NULL, "main", "vs_5_0", flags, NULL, &compiledVertexShader, &compilationMsgs)))
@@ -593,8 +600,8 @@ namespace game
 		else
 		{
 			// Load compiled vertex shader
-			Microsoft::WRL::ComPtr<ID3DBlob> compiledPixelShader = nullptr;
-			Microsoft::WRL::ComPtr<ID3DBlob> compiledVertexShader = nullptr;
+			Microsoft::WRL::ComPtr<ID3DBlob> compiledPixelShader;// = nullptr;
+			Microsoft::WRL::ComPtr<ID3DBlob> compiledVertexShader;// = nullptr;
 
 			// Load vertex shader
 			if (FAILED(D3DReadFileToBlob((ConvertToWide(vertex).c_str()), &compiledVertexShader)))

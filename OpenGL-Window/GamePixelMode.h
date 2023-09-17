@@ -504,12 +504,14 @@ namespace game
 		{
 			// create root signature
 
-			D3D12_ROOT_SIGNATURE_DESC rootSignatureDesc = {};
-			rootSignatureDesc.Flags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
-			rootSignatureDesc.NumParameters = 0;
-			rootSignatureDesc.pParameters = nullptr;
-			rootSignatureDesc.NumStaticSamplers = 0;
-			rootSignatureDesc.pStaticSamplers = nullptr;
+			//D3D12_ROOT_SIGNATURE_DESC rootSignatureDesc = {};
+			//rootSignatureDesc.Flags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
+			//rootSignatureDesc.NumParameters = 0;
+			//rootSignatureDesc.pParameters = nullptr;
+			//rootSignatureDesc.NumStaticSamplers = 0;
+			//rootSignatureDesc.pStaticSamplers = nullptr;
+			CD3DX12_ROOT_SIGNATURE_DESC rootSignatureDesc;
+			rootSignatureDesc.Init(0, nullptr, 0, nullptr, D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT);
 			
 
 			Microsoft::WRL::ComPtr<ID3DBlob> signature;
@@ -593,7 +595,7 @@ namespace game
 				blendDesc.RenderTarget[target] = defaultRenderTargetBlendDesc;
 			psoDesc.BlendState = blendDesc;
 			psoDesc.NumRenderTargets = 1; // we are only binding one render target
-			//psoDesc.Flags = D3D12_PIPELINE_STATE_FLAG_TOOL_DEBUG; only works with warp
+			psoDesc.Flags = D3D12_PIPELINE_STATE_FLAG_NONE;
 
 			// create the pso
 			HRESULT hr = 0;
@@ -651,7 +653,7 @@ namespace game
 				&heapProp, // a default heap
 				D3D12_HEAP_FLAG_NONE, // no flags
 				&resDesc, // resource description for a buffer
-				D3D12_RESOURCE_STATE_COPY_DEST, // we will start this heap in the copy destination state since we will copy data
+				D3D12_RESOURCE_STATE_COMMON,//D3D12_RESOURCE_STATE_COPY_DEST, // we will start this heap in the copy destination state since we will copy data
 				// from the upload heap to this heap
 				nullptr, // optimized clear value must be null for this type of resource. used for render targets and depth/stencil buffers
 				IID_PPV_ARGS(&_vertexBuffer));
@@ -740,7 +742,7 @@ namespace game
 			// but in this tutorial we are only clearing the rtv, and do not actually need
 			// anything but an initial default pipeline, which is what we get by setting
 			// the second parameter to NULL
-			if (FAILED(enginePointer->commandList->Reset(temp->_commandAllocator[temp->_frameIndex].Get(), _pipelineStateObject.Get())))
+			if (FAILED(enginePointer->commandList->Reset(temp->_commandAllocator[temp->_frameIndex].Get(), NULL)))
 			{
 				std::cout << "command list reset failed\n";
 				//Running = false;
@@ -1263,30 +1265,6 @@ namespace game
 #if defined(GAME_DIRECTX12)
 		if (enginePointer->geIsUsing(GAME_DIRECTX12))
 		{
-			RendererDX12* temp = enginePointer->geGetRenderer();
-			//enginePointer->commandList->Close();
-			//temp->_WaitForPreviousFrame(false);
-			//if (FAILED(temp->_commandAllocator[temp->_frameIndex]->Reset()))
-			//{
-			//	//Running = false;
-			//	std::cout << "Command allocator reset failed\n";
-			//}
-
-			//// reset the command list. by resetting the command list we are putting it into
-			//// a recording state so we can start recording commands into the command allocator.
-			//// the command allocator that we reference here may have multiple command lists
-			//// associated with it, but only one can be recording at any time. Make sure
-			//// that any other command lists associated to this command allocator are in
-			//// the closed state (not recording).
-			//// Here you will pass an initial pipeline state object as the second parameter,
-			//// but in this tutorial we are only clearing the rtv, and do not actually need
-			//// anything but an initial default pipeline, which is what we get by setting
-			//// the second parameter to NULL
-			//if (FAILED(enginePointer->commandList->Reset(temp->_commandAllocator[temp->_frameIndex].Get(), _pipelineStateObject.Get())))
-			//{
-			//	std::cout << "command list reset failed\n";
-			//	//Running = false;
-			//}
 
 			// draw triangle
 			enginePointer->commandList->SetPipelineState(_pipelineStateObject.Get());
@@ -1296,39 +1274,6 @@ namespace game
 			enginePointer->commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST); // set the primitive topology
 			enginePointer->commandList->IASetVertexBuffers(0, 1, &vertexBufferView); // set the vertex buffer (using the vertex buffer view)
 			enginePointer->commandList->DrawInstanced(3, 1, 0, 0); // finally draw 3 vertices (draw the triangle)
-			// Now we execute the command list to upload the initial assets (triangle data)
-			//enginePointer->commandList->Close();
-			//ID3D12CommandList* ppCommandLists[] = { enginePointer->commandList.Get() };
-			//enginePointer->commandQueue->ExecuteCommandLists(_countof(ppCommandLists), ppCommandLists);
-
-			// increment the fence value now, otherwise the buffer might not be uploaded by the time we start drawing
-
-			//temp->_fenceValue[temp->_frameIndex]++;
-
-			//HRESULT hr = enginePointer->commandQueue->Signal(temp->_fence[temp->_frameIndex].Get(), temp->_fenceValue[temp->_frameIndex]);
-			//if (FAILED(hr))
-			//{
-			//	lastError = { GameErrors::GameDirectX12Specific,"Pixel mode signal failed." };
-			//	// lastError.string += the hr error
-			//	if (hr == D3D12_ERROR_ADAPTER_NOT_FOUND)
-			//		lastError.lastErrorString += ": D3D12_ERROR_ADAPTER_NOT_FOUND";
-			//	else if (hr == D3D12_ERROR_DRIVER_VERSION_MISMATCH)
-			//		lastError.lastErrorString += ": D3D12_ERROR_DRIVER_VERSION_MISMATCH";
-			//	else if (hr == DXGI_ERROR_INVALID_CALL)
-			//		lastError.lastErrorString += ": DXGI_ERROR_INVALID_CALL";
-			//	else if (hr == DXGI_ERROR_WAS_STILL_DRAWING)
-			//		lastError.lastErrorString += ": DXGI_ERROR_WAS_STILL_DRAWING";
-			//	else if (hr == E_FAIL)
-			//		lastError.lastErrorString += ": E_FAIL";
-			//	else if (hr == E_INVALIDARG)
-			//		lastError.lastErrorString += ": E_INVALIDARG";
-			//	else if (hr == E_OUTOFMEMORY)
-			//		lastError.lastErrorString += ": E_OUTOFMEMORY";
-			//	else if (hr == E_NOTIMPL)
-			//		lastError.lastErrorString += ": E_NOTIMPL";
-			//	//lastError = { GameErrors::GameDirectX12Specific, "Could not create graphics pipeline state." };
-			//	//return false;
-			//}
 
 		}
 #endif
