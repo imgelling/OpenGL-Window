@@ -143,14 +143,24 @@ namespace game
 			float_t r, g, b, a;
 			float_t u, v;
 		};
+		_vertex12 _quadVertices12[4] =
+		{
+			// tl
+			{0.0f, 1.0f, 0.1f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f},
+			// tr
+			{0.5f, -0.5f, 0.1f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f, .0f},
+			// bl
+			{-0.5f, -0.5f, 0.1f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f},
+			// br
+			{0.5f, 0.5f, 0.1f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f},
+		};
 		Shader _pixelModeShader12;
 		Microsoft::WRL::ComPtr<ID3D12PipelineState> _pipelineStateObject; // pso containing a pipeline state
 		Microsoft::WRL::ComPtr<ID3D12RootSignature> _rootSignature; // root signature defines data shaders will access
-		Microsoft::WRL::ComPtr<ID3D12Resource> _vertexBuffer; // a default buffer in GPU memory that we will load vertex data for our triangle into
-		D3D12_VIEWPORT _viewport; // area that output from rasterizer will be stretched to.
+		Microsoft::WRL::ComPtr<ID3D12Resource> _vertexBufferHeap; // a default buffer in GPU memory that we will load vertex data for our triangle into
+		Microsoft::WRL::ComPtr<ID3D12Resource> _vertexBufferUploadHeap;
+		D3D12_VIEWPORT _viewPort; // area that output from rasterizer will be stretched to.
 		D3D12_RECT _scissorRect; // the area to draw in. pixels outside that area will not be drawn onto
-
-
 		D3D12_VERTEX_BUFFER_VIEW vertexBufferView = {}; // a structure containing a pointer to the vertex data in gpu memory
 		// the total size of the buffer, and the size of each element (vertex)
 
@@ -182,6 +192,10 @@ namespace game
 		_textureShaderResourceView0_11 = nullptr;
 		_textureShaderResourceView1_11 = nullptr;
 		_textureSamplerState11 = nullptr;
+#endif
+#if defined(GAME_DIRECTX12)
+		_scissorRect = {};
+		_viewPort = {};
 #endif
 	}
 
@@ -576,7 +590,7 @@ namespace game
 			psoDesc.SampleMask = 0xffffffff; // sample mask has to do with multi-sampling. 0xffffffff means point sampling is done
 			D3D12_RASTERIZER_DESC rasterDesc = {};
 			rasterDesc.FillMode = D3D12_FILL_MODE_SOLID;
-			rasterDesc.CullMode = D3D12_CULL_MODE_BACK;
+			rasterDesc.CullMode = D3D12_CULL_MODE_NONE;// D3D12_CULL_MODE_BACK;
 			rasterDesc.FrontCounterClockwise = FALSE;
 			rasterDesc.DepthBias = D3D12_DEFAULT_DEPTH_BIAS;
 			rasterDesc.DepthBiasClamp = D3D12_DEFAULT_DEPTH_BIAS_CLAMP;
@@ -634,31 +648,7 @@ namespace game
 
 			// Create vertex buffer
 
-			// a triangle
-			struct Vertextemp
-			{
-				float x;
-				float y;
-				float z;
-				float r;
-				float g;
-				float b;
-				float a;
-			};
-			//Vertextemp vList[3] = 
-			//{
-			//	{ 0.0f, 0.5f, 0.5f },
-			//	{ 0.5f, -0.5f, 0.5f },
-			//	{ -0.5f, -0.5f, 0.5f },
-			//};
-			Vertextemp vList[3] = 
-			{
-				{ 0.0f, 0.5f, 0.5f, 1.0f, 0.0f, 0.0f, 1.0f },
-				{ 0.5f, -0.5f, 0.5f, 0.0f, 1.0f, 0.0f, 1.0f },
-				{ -0.5f, -0.5f, 0.5f, 0.0f, 0.0f, 1.0f, 1.0f },
-			};
-
-			int vBufferSize = sizeof(vList);
+			int vBufferSize = sizeof(_quadVertices12);
 
 			// create default heap
 			// default heap is memory on the GPU. Only the GPU has access to this memory
@@ -673,7 +663,7 @@ namespace game
 				D3D12_RESOURCE_STATE_COMMON,//D3D12_RESOURCE_STATE_COPY_DEST, // we will start this heap in the copy destination state since we will copy data
 				// from the upload heap to this heap
 				nullptr, // optimized clear value must be null for this type of resource. used for render targets and depth/stencil buffers
-				IID_PPV_ARGS(&_vertexBuffer));
+				IID_PPV_ARGS(&_vertexBufferHeap));
 			if (FAILED(hr))
 			{
 				lastError = { GameErrors::GameDirectX12Specific,"Could not create vertex buffer resource heap for PixelMode." };
@@ -698,7 +688,7 @@ namespace game
 				return false;
 			}
 			// we can give resource heaps a name so when we debug with the graphics debugger we know what resource we are looking at
-			_vertexBuffer->SetName(L"Vertex Buffer Resource Heap");
+			_vertexBufferHeap->SetName(L"Vertex Buffer Resource Heap");
 
 			// PROBABLY NEED TO KEEP THIS
 			// create upload heap
@@ -706,14 +696,14 @@ namespace game
 			// We will upload the vertex buffer using this heap to the default heap
 			heapProp = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
 			resDesc = CD3DX12_RESOURCE_DESC::Buffer(vBufferSize);
-			ID3D12Resource* vBufferUploadHeap;
+			//ID3D12Resource* vBufferUploadHeap;
 			hr = enginePointer->d3d12Device->CreateCommittedResource(
 				&heapProp, // upload heap
 				D3D12_HEAP_FLAG_NONE, // no flags
 				&resDesc, // resource description for a buffer
 				D3D12_RESOURCE_STATE_GENERIC_READ, // GPU will read from this buffer and copy its contents to the default heap
 				nullptr,
-				IID_PPV_ARGS(&vBufferUploadHeap));
+				IID_PPV_ARGS(&_vertexBufferUploadHeap));
 			if (FAILED(hr))
 			{
 				lastError = { GameErrors::GameDirectX12Specific,"Could not create vertex buffer upload heap for PixelMode." };
@@ -737,7 +727,7 @@ namespace game
 				//lastError = { GameErrors::GameDirectX12Specific, "Could not create graphics pipeline state." };
 				return false;
 			}
-			vBufferUploadHeap->SetName(L"Vertex Buffer Upload Resource Heap");
+			_vertexBufferUploadHeap->SetName(L"Vertex Buffer Upload Resource Heap");
 
 			RendererDX12* temp = enginePointer->geGetRenderer();
 
@@ -749,16 +739,7 @@ namespace game
 				std::cout << "Command allocator reset failed\n";
 			}
 
-			// reset the command list. by resetting the command list we are putting it into
-			// a recording state so we can start recording commands into the command allocator.
-			// the command allocator that we reference here may have multiple command lists
-			// associated with it, but only one can be recording at any time. Make sure
-			// that any other command lists associated to this command allocator are in
-			// the closed state (not recording).
-			// Here you will pass an initial pipeline state object as the second parameter,
-			// but in this tutorial we are only clearing the rtv, and do not actually need
-			// anything but an initial default pipeline, which is what we get by setting
-			// the second parameter to NULL
+			// Reset to start recording
 			if (FAILED(enginePointer->commandList->Reset(temp->_commandAllocator[temp->_frameIndex].Get(), NULL)))
 			{
 				std::cout << "command list reset failed\n";
@@ -769,16 +750,16 @@ namespace game
 			
 			// store vertex buffer in upload heap
 			D3D12_SUBRESOURCE_DATA vertexData = {};
-			vertexData.pData = reinterpret_cast<BYTE*>(vList); // pointer to our vertex array
+			vertexData.pData = reinterpret_cast<BYTE*>(_quadVertices12); // pointer to our vertex array
 			vertexData.RowPitch = vBufferSize; // size of all our triangle vertex data
 			vertexData.SlicePitch = vBufferSize; // also the size of our triangle vertex data
 
 			// we are now creating a command with the command list to copy the data from
 			// the upload heap to the default heap
-			UpdateSubresources(enginePointer->commandList.Get(), _vertexBuffer.Get(), vBufferUploadHeap, 0, 0, 1, &vertexData);
+			UpdateSubresources(enginePointer->commandList.Get(), _vertexBufferHeap.Get(), _vertexBufferUploadHeap.Get(), 0, 0, 1, &vertexData);
 
 			// transition the vertex buffer data from copy destination state to vertex buffer state
-			D3D12_RESOURCE_BARRIER resBar = CD3DX12_RESOURCE_BARRIER::Transition(_vertexBuffer.Get(), D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER);
+			CD3DX12_RESOURCE_BARRIER resBar = CD3DX12_RESOURCE_BARRIER::Transition(_vertexBufferHeap.Get(), D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER);
 			enginePointer->commandList->ResourceBarrier(1, &resBar);
 
 			// Now we execute the command list to upload the initial assets (triangle data)
@@ -815,18 +796,18 @@ namespace game
 			}
 
 			// create a vertex buffer view for the triangle. We get the GPU memory address to the vertex pointer using the GetGPUVirtualAddress() method
-			vertexBufferView.BufferLocation = _vertexBuffer->GetGPUVirtualAddress();
-			vertexBufferView.StrideInBytes = sizeof(Vertextemp);
+			vertexBufferView.BufferLocation = _vertexBufferHeap->GetGPUVirtualAddress();
+			vertexBufferView.StrideInBytes = sizeof(_vertex12);
 			vertexBufferView.SizeInBytes = vBufferSize;
 
 			// Fill out the Viewport
-			_viewport.TopLeftX = 0;
-			_viewport.TopLeftY = 0;
+			_viewPort.TopLeftX = 0;
+			_viewPort.TopLeftY = 0;
 			Vector2i t = enginePointer->geGetWindowSize();
-			_viewport.Width = (float_t)t.width;
-			_viewport.Height = (float_t)t.height;
-			_viewport.MinDepth = 0.0f;
-			_viewport.MaxDepth = 1.0f;
+			_viewPort.Width = (float_t)t.width;
+			_viewPort.Height = (float_t)t.height;
+			_viewPort.MinDepth = 0.0f;
+			_viewPort.MaxDepth = 1.0f;
 
 			// Fill out a scissor rect
 			_scissorRect.left = 0;
@@ -840,7 +821,7 @@ namespace game
 #endif
 
 		// Scale the texture to window size
-		_ScaleQuadToWindow();
+		//_ScaleQuadToWindow();
 		return true;
 	}
 
@@ -1079,17 +1060,61 @@ namespace game
 			enginePointer->d3d11DeviceContext->Unmap(_vertexBuffer11, 0);
 		}
 #endif
+#if defined(GAME_DIRECTX12)
+		if (enginePointer->geIsUsing(GAME_DIRECTX12))
+		{
+			// Homoginize the scaled rect to -1 to 1 range using
+			//_positionOfScaledTexture.x = (_positionOfScaledTexture.x * 2.0f / (float_t)_windowSize.width) - 1.0f;
+			//_positionOfScaledTexture.y = (_positionOfScaledTexture.y * 2.0f / (float_t)_windowSize.height) - 1.0f;
+			//_sizeOfScaledTexture.width = ((float_t)_sizeOfScaledTexture.width * 2.0f / (float_t)_windowSize.width) - 1.0f;
+			//_sizeOfScaledTexture.height = ((float_t)_sizeOfScaledTexture.height * 2.0f / (float_t)_windowSize.height) - 1.0f;
+			//_positionOfScaledTexture.y = -_positionOfScaledTexture.y;
+			//_sizeOfScaledTexture.height = -_sizeOfScaledTexture.height;
+
+			// tl
+			_quadVertices12[0].x = -0.5f;// _positionOfScaledTexture.x;
+			_quadVertices12[0].y = -0.5f;// _positionOfScaledTexture.y;
+			// tr
+			_quadVertices12[1].x = 0.5f;// _sizeOfScaledTexture.width;
+			_quadVertices12[1].y = -0.5f;// _positionOfScaledTexture.y;
+			// bl
+			_quadVertices12[2].x = -0.5f;// _positionOfScaledTexture.x;
+			_quadVertices12[2].y = 0.5f;// _sizeOfScaledTexture.height;
+
+			// br
+			_quadVertices12[3].x = _sizeOfScaledTexture.width;
+			_quadVertices12[3].y = _sizeOfScaledTexture.height;
+
+			int vBufferSize = sizeof(_quadVertices12);
+			D3D12_SUBRESOURCE_DATA vertexData = {};
+			vertexData.pData = reinterpret_cast<BYTE*>(_quadVertices12); // pointer to our vertex array
+			vertexData.RowPitch = vBufferSize; // size of all our triangle vertex data
+			vertexData.SlicePitch = vBufferSize; // also the size of our triangle vertex data
+
+			CD3DX12_RESOURCE_BARRIER resBar = CD3DX12_RESOURCE_BARRIER::Transition(_vertexBufferHeap.Get(), D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, D3D12_RESOURCE_STATE_COPY_DEST);
+			enginePointer->commandList->ResourceBarrier(1, &resBar);
+			// we are now creating a command with the command list to copy the data from
+			// the upload heap to the default heap
+			UpdateSubresources(enginePointer->commandList.Get(), _vertexBufferHeap.Get(), _vertexBufferUploadHeap.Get(), 0, 0, 1, &vertexData);
+
+			// transition the vertex buffer data from copy destination state to vertex buffer state
+			CD3DX12_RESOURCE_BARRIER resBar2 = CD3DX12_RESOURCE_BARRIER::Transition(_vertexBufferHeap.Get(), D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER);
+			enginePointer->commandList->ResourceBarrier(1, &resBar2);
+		}
+#endif
 
 
 	}
 
 	inline void PixelMode::Render()
 	{
+		static bool first = true;
 		Vector2i currentWindowSize = enginePointer->geGetWindowSize();
 
 		// If window size has changed
-		if ((currentWindowSize.width != _windowSize.width) || (currentWindowSize.height != _windowSize.height))
+		if ((currentWindowSize.width != _windowSize.width) || (currentWindowSize.height != _windowSize.height) || (first))
 		{
+			first = false;
 			_windowSize = currentWindowSize;
 
 			// Rescale the quad to fit new window size
@@ -1286,7 +1311,7 @@ namespace game
 			// draw triangle
 			enginePointer->commandList->SetPipelineState(_pipelineStateObject.Get());
 			enginePointer->commandList->SetGraphicsRootSignature(_rootSignature.Get()); // set the root signature
-			enginePointer->commandList->RSSetViewports(1, &_viewport); // set the viewports
+			enginePointer->commandList->RSSetViewports(1, &_viewPort); // set the viewports
 			enginePointer->commandList->RSSetScissorRects(1, &_scissorRect); // set the scissor rects
 			enginePointer->commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST); // set the primitive topology
 			enginePointer->commandList->IASetVertexBuffers(0, 1, &vertexBufferView); // set the vertex buffer (using the vertex buffer view)

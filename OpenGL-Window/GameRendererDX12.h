@@ -49,7 +49,7 @@ namespace game
 		void EndFrame();
 		void GetDevice(Microsoft::WRL::ComPtr<ID3D12Device2> &d3d12Device, Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> &commandList, Microsoft::WRL::ComPtr <ID3D12CommandQueue> &commandQueue);
 
-		void Clear();
+		//void Clear();
 		D3D12_CPU_DESCRIPTOR_HANDLE currentFrameBuffer;
 
 		Microsoft::WRL::ComPtr<ID3D12Fence> _fence[frameBufferCount];    // an object that is locked while our command list is being executed by the gpu. We need as many 
@@ -117,18 +117,6 @@ namespace game
 			}
 		}
 		CloseHandle(_fenceEvent);
-
-		//SAFE_RELEASE(_d3d12Device);
-		//SAFE_RELEASE(_commandQueue);
-		//SAFE_RELEASE(_swapChain);
-		//SAFE_RELEASE(_rtvDescriptorHeap);
-		//for (uint32_t buffer = 0; buffer < frameBufferCount; buffer++)
-		//{
-			//SAFE_RELEASE(_renderTargets[buffer]);
-			//SAFE_RELEASE(_commandAllocator[buffer]);
-			//SAFE_RELEASE(_fence[buffer]);
-		//}
-		//SAFE_RELEASE(_commandList);
 	}
 
 	inline bool RendererDX12::CreateDevice(Window& window)
@@ -369,14 +357,6 @@ namespace game
 			_frameIndex = _swapChain->GetCurrentBackBufferIndex();
 	}
 
-	inline void RendererDX12::Clear()
-	{
-
-		// Clear the render target by using the ClearRenderTargetView command
-		_commandList->ClearRenderTargetView(currentFrameBuffer, Colors::DarkGray.rgba, 0, nullptr);
-
-	}
-
 	inline void RendererDX12::StartFrame()
 	{
 
@@ -410,14 +390,12 @@ namespace game
 
 	inline void RendererDX12::EndFrame()
 	{
-		// transition the "frameIndex" render target from the render target state to the present state. If the debug layer is enabled, you will receive a
-
+		// Transition the render target to the present state.
 		CD3DX12_RESOURCE_BARRIER t = CD3DX12_RESOURCE_BARRIER::Transition(_renderTargets[_frameIndex].Get(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT);
 		_commandList->ResourceBarrier(1, &t);
 
 		if (FAILED(_commandList->Close()))
 		{
-			//Running = false;
 			std::cout << "Commandlist close failed\n";
 		}
 	}
