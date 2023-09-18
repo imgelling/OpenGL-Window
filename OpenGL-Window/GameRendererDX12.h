@@ -6,6 +6,9 @@
 #include <vector>
 #include <wrl.h>
 
+#include <dxgidebug.h>
+//#pragma comment(lib, "DXGIDebug.lib")
+
 #include "GameErrors.h"
 #include "GameImageLoader.h"
 #include "GameRendererBase.h"
@@ -31,9 +34,7 @@ namespace game
 		void Swap();
 		void HandleWindowResize(const uint32_t width, const uint32_t height, const bool doReset) {};
 		void FillOutRendererInfo() {};
-		bool CreateTexture(Texture2D& texture) {
-			lastError = { GameErrors::GameDirectX12Specific,"Texture not implemented " }; return false;
-		};
+		bool CreateTexture(Texture2D& texture);
 		bool LoadTexture(std::string fileName, Texture2D& texture) {
 			lastError = { GameErrors::GameDirectX12Specific,"Texture not implemented " }; return false;
 		};
@@ -116,14 +117,21 @@ namespace game
 				_WaitForPreviousFrame(false);
 			}
 		}
+		// memory check stuff
+		IDXGIDebug1* pDebug = nullptr;
+		if (SUCCEEDED(DXGIGetDebugInterface1(0, IID_PPV_ARGS(&pDebug))))
+		{
+			pDebug->ReportLiveObjects(DXGI_DEBUG_ALL, DXGI_DEBUG_RLO_IGNORE_INTERNAL);
+			pDebug->Release();
+		}
 		CloseHandle(_fenceEvent);
 	}
 
 	inline bool RendererDX12::CreateDevice(Window& window)
 	{
 		uint32_t createFactoryFlags = 0;
-		std::vector<IDXGIAdapter1*> adapterList;  // needs in class
-		IDXGIAdapter1* adapter = nullptr;
+		std::vector<Microsoft::WRL::ComPtr<IDXGIAdapter1>> adapterList;  // needs in class
+		Microsoft::WRL::ComPtr<IDXGIAdapter1> adapter = nullptr;
 		uint32_t adapterIndex = 0;
 		
 		
@@ -131,6 +139,8 @@ namespace game
 		{
 			createFactoryFlags = DXGI_CREATE_FACTORY_DEBUG;
 		}
+
+		//ReportLiveObjects()
 
 		// Enable debug mode if needed
 		if (_attributes.DebugMode)
@@ -143,6 +153,8 @@ namespace game
 			}
 			debugInterface->EnableDebugLayer();
 		}
+
+
 
 		Microsoft::WRL::ComPtr <IDXGIFactory4> dxgiFactory;
 		if (FAILED(CreateDXGIFactory2(createFactoryFlags, IID_PPV_ARGS(&dxgiFactory))))
@@ -172,7 +184,7 @@ namespace game
 			std::cout << "Vendor id : " << desc.VendorId << "\n";
 
 			// Check for dx12 support on current adapter
-			if (SUCCEEDED(D3D12CreateDevice(adapter, D3D_FEATURE_LEVEL_12_0, _uuidof(ID3D12Device), nullptr)))
+			if (SUCCEEDED(D3D12CreateDevice(adapter.Get(), D3D_FEATURE_LEVEL_12_0, _uuidof(ID3D12Device), nullptr)))
 			{
 				// Save the adapter
 				adapterList.emplace_back(adapter);
@@ -190,11 +202,48 @@ namespace game
 		}
 
 		// Create the device
-		if (FAILED(D3D12CreateDevice(adapter, D3D_FEATURE_LEVEL_12_0, IID_PPV_ARGS(&_d3d12Device))))
+		if (FAILED(D3D12CreateDevice(adapter.Get(), D3D_FEATURE_LEVEL_12_0, IID_PPV_ARGS(&_d3d12Device))))
 		{
 			lastError = { GameErrors::GameDirectX12Specific, "Could not create device." };
 			return false;
 		}
+
+		if (_attributes.DebugMode)
+		{
+			//ID3D12InfoQueue* pInfoQueue = nullptr;
+			//if (!FAILED(_d3d12Device->QueryInterface(IID_PPV_ARGS(&pInfoQueue))))
+			//{
+				//// Suppress whole categories of messages.
+				////D3D12_MESSAGE_CATEGORY Categories[] = {};
+
+				//// Suppress messages based on their severity level.
+				//D3D12_MESSAGE_SEVERITY Severities[] =
+				//{
+				//	D3D12_MESSAGE_SEVERITY_INFO
+				//};
+
+				//// Suppress individual messages by their ID.
+				//D3D12_MESSAGE_ID DenyIds[] =
+				//{
+				//	// The 11On12 implementation does not use optimized clearing yet.
+				//	D3D12_MESSAGE_ID_CLEARRENDERTARGETVIEW_MISMATCHINGCLEARVALUE
+				//};
+
+				//D3D12_INFO_QUEUE_FILTER NewFilter = {};
+				////NewFilter.DenyList.NumCategories = _countof(Categories);
+				////NewFilter.DenyList.pCategoryList = Categories;
+				//NewFilter.DenyList.NumSeverities = _countof(Severities);
+				//NewFilter.DenyList.pSeverityList = Severities;
+				//NewFilter.DenyList.NumIDs = _countof(DenyIds);
+				//NewFilter.DenyList.pIDList = DenyIds;
+
+				//pInfoQueue->PushStorageFilter(&NewFilter);
+				//pInfoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_WARNING, TRUE);
+				//pInfoQueue->Release();
+			//}
+		}
+
+
 
 		// Create the command queue
 		D3D12_COMMAND_QUEUE_DESC commandQueueDesc = { }; // Use defaults
@@ -512,6 +561,36 @@ namespace game
 	{
 
 	}
+
+	inline bool RendererDX12::CreateTexture(Texture2D& texture) {
+		texture.oneOverWidth = 1.0f / (float_t)texture.width;
+		texture.oneOverHeight = 1.0f / (float_t)texture.height;
+		texture.isCopy = false;
+
+		D3D12_RESOURCE_DESC textureDesc = {};
+		textureDesc.MipLevels = 1;
+		textureDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+		textureDesc.Width = texture.width;
+		textureDesc.Height = texture.height;
+		textureDesc.Flags = D3D12_RESOURCE_FLAG_NONE;
+		textureDesc.DepthOrArraySize = 1;
+		textureDesc.SampleDesc.Count = 1;
+		textureDesc.SampleDesc.Quality = 0;
+		textureDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
+		CD3DX12_HEAP_PROPERTIES heapProp = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT);
+		if (FAILED(_d3d12Device->CreateCommittedResource(
+			&heapProp,
+			D3D12_HEAP_FLAG_NONE,
+			&textureDesc,
+			D3D12_RESOURCE_STATE_COPY_DEST,
+			nullptr,
+			IID_PPV_ARGS(&texture.textureResource))))
+		{
+			lastError = { GameErrors::GameDirectX12Specific,"Could not create texture." }; 
+			return false;
+		}
+		return true;
+	};
 }
 
 #undef frameBufferCount

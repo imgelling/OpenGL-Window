@@ -1,4 +1,7 @@
 #pragma once
+#if defined(GAME_DIRECTX12)
+#include <d3d12.h>
+#endif
 #if defined(GAME_DIRECTX11)
 #include <d3d11.h>
 #endif
@@ -32,6 +35,9 @@ namespace game
 #endif
 #if defined(GAME_DIRECTX11)
 		ID3D11Texture2D* textureInterface11;
+#endif
+#if defined(GAME_DIRECTX12)
+		Microsoft::WRL::ComPtr<ID3D12Resource> textureResource;
 #endif
 		std::string name;
 		uint32_t width;

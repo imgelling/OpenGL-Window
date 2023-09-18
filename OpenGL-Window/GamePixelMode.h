@@ -305,7 +305,7 @@ namespace game
 			if (!enginePointer->geCreateTexture(_frameBuffer[loop]))
 			{
 				lastError = { GameErrors::GameRenderer, "Could not create textures for PixelMode frame buffers." };
-				//return false;
+				return false;
 			}
 		}
 
@@ -526,7 +526,7 @@ namespace game
 			//rootSignatureDesc.pParameters = nullptr;
 			//rootSignatureDesc.NumStaticSamplers = 0;
 			//rootSignatureDesc.pStaticSamplers = nullptr;
-			CD3DX12_ROOT_SIGNATURE_DESC rootSignatureDesc;
+			CD3DX12_ROOT_SIGNATURE_DESC rootSignatureDesc = {};
 			rootSignatureDesc.Init(0, nullptr, 0, nullptr, D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT);
 			
 
@@ -1064,22 +1064,22 @@ namespace game
 		if (enginePointer->geIsUsing(GAME_DIRECTX12))
 		{
 			// Homoginize the scaled rect to -1 to 1 range using
-			//_positionOfScaledTexture.x = (_positionOfScaledTexture.x * 2.0f / (float_t)_windowSize.width) - 1.0f;
-			//_positionOfScaledTexture.y = (_positionOfScaledTexture.y * 2.0f / (float_t)_windowSize.height) - 1.0f;
-			//_sizeOfScaledTexture.width = ((float_t)_sizeOfScaledTexture.width * 2.0f / (float_t)_windowSize.width) - 1.0f;
-			//_sizeOfScaledTexture.height = ((float_t)_sizeOfScaledTexture.height * 2.0f / (float_t)_windowSize.height) - 1.0f;
+			_positionOfScaledTexture.x = (_positionOfScaledTexture.x * 2.0f / (float_t)_windowSize.width) - 1.0f;
+			_positionOfScaledTexture.y = (_positionOfScaledTexture.y * 2.0f / (float_t)_windowSize.height) - 1.0f;
+			_sizeOfScaledTexture.width = ((float_t)_sizeOfScaledTexture.width * 2.0f / (float_t)_windowSize.width) - 1.0f;
+			_sizeOfScaledTexture.height = ((float_t)_sizeOfScaledTexture.height * 2.0f / (float_t)_windowSize.height) - 1.0f;
 			//_positionOfScaledTexture.y = -_positionOfScaledTexture.y;
 			//_sizeOfScaledTexture.height = -_sizeOfScaledTexture.height;
 
-			// tl
-			_quadVertices12[0].x = -0.5f;// _positionOfScaledTexture.x;
-			_quadVertices12[0].y = -0.5f;// _positionOfScaledTexture.y;
-			// tr
-			_quadVertices12[1].x = 0.5f;// _sizeOfScaledTexture.width;
-			_quadVertices12[1].y = -0.5f;// _positionOfScaledTexture.y;
-			// bl
-			_quadVertices12[2].x = -0.5f;// _positionOfScaledTexture.x;
-			_quadVertices12[2].y = 0.5f;// _sizeOfScaledTexture.height;
+			// tl -1,1
+			_quadVertices12[0].x = _positionOfScaledTexture.x;
+			_quadVertices12[0].y = _positionOfScaledTexture.y;
+			// tr 1,1
+			_quadVertices12[1].x = _sizeOfScaledTexture.width;
+			_quadVertices12[1].y = _positionOfScaledTexture.y;
+			// bl -1,-1
+			_quadVertices12[2].x = _positionOfScaledTexture.x;
+			_quadVertices12[2].y = _sizeOfScaledTexture.height;
 
 			// br
 			_quadVertices12[3].x = _sizeOfScaledTexture.width;
@@ -1091,13 +1091,14 @@ namespace game
 			vertexData.RowPitch = vBufferSize; // size of all our triangle vertex data
 			vertexData.SlicePitch = vBufferSize; // also the size of our triangle vertex data
 
+			// Turn vertex buffer into a destination state
 			CD3DX12_RESOURCE_BARRIER resBar = CD3DX12_RESOURCE_BARRIER::Transition(_vertexBufferHeap.Get(), D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, D3D12_RESOURCE_STATE_COPY_DEST);
 			enginePointer->commandList->ResourceBarrier(1, &resBar);
-			// we are now creating a command with the command list to copy the data from
-			// the upload heap to the default heap
+
+			// Upload the vertex buffer to the vertex buffer heap
 			UpdateSubresources(enginePointer->commandList.Get(), _vertexBufferHeap.Get(), _vertexBufferUploadHeap.Get(), 0, 0, 1, &vertexData);
 
-			// transition the vertex buffer data from copy destination state to vertex buffer state
+			// Turn vertex buffer into a vertex buffer state again
 			CD3DX12_RESOURCE_BARRIER resBar2 = CD3DX12_RESOURCE_BARRIER::Transition(_vertexBufferHeap.Get(), D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER);
 			enginePointer->commandList->ResourceBarrier(1, &resBar2);
 		}
