@@ -37,7 +37,7 @@ namespace game
 		ID3D11Texture2D* textureInterface11;
 #endif
 #if defined(GAME_DIRECTX12)
-		Microsoft::WRL::ComPtr<ID3D12Resource> textureResource;
+		Microsoft::WRL::ComPtr<ID3D12Resource> textureResource12;
 #endif
 		std::string name;
 		uint32_t width;

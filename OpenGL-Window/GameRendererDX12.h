@@ -10,6 +10,7 @@
 //#pragma comment(lib, "DXGIDebug.lib")
 
 #include "GameErrors.h"
+#include "GameHelpers.h"
 #include "GameImageLoader.h"
 #include "GameRendererBase.h"
 #include "GameShader.h"
@@ -51,7 +52,7 @@ namespace game
 		void GetDevice(Microsoft::WRL::ComPtr<ID3D12Device2> &d3d12Device, Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> &commandList, Microsoft::WRL::ComPtr <ID3D12CommandQueue> &commandQueue);
 
 		//void Clear();
-		D3D12_CPU_DESCRIPTOR_HANDLE currentFrameBuffer;
+		CD3DX12_CPU_DESCRIPTOR_HANDLE currentFrameBuffer;
 
 		Microsoft::WRL::ComPtr<ID3D12Fence> _fence[frameBufferCount];    // an object that is locked while our command list is being executed by the gpu. We need as many 
 		//as we have allocators (more if we want to know when the gpu is finished with an asset)
@@ -117,13 +118,7 @@ namespace game
 				_WaitForPreviousFrame(false);
 			}
 		}
-		// memory check stuff
-		IDXGIDebug1* pDebug = nullptr;
-		if (SUCCEEDED(DXGIGetDebugInterface1(0, IID_PPV_ARGS(&pDebug))))
-		{
-			pDebug->ReportLiveObjects(DXGI_DEBUG_ALL, DXGI_DEBUG_RLO_IGNORE_INTERNAL);
-			pDebug->Release();
-		}
+
 		CloseHandle(_fenceEvent);
 	}
 
@@ -210,37 +205,37 @@ namespace game
 
 		if (_attributes.DebugMode)
 		{
-			//ID3D12InfoQueue* pInfoQueue = nullptr;
-			//if (!FAILED(_d3d12Device->QueryInterface(IID_PPV_ARGS(&pInfoQueue))))
-			//{
-				//// Suppress whole categories of messages.
-				////D3D12_MESSAGE_CATEGORY Categories[] = {};
+			ID3D12InfoQueue* pInfoQueue = nullptr;
+			if (!FAILED(_d3d12Device->QueryInterface(IID_PPV_ARGS(&pInfoQueue))))
+			{
+				// Suppress whole categories of messages.
+				//D3D12_MESSAGE_CATEGORY Categories[] = {};
 
-				//// Suppress messages based on their severity level.
-				//D3D12_MESSAGE_SEVERITY Severities[] =
-				//{
-				//	D3D12_MESSAGE_SEVERITY_INFO
-				//};
+				// Suppress messages based on their severity level.
+				D3D12_MESSAGE_SEVERITY Severities[] =
+				{
+					D3D12_MESSAGE_SEVERITY_INFO
+				};
 
-				//// Suppress individual messages by their ID.
-				//D3D12_MESSAGE_ID DenyIds[] =
-				//{
-				//	// The 11On12 implementation does not use optimized clearing yet.
-				//	D3D12_MESSAGE_ID_CLEARRENDERTARGETVIEW_MISMATCHINGCLEARVALUE
-				//};
+				// Suppress individual messages by their ID.
+				D3D12_MESSAGE_ID DenyIds[] =
+				{
+					// The 11On12 implementation does not use optimized clearing yet.
+					D3D12_MESSAGE_ID_CLEARRENDERTARGETVIEW_MISMATCHINGCLEARVALUE
+				};
 
-				//D3D12_INFO_QUEUE_FILTER NewFilter = {};
-				////NewFilter.DenyList.NumCategories = _countof(Categories);
-				////NewFilter.DenyList.pCategoryList = Categories;
-				//NewFilter.DenyList.NumSeverities = _countof(Severities);
-				//NewFilter.DenyList.pSeverityList = Severities;
-				//NewFilter.DenyList.NumIDs = _countof(DenyIds);
-				//NewFilter.DenyList.pIDList = DenyIds;
+				D3D12_INFO_QUEUE_FILTER NewFilter = {};
+				//NewFilter.DenyList.NumCategories = _countof(Categories);
+				//NewFilter.DenyList.pCategoryList = Categories;
+				NewFilter.DenyList.NumSeverities = _countof(Severities);
+				NewFilter.DenyList.pSeverityList = Severities;
+				NewFilter.DenyList.NumIDs = _countof(DenyIds);
+				NewFilter.DenyList.pIDList = DenyIds;
 
-				//pInfoQueue->PushStorageFilter(&NewFilter);
-				//pInfoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_WARNING, TRUE);
-				//pInfoQueue->Release();
-			//}
+				pInfoQueue->PushStorageFilter(&NewFilter);
+				pInfoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_WARNING, TRUE);
+				pInfoQueue->Release();
+			}
 		}
 
 
@@ -254,10 +249,10 @@ namespace game
 		}
 
 		// Create the swap chain
-		DXGI_MODE_DESC backBufferDesc = {}; // this is to describe our display mode
-		backBufferDesc.Width = _attributes.WindowWidth; // buffer width
-		backBufferDesc.Height = _attributes.WindowHeight; // buffer height
-		backBufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM; // format of the buffer (rgba 32 bits, 8 bits for each chanel)
+		DXGI_MODE_DESC backBufferDesc = {}; 
+		backBufferDesc.Width = _attributes.WindowWidth; 
+		backBufferDesc.Height = _attributes.WindowHeight; 
+		backBufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM; 
 		// Describe and create the swap chain.
 		DXGI_SWAP_CHAIN_DESC1 swapChainDesc = {};
 		swapChainDesc.BufferCount = frameBufferCount;
@@ -308,7 +303,7 @@ namespace game
 		_rtvDescriptorSize = _d3d12Device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
 
 		// Handle to start of RTV heap
-		D3D12_CPU_DESCRIPTOR_HANDLE  rtvHandle = _rtvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
+		CD3DX12_CPU_DESCRIPTOR_HANDLE  rtvHandle(_rtvDescriptorHeap->GetCPUDescriptorHandleForHeapStart());
 
 		// Create a RTV for each buffer
 		for (int i = 0; i < frameBufferCount; i++)
@@ -324,7 +319,7 @@ namespace game
 			_d3d12Device->CreateRenderTargetView(_renderTargets[i].Get(), nullptr, rtvHandle);
 
 			// Increment the rtv handle by the rtv descriptor size
-			rtvHandle.ptr += _rtvDescriptorSize;
+			rtvHandle.Offset(1, _rtvDescriptorSize);
 		}
 
 		// MS only makes 1
@@ -336,6 +331,7 @@ namespace game
 				lastError = { GameErrors::GameDirectX12Specific, "Could not create command allocator " + std::to_string(i) };
 				return false;
 			}
+			_commandAllocator[i].Get()->SetName(ConvertToWide("Command Allocator " + std::to_string(i)).c_str());
 		}
 
 		// create the command list with the first allocator
@@ -433,7 +429,7 @@ namespace game
 
 		// Set the current render target
 		currentFrameBuffer = _rtvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
-		currentFrameBuffer.ptr += ((SIZE_T)_frameIndex * _rtvDescriptorSize);
+		currentFrameBuffer.Offset(_frameIndex, _rtvDescriptorSize);
 		_commandList->OMSetRenderTargets(1, &currentFrameBuffer, FALSE, nullptr);
 	}
 
@@ -584,11 +580,12 @@ namespace game
 			&textureDesc,
 			D3D12_RESOURCE_STATE_COPY_DEST,
 			nullptr,
-			IID_PPV_ARGS(&texture.textureResource))))
+			IID_PPV_ARGS(&texture.textureResource12))))
 		{
 			lastError = { GameErrors::GameDirectX12Specific,"Could not create texture." }; 
 			return false;
 		}
+		texture.textureResource12.Get()->SetName(ConvertToWide(texture.name.c_str()).c_str());
 		return true;
 	};
 }

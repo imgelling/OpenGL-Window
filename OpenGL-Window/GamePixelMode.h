@@ -154,6 +154,9 @@ namespace game
 			// br
 			{0.5f, 0.5f, 0.1f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f},
 		};
+		Microsoft::WRL::ComPtr <ID3D12Resource> _indexBuffer12; // a default buffer in GPU memory that we will load index data for our triangle into
+
+		D3D12_INDEX_BUFFER_VIEW _indexBufferView; // a structure holding information about the index buffer
 		Shader _pixelModeShader12;
 		Microsoft::WRL::ComPtr<ID3D12PipelineState> _pipelineStateObject; // pso containing a pipeline state
 		Microsoft::WRL::ComPtr<ID3D12RootSignature> _rootSignature; // root signature defines data shaders will access
@@ -196,6 +199,7 @@ namespace game
 #if defined(GAME_DIRECTX12)
 		_scissorRect = {};
 		_viewPort = {};
+		_indexBufferView = {};
 #endif
 	}
 
@@ -729,6 +733,41 @@ namespace game
 			}
 			_vertexBufferUploadHeap->SetName(L"Vertex Buffer Upload Resource Heap");
 
+			// setup index buffer stuff
+			// a quad (2 triangles)
+			DWORD iList[] = {
+				0, 1, 2, // first triangle
+				1, 3, 2 // second triangle
+			};
+			int iBufferSize = sizeof(iList);
+
+			// create default heap to hold index buffer
+			CD3DX12_HEAP_PROPERTIES iHeapProp = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT);
+			CD3DX12_RESOURCE_DESC iHeapDesc = CD3DX12_RESOURCE_DESC::Buffer(iBufferSize);
+			enginePointer->d3d12Device->CreateCommittedResource(
+				&iHeapProp, // a default heap
+				D3D12_HEAP_FLAG_NONE, // no flags
+				&iHeapDesc, // resource description for a buffer
+				D3D12_RESOURCE_STATE_COMMON, // start in the copy destination state
+				nullptr, // optimized clear value must be null for this type of resource
+				IID_PPV_ARGS(&_indexBuffer12));
+
+			// we can give resource heaps a name so when we debug with the graphics debugger we know what resource we are looking at
+			_indexBuffer12->SetName(L"Index Buffer Resource Heap");
+
+			// create upload heap to upload index buffer
+			CD3DX12_HEAP_PROPERTIES iBufferUp = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
+			CD3DX12_RESOURCE_DESC iBufferUpRes = CD3DX12_RESOURCE_DESC::Buffer(iBufferSize);
+			ID3D12Resource* iBufferUploadHeap;
+			enginePointer->d3d12Device->CreateCommittedResource(
+				&iBufferUp, // upload heap
+				D3D12_HEAP_FLAG_NONE, // no flags
+				&iBufferUpRes, // resource description for a buffer
+				D3D12_RESOURCE_STATE_GENERIC_READ, // GPU will read from this buffer and copy its contents to the default heap
+				nullptr,
+				IID_PPV_ARGS(&iBufferUploadHeap));
+			iBufferUploadHeap->SetName(L"Index Buffer Upload Resource Heap");
+
 			RendererDX12* temp = enginePointer->geGetRenderer();
 
 
@@ -761,6 +800,20 @@ namespace game
 			// transition the vertex buffer data from copy destination state to vertex buffer state
 			CD3DX12_RESOURCE_BARRIER resBar = CD3DX12_RESOURCE_BARRIER::Transition(_vertexBufferHeap.Get(), D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER);
 			enginePointer->commandList->ResourceBarrier(1, &resBar);
+
+			// store index buffer in upload heap
+			D3D12_SUBRESOURCE_DATA indexData = {};
+			indexData.pData = reinterpret_cast<BYTE*>(iList); // pointer to our index array
+			indexData.RowPitch = iBufferSize; // size of all our index buffer
+			indexData.SlicePitch = iBufferSize; // also the size of our index buffer
+
+			// we are now creating a command with the command list to copy the data from
+			// the upload heap to the default heap
+			UpdateSubresources(enginePointer->commandList.Get(), _indexBuffer12.Get(), iBufferUploadHeap, 0, 0, 1, &indexData);
+
+			// transition the vertex buffer data from copy destination state to vertex buffer state
+			CD3DX12_RESOURCE_BARRIER ibufferbar = CD3DX12_RESOURCE_BARRIER::Transition(_indexBuffer12.Get(), D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER);
+			enginePointer->commandList->ResourceBarrier(1, &ibufferbar);
 
 			// Now we execute the command list to upload the initial assets (triangle data)
 			enginePointer->commandList->Close();
@@ -799,6 +852,11 @@ namespace game
 			vertexBufferView.BufferLocation = _vertexBufferHeap->GetGPUVirtualAddress();
 			vertexBufferView.StrideInBytes = sizeof(_vertex12);
 			vertexBufferView.SizeInBytes = vBufferSize;
+
+			// create a vertex buffer view for the triangle. We get the GPU memory address to the vertex pointer using the GetGPUVirtualAddress() method
+			_indexBufferView.BufferLocation = _indexBuffer12->GetGPUVirtualAddress();
+			_indexBufferView.Format = DXGI_FORMAT_R32_UINT; // 32-bit unsigned integer (this is what a dword is, double word, a word is 2 bytes)
+			_indexBufferView.SizeInBytes = iBufferSize;
 
 			// Fill out the Viewport
 			_viewPort.TopLeftX = 0;
@@ -872,6 +930,12 @@ namespace game
 			}
 			memcpy(data.pData, (unsigned char*)_video, sizeof(unsigned char) * _frameBuffer[_currentBuffer].width * _frameBuffer[_currentBuffer].height * 4);
 			enginePointer->d3d11DeviceContext->Unmap(_frameBuffer[_currentBuffer].textureInterface11, 0);
+		}
+#endif
+#if defined(GAME_DIRECTX12)
+		if (enginePointer->geIsUsing(GAME_DIRECTX12))
+		{
+
 		}
 #endif
 	}
@@ -1316,8 +1380,9 @@ namespace game
 			enginePointer->commandList->RSSetScissorRects(1, &_scissorRect); // set the scissor rects
 			enginePointer->commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST); // set the primitive topology
 			enginePointer->commandList->IASetVertexBuffers(0, 1, &vertexBufferView); // set the vertex buffer (using the vertex buffer view)
-			enginePointer->commandList->DrawInstanced(3, 1, 0, 0); // finally draw 3 vertices (draw the triangle)
-
+			//enginePointer->commandList->DrawInstanced(3, 1, 0, 0); // finally draw 3 vertices (draw the triangle)
+			enginePointer->commandList->IASetIndexBuffer(&_indexBufferView);
+			enginePointer->commandList->DrawIndexedInstanced(6, 1, 0, 0, 0); // draw 2 triangles (draw 1 instance of 2 triangles)
 		}
 #endif
 
