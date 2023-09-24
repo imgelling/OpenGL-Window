@@ -692,15 +692,13 @@ namespace game
 				return false;
 			}
 			// we can give resource heaps a name so when we debug with the graphics debugger we know what resource we are looking at
-			_vertexBufferHeap->SetName(L"Vertex Buffer Resource Heap");
+			_vertexBufferHeap->SetName(L"PixelMode Vertex Buffer Resource Heap");
 
-			// PROBABLY NEED TO KEEP THIS
 			// create upload heap
 			// upload heaps are used to upload data to the GPU. CPU can write to it, GPU can read from it
 			// We will upload the vertex buffer using this heap to the default heap
 			heapProp = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
 			resDesc = CD3DX12_RESOURCE_DESC::Buffer(vBufferSize);
-			//ID3D12Resource* vBufferUploadHeap;
 			hr = enginePointer->d3d12Device->CreateCommittedResource(
 				&heapProp, // upload heap
 				D3D12_HEAP_FLAG_NONE, // no flags
@@ -711,7 +709,6 @@ namespace game
 			if (FAILED(hr))
 			{
 				lastError = { GameErrors::GameDirectX12Specific,"Could not create vertex buffer upload heap for PixelMode." };
-				// lastError.string += the hr error
 				if (hr == D3D12_ERROR_ADAPTER_NOT_FOUND)
 					lastError.lastErrorString += ": D3D12_ERROR_ADAPTER_NOT_FOUND";
 				else if (hr == D3D12_ERROR_DRIVER_VERSION_MISMATCH)
@@ -728,11 +725,12 @@ namespace game
 					lastError.lastErrorString += ": E_OUTOFMEMORY";
 				else if (hr == E_NOTIMPL)
 					lastError.lastErrorString += ": E_NOTIMPL";
-				//lastError = { GameErrors::GameDirectX12Specific, "Could not create graphics pipeline state." };
 				return false;
 			}
-			_vertexBufferUploadHeap->SetName(L"Vertex Buffer Upload Resource Heap");
+			_vertexBufferUploadHeap->SetName(L"PixelMode Vertex Buffer Upload Resource Heap");
 
+
+			// ------------------ needs to be in class
 			// setup index buffer stuff
 			// a quad (2 triangles)
 			DWORD iList[] = {
@@ -741,32 +739,75 @@ namespace game
 			};
 			int iBufferSize = sizeof(iList);
 
+			// -------------------- heap props and resdesc can be reused
+
 			// create default heap to hold index buffer
 			CD3DX12_HEAP_PROPERTIES iHeapProp = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT);
 			CD3DX12_RESOURCE_DESC iHeapDesc = CD3DX12_RESOURCE_DESC::Buffer(iBufferSize);
-			enginePointer->d3d12Device->CreateCommittedResource(
+			hr = enginePointer->d3d12Device->CreateCommittedResource(
 				&iHeapProp, // a default heap
 				D3D12_HEAP_FLAG_NONE, // no flags
 				&iHeapDesc, // resource description for a buffer
 				D3D12_RESOURCE_STATE_COMMON, // start in the copy destination state
 				nullptr, // optimized clear value must be null for this type of resource
 				IID_PPV_ARGS(&_indexBuffer12));
-
+			if (FAILED(hr))
+			{
+				lastError = { GameErrors::GameDirectX12Specific,"Could not create vertex buffer upload heap for PixelMode." };
+				if (hr == D3D12_ERROR_ADAPTER_NOT_FOUND)
+					lastError.lastErrorString += ": D3D12_ERROR_ADAPTER_NOT_FOUND";
+				else if (hr == D3D12_ERROR_DRIVER_VERSION_MISMATCH)
+					lastError.lastErrorString += ": D3D12_ERROR_DRIVER_VERSION_MISMATCH";
+				else if (hr == DXGI_ERROR_INVALID_CALL)
+					lastError.lastErrorString += ": DXGI_ERROR_INVALID_CALL";
+				else if (hr == DXGI_ERROR_WAS_STILL_DRAWING)
+					lastError.lastErrorString += ": DXGI_ERROR_WAS_STILL_DRAWING";
+				else if (hr == E_FAIL)
+					lastError.lastErrorString += ": E_FAIL";
+				else if (hr == E_INVALIDARG)
+					lastError.lastErrorString += ": E_INVALIDARG";
+				else if (hr == E_OUTOFMEMORY)
+					lastError.lastErrorString += ": E_OUTOFMEMORY";
+				else if (hr == E_NOTIMPL)
+					lastError.lastErrorString += ": E_NOTIMPL";
+				return false;
+			}
 			// we can give resource heaps a name so when we debug with the graphics debugger we know what resource we are looking at
-			_indexBuffer12->SetName(L"Index Buffer Resource Heap");
+			_indexBuffer12->SetName(L"PixelMode Index Buffer Resource Heap");
 
 			// create upload heap to upload index buffer
 			CD3DX12_HEAP_PROPERTIES iBufferUp = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
 			CD3DX12_RESOURCE_DESC iBufferUpRes = CD3DX12_RESOURCE_DESC::Buffer(iBufferSize);
 			ID3D12Resource* iBufferUploadHeap;
-			enginePointer->d3d12Device->CreateCommittedResource(
+			hr = enginePointer->d3d12Device->CreateCommittedResource(
 				&iBufferUp, // upload heap
 				D3D12_HEAP_FLAG_NONE, // no flags
 				&iBufferUpRes, // resource description for a buffer
 				D3D12_RESOURCE_STATE_GENERIC_READ, // GPU will read from this buffer and copy its contents to the default heap
 				nullptr,
 				IID_PPV_ARGS(&iBufferUploadHeap));
-			iBufferUploadHeap->SetName(L"Index Buffer Upload Resource Heap");
+			if (FAILED(hr))
+			{
+				lastError = { GameErrors::GameDirectX12Specific,"Could not create vertex buffer upload heap for PixelMode." };
+				if (hr == D3D12_ERROR_ADAPTER_NOT_FOUND)
+					lastError.lastErrorString += ": D3D12_ERROR_ADAPTER_NOT_FOUND";
+				else if (hr == D3D12_ERROR_DRIVER_VERSION_MISMATCH)
+					lastError.lastErrorString += ": D3D12_ERROR_DRIVER_VERSION_MISMATCH";
+				else if (hr == DXGI_ERROR_INVALID_CALL)
+					lastError.lastErrorString += ": DXGI_ERROR_INVALID_CALL";
+				else if (hr == DXGI_ERROR_WAS_STILL_DRAWING)
+					lastError.lastErrorString += ": DXGI_ERROR_WAS_STILL_DRAWING";
+				else if (hr == E_FAIL)
+					lastError.lastErrorString += ": E_FAIL";
+				else if (hr == E_INVALIDARG)
+					lastError.lastErrorString += ": E_INVALIDARG";
+				else if (hr == E_OUTOFMEMORY)
+					lastError.lastErrorString += ": E_OUTOFMEMORY";
+				else if (hr == E_NOTIMPL)
+					lastError.lastErrorString += ": E_NOTIMPL";
+				return false;
+			}
+			iBufferUploadHeap->SetName(L"PixelMode Index Buffer Upload Resource Heap");
 
 			RendererDX12* temp = enginePointer->geGetRenderer();
 
@@ -870,11 +911,6 @@ namespace game
 			_scissorRect.top = 0;
 			_scissorRect.right = t.width;
 			_scissorRect.bottom = t.height;
-
-			//temp->_WaitForPreviousFrame(false);
-
-
-
 		}
 #endif
 
