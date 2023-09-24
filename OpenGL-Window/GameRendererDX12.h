@@ -119,6 +119,14 @@ namespace game
 			}
 		}
 
+		//// memory check stuff
+		//IDXGIDebug1* pDebug = nullptr;
+		//if (SUCCEEDED(DXGIGetDebugInterface1(0, IID_PPV_ARGS(&pDebug))))
+		//{
+		//	pDebug->ReportLiveObjects(DXGI_DEBUG_ALL, DXGI_DEBUG_RLO_IGNORE_INTERNAL);
+		//	pDebug->Release();
+		//}
+
 		CloseHandle(_fenceEvent);
 	}
 
@@ -134,8 +142,6 @@ namespace game
 		{
 			createFactoryFlags = DXGI_CREATE_FACTORY_DEBUG;
 		}
-
-		//ReportLiveObjects()
 
 		// Enable debug mode if needed
 		if (_attributes.DebugMode)

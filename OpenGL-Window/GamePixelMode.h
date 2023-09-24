@@ -827,7 +827,6 @@ namespace game
 			if (FAILED(hr))
 			{
 				lastError = { GameErrors::GameDirectX12Specific,"Pixel mode signal failed." };
-				// lastError.string += the hr error
 				if (hr == D3D12_ERROR_ADAPTER_NOT_FOUND)
 					lastError.lastErrorString += ": D3D12_ERROR_ADAPTER_NOT_FOUND";
 				else if (hr == D3D12_ERROR_DRIVER_VERSION_MISMATCH)
@@ -844,7 +843,6 @@ namespace game
 					lastError.lastErrorString += ": E_OUTOFMEMORY";
 				else if (hr == E_NOTIMPL)
 					lastError.lastErrorString += ": E_NOTIMPL";
-				//lastError = { GameErrors::GameDirectX12Specific, "Could not create graphics pipeline state." };
 				return false;
 			}
 
@@ -872,6 +870,8 @@ namespace game
 			_scissorRect.top = 0;
 			_scissorRect.right = t.width;
 			_scissorRect.bottom = t.height;
+
+			//temp->_WaitForPreviousFrame(false);
 
 
 
