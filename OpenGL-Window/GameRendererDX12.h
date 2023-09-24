@@ -53,7 +53,12 @@ namespace game
 		bool CreateDevice(Window& window);
 		void DestroyDevice();
 		void Swap();
-		void HandleWindowResize(const uint32_t width, const uint32_t height, const bool doReset) {};
+		void HandleWindowResize(const uint32_t width, const uint32_t height, const bool doReset) 
+		{
+			// Save new size
+			//_attributes.WindowWidth = width;
+			//_attributes.WindowHeight = height;
+		};
 		void FillOutRendererInfo() {};
 		bool CreateTexture(Texture2D& texture);
 		bool LoadTexture(std::string fileName, Texture2D& texture) {
@@ -83,6 +88,8 @@ namespace game
 		void _WaitForPreviousFrame(bool getcurrent);
 	protected:
 		void _ReadExtensions() {};
+		D3D12_VIEWPORT _viewPort = {}; // area that output from rasterizer will be stretched to.
+		D3D12_RECT _scissorRect = {}; // the area to draw in. pixels outside that area will not be drawn onto
 
 		Microsoft::WRL::ComPtr<ID3D12Debug> debugInterface;
 		Microsoft::WRL::ComPtr<ID3D12Device2> _d3d12Device; // direct3d device
@@ -457,6 +464,23 @@ namespace game
 		currentFrameBuffer = _rtvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
 		currentFrameBuffer.Offset(_frameIndex, _rtvDescriptorSize);
 		_commandList->OMSetRenderTargets(1, &currentFrameBuffer, FALSE, nullptr);
+
+
+		// Fill out the Viewport
+		_viewPort.TopLeftX = 0;
+		_viewPort.TopLeftY = 0;
+		_viewPort.Width = (float_t)_attributes.WindowWidth;
+		_viewPort.Height = (float_t)_attributes.WindowHeight;
+		_viewPort.MinDepth = 0.0f;
+		_viewPort.MaxDepth = 1.0f;
+
+		// Fill out a scissor rect
+		_scissorRect.left = 0;
+		_scissorRect.top = 0;
+		_scissorRect.right = _attributes.WindowWidth;
+		_scissorRect.bottom = _attributes.WindowHeight;
+		_commandList->RSSetViewports(1, &_viewPort);
+		_commandList->RSSetScissorRects(1, &_scissorRect);
 	}
 
 	inline void RendererDX12::EndFrame()

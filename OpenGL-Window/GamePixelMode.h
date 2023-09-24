@@ -154,19 +154,15 @@ namespace game
 			// br
 			{0.5f, 0.5f, 0.1f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f},
 		};
-		Microsoft::WRL::ComPtr <ID3D12Resource> _indexBuffer12; // a default buffer in GPU memory that we will load index data for our triangle into
-
+		Microsoft::WRL::ComPtr<ID3D12Resource> _indexBufferHeap; // a default buffer in GPU memory that we will load index data for our triangle into
+		Microsoft::WRL::ComPtr<ID3D12Resource> _indexBufferUploadHeap;
 		D3D12_INDEX_BUFFER_VIEW _indexBufferView; // a structure holding information about the index buffer
 		Shader _pixelModeShader12;
 		Microsoft::WRL::ComPtr<ID3D12PipelineState> _pipelineStateObject; // pso containing a pipeline state
 		Microsoft::WRL::ComPtr<ID3D12RootSignature> _rootSignature; // root signature defines data shaders will access
 		Microsoft::WRL::ComPtr<ID3D12Resource> _vertexBufferHeap; // a default buffer in GPU memory that we will load vertex data for our triangle into
 		Microsoft::WRL::ComPtr<ID3D12Resource> _vertexBufferUploadHeap;
-		D3D12_VIEWPORT _viewPort; // area that output from rasterizer will be stretched to.
-		D3D12_RECT _scissorRect; // the area to draw in. pixels outside that area will not be drawn onto
-		D3D12_VERTEX_BUFFER_VIEW vertexBufferView = {}; // a structure containing a pointer to the vertex data in gpu memory
-		// the total size of the buffer, and the size of each element (vertex)
-
+		D3D12_VERTEX_BUFFER_VIEW _vertexBufferView; // a structure containing a pointer to the vertex data in gpu memory
 #endif
 	};
 
@@ -197,8 +193,9 @@ namespace game
 		_textureSamplerState11 = nullptr;
 #endif
 #if defined(GAME_DIRECTX12)
-		_scissorRect = {};
-		_viewPort = {};
+		//_scissorRect = {};
+		//_viewPort = {};
+		_vertexBufferView = {};
 		_indexBufferView = {};
 #endif
 	}
@@ -626,55 +623,42 @@ namespace game
 			_vertexBufferUploadHeap->SetName(L"PixelMode Vertex Buffer Upload Heap");
 
 
-			// ------------------ needs to be in class
-			// setup index buffer stuff
-			// a quad (2 triangles)
+			// Index buffer
 			DWORD iList[] = {
 				0, 1, 2, // first triangle
 				1, 3, 2 // second triangle
 			};
-			//0, 1, 2, 1, 3, 2,
-			int iBufferSize = sizeof(iList);
+			uint32_t iBufferSize = sizeof(iList);
 
-			// -------------------- heap props and resdesc can be reused
-
-			// create default heap to hold index buffer
-			CD3DX12_HEAP_PROPERTIES iHeapProp = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT);
-			CD3DX12_RESOURCE_DESC iHeapDesc = CD3DX12_RESOURCE_DESC::Buffer(iBufferSize);
-			hr = enginePointer->d3d12Device->CreateCommittedResource(
-				&iHeapProp, // a default heap
-				D3D12_HEAP_FLAG_NONE, // no flags
-				&iHeapDesc, // resource description for a buffer
-				D3D12_RESOURCE_STATE_COMMON, // start in the copy destination state
-				nullptr, // optimized clear value must be null for this type of resource
-				IID_PPV_ARGS(&_indexBuffer12));
+			// Create index buffer heap
+			heapProp = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT);
+			resDesc = CD3DX12_RESOURCE_DESC::Buffer(iBufferSize);
+			hr = enginePointer->d3d12Device->CreateCommittedResource(&heapProp, D3D12_HEAP_FLAG_NONE, &resDesc, D3D12_RESOURCE_STATE_COMMON, nullptr, IID_PPV_ARGS(&_indexBufferHeap));
 			if (FAILED(hr))
 			{
 				lastError = { GameErrors::GameDirectX12Specific,"Could not create vertex buffer upload heap for PixelMode." };
 				AppendHR12(hr);
 				return false;
 			}
-			// we can give resource heaps a name so when we debug with the graphics debugger we know what resource we are looking at
-			_indexBuffer12->SetName(L"PixelMode Index Buffer Resource Heap");
+			_indexBufferHeap->SetName(L"PixelMode Index Buffer Resource Heap");
 
 			// create upload heap to upload index buffer
-			CD3DX12_HEAP_PROPERTIES iBufferUp = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
-			CD3DX12_RESOURCE_DESC iBufferUpRes = CD3DX12_RESOURCE_DESC::Buffer(iBufferSize);
-			ID3D12Resource* iBufferUploadHeap;
+			heapProp = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
+			resDesc = CD3DX12_RESOURCE_DESC::Buffer(iBufferSize);
 			hr = enginePointer->d3d12Device->CreateCommittedResource(
-				&iBufferUp, // upload heap
+				&heapProp, // upload heap
 				D3D12_HEAP_FLAG_NONE, // no flags
-				&iBufferUpRes, // resource description for a buffer
+				&resDesc, // resource description for a buffer
 				D3D12_RESOURCE_STATE_GENERIC_READ, // GPU will read from this buffer and copy its contents to the default heap
 				nullptr,
-				IID_PPV_ARGS(&iBufferUploadHeap));
+				IID_PPV_ARGS(&_indexBufferUploadHeap));
 			if (FAILED(hr))
 			{
 				lastError = { GameErrors::GameDirectX12Specific,"Could not create vertex buffer upload heap for PixelMode." };
 				AppendHR12(hr);
 				return false;
 			}
-			iBufferUploadHeap->SetName(L"PixelMode Index Buffer Upload Resource Heap");
+			_indexBufferUploadHeap->SetName(L"PixelMode Index Buffer Upload Resource Heap");
 
 			RendererDX12* temp = enginePointer->geGetRenderer();
 
@@ -717,10 +701,10 @@ namespace game
 
 			// we are now creating a command with the command list to copy the data from
 			// the upload heap to the default heap
-			UpdateSubresources(enginePointer->commandList.Get(), _indexBuffer12.Get(), iBufferUploadHeap, 0, 0, 1, &indexData);
+			UpdateSubresources(enginePointer->commandList.Get(), _indexBufferHeap.Get(), _indexBufferUploadHeap.Get(), 0, 0, 1, &indexData);
 
 			// transition the vertex buffer data from copy destination state to vertex buffer state
-			CD3DX12_RESOURCE_BARRIER ibufferbar = CD3DX12_RESOURCE_BARRIER::Transition(_indexBuffer12.Get(), D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER);
+			CD3DX12_RESOURCE_BARRIER ibufferbar = CD3DX12_RESOURCE_BARRIER::Transition(_indexBufferHeap.Get(), D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER);
 			enginePointer->commandList->ResourceBarrier(1, &ibufferbar);
 
 			// Now we execute the command list to upload the initial assets (triangle data)
@@ -739,30 +723,17 @@ namespace game
 				return false;
 			}
 
-			// create a vertex buffer view for the triangle. We get the GPU memory address to the vertex pointer using the GetGPUVirtualAddress() method
-			vertexBufferView.BufferLocation = _vertexBufferHeap->GetGPUVirtualAddress();
-			vertexBufferView.StrideInBytes = sizeof(_vertex12);
-			vertexBufferView.SizeInBytes = vBufferSize;
+			//temp->_WaitForPreviousFrame(true);
 
 			// create a vertex buffer view for the triangle. We get the GPU memory address to the vertex pointer using the GetGPUVirtualAddress() method
-			_indexBufferView.BufferLocation = _indexBuffer12->GetGPUVirtualAddress();
+			_vertexBufferView.BufferLocation = _vertexBufferHeap->GetGPUVirtualAddress();
+			_vertexBufferView.StrideInBytes = sizeof(_vertex12);
+			_vertexBufferView.SizeInBytes = vBufferSize;
+
+			// create a vertex buffer view for the triangle. We get the GPU memory address to the vertex pointer using the GetGPUVirtualAddress() method
+			_indexBufferView.BufferLocation = _indexBufferHeap->GetGPUVirtualAddress();
 			_indexBufferView.Format = DXGI_FORMAT_R32_UINT; // 32-bit unsigned integer (this is what a dword is, double word, a word is 2 bytes)
 			_indexBufferView.SizeInBytes = iBufferSize;
-
-			// Fill out the Viewport
-			_viewPort.TopLeftX = 0;
-			_viewPort.TopLeftY = 0;
-			Vector2i t = enginePointer->geGetWindowSize();
-			_viewPort.Width = (float_t)t.width;
-			_viewPort.Height = (float_t)t.height;
-			_viewPort.MinDepth = 0.0f;
-			_viewPort.MaxDepth = 1.0f;
-
-			// Fill out a scissor rect
-			_scissorRect.left = 0;
-			_scissorRect.top = 0;
-			_scissorRect.right = t.width;
-			_scissorRect.bottom = t.height;
 		}
 #endif
 
@@ -1260,17 +1231,13 @@ namespace game
 #if defined(GAME_DIRECTX12)
 		if (enginePointer->geIsUsing(GAME_DIRECTX12))
 		{
-
-			// draw triangle
+			// Draw the quad
 			enginePointer->commandList->SetPipelineState(_pipelineStateObject.Get());
-			enginePointer->commandList->SetGraphicsRootSignature(_rootSignature.Get()); // set the root signature
-			enginePointer->commandList->RSSetViewports(1, &_viewPort); // set the viewports
-			enginePointer->commandList->RSSetScissorRects(1, &_scissorRect); // set the scissor rects
-			enginePointer->commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST); // set the primitive topology
-			enginePointer->commandList->IASetVertexBuffers(0, 1, &vertexBufferView); // set the vertex buffer (using the vertex buffer view)
-			//enginePointer->commandList->DrawInstanced(3, 1, 0, 0); // finally draw 3 vertices (draw the triangle)
+			enginePointer->commandList->SetGraphicsRootSignature(_rootSignature.Get());
+			enginePointer->commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST); 
+			enginePointer->commandList->IASetVertexBuffers(0, 1, &_vertexBufferView);
 			enginePointer->commandList->IASetIndexBuffer(&_indexBufferView);
-			enginePointer->commandList->DrawIndexedInstanced(6, 1, 0, 0, 0); // draw 2 triangles (draw 1 instance of 2 triangles)
+			enginePointer->commandList->DrawIndexedInstanced(6, 1, 0, 0, 0);
 		}
 #endif
 
