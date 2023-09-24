@@ -26,6 +26,26 @@
 namespace game
 {
 	extern SystemInfo systemInfo;
+
+	void AppendHR12(const HRESULT hr)
+	{
+		if (hr == D3D12_ERROR_ADAPTER_NOT_FOUND)
+			lastError.lastErrorString += ": D3D12_ERROR_ADAPTER_NOT_FOUND";
+		else if (hr == D3D12_ERROR_DRIVER_VERSION_MISMATCH)
+			lastError.lastErrorString += ": D3D12_ERROR_DRIVER_VERSION_MISMATCH";
+		else if (hr == DXGI_ERROR_INVALID_CALL)
+			lastError.lastErrorString += ": DXGI_ERROR_INVALID_CALL";
+		else if (hr == DXGI_ERROR_WAS_STILL_DRAWING)
+			lastError.lastErrorString += ": DXGI_ERROR_WAS_STILL_DRAWING";
+		else if (hr == E_FAIL)
+			lastError.lastErrorString += ": E_FAIL";
+		else if (hr == E_INVALIDARG)
+			lastError.lastErrorString += ": E_INVALIDARG";
+		else if (hr == E_OUTOFMEMORY)
+			lastError.lastErrorString += ": E_OUTOFMEMORY";
+		else if (hr == E_NOTIMPL)
+			lastError.lastErrorString += ": E_NOTIMPL";
+	}
 	class RendererDX12 : public RendererBase
 	{
 	public:

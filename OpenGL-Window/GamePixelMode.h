@@ -528,16 +528,20 @@ namespace game
 			
 			// Serialized root signature
 			Microsoft::WRL::ComPtr<ID3DBlob> signature;
-			if (FAILED(D3D12SerializeRootSignature(&rootSignatureDesc, D3D_ROOT_SIGNATURE_VERSION_1, &signature, nullptr)))
+			HRESULT hr = D3D12SerializeRootSignature(&rootSignatureDesc, D3D_ROOT_SIGNATURE_VERSION_1, &signature, nullptr);
+			if (FAILED(hr))
 			{
 				lastError = { GameErrors::GameDirectX12Specific, "Could not serialize root signature in PixleMode." };
+				AppendHR12(hr);
 				return false;
 			}
 
 			// Create the root signature
-			if (FAILED(enginePointer->d3d12Device->CreateRootSignature(0, signature->GetBufferPointer(), signature->GetBufferSize(), IID_PPV_ARGS(&_rootSignature))))
+			hr = enginePointer->d3d12Device->CreateRootSignature(0, signature->GetBufferPointer(), signature->GetBufferSize(), IID_PPV_ARGS(&_rootSignature));
+			if (FAILED(hr))
 			{
 				lastError = { GameErrors::GameDirectX12Specific, "Could not create root signature in PixelMode." };
+				AppendHR12(hr);
 				return false;
 			}
 			_rootSignature->SetName(L"PixelMode Root Signature");
@@ -563,9 +567,7 @@ namespace game
 
 			// fill out an input layout description structure
 			D3D12_INPUT_LAYOUT_DESC inputLayoutDesc = {};
-
-			// we can get the number of elements in an array by "sizeof(array) / sizeof(arrayElementType)"
-			inputLayoutDesc.NumElements = sizeof(inputElementDescs) / sizeof(D3D12_INPUT_ELEMENT_DESC);
+			inputLayoutDesc.NumElements = ARRAYSIZE(inputElementDescs);
 			inputLayoutDesc.pInputElementDescs = inputElementDescs;
 
 			
@@ -577,9 +579,7 @@ namespace game
 			psoDesc.PS = CD3DX12_SHADER_BYTECODE(_pixelModeShader12.compiledPixelShader12.Get());
 			psoDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE; 
 			psoDesc.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM;
-			DXGI_SAMPLE_DESC sampleDesc = {};
-			sampleDesc.Count = 1;			
-			psoDesc.SampleDesc = sampleDesc; 
+			psoDesc.SampleDesc = { 1, 0 };
 			psoDesc.SampleMask = 0xffffffff; 
 			D3D12_RASTERIZER_DESC rasterDesc = CD3DX12_RASTERIZER_DESC(D3D12_DEFAULT);
 			rasterDesc.FrontCounterClockwise = TRUE;
@@ -588,112 +588,42 @@ namespace game
 			psoDesc.NumRenderTargets = 1;
 			psoDesc.Flags = D3D12_PIPELINE_STATE_FLAG_NONE;
 
-			// create the pso
-			HRESULT hr = 0;
+			// Create the pso
 			hr = enginePointer->d3d12Device->CreateGraphicsPipelineState(&psoDesc, IID_PPV_ARGS(&_pipelineStateObject));
 			if (FAILED(hr))
 			{
 				lastError = { GameErrors::GameDirectX12Specific,"Could not create pipline state for PixelMode." };
-				// lastError.string += the hr error
-				if (hr == D3D12_ERROR_ADAPTER_NOT_FOUND)
-					lastError.lastErrorString  += ": D3D12_ERROR_ADAPTER_NOT_FOUND";
-				else if (hr == D3D12_ERROR_DRIVER_VERSION_MISMATCH)
-					lastError.lastErrorString += ": D3D12_ERROR_DRIVER_VERSION_MISMATCH";
-				else if (hr == DXGI_ERROR_INVALID_CALL)
-					lastError.lastErrorString += ": DXGI_ERROR_INVALID_CALL";
-				else if (hr == DXGI_ERROR_WAS_STILL_DRAWING)
-					lastError.lastErrorString += ": DXGI_ERROR_WAS_STILL_DRAWING";
-				else if (hr == E_FAIL)
-					lastError.lastErrorString += ": E_FAIL";
-				else if (hr == E_INVALIDARG)
-					lastError.lastErrorString += ": E_INVALIDARG";
-				else if (hr == E_OUTOFMEMORY)
-					lastError.lastErrorString += ": E_OUTOFMEMORY";
-				else if (hr == E_NOTIMPL)
-					lastError.lastErrorString += ": E_NOTIMPL";
-				//lastError = { GameErrors::GameDirectX12Specific, "Could not create graphics pipeline state." };
+				AppendHR12(hr);
 				return false;
 			}
 			_pipelineStateObject->SetName(L"PixelMode PSO");
 
 			// Create vertex buffer
+			uint32_t vBufferSize = sizeof(_quadVertices12);
 
-			int vBufferSize = sizeof(_quadVertices12);
-
-			// create default heap
-			// default heap is memory on the GPU. Only the GPU has access to this memory
-			// To get data into this heap, we will have to upload the data using
-			// an upload heap
+			// Create vertex buffer heap
 			D3D12_HEAP_PROPERTIES heapProp = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT);
-			D3D12_RESOURCE_DESC resDesc = CD3DX12_RESOURCE_DESC::Buffer(sizeof(_quadVertices12));
-			hr = enginePointer->d3d12Device->CreateCommittedResource(
-				&heapProp, // a default heap
-				D3D12_HEAP_FLAG_NONE, // no flags
-				&resDesc, // resource description for a buffer
-				D3D12_RESOURCE_STATE_COMMON,//D3D12_RESOURCE_STATE_COPY_DEST, // we will start this heap in the copy destination state since we will copy data
-				// from the upload heap to this heap
-				nullptr, // optimized clear value must be null for this type of resource. used for render targets and depth/stencil buffers
-				IID_PPV_ARGS(&_vertexBufferHeap));
+			D3D12_RESOURCE_DESC resDesc = CD3DX12_RESOURCE_DESC::Buffer(vBufferSize);
+			hr = enginePointer->d3d12Device->CreateCommittedResource(&heapProp, D3D12_HEAP_FLAG_NONE, &resDesc,	D3D12_RESOURCE_STATE_COMMON, nullptr, IID_PPV_ARGS(&_vertexBufferHeap));
 			if (FAILED(hr))
 			{
-				lastError = { GameErrors::GameDirectX12Specific,"Could not create vertex buffer resource heap for PixelMode." };
-				// lastError.string += the hr error
-				if (hr == D3D12_ERROR_ADAPTER_NOT_FOUND)
-					lastError.lastErrorString += ": D3D12_ERROR_ADAPTER_NOT_FOUND";
-				else if (hr == D3D12_ERROR_DRIVER_VERSION_MISMATCH)
-					lastError.lastErrorString += ": D3D12_ERROR_DRIVER_VERSION_MISMATCH";
-				else if (hr == DXGI_ERROR_INVALID_CALL)
-					lastError.lastErrorString += ": DXGI_ERROR_INVALID_CALL";
-				else if (hr == DXGI_ERROR_WAS_STILL_DRAWING)
-					lastError.lastErrorString += ": DXGI_ERROR_WAS_STILL_DRAWING";
-				else if (hr == E_FAIL)
-					lastError.lastErrorString += ": E_FAIL";
-				else if (hr == E_INVALIDARG)
-					lastError.lastErrorString += ": E_INVALIDARG";
-				else if (hr == E_OUTOFMEMORY)
-					lastError.lastErrorString += ": E_OUTOFMEMORY";
-				else if (hr == E_NOTIMPL)
-					lastError.lastErrorString += ": E_NOTIMPL";
-				//lastError = { GameErrors::GameDirectX12Specific, "Could not create graphics pipeline state." };
+				lastError = { GameErrors::GameDirectX12Specific,"Could not create vertex buffer heap for PixelMode." };
+				AppendHR12(hr);
 				return false;
 			}
-			// we can give resource heaps a name so when we debug with the graphics debugger we know what resource we are looking at
-			_vertexBufferHeap->SetName(L"PixelMode Vertex Buffer Resource Heap");
+			_vertexBufferHeap->SetName(L"PixelMode Vertex Buffer Heap");
 
-			// create upload heap
-			// upload heaps are used to upload data to the GPU. CPU can write to it, GPU can read from it
-			// We will upload the vertex buffer using this heap to the default heap
+			// Create vertex buffer upload heap
 			heapProp = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
 			resDesc = CD3DX12_RESOURCE_DESC::Buffer(vBufferSize);
-			hr = enginePointer->d3d12Device->CreateCommittedResource(
-				&heapProp, // upload heap
-				D3D12_HEAP_FLAG_NONE, // no flags
-				&resDesc, // resource description for a buffer
-				D3D12_RESOURCE_STATE_GENERIC_READ, // GPU will read from this buffer and copy its contents to the default heap
-				nullptr,
-				IID_PPV_ARGS(&_vertexBufferUploadHeap));
+			hr = enginePointer->d3d12Device->CreateCommittedResource(&heapProp,	D3D12_HEAP_FLAG_NONE, &resDesc,	D3D12_RESOURCE_STATE_GENERIC_READ, nullptr,	IID_PPV_ARGS(&_vertexBufferUploadHeap));
 			if (FAILED(hr))
 			{
 				lastError = { GameErrors::GameDirectX12Specific,"Could not create vertex buffer upload heap for PixelMode." };
-				if (hr == D3D12_ERROR_ADAPTER_NOT_FOUND)
-					lastError.lastErrorString += ": D3D12_ERROR_ADAPTER_NOT_FOUND";
-				else if (hr == D3D12_ERROR_DRIVER_VERSION_MISMATCH)
-					lastError.lastErrorString += ": D3D12_ERROR_DRIVER_VERSION_MISMATCH";
-				else if (hr == DXGI_ERROR_INVALID_CALL)
-					lastError.lastErrorString += ": DXGI_ERROR_INVALID_CALL";
-				else if (hr == DXGI_ERROR_WAS_STILL_DRAWING)
-					lastError.lastErrorString += ": DXGI_ERROR_WAS_STILL_DRAWING";
-				else if (hr == E_FAIL)
-					lastError.lastErrorString += ": E_FAIL";
-				else if (hr == E_INVALIDARG)
-					lastError.lastErrorString += ": E_INVALIDARG";
-				else if (hr == E_OUTOFMEMORY)
-					lastError.lastErrorString += ": E_OUTOFMEMORY";
-				else if (hr == E_NOTIMPL)
-					lastError.lastErrorString += ": E_NOTIMPL";
+				AppendHR12(hr);
 				return false;
 			}
-			_vertexBufferUploadHeap->SetName(L"PixelMode Vertex Buffer Upload Resource Heap");
+			_vertexBufferUploadHeap->SetName(L"PixelMode Vertex Buffer Upload Heap");
 
 
 			// ------------------ needs to be in class
@@ -721,22 +651,7 @@ namespace game
 			if (FAILED(hr))
 			{
 				lastError = { GameErrors::GameDirectX12Specific,"Could not create vertex buffer upload heap for PixelMode." };
-				if (hr == D3D12_ERROR_ADAPTER_NOT_FOUND)
-					lastError.lastErrorString += ": D3D12_ERROR_ADAPTER_NOT_FOUND";
-				else if (hr == D3D12_ERROR_DRIVER_VERSION_MISMATCH)
-					lastError.lastErrorString += ": D3D12_ERROR_DRIVER_VERSION_MISMATCH";
-				else if (hr == DXGI_ERROR_INVALID_CALL)
-					lastError.lastErrorString += ": DXGI_ERROR_INVALID_CALL";
-				else if (hr == DXGI_ERROR_WAS_STILL_DRAWING)
-					lastError.lastErrorString += ": DXGI_ERROR_WAS_STILL_DRAWING";
-				else if (hr == E_FAIL)
-					lastError.lastErrorString += ": E_FAIL";
-				else if (hr == E_INVALIDARG)
-					lastError.lastErrorString += ": E_INVALIDARG";
-				else if (hr == E_OUTOFMEMORY)
-					lastError.lastErrorString += ": E_OUTOFMEMORY";
-				else if (hr == E_NOTIMPL)
-					lastError.lastErrorString += ": E_NOTIMPL";
+				AppendHR12(hr);
 				return false;
 			}
 			// we can give resource heaps a name so when we debug with the graphics debugger we know what resource we are looking at
@@ -756,22 +671,7 @@ namespace game
 			if (FAILED(hr))
 			{
 				lastError = { GameErrors::GameDirectX12Specific,"Could not create vertex buffer upload heap for PixelMode." };
-				if (hr == D3D12_ERROR_ADAPTER_NOT_FOUND)
-					lastError.lastErrorString += ": D3D12_ERROR_ADAPTER_NOT_FOUND";
-				else if (hr == D3D12_ERROR_DRIVER_VERSION_MISMATCH)
-					lastError.lastErrorString += ": D3D12_ERROR_DRIVER_VERSION_MISMATCH";
-				else if (hr == DXGI_ERROR_INVALID_CALL)
-					lastError.lastErrorString += ": DXGI_ERROR_INVALID_CALL";
-				else if (hr == DXGI_ERROR_WAS_STILL_DRAWING)
-					lastError.lastErrorString += ": DXGI_ERROR_WAS_STILL_DRAWING";
-				else if (hr == E_FAIL)
-					lastError.lastErrorString += ": E_FAIL";
-				else if (hr == E_INVALIDARG)
-					lastError.lastErrorString += ": E_INVALIDARG";
-				else if (hr == E_OUTOFMEMORY)
-					lastError.lastErrorString += ": E_OUTOFMEMORY";
-				else if (hr == E_NOTIMPL)
-					lastError.lastErrorString += ": E_NOTIMPL";
+				AppendHR12(hr);
 				return false;
 			}
 			iBufferUploadHeap->SetName(L"PixelMode Index Buffer Upload Resource Heap");
@@ -835,22 +735,7 @@ namespace game
 			if (FAILED(hr))
 			{
 				lastError = { GameErrors::GameDirectX12Specific,"Pixel mode signal failed." };
-				if (hr == D3D12_ERROR_ADAPTER_NOT_FOUND)
-					lastError.lastErrorString += ": D3D12_ERROR_ADAPTER_NOT_FOUND";
-				else if (hr == D3D12_ERROR_DRIVER_VERSION_MISMATCH)
-					lastError.lastErrorString += ": D3D12_ERROR_DRIVER_VERSION_MISMATCH";
-				else if (hr == DXGI_ERROR_INVALID_CALL)
-					lastError.lastErrorString += ": DXGI_ERROR_INVALID_CALL";
-				else if (hr == DXGI_ERROR_WAS_STILL_DRAWING)
-					lastError.lastErrorString += ": DXGI_ERROR_WAS_STILL_DRAWING";
-				else if (hr == E_FAIL)
-					lastError.lastErrorString += ": E_FAIL";
-				else if (hr == E_INVALIDARG)
-					lastError.lastErrorString += ": E_INVALIDARG";
-				else if (hr == E_OUTOFMEMORY)
-					lastError.lastErrorString += ": E_OUTOFMEMORY";
-				else if (hr == E_NOTIMPL)
-					lastError.lastErrorString += ": E_NOTIMPL";
+				AppendHR12(hr);
 				return false;
 			}
 
@@ -882,7 +767,7 @@ namespace game
 #endif
 
 		// Scale the texture to window size
-		//_ScaleQuadToWindow();
+		_ScaleQuadToWindow();
 		return true;
 	}
 
