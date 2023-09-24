@@ -522,26 +522,19 @@ namespace game
 #if defined (GAME_DIRECTX12)
 		if (enginePointer->geIsUsing(GAME_DIRECTX12))
 		{
-			// create root signature
-
-			//D3D12_ROOT_SIGNATURE_DESC rootSignatureDesc = {};
-			//rootSignatureDesc.Flags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
-			//rootSignatureDesc.NumParameters = 0;
-			//rootSignatureDesc.pParameters = nullptr;
-			//rootSignatureDesc.NumStaticSamplers = 0;
-			//rootSignatureDesc.pStaticSamplers = nullptr;
+			// Root signature description
 			CD3DX12_ROOT_SIGNATURE_DESC rootSignatureDesc = {};
 			rootSignatureDesc.Init(0, nullptr, 0, nullptr, D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT);
 			
-
+			// Serialized root signature
 			Microsoft::WRL::ComPtr<ID3DBlob> signature;
 			if (FAILED(D3D12SerializeRootSignature(&rootSignatureDesc, D3D_ROOT_SIGNATURE_VERSION_1, &signature, nullptr)))
 			{
 				lastError = { GameErrors::GameDirectX12Specific, "Could not serialize root signature in PixleMode." };
-				//std::cout << "Serialize of root signature failed in PixelMode!\n";
 				return false;
 			}
 
+			// Create the root signature
 			if (FAILED(enginePointer->d3d12Device->CreateRootSignature(0, signature->GetBufferPointer(), signature->GetBufferSize(), IID_PPV_ARGS(&_rootSignature))))
 			{
 				lastError = { GameErrors::GameDirectX12Specific, "Could not create root signature in PixelMode." };
@@ -562,14 +555,10 @@ namespace game
 			//	{ "COLOR",    0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 12, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0},
 			//	{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT,    0, 28, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0},
 			//};
-			//D3D12_INPUT_ELEMENT_DESC inputLayout[] =
-			//{
-			//	{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 }
-			//};
 			D3D12_INPUT_ELEMENT_DESC inputElementDescs[] =
 			{
-				{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
-				{ "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 12, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 }
+				{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
+				{ "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 }
 			};
 
 			// fill out an input layout description structure
@@ -580,46 +569,23 @@ namespace game
 			inputLayoutDesc.pInputElementDescs = inputElementDescs;
 
 			
-			
-			D3D12_GRAPHICS_PIPELINE_STATE_DESC psoDesc = {}; // a structure to define a pso
-			psoDesc.InputLayout = inputLayoutDesc; // the structure describing our input layout
-			psoDesc.pRootSignature = _rootSignature.Get(); // the root signature that describes the input data this pso needs
-			psoDesc.VS = CD3DX12_SHADER_BYTECODE(_pixelModeShader12.compiledVertexShader12.Get()); // structure describing where to find the vertex shader bytecode and how large it is
-			psoDesc.PS = CD3DX12_SHADER_BYTECODE(_pixelModeShader12.compiledPixelShader12.Get()); // same as VS but for pixel shader
-			psoDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE; // type of topology we are drawing
-			psoDesc.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM; // format of the render target
+			// Describe PSO
+			D3D12_GRAPHICS_PIPELINE_STATE_DESC psoDesc = {}; 
+			psoDesc.InputLayout = inputLayoutDesc; 
+			psoDesc.pRootSignature = _rootSignature.Get();
+			psoDesc.VS = CD3DX12_SHADER_BYTECODE(_pixelModeShader12.compiledVertexShader12.Get());
+			psoDesc.PS = CD3DX12_SHADER_BYTECODE(_pixelModeShader12.compiledPixelShader12.Get());
+			psoDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE; 
+			psoDesc.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM;
 			DXGI_SAMPLE_DESC sampleDesc = {};
-			sampleDesc.Count = 1;
-			psoDesc.SampleDesc = sampleDesc; // must be the same sample description as the swapchain and depth/stencil buffer
-			psoDesc.SampleMask = 0xffffffff; // sample mask has to do with multi-sampling. 0xffffffff means point sampling is done
-			D3D12_RASTERIZER_DESC rasterDesc = {};
-			rasterDesc.FillMode = D3D12_FILL_MODE_SOLID;
-			rasterDesc.CullMode = D3D12_CULL_MODE_NONE;// D3D12_CULL_MODE_BACK;
-			rasterDesc.FrontCounterClockwise = FALSE;
-			rasterDesc.DepthBias = D3D12_DEFAULT_DEPTH_BIAS;
-			rasterDesc.DepthBiasClamp = D3D12_DEFAULT_DEPTH_BIAS_CLAMP;
-			rasterDesc.SlopeScaledDepthBias = D3D12_DEFAULT_SLOPE_SCALED_DEPTH_BIAS;
-			rasterDesc.DepthClipEnable = TRUE;
-			rasterDesc.MultisampleEnable = FALSE;
-			rasterDesc.AntialiasedLineEnable = FALSE;
-			rasterDesc.ForcedSampleCount = 0;
-			rasterDesc.ConservativeRaster = D3D12_CONSERVATIVE_RASTERIZATION_MODE_OFF;
+			sampleDesc.Count = 1;			
+			psoDesc.SampleDesc = sampleDesc; 
+			psoDesc.SampleMask = 0xffffffff; 
+			D3D12_RASTERIZER_DESC rasterDesc = CD3DX12_RASTERIZER_DESC(D3D12_DEFAULT);
+			rasterDesc.FrontCounterClockwise = TRUE;
 			psoDesc.RasterizerState = rasterDesc;
-			D3D12_BLEND_DESC blendDesc = {};
-			blendDesc.AlphaToCoverageEnable = FALSE;
-			blendDesc.IndependentBlendEnable = FALSE;
-			const D3D12_RENDER_TARGET_BLEND_DESC defaultRenderTargetBlendDesc =
-			{
-				FALSE,FALSE,
-				D3D12_BLEND_ONE, D3D12_BLEND_ZERO, D3D12_BLEND_OP_ADD,
-				D3D12_BLEND_ONE, D3D12_BLEND_ZERO, D3D12_BLEND_OP_ADD,
-				D3D12_LOGIC_OP_NOOP,
-				D3D12_COLOR_WRITE_ENABLE_ALL,
-			};
-			for (uint32_t target = 0; target < D3D12_SIMULTANEOUS_RENDER_TARGET_COUNT; target++)
-				blendDesc.RenderTarget[target] = defaultRenderTargetBlendDesc;
-			psoDesc.BlendState = blendDesc;
-			psoDesc.NumRenderTargets = 1; // we are only binding one render target
+			psoDesc.BlendState = CD3DX12_BLEND_DESC(D3D12_DEFAULT);
+			psoDesc.NumRenderTargets = 1;
 			psoDesc.Flags = D3D12_PIPELINE_STATE_FLAG_NONE;
 
 			// create the pso
@@ -659,7 +625,7 @@ namespace game
 			// To get data into this heap, we will have to upload the data using
 			// an upload heap
 			D3D12_HEAP_PROPERTIES heapProp = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT);
-			D3D12_RESOURCE_DESC resDesc = CD3DX12_RESOURCE_DESC::Buffer(vBufferSize);
+			D3D12_RESOURCE_DESC resDesc = CD3DX12_RESOURCE_DESC::Buffer(sizeof(_quadVertices12));
 			hr = enginePointer->d3d12Device->CreateCommittedResource(
 				&heapProp, // a default heap
 				D3D12_HEAP_FLAG_NONE, // no flags
@@ -737,6 +703,7 @@ namespace game
 				0, 1, 2, // first triangle
 				1, 3, 2 // second triangle
 			};
+			//0, 1, 2, 1, 3, 2,
 			int iBufferSize = sizeof(iList);
 
 			// -------------------- heap props and resdesc can be reused
