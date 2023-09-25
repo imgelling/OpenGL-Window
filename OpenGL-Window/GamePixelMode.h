@@ -839,7 +839,7 @@ namespace game
 		_sizeOfScaledTexture.width = _positionOfScaledTexture.x + (_frameBuffer[_currentBuffer].width * _scale.x);
 		_sizeOfScaledTexture.height = _positionOfScaledTexture.y + (_frameBuffer[_currentBuffer].height * _scale.y);
 
-		// Pixel offset fix
+		// Pixel offset fix (may be wrecking dx10 and 11)
 		_positionOfScaledTexture.x -= _frameBuffer[_currentBuffer].oneOverWidth;
 		_positionOfScaledTexture.y -= _frameBuffer[_currentBuffer].oneOverHeight;
 		_sizeOfScaledTexture.width -= _frameBuffer[_currentBuffer].oneOverWidth;
