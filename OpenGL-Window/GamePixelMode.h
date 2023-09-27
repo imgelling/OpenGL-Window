@@ -657,7 +657,6 @@ namespace game
 			// resets the command list -----------------------------
 			if (FAILED(temp->_commandAllocator[temp->_frameIndex]->Reset()))
 			{
-				//Running = false;
 				std::cout << "Command allocator reset failed\n";
 			}
 
@@ -665,46 +664,42 @@ namespace game
 			if (FAILED(enginePointer->commandList->Reset(temp->_commandAllocator[temp->_frameIndex].Get(), NULL)))
 			{
 				std::cout << "command list reset failed\n";
-				//Running = false;
 			}
-
 			// end of command list reset ---------------------------------------
 			
-			// store vertex buffer in upload heap
+			// Fill out resource data with vertex data
 			D3D12_SUBRESOURCE_DATA vertexData = {};
-			vertexData.pData = reinterpret_cast<BYTE*>(_quadVertices12); // pointer to our vertex array
-			vertexData.RowPitch = vBufferSize; // size of all our triangle vertex data
-			vertexData.SlicePitch = vBufferSize; // also the size of our triangle vertex data
+			vertexData.pData = reinterpret_cast<uint8_t*>(_quadVertices12);
+			vertexData.RowPitch = vBufferSize;
+			vertexData.SlicePitch = vBufferSize;
 
-			// we are now creating a command with the command list to copy the data from
-			// the upload heap to the default heap
+			// Create a command to copy vertex buffer
 			UpdateSubresources(enginePointer->commandList.Get(), _vertexBufferHeap.Get(), _vertexBufferUploadHeap.Get(), 0, 0, 1, &vertexData);
 
-			// transition the vertex buffer data from copy destination state to vertex buffer state
+			// Transition the vertex buffer data from copy destination state to vertex buffer state
 			CD3DX12_RESOURCE_BARRIER resBar = CD3DX12_RESOURCE_BARRIER::Transition(_vertexBufferHeap.Get(), D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER);
 			enginePointer->commandList->ResourceBarrier(1, &resBar);
 
-			// store index buffer in upload heap
+			// Fill out resource data with index buffer
 			D3D12_SUBRESOURCE_DATA indexData = {};
-			indexData.pData = reinterpret_cast<BYTE*>(iList); // pointer to our index array
-			indexData.RowPitch = iBufferSize; // size of all our index buffer
-			indexData.SlicePitch = iBufferSize; // also the size of our index buffer
+			indexData.pData = reinterpret_cast<uint8_t*>(iList);
+			indexData.RowPitch = iBufferSize;
+			indexData.SlicePitch = iBufferSize;
 
-			// we are now creating a command with the command list to copy the data from
-			// the upload heap to the default heap
+			// Create a command to copy index buffer
 			UpdateSubresources(enginePointer->commandList.Get(), _indexBufferHeap.Get(), _indexBufferUploadHeap.Get(), 0, 0, 1, &indexData);
 
-			// transition the vertex buffer data from copy destination state to vertex buffer state
+			// Transition the index buffer data from copy destination state to vertex buffer state
 			CD3DX12_RESOURCE_BARRIER ibufferbar = CD3DX12_RESOURCE_BARRIER::Transition(_indexBufferHeap.Get(), D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER);
 			enginePointer->commandList->ResourceBarrier(1, &ibufferbar);
 
-			// Now we execute the command list to upload the initial assets (triangle data)
+			// Execture the command list to upload the initial data
 			enginePointer->commandList->Close();
 			ID3D12CommandList* ppCommandLists[] = { enginePointer->commandList.Get() };
 			enginePointer->commandQueue->ExecuteCommandLists(_countof(ppCommandLists), ppCommandLists);
 
+			// ??
 			// increment the fence value now, otherwise the buffer might not be uploaded by the time we start drawing
-
 			temp->_fenceValue[temp->_frameIndex]++;
 			hr = enginePointer->commandQueue->Signal(temp->_fence[temp->_frameIndex].Get(), temp->_fenceValue[temp->_frameIndex]);
 			if (FAILED(hr))
@@ -714,19 +709,19 @@ namespace game
 				return false;
 			}
 
-			//temp->_WaitForPreviousFrame(true);
+			//temp->_WaitForPreviousFrame(false);
 
-			// create a vertex buffer view for the triangle. We get the GPU memory address to the vertex pointer using the GetGPUVirtualAddress() method
+			// Create a vertex buffer view for the quad
 			_vertexBufferView.BufferLocation = _vertexBufferHeap->GetGPUVirtualAddress();
 			_vertexBufferView.StrideInBytes = sizeof(_vertex12);
 			_vertexBufferView.SizeInBytes = vBufferSize;
 
-			// create a vertex buffer view for the triangle. We get the GPU memory address to the vertex pointer using the GetGPUVirtualAddress() method
+			// Create a index buffer view for the quad
 			_indexBufferView.BufferLocation = _indexBufferHeap->GetGPUVirtualAddress();
-			_indexBufferView.Format = DXGI_FORMAT_R32_UINT; // 32-bit unsigned integer (this is what a dword is, double word, a word is 2 bytes)
+			_indexBufferView.Format = DXGI_FORMAT_R32_UINT;
 			_indexBufferView.SizeInBytes = iBufferSize;
 
-			// Create render bundle
+			// Create render bundle now the index and vertex buffers have been made
 			if (FAILED(enginePointer->d3d12Device->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_BUNDLE, IID_PPV_ARGS(&_bundleAllocator))))
 			{
 				lastError = { GameErrors::GameDirectX12Specific,"Could not create bundle allocator for PixelMode." };
@@ -740,9 +735,9 @@ namespace game
 				AppendHR12(hr);
 				return false;
 			}
-			_renderBundle->SetName(L"RenderBundle");
+			_renderBundle->SetName(L"PixelMode Render Bundle");
 
-			// create bundle
+			// Record render bundle
 			//_bundle->SetPipelineState(_pipelineStateObject.Get()); // may not need to record
 			_renderBundle->SetGraphicsRootSignature(_rootSignature.Get());
 			_renderBundle->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
