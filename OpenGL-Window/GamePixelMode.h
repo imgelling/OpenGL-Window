@@ -163,6 +163,8 @@ namespace game
 		Microsoft::WRL::ComPtr<ID3D12Resource> _vertexBufferHeap; // a default buffer in GPU memory that we will load vertex data for our triangle into
 		Microsoft::WRL::ComPtr<ID3D12Resource> _vertexBufferUploadHeap;
 		D3D12_VERTEX_BUFFER_VIEW _vertexBufferView; // a structure containing a pointer to the vertex data in gpu memory
+		Microsoft::WRL::ComPtr<ID3D12CommandAllocator> _bundleAllocator;
+		Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> _renderBundle;
 #endif
 	};
 
@@ -663,6 +665,8 @@ namespace game
 			RendererDX12* temp = enginePointer->geGetRenderer();
 
 
+
+
 			// resets the command list -----------------------------
 			if (FAILED(temp->_commandAllocator[temp->_frameIndex]->Reset()))
 			{
@@ -734,6 +738,35 @@ namespace game
 			_indexBufferView.BufferLocation = _indexBufferHeap->GetGPUVirtualAddress();
 			_indexBufferView.Format = DXGI_FORMAT_R32_UINT; // 32-bit unsigned integer (this is what a dword is, double word, a word is 2 bytes)
 			_indexBufferView.SizeInBytes = iBufferSize;
+
+			// Create render bundle
+			if (FAILED(enginePointer->d3d12Device->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_BUNDLE, IID_PPV_ARGS(&_bundleAllocator))))
+			{
+				lastError = { GameErrors::GameDirectX12Specific,"Could not create bundle allocator for PixelMode." };
+				AppendHR12(hr);
+				return false;
+			}
+			_bundleAllocator->SetName(L"PixelMode Bundle Allocator");
+			if (FAILED(enginePointer->d3d12Device->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_BUNDLE, _bundleAllocator.Get(), _pipelineStateObject.Get(), IID_PPV_ARGS(&_renderBundle))))
+			{
+				lastError = { GameErrors::GameDirectX12Specific,"Could not create bundle command list for PixelMode." };
+				AppendHR12(hr);
+				return false;
+			}
+
+			// create bundle
+			//_bundle->SetPipelineState(_pipelineStateObject.Get()); // may not need to record
+			_renderBundle->SetGraphicsRootSignature(_rootSignature.Get());
+			_renderBundle->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+			_renderBundle->IASetVertexBuffers(0, 1, &_vertexBufferView);
+			_renderBundle->IASetIndexBuffer(&_indexBufferView);
+			_renderBundle->DrawIndexedInstanced(6, 1, 0, 0, 0);
+			if (FAILED(_renderBundle->Close()))
+			{
+				lastError = { GameErrors::GameDirectX12Specific,"Closing bundle failed for PixelMode." };
+				AppendHR12(hr);
+				return false;
+			}
 		}
 #endif
 
@@ -1231,13 +1264,14 @@ namespace game
 #if defined(GAME_DIRECTX12)
 		if (enginePointer->geIsUsing(GAME_DIRECTX12))
 		{
-			// Draw the quad
-			enginePointer->commandList->SetPipelineState(_pipelineStateObject.Get());
-			enginePointer->commandList->SetGraphicsRootSignature(_rootSignature.Get());
-			enginePointer->commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST); 
-			enginePointer->commandList->IASetVertexBuffers(0, 1, &_vertexBufferView);
-			enginePointer->commandList->IASetIndexBuffer(&_indexBufferView);
-			enginePointer->commandList->DrawIndexedInstanced(6, 1, 0, 0, 0);
+			//// Draw the quad
+			//enginePointer->commandList->SetPipelineState(_pipelineStateObject.Get());
+			//enginePointer->commandList->SetGraphicsRootSignature(_rootSignature.Get());
+			//enginePointer->commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST); 
+			//enginePointer->commandList->IASetVertexBuffers(0, 1, &_vertexBufferView);
+			//enginePointer->commandList->IASetIndexBuffer(&_indexBufferView);
+			//enginePointer->commandList->DrawIndexedInstanced(6, 1, 0, 0, 0);
+			enginePointer->commandList->ExecuteBundle(_renderBundle.Get());
 		}
 #endif
 
