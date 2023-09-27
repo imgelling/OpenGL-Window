@@ -154,15 +154,15 @@ namespace game
 			// br
 			{0.5f, 0.5f, 0.1f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f},
 		};
-		Microsoft::WRL::ComPtr<ID3D12Resource> _indexBufferHeap; // a default buffer in GPU memory that we will load index data for our triangle into
-		Microsoft::WRL::ComPtr<ID3D12Resource> _indexBufferUploadHeap;
-		D3D12_INDEX_BUFFER_VIEW _indexBufferView; // a structure holding information about the index buffer
 		Shader _pixelModeShader12;
-		Microsoft::WRL::ComPtr<ID3D12PipelineState> _pipelineStateObject; // pso containing a pipeline state
-		Microsoft::WRL::ComPtr<ID3D12RootSignature> _rootSignature; // root signature defines data shaders will access
-		Microsoft::WRL::ComPtr<ID3D12Resource> _vertexBufferHeap; // a default buffer in GPU memory that we will load vertex data for our triangle into
+		Microsoft::WRL::ComPtr<ID3D12PipelineState> _pipelineStateObject; 
+		Microsoft::WRL::ComPtr<ID3D12RootSignature> _rootSignature; 
+		Microsoft::WRL::ComPtr<ID3D12Resource> _indexBufferHeap; 
+		Microsoft::WRL::ComPtr<ID3D12Resource> _indexBufferUploadHeap;
+		D3D12_INDEX_BUFFER_VIEW _indexBufferView; 
+		Microsoft::WRL::ComPtr<ID3D12Resource> _vertexBufferHeap; 
 		Microsoft::WRL::ComPtr<ID3D12Resource> _vertexBufferUploadHeap;
-		D3D12_VERTEX_BUFFER_VIEW _vertexBufferView; // a structure containing a pointer to the vertex data in gpu memory
+		D3D12_VERTEX_BUFFER_VIEW _vertexBufferView; 
 		Microsoft::WRL::ComPtr<ID3D12CommandAllocator> _bundleAllocator;
 		Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> _renderBundle;
 #endif
@@ -195,8 +195,6 @@ namespace game
 		_textureSamplerState11 = nullptr;
 #endif
 #if defined(GAME_DIRECTX12)
-		//_scissorRect = {};
-		//_viewPort = {};
 		_vertexBufferView = {};
 		_indexBufferView = {};
 #endif
@@ -551,20 +549,15 @@ namespace game
 				return false;
 			}
 
-			// create input layout
-			//D3D12_INPUT_ELEMENT_DESC inputLayout[] =
-			//{
-			//	{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
-			//	{ "COLOR",    0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 12, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0},
-			//	{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT,    0, 28, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0},
-			//};
+			// Input layout
 			D3D12_INPUT_ELEMENT_DESC inputElementDescs[] =
 			{
 				{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
-				{ "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 }
+				{ "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
+				{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT,    0, D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0}
 			};
 
-			// fill out an input layout description structure
+			// Describe input layout
 			D3D12_INPUT_LAYOUT_DESC inputLayoutDesc = {};
 			inputLayoutDesc.NumElements = ARRAYSIZE(inputElementDescs);
 			inputLayoutDesc.pInputElementDescs = inputElementDescs;
@@ -627,8 +620,8 @@ namespace game
 
 			// Index buffer
 			DWORD iList[] = {
-				0, 1, 2, // first triangle
-				1, 3, 2 // second triangle
+				0, 1, 2, 
+				1, 3, 2
 			};
 			uint32_t iBufferSize = sizeof(iList);
 
@@ -638,29 +631,23 @@ namespace game
 			hr = enginePointer->d3d12Device->CreateCommittedResource(&heapProp, D3D12_HEAP_FLAG_NONE, &resDesc, D3D12_RESOURCE_STATE_COMMON, nullptr, IID_PPV_ARGS(&_indexBufferHeap));
 			if (FAILED(hr))
 			{
-				lastError = { GameErrors::GameDirectX12Specific,"Could not create vertex buffer upload heap for PixelMode." };
+				lastError = { GameErrors::GameDirectX12Specific,"Could not create index buffer upload heap for PixelMode." };
 				AppendHR12(hr);
 				return false;
 			}
-			_indexBufferHeap->SetName(L"PixelMode Index Buffer Resource Heap");
+			_indexBufferHeap->SetName(L"PixelMode Index Buffer Heap");
 
 			// create upload heap to upload index buffer
 			heapProp = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
 			resDesc = CD3DX12_RESOURCE_DESC::Buffer(iBufferSize);
-			hr = enginePointer->d3d12Device->CreateCommittedResource(
-				&heapProp, // upload heap
-				D3D12_HEAP_FLAG_NONE, // no flags
-				&resDesc, // resource description for a buffer
-				D3D12_RESOURCE_STATE_GENERIC_READ, // GPU will read from this buffer and copy its contents to the default heap
-				nullptr,
-				IID_PPV_ARGS(&_indexBufferUploadHeap));
+			hr = enginePointer->d3d12Device->CreateCommittedResource(&heapProp,	D3D12_HEAP_FLAG_NONE, &resDesc,	D3D12_RESOURCE_STATE_GENERIC_READ, nullptr, IID_PPV_ARGS(&_indexBufferUploadHeap));
 			if (FAILED(hr))
 			{
 				lastError = { GameErrors::GameDirectX12Specific,"Could not create vertex buffer upload heap for PixelMode." };
 				AppendHR12(hr);
 				return false;
 			}
-			_indexBufferUploadHeap->SetName(L"PixelMode Index Buffer Upload Resource Heap");
+			_indexBufferUploadHeap->SetName(L"PixelMode Index Buffer Upload Heap");
 
 			RendererDX12* temp = enginePointer->geGetRenderer();
 
@@ -753,6 +740,7 @@ namespace game
 				AppendHR12(hr);
 				return false;
 			}
+			_renderBundle->SetName(L"RenderBundle");
 
 			// create bundle
 			//_bundle->SetPipelineState(_pipelineStateObject.Get()); // may not need to record
@@ -763,7 +751,7 @@ namespace game
 			_renderBundle->DrawIndexedInstanced(6, 1, 0, 0, 0);
 			if (FAILED(_renderBundle->Close()))
 			{
-				lastError = { GameErrors::GameDirectX12Specific,"Closing bundle failed for PixelMode." };
+				lastError = { GameErrors::GameDirectX12Specific,"Closing render bundle failed for PixelMode." };
 				AppendHR12(hr);
 				return false;
 			}
