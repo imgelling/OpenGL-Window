@@ -38,6 +38,8 @@ namespace game
 #endif
 #if defined(GAME_DIRECTX12)
 		Microsoft::WRL::ComPtr<ID3D12Resource> textureResource12;
+		Microsoft::WRL::ComPtr<ID3D12Resource> textureUploadHeap12;
+		Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> srvHeap;
 #endif
 		std::string name;
 		uint32_t width;
