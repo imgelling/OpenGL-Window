@@ -22,13 +22,27 @@
 //    return float4(0.0f, 1.0f, 0.0f, 1.0f); // Red, Green, Blue, Alpha
 //}
 
+//struct PSInput
+//{
+//    float4 position : SV_POSITION;
+//    float4 color : COLOR;
+//};
+
+//float4 main(PSInput input) : SV_TARGET
+//{
+//    return input.color;
+//}
 struct PSInput
 {
     float4 position : SV_POSITION;
     float4 color : COLOR;
+    float2 uv : TEXCOORD;
 };
+
+Texture2D g_texture : register(t0);
+SamplerState g_sampler : register(s0);
 
 float4 main(PSInput input) : SV_TARGET
 {
-    return input.color;
+    return g_texture.Sample(g_sampler, input.uv);
 }

@@ -20,18 +20,39 @@
 //{
 //    return float4(pos, 1.0f);
 //}
+//struct PSInput
+//{
+//    float4 position : SV_POSITION;
+//    float4 color : COLOR;
+//};
+
+//PSInput main(float4 position : POSITION, float4 color : COLOR)
+//{
+//    PSInput result;
+
+//    result.position = position;
+//    result.color = color;
+
+//    return result;
+//}
+
 struct PSInput
 {
     float4 position : SV_POSITION;
     float4 color : COLOR;
+    float2 uv : TEXCOORD;
 };
 
-PSInput main(float4 position : POSITION, float4 color : COLOR)
+Texture2D g_texture : register(t0);
+SamplerState g_sampler : register(s0);
+
+PSInput main(float4 position : POSITION, float4 color: COLOR, float2 uv : TEXCOORD)
 {
     PSInput result;
 
     result.position = position;
     result.color = color;
+    result.uv = uv;
 
     return result;
 }

@@ -437,7 +437,6 @@ namespace game
 
 	inline void RendererDX12::StartFrame()
 	{
-
 		// We have to wait for the gpu to finish with the command allocator before we reset it
 		_WaitForPreviousFrame(true);
 
@@ -628,7 +627,7 @@ namespace game
 			&heapProp,
 			D3D12_HEAP_FLAG_NONE,
 			&textureDesc,
-			D3D12_RESOURCE_STATE_COPY_DEST,
+			D3D12_RESOURCE_STATE_COPY_DEST, //D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE
 			nullptr,
 			IID_PPV_ARGS(&texture.textureResource12));
 		if (FAILED(hr))
