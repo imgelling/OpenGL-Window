@@ -146,13 +146,13 @@ namespace game
 		_vertex12 _quadVertices12[4] =
 		{
 			// tl
-			{0.0f, 1.0f, 0.1f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f},
+			{0.0f, 1.0f, 0.1f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f},
 			// tr
-			{0.5f, -0.5f, 0.1f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f, .0f},
+			{0.5f, -0.5f, 0.1f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f, 1.0f},
 			// bl
-			{-0.5f, -0.5f, 0.1f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f},
+			{-0.5f, -0.5f, 0.1f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f},
 			// br
-			{0.5f, 0.5f, 0.1f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f},
+			{0.5f, 0.5f, 0.1f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f},
 		};
 		Shader _pixelModeShader12;
 		Microsoft::WRL::ComPtr<ID3D12PipelineState> _pipelineStateObject; 
@@ -1454,7 +1454,7 @@ namespace game
 #if defined(GAME_DIRECTX12)
 		if (enginePointer->geIsUsing(GAME_DIRECTX12))
 		{
-			_video[y * _bufferSize.width + x] = color.packedABGR;
+			_video[(y) * _bufferSize.width + x] = color.packedABGR;
 			return;
 		}
 #endif
@@ -1494,7 +1494,8 @@ namespace game
 #if defined(GAME_DIRECTX12)
 		if (enginePointer->geIsUsing(GAME_DIRECTX12))
 		{
-			_video[y * _bufferSize.width + x] = color.packedABGR;
+			//y = _bufferSize.height - y;
+			_video[(y) * _bufferSize.width + x] = color.packedABGR;
 			return;
 		}
 #endif
