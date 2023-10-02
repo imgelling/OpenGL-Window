@@ -519,85 +519,62 @@ namespace game
 #if defined (GAME_DIRECTX12)
 		if (enginePointer->geIsUsing(GAME_DIRECTX12))
 		{
-			//// Root signature description
-			//CD3DX12_ROOT_SIGNATURE_DESC rootSignatureDesc = {};
-			//rootSignatureDesc.Init(0, nullptr, 0, nullptr, D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT);
-			//
-			//// Serialized root signature
-			//Microsoft::WRL::ComPtr<ID3DBlob> signature;
-			//HRESULT hr = D3D12SerializeRootSignature(&rootSignatureDesc, D3D_ROOT_SIGNATURE_VERSION_1, &signature, nullptr);
-			//if (FAILED(hr))
-			//{
-			//	lastError = { GameErrors::GameDirectX12Specific, "Could not serialize root signature in PixleMode." };
-			//	AppendHR12(hr);
-			//	return false;
-			//}
-
-			//// Create the root signature
-			//hr = enginePointer->d3d12Device->CreateRootSignature(0, signature->GetBufferPointer(), signature->GetBufferSize(), IID_PPV_ARGS(&_rootSignature));
-			//if (FAILED(hr))
-			//{
-			//	lastError = { GameErrors::GameDirectX12Specific, "Could not create root signature in PixelMode." };
-			//	AppendHR12(hr);
-			//	return false;
-			//}
-			//_rootSignature->SetName(L"PixelMode Root Signature");
-			// 
+			// Root signature description
 			HRESULT hr = {};
-				// Create the root signature.
-			
-				D3D12_FEATURE_DATA_ROOT_SIGNATURE featureData = {};
+			// Create the root signature.
 
-				// This is the highest version the sample supports. If CheckFeatureSupport succeeds, the HighestVersion returned will not be greater than this.
-				featureData.HighestVersion = D3D_ROOT_SIGNATURE_VERSION_1_1;
+			D3D12_FEATURE_DATA_ROOT_SIGNATURE featureData = {};
 
-				if (FAILED(enginePointer->d3d12Device->CheckFeatureSupport(D3D12_FEATURE_ROOT_SIGNATURE, &featureData, sizeof(featureData))))
-				{
-					featureData.HighestVersion = D3D_ROOT_SIGNATURE_VERSION_1_0;
-				}
+			// This is the highest version the sample supports. If CheckFeatureSupport succeeds, the HighestVersion returned will not be greater than this.
+			featureData.HighestVersion = D3D_ROOT_SIGNATURE_VERSION_1_1;
 
-				CD3DX12_DESCRIPTOR_RANGE1 ranges[1] = {};
-				ranges[0].Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 0, 0, D3D12_DESCRIPTOR_RANGE_FLAG_DATA_STATIC);
+			if (FAILED(enginePointer->d3d12Device->CheckFeatureSupport(D3D12_FEATURE_ROOT_SIGNATURE, &featureData, sizeof(featureData))))
+			{
+				featureData.HighestVersion = D3D_ROOT_SIGNATURE_VERSION_1_0;
+			}
 
-				CD3DX12_ROOT_PARAMETER1 rootParameters[1] = {};
-				rootParameters[0].InitAsDescriptorTable(1, &ranges[0], D3D12_SHADER_VISIBILITY_PIXEL);
+			CD3DX12_DESCRIPTOR_RANGE1 ranges[1] = {};
+			ranges[0].Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 0, 0, D3D12_DESCRIPTOR_RANGE_FLAG_DATA_STATIC);
 
-				D3D12_STATIC_SAMPLER_DESC sampler = {};
-				sampler.Filter = D3D12_FILTER_MIN_MAG_MIP_POINT;
-				sampler.AddressU = D3D12_TEXTURE_ADDRESS_MODE_BORDER;
-				sampler.AddressV = D3D12_TEXTURE_ADDRESS_MODE_BORDER;
-				sampler.AddressW = D3D12_TEXTURE_ADDRESS_MODE_BORDER;
-				sampler.MipLODBias = 0;
-				sampler.MaxAnisotropy = 0;
-				sampler.ComparisonFunc = D3D12_COMPARISON_FUNC_NEVER;
-				sampler.BorderColor = D3D12_STATIC_BORDER_COLOR_TRANSPARENT_BLACK;
-				sampler.MinLOD = 0.0f;
-				sampler.MaxLOD = D3D12_FLOAT32_MAX;
-				sampler.ShaderRegister = 0;
-				sampler.RegisterSpace = 0;
-				sampler.ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+			CD3DX12_ROOT_PARAMETER1 rootParameters[1] = {};
+			rootParameters[0].InitAsDescriptorTable(1, &ranges[0], D3D12_SHADER_VISIBILITY_PIXEL);
 
-				CD3DX12_VERSIONED_ROOT_SIGNATURE_DESC rootSignatureDesc;
-				rootSignatureDesc.Init_1_1(_countof(rootParameters), rootParameters, 1, &sampler, D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT);
+			D3D12_STATIC_SAMPLER_DESC sampler = {};
+			sampler.Filter = D3D12_FILTER_MIN_MAG_MIP_POINT;
+			sampler.AddressU = D3D12_TEXTURE_ADDRESS_MODE_BORDER;
+			sampler.AddressV = D3D12_TEXTURE_ADDRESS_MODE_BORDER;
+			sampler.AddressW = D3D12_TEXTURE_ADDRESS_MODE_BORDER;
+			sampler.MipLODBias = 0;
+			sampler.MaxAnisotropy = 0;
+			sampler.ComparisonFunc = D3D12_COMPARISON_FUNC_NEVER;
+			sampler.BorderColor = D3D12_STATIC_BORDER_COLOR_TRANSPARENT_BLACK;
+			sampler.MinLOD = 0.0f;
+			sampler.MaxLOD = D3D12_FLOAT32_MAX;
+			sampler.ShaderRegister = 0;
+			sampler.RegisterSpace = 0;
+			sampler.ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
 
-				Microsoft::WRL::ComPtr<ID3DBlob> signature;
-				hr = D3DX12SerializeVersionedRootSignature(&rootSignatureDesc, D3D_ROOT_SIGNATURE_VERSION_1, &signature, nullptr);
-				if (FAILED(hr))
-				{
-					lastError = { GameErrors::GameDirectX12Specific, "could not serialize root signature in pixlemode." };
-					AppendHR12(hr);
-					return false;
-				}
+			CD3DX12_VERSIONED_ROOT_SIGNATURE_DESC rootSignatureDesc = {};
+			rootSignatureDesc.Init_1_1(_countof(rootParameters), rootParameters, 1, &sampler, D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT);
 
-				// create the root signature
-				hr = enginePointer->d3d12Device->CreateRootSignature(0, signature->GetBufferPointer(), signature->GetBufferSize(), IID_PPV_ARGS(&_rootSignature));
-				if (FAILED(hr))
-				{
-					lastError = { GameErrors::GameDirectX12Specific, "could not create root signature in pixelmode." };
-					AppendHR12(hr);
-					return false;
-				}
-				_rootSignature->SetName(L"pixelmode root signature");
+			Microsoft::WRL::ComPtr<ID3DBlob> signature;
+			hr = D3DX12SerializeVersionedRootSignature(&rootSignatureDesc, D3D_ROOT_SIGNATURE_VERSION_1, &signature, nullptr);
+			if (FAILED(hr))
+			{
+				lastError = { GameErrors::GameDirectX12Specific, "Could not serialize root signature in pixlemode." };
+				AppendHR12(hr);
+				return false;
+			}
+
+			// create the root signature
+			hr = enginePointer->d3d12Device->CreateRootSignature(0, signature->GetBufferPointer(), signature->GetBufferSize(), IID_PPV_ARGS(&_rootSignature));
+			if (FAILED(hr))
+			{
+				lastError = { GameErrors::GameDirectX12Specific, "could not create root signature in pixelmode." };
+				AppendHR12(hr);
+				return false;
+			}
+			_rootSignature->SetName(L"pixelmode root signature");
 
 
 			// Load shaders for sprite mode
@@ -833,11 +810,11 @@ namespace game
 
 
 			// Record render bundle
-			//_renderBundle->SetPipelineState(_pipelineStateObject.Get()); // may not need to record
-			//_renderBundle->SetGraphicsRootSignature(_rootSignature.Get());
-			//ID3D12DescriptorHeap* ppHeaps[] = { _frameBuffer[_currentBuffer].srvHeap.Get() };
-			//_renderBundle->SetDescriptorHeaps(_countof(ppHeaps), ppHeaps);
-			//_renderBundle->SetGraphicsRootDescriptorTable(0, _frameBuffer[_currentBuffer].srvHeap->GetGPUDescriptorHandleForHeapStart());
+			_renderBundle->SetPipelineState(_pipelineStateObject.Get()); // may not need to record
+			_renderBundle->SetGraphicsRootSignature(_rootSignature.Get());
+			ID3D12DescriptorHeap* ppHeaps[] = { _frameBuffer[_currentBuffer].srvHeap.Get() };
+			_renderBundle->SetDescriptorHeaps(_countof(ppHeaps), ppHeaps);
+			_renderBundle->SetGraphicsRootDescriptorTable(0, _frameBuffer[_currentBuffer].srvHeap->GetGPUDescriptorHandleForHeapStart());
 			_renderBundle->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 			_renderBundle->IASetVertexBuffers(0, 1, &_vertexBufferView);
 			_renderBundle->IASetIndexBuffer(&_indexBufferView);
@@ -911,7 +888,7 @@ namespace game
 			D3D12_SUBRESOURCE_DATA textureData = {};
 			textureData.pData = reinterpret_cast<uint8_t*>(_video);
 			textureData.RowPitch = _frameBuffer[_currentBuffer].width * 4;
-			textureData.SlicePitch = 1;// textureData.RowPitch* _frameBuffer[_currentBuffer].height;
+			textureData.SlicePitch = textureData.RowPitch* _frameBuffer[_currentBuffer].height;
 			CD3DX12_RESOURCE_BARRIER trans = CD3DX12_RESOURCE_BARRIER::Transition(_frameBuffer[_currentBuffer].textureResource12.Get(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_COPY_DEST);
 			enginePointer->commandList->ResourceBarrier(1, &trans);
 			UpdateSubresources(enginePointer->commandList.Get(), _frameBuffer[_currentBuffer].textureResource12.Get(), _frameBuffer[_currentBuffer].textureUploadHeap12.Get(), 0, 0, 1, &textureData);
@@ -1359,12 +1336,12 @@ namespace game
 		if (enginePointer->geIsUsing(GAME_DIRECTX12))
 		{
 			// Draw the quad
-			enginePointer->commandList->SetPipelineState(_pipelineStateObject.Get());
-			enginePointer->commandList->SetGraphicsRootSignature(_rootSignature.Get());
+			//enginePointer->commandList->SetPipelineState(_pipelineStateObject.Get());
+			//enginePointer->commandList->SetGraphicsRootSignature(_rootSignature.Get());
 			ID3D12DescriptorHeap* ppHeaps[] = { _frameBuffer[_currentBuffer].srvHeap.Get() };
 			enginePointer->commandList->SetDescriptorHeaps(_countof(ppHeaps), ppHeaps);
 
-			enginePointer->commandList->SetGraphicsRootDescriptorTable(0, _frameBuffer[_currentBuffer].srvHeap->GetGPUDescriptorHandleForHeapStart());
+			//enginePointer->commandList->SetGraphicsRootDescriptorTable(0, _frameBuffer[_currentBuffer].srvHeap->GetGPUDescriptorHandleForHeapStart());
 
 			//enginePointer->commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST); 
 			//enginePointer->commandList->IASetVertexBuffers(0, 1, &_vertexBufferView);
@@ -1374,8 +1351,8 @@ namespace game
 		}
 #endif
 
-		_currentBuffer++;
-		if (_currentBuffer > 1) _currentBuffer = 0;
+		//_currentBuffer++;
+		//if (_currentBuffer > 1) _currentBuffer = 0;
 
 	}
 
