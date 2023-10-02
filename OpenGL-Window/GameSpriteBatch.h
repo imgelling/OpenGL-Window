@@ -1080,10 +1080,10 @@ namespace game
 					srDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
 					srDesc.ViewDimension = D3D10_SRV_DIMENSION_TEXTURE2D;
 					srDesc.Texture2D.MostDetailedMip = 0;
-					srDesc.Texture2D.MipLevels = 0;
+					srDesc.Texture2D.MipLevels = 1;
 					if (FAILED(enginePointer->d3d10Device->CreateShaderResourceView(texture.textureInterface10, &srDesc, &newTextureSRV)))
 					{
-						std::cout << "CreateSRV spritebatch failed!\n";
+						std::cout << "new texture in render CreateSRV spritebatch failed!\n";
 					}
 					_knownTextures10[texture.name] = newTextureSRV;
 					enginePointer->d3d10Device->PSSetShaderResources(0, 1, &newTextureSRV);

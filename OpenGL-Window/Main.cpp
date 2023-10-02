@@ -3,10 +3,10 @@
 //#define GAME_ENABLE_NETWORKING
 //#define GAME_ENABLE_SHADERS
 //#define GAME_SUPPORT_DIRECTX9
-//#define GAME_SUPPORT_DIRECTX10
-//#define GAME_SUPPORT_DIRECTX11
+#define GAME_SUPPORT_DIRECTX10
+#define GAME_SUPPORT_DIRECTX11
 #define GAME_SUPPORT_DIRECTX12
-//#define GAME_SUPPORT_OPENGL
+#define GAME_SUPPORT_OPENGL
 //#define GAME_SUPPORT_VULKAN 
 //#define GAME_SUPPORT_ALL
 #include "Game.h"
@@ -63,7 +63,7 @@ public:
 		//attributes.RenderingAPI = game::RenderAPI::DirectX9; 
 		attributes.RenderingAPI = game::RenderAPI::DirectX10;
 		//attributes.RenderingAPI = game::RenderAPI::DirectX11;
-		attributes.RenderingAPI = game::RenderAPI::DirectX12;
+		//attributes.RenderingAPI = game::RenderAPI::DirectX12;
 		//attributes.RenderingAPI = game::RenderAPI::OpenGL;
 		
 		geSetAttributes(attributes);
@@ -76,9 +76,9 @@ public:
 		Setup();
 
 		// Load sprite texture
-		//if (!geLoadTexture("Content/test.png", spriteTexture))
+		if (!geLoadTexture("Content/test.png", spriteTexture))
 		{
-			//geLogLastError();
+			geLogLastError();
 		}
 
 		// Temp load shader
@@ -103,15 +103,15 @@ public:
 		}
 
 		// Setup sprite batch
-		//if (!spriteBatch.Initialize())
+		if (!spriteBatch.Initialize())
 		{
-			//geLogLastError();
+			geLogLastError();
 		}
 
 		// Load font for output to screen
-		//if (!spriteFont.Load("Content/new.fnt", "Content/new.png"))
+		if (!spriteFont.Load("Content/new.fnt", "Content/new.png"))
 		{
-			//geLogLastError();
+			geLogLastError();
 		}		
 	}
 
