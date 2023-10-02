@@ -449,9 +449,12 @@ namespace game
 		}
 
 		// reset the command list. 
-		if (FAILED(_commandList->Reset(_commandAllocator[_frameIndex].Get(), NULL)))
+		HRESULT hr = _commandList->Reset(_commandAllocator[_frameIndex].Get(), NULL);
+		if (FAILED(hr))
 		{
-			std::cout << "command list reset failed\n";
+			//std::cout << "command list reset failed\n";
+			AppendHR12(hr);
+			std::cout << lastError.lastErrorString << "\n";
 			//Running = false;
 		}
 
@@ -488,9 +491,11 @@ namespace game
 		CD3DX12_RESOURCE_BARRIER t = CD3DX12_RESOURCE_BARRIER::Transition(_renderTargets[_frameIndex].Get(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT);
 		_commandList->ResourceBarrier(1, &t);
 
-		if (FAILED(_commandList->Close()))
+		HRESULT hr = _commandList->Close();
+		if (FAILED(hr))
 		{
-			std::cout << "Commandlist close failed\n";
+			AppendHR12(hr);
+			std::cout << lastError.lastErrorString << "\n";
 		}
 	}
 

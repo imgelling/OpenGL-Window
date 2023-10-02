@@ -833,8 +833,11 @@ namespace game
 
 
 			// Record render bundle
-			//_bundle->SetPipelineState(_pipelineStateObject.Get()); // may not need to record
-			_renderBundle->SetGraphicsRootSignature(_rootSignature.Get());
+			//_renderBundle->SetPipelineState(_pipelineStateObject.Get()); // may not need to record
+			//_renderBundle->SetGraphicsRootSignature(_rootSignature.Get());
+			//ID3D12DescriptorHeap* ppHeaps[] = { _frameBuffer[_currentBuffer].srvHeap.Get() };
+			//_renderBundle->SetDescriptorHeaps(_countof(ppHeaps), ppHeaps);
+			//_renderBundle->SetGraphicsRootDescriptorTable(0, _frameBuffer[_currentBuffer].srvHeap->GetGPUDescriptorHandleForHeapStart());
 			_renderBundle->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 			_renderBundle->IASetVertexBuffers(0, 1, &_vertexBufferView);
 			_renderBundle->IASetIndexBuffer(&_indexBufferView);
@@ -959,15 +962,15 @@ namespace game
 		_sizeOfScaledTexture.height = _positionOfScaledTexture.y + (_frameBuffer[_currentBuffer].height * _scale.y);
 
 		// Pixel offset fix (may be wrecking dx10 and 11)
-#if !defined(GAME_DIRECTX10)  && !defined(GAME_DIRECTX11) && !defined(GAME_DIRECTX12)
-		if (enginePointer->geIsUsing(GAME_DIRECTX9) || enginePointer->geIsUsing(GAME_OPENGL))
+//#if !defined(GAME_DIRECTX10)  && !defined(GAME_DIRECTX11) && !defined(GAME_DIRECTX12)
+		//if (enginePointer->geIsUsing(GAME_DIRECTX9) || enginePointer->geIsUsing(GAME_OPENGL))
 		{
 			_positionOfScaledTexture.x -= _frameBuffer[_currentBuffer].oneOverWidth;
 			_positionOfScaledTexture.y -= _frameBuffer[_currentBuffer].oneOverHeight;
 			_sizeOfScaledTexture.width -= _frameBuffer[_currentBuffer].oneOverWidth;
 			_sizeOfScaledTexture.height -= _frameBuffer[_currentBuffer].oneOverHeight;
 		}
-#endif
+//#endif
 
 		_savedPositionOfScaledTexture = _positionOfScaledTexture;
 
@@ -1363,11 +1366,11 @@ namespace game
 
 			enginePointer->commandList->SetGraphicsRootDescriptorTable(0, _frameBuffer[_currentBuffer].srvHeap->GetGPUDescriptorHandleForHeapStart());
 
-			enginePointer->commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST); 
-			enginePointer->commandList->IASetVertexBuffers(0, 1, &_vertexBufferView);
-			enginePointer->commandList->IASetIndexBuffer(&_indexBufferView);
-			enginePointer->commandList->DrawIndexedInstanced(6, 1, 0, 0, 0);
-			//enginePointer->commandList->ExecuteBundle(_renderBundle.Get());
+			//enginePointer->commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST); 
+			//enginePointer->commandList->IASetVertexBuffers(0, 1, &_vertexBufferView);
+			//enginePointer->commandList->IASetIndexBuffer(&_indexBufferView);
+			//enginePointer->commandList->DrawIndexedInstanced(6, 1, 0, 0, 0);
+			enginePointer->commandList->ExecuteBundle(_renderBundle.Get());
 		}
 #endif
 
