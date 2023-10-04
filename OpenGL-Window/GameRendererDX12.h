@@ -88,6 +88,7 @@ namespace game
 		void _WaitForPreviousFrame(bool getcurrent);
 	protected:
 		void _ReadExtensions() {};
+		bool _midFrame; // Are we in the middle of a frame? If so end the frame before closing (dx12 does not like that)
 		D3D12_VIEWPORT _viewPort = {}; // area that output from rasterizer will be stretched to.
 		D3D12_RECT _scissorRect = {}; // the area to draw in. pixels outside that area will not be drawn onto
 
@@ -126,10 +127,19 @@ namespace game
 		}
 		_commandList = nullptr;
 		_fenceEvent = nullptr;
+		_midFrame = false;
 	}
 
 	inline void RendererDX12::DestroyDevice()
 	{
+		// Not sure how we are getting here mid frame, but we are, so make sure we finish executing
+		// command list
+		if (_midFrame)
+		{
+			EndFrame();
+			Swap();
+			//_WaitForPreviousFrame(true);
+		}
 		// get swapchain out of full screen before exiting
 		BOOL fs = false;
 		if (_swapChain)
@@ -155,6 +165,7 @@ namespace game
 		//}
 
 		CloseHandle(_fenceEvent);
+		_fenceEvent = nullptr;
 	}
 
 	inline bool RendererDX12::CreateDevice(Window& window)
@@ -441,6 +452,10 @@ namespace game
 		// We have to wait for the gpu to finish with the command allocator before we reset it
 		_WaitForPreviousFrame(true);
 
+		// Starting a frame, want to make sure we end it before closing application, dx12 can throw and error if
+		// a command list is not used
+		_midFrame = true;
+
 		// we can only reset an allocator once the gpu is done with it
 		// resetting an allocator frees the memory that the command list was stored in
 		if (FAILED(_commandAllocator[_frameIndex]->Reset()))
@@ -526,6 +541,7 @@ namespace game
 			//Running = false;
 		}
 		//_WaitForPreviousFrame(true);
+		_midFrame = false;
 	}
 
 	inline bool RendererDX12::LoadShader(const std::string vertex, const std::string fragment, Shader& shader)

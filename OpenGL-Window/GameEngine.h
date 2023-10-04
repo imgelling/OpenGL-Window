@@ -363,6 +363,7 @@ namespace game
 
 		// Clean up end user stuff
 		Shutdown();
+		_renderer->DestroyDevice();
 	}
 
 	inline void Engine::geStopEngine()
