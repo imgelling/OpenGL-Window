@@ -146,13 +146,13 @@ namespace game
 		_vertex12 _quadVertices12[4] =
 		{
 			// tl
-			{0.0f, 1.0f, 0.1f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f},
+			{0.0f, 1.0f, 0.1f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f},
 			// tr
-			{0.5f, -0.5f, 0.1f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f},
+			{0.5f, -0.5f, 0.1f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f},
 			// bl
-			{-0.5f, -0.5f, 0.1f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f},
+			{-0.5f, -0.5f, 0.1f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f},
 			// br
-			{0.5f, 0.5f, 0.1f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f},
+			{0.5f, 0.5f, 0.1f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f},
 		};
 		Shader _pixelModeShader12;
 		Microsoft::WRL::ComPtr<ID3D12PipelineState> _pipelineStateObject; 
@@ -608,18 +608,18 @@ namespace game
 			psoDesc.SampleDesc = { 1, 0 };
 			psoDesc.SampleMask = 0xffffffff; 
 			D3D12_RASTERIZER_DESC rasterDesc = CD3DX12_RASTERIZER_DESC(D3D12_DEFAULT);
-			rasterDesc.FrontCounterClockwise = TRUE;
+			//rasterDesc.FrontCounterClockwise = FALSE;
 			psoDesc.RasterizerState = rasterDesc;
 			psoDesc.BlendState = CD3DX12_BLEND_DESC(D3D12_DEFAULT);
-			//const D3D12_RENDER_TARGET_BLEND_DESC defaultRenderTargetBlendDesc =
-			//{
-			//	FALSE,FALSE,
-			//	D3D12_BLEND_ONE, D3D12_BLEND_ZERO, D3D12_BLEND_OP_ADD,
-			//	D3D12_BLEND_ONE, D3D12_BLEND_ZERO, D3D12_BLEND_OP_ADD,
-			//	D3D12_LOGIC_OP_NOOP,
-			//	D3D12_COLOR_WRITE_ENABLE_ALL,
-			//};
-			//psoDesc.BlendState.RenderTarget[0] = defaultRenderTargetBlendDesc;
+			const D3D12_RENDER_TARGET_BLEND_DESC defaultRenderTargetBlendDesc =
+			{
+				TRUE,FALSE,
+				D3D12_BLEND_SRC_ALPHA, D3D12_BLEND_INV_SRC_ALPHA, D3D12_BLEND_OP_ADD,
+				D3D12_BLEND_SRC_ALPHA, D3D12_BLEND_INV_SRC_ALPHA, D3D12_BLEND_OP_ADD,
+				D3D12_LOGIC_OP_NOOP,
+				D3D12_COLOR_WRITE_ENABLE_ALL,
+			};
+			psoDesc.BlendState.RenderTarget[0] = defaultRenderTargetBlendDesc;
 			psoDesc.NumRenderTargets = 1;
 			psoDesc.Flags = D3D12_PIPELINE_STATE_FLAG_NONE;
 
@@ -1104,8 +1104,8 @@ namespace game
 			_positionOfScaledTexture.y = (_positionOfScaledTexture.y * 2.0f / (float_t)_windowSize.height) - 1.0f;
 			_sizeOfScaledTexture.width = ((float_t)_sizeOfScaledTexture.width * 2.0f / (float_t)_windowSize.width) - 1.0f;
 			_sizeOfScaledTexture.height = ((float_t)_sizeOfScaledTexture.height * 2.0f / (float_t)_windowSize.height) - 1.0f;
-			//_positionOfScaledTexture.y = -_positionOfScaledTexture.y;
-			//_sizeOfScaledTexture.height = -_sizeOfScaledTexture.height;
+			_positionOfScaledTexture.y = -_positionOfScaledTexture.y;
+			_sizeOfScaledTexture.height = -_sizeOfScaledTexture.height;
 
 			// tl -1,1
 			_quadVertices12[0].x = _positionOfScaledTexture.x;

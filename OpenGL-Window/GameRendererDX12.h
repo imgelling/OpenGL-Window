@@ -80,12 +80,12 @@ namespace game
 
 		Microsoft::WRL::ComPtr<ID3D12Fence> _fence[frameBufferCount];    // an object that is locked while our command list is being executed by the gpu. We need as many 
 		//as we have allocators (more if we want to know when the gpu is finished with an asset)
+		Microsoft::WRL::ComPtr<ID3D12CommandAllocator> _commandAllocator[frameBufferCount]; // we want enough allocators for each buffer * number of threads (we only have one thread)
 		HANDLE _fenceEvent; // a handle to an event when our fence is unlocked by the gpu
 		uint64_t _fenceValue[frameBufferCount]; // this value is incremented each frame. each fence will have its own value
 		uint32_t _frameIndex; // current rtv we are on
-		void _WaitForPreviousFrame(bool getcurrent);
+		void _WaitForPreviousFrame(bool nextFrame);
 	protected:
-		Microsoft::WRL::ComPtr<ID3D12CommandAllocator> _commandAllocator[frameBufferCount]; // we want enough allocators for each buffer * number of threads (we only have one thread)
 		void _ReadExtensions() {};
 		bool _midFrame; // Are we in the middle of a frame? If so end the frame before closing (dx12 does not like that)
 		D3D12_VIEWPORT _viewPort = {}; // area that output from rasterizer will be stretched to.
