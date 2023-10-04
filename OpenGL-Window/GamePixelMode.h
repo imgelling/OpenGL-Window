@@ -838,7 +838,7 @@ namespace game
 #endif
 
 		// Scale the texture to window size
-		_ScaleQuadToWindow();
+		//_ScaleQuadToWindow();
 		return true;
 	}
 

@@ -1,5 +1,5 @@
 // Engine header
-//#define GAME_USE_DEDICATED_GPU
+#define GAME_USE_DEDICATED_GPU
 //#define GAME_ENABLE_NETWORKING
 //#define GAME_ENABLE_SHADERS
 //#define GAME_SUPPORT_DIRECTX9
@@ -59,7 +59,7 @@ public:
 		attributes.UpdateLock = MAX_UPDATES;
 		attributes.VsyncOn = false;
 		attributes.DebugMode = true;
-		attributes.MultiSamples = 8;
+		attributes.MultiSamples = 8; // Not implemented in most of DX
 		//attributes.RenderingAPI = game::RenderAPI::DirectX9; 
 		//attributes.RenderingAPI = game::RenderAPI::DirectX10;
 		//attributes.RenderingAPI = game::RenderAPI::DirectX11;
@@ -230,7 +230,6 @@ public:
 #if defined(GAME_DIRECTX11)
 		if (geIsUsing(GAME_DIRECTX11))
 		{
-			float color[4] = { 0.25f, 0.25f, 0.25f, 1.0f };
 			d3d11DeviceContext->ClearRenderTargetView(d3d11RenderTarget, game::Colors::DarkGray.rgba);
 			d3d11DeviceContext->ClearDepthStencilView(d3d11DepthStencilView, D3D10_CLEAR_DEPTH | D3D10_CLEAR_STENCIL, 1.0f, 0);
 		}

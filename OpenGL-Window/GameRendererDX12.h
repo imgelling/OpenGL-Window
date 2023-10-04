@@ -267,6 +267,7 @@ namespace game
 
 				pInfoQueue->PushStorageFilter(&NewFilter);
 				pInfoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_WARNING, TRUE);
+				pInfoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_ERROR, TRUE);
 				pInfoQueue->Release();
 			}
 		}
@@ -400,7 +401,7 @@ namespace game
 		return true;
 	};
 
-	inline void RendererDX12::_WaitForPreviousFrame(bool getcurrent)
+	inline void RendererDX12::_WaitForPreviousFrame(bool nextFrame)
 	{
 		HRESULT hr;
 // WAITING FOR THE FRAME TO COMPLETE BEFORE CONTINUING IS NOT BEST PRACTICE.
@@ -408,12 +409,10 @@ namespace game
 // sample illustrates how to use fences for efficient resource usage and to
 // maximize GPU utilization.
 
-		// swap the current rtv buffer index so we draw on the correct buffer
-		if (getcurrent)
+		// Make sure we have the current back buffer being drawn to
+		if (nextFrame)
 			_frameIndex = _swapChain->GetCurrentBackBufferIndex();
 
-		// if the current fence value is still less than "fenceValue", then we know the GPU has not finished executing
-		// the command queue since it has not reached the "commandQueue->Signal(fence, fenceValue)" command
 		if (_fence[_frameIndex]->GetCompletedValue() < _fenceValue[_frameIndex])
 		{
 			// we have the fence create an event which is signaled once the fence's current value is "fenceValue"
@@ -421,7 +420,6 @@ namespace game
 			if (FAILED(hr))
 			{
 				lastError = { GameErrors::GameDirectX12Specific,"Fence event completion failed." };
-				//enginePointer->geLogLastError();// Running = false;
 			}
 
 			// We will wait until the fence has triggered the event that it's current value has reached "fenceValue". once it's value
@@ -429,10 +427,13 @@ namespace game
 			WaitForSingleObject(_fenceEvent, INFINITE);
 		}
 
-		// increment fenceValue for next frame
-		_fenceValue[_frameIndex]++;
-		if (getcurrent)
+		// Increment the fence for next frame
+		// and get the current back buffer again incase there was a swap
+		if (nextFrame)
+		{
+			_fenceValue[_frameIndex]++;
 			_frameIndex = _swapChain->GetCurrentBackBufferIndex();
+		}
 	}
 
 	inline void RendererDX12::StartFrame()
