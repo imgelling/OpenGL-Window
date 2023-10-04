@@ -76,7 +76,6 @@ namespace game
 		void EndFrame();
 		void GetDevice(Microsoft::WRL::ComPtr<ID3D12Device2> &d3d12Device, Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> &commandList, Microsoft::WRL::ComPtr <ID3D12CommandQueue> &commandQueue);
 
-		//void Clear();
 		CD3DX12_CPU_DESCRIPTOR_HANDLE currentFrameBuffer;
 
 		Microsoft::WRL::ComPtr<ID3D12Fence> _fence[frameBufferCount];    // an object that is locked while our command list is being executed by the gpu. We need as many 
@@ -84,9 +83,9 @@ namespace game
 		HANDLE _fenceEvent; // a handle to an event when our fence is unlocked by the gpu
 		uint64_t _fenceValue[frameBufferCount]; // this value is incremented each frame. each fence will have its own value
 		uint32_t _frameIndex; // current rtv we are on
-		Microsoft::WRL::ComPtr<ID3D12CommandAllocator> _commandAllocator[frameBufferCount]; // we want enough allocators for each buffer * number of threads (we only have one thread)
 		void _WaitForPreviousFrame(bool getcurrent);
 	protected:
+		Microsoft::WRL::ComPtr<ID3D12CommandAllocator> _commandAllocator[frameBufferCount]; // we want enough allocators for each buffer * number of threads (we only have one thread)
 		void _ReadExtensions() {};
 		bool _midFrame; // Are we in the middle of a frame? If so end the frame before closing (dx12 does not like that)
 		D3D12_VIEWPORT _viewPort = {}; // area that output from rasterizer will be stretched to.

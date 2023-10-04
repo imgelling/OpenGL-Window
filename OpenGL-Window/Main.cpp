@@ -1,5 +1,5 @@
 // Engine header
-#define GAME_USE_DEDICATED_GPU
+//#define GAME_USE_DEDICATED_GPU
 //#define GAME_ENABLE_NETWORKING
 //#define GAME_ENABLE_SHADERS
 //#define GAME_SUPPORT_DIRECTX9
@@ -60,9 +60,9 @@ public:
 		attributes.VsyncOn = false;
 		attributes.DebugMode = true;
 		attributes.MultiSamples = 8; // Not implemented in most of DX
-		//attributes.RenderingAPI = game::RenderAPI::DirectX9; 
-		//attributes.RenderingAPI = game::RenderAPI::DirectX10;
-		//attributes.RenderingAPI = game::RenderAPI::DirectX11;
+		attributes.RenderingAPI = game::RenderAPI::DirectX9; 
+		attributes.RenderingAPI = game::RenderAPI::DirectX10;
+		attributes.RenderingAPI = game::RenderAPI::DirectX11;
 		attributes.RenderingAPI = game::RenderAPI::DirectX12;
 		//attributes.RenderingAPI = game::RenderAPI::OpenGL;
 		
