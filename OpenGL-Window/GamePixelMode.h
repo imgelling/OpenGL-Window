@@ -146,11 +146,11 @@ namespace game
 		_vertex12 _quadVertices12[4] =
 		{
 			// tl
-			{0.0f, 1.0f, 0.1f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f},
+			{0.0f, 1.0f, 0.1f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f},
 			// tr
-			{0.5f, -0.5f, 0.1f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f, 1.0f},
+			{0.5f, -0.5f, 0.1f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f},
 			// bl
-			{-0.5f, -0.5f, 0.1f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f},
+			{-0.5f, -0.5f, 0.1f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f},
 			// br
 			{0.5f, 0.5f, 0.1f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f},
 		};
@@ -611,6 +611,15 @@ namespace game
 			rasterDesc.FrontCounterClockwise = TRUE;
 			psoDesc.RasterizerState = rasterDesc;
 			psoDesc.BlendState = CD3DX12_BLEND_DESC(D3D12_DEFAULT);
+			//const D3D12_RENDER_TARGET_BLEND_DESC defaultRenderTargetBlendDesc =
+			//{
+			//	FALSE,FALSE,
+			//	D3D12_BLEND_ONE, D3D12_BLEND_ZERO, D3D12_BLEND_OP_ADD,
+			//	D3D12_BLEND_ONE, D3D12_BLEND_ZERO, D3D12_BLEND_OP_ADD,
+			//	D3D12_LOGIC_OP_NOOP,
+			//	D3D12_COLOR_WRITE_ENABLE_ALL,
+			//};
+			//psoDesc.BlendState.RenderTarget[0] = defaultRenderTargetBlendDesc;
 			psoDesc.NumRenderTargets = 1;
 			psoDesc.Flags = D3D12_PIPELINE_STATE_FLAG_NONE;
 
