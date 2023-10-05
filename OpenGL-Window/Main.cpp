@@ -175,8 +175,7 @@ public:
 		pixelMode.VerticalPillClip(scaledMousePos.x, scaledMousePos.y, 38, 4, game::Colors::White);
 
 		// Weird diagonal
-		game::Color test(1.0f, 0.0f, 1.0f, 0.1f);
-		pixelMode.LineClip(-20, -10, scaledMousePos.x, scaledMousePos.y, test);// game::Colors::Pink);
+		pixelMode.LineClip(-20, -10, scaledMousePos.x, scaledMousePos.y, game::Colors::Pink);
 
 		// Rectangle
 		game::Recti rect;

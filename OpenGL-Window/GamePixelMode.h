@@ -695,8 +695,6 @@ namespace game
 			RendererDX12* temp = enginePointer->geGetRenderer();
 
 
-
-
 			// resets the command list -----------------------------
 			if (FAILED(temp->_commandAllocator[temp->_frameIndex]->Reset()))
 			{
@@ -799,23 +797,23 @@ namespace game
 			srvDesc.Texture2D.MipLevels = 1;
 			enginePointer->d3d12Device->CreateShaderResourceView(_frameBuffer[0].textureResource12.Get(), &srvDesc, _frameBuffer[0].srvHeap->GetCPUDescriptorHandleForHeapStart());
 
-			srvDesc = {};
-			srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-			// needs to be saved in texture 2d
-			textureDesc = {};
-			textureDesc.MipLevels = 1;
-			textureDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-			textureDesc.Width = _frameBuffer[1].width;
-			textureDesc.Height = _frameBuffer[1].height;
-			textureDesc.Flags = D3D12_RESOURCE_FLAG_NONE;
-			textureDesc.DepthOrArraySize = 1;
-			textureDesc.SampleDesc.Count = 1;
-			textureDesc.SampleDesc.Quality = 0;
-			textureDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
-			srvDesc.Format = textureDesc.Format;
-			srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
-			srvDesc.Texture2D.MipLevels = 1;
-			enginePointer->d3d12Device->CreateShaderResourceView(_frameBuffer[1].textureResource12.Get(), &srvDesc, _frameBuffer[1].srvHeap->GetCPUDescriptorHandleForHeapStart());
+			//srvDesc = {};
+			//srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+			//// needs to be saved in texture 2d
+			//textureDesc = {};
+			//textureDesc.MipLevels = 1;
+			//textureDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+			//textureDesc.Width = _frameBuffer[1].width;
+			//textureDesc.Height = _frameBuffer[1].height;
+			//textureDesc.Flags = D3D12_RESOURCE_FLAG_NONE;
+			//textureDesc.DepthOrArraySize = 1;
+			//textureDesc.SampleDesc.Count = 1;
+			//textureDesc.SampleDesc.Quality = 0;
+			//textureDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
+			//srvDesc.Format = textureDesc.Format;
+			//srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
+			//srvDesc.Texture2D.MipLevels = 1;
+			//enginePointer->d3d12Device->CreateShaderResourceView(_frameBuffer[1].textureResource12.Get(), &srvDesc, _frameBuffer[1].srvHeap->GetCPUDescriptorHandleForHeapStart());
 
 
 			// Record render bundle

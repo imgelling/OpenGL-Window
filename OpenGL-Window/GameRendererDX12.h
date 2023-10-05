@@ -183,7 +183,6 @@ namespace game
 		// Enable debug mode if needed
 		if (_attributes.DebugMode)
 		{
-			/*Microsoft::WRL::ComPtr<ID3D12Debug> debugInterface;*/  // Do I need to hold onto this?
 			if (FAILED(D3D12GetDebugInterface(IID_PPV_ARGS(&debugInterface))))
 			{
 				lastError = { GameErrors::GameDirectX12Specific, "Could not get debug layer." };
@@ -248,7 +247,7 @@ namespace game
 
 		if (_attributes.DebugMode)
 		{
-			ID3D12InfoQueue* pInfoQueue = nullptr;
+			Microsoft::WRL::ComPtr<ID3D12InfoQueue> pInfoQueue = nullptr;
 			if (!FAILED(_d3d12Device->QueryInterface(IID_PPV_ARGS(&pInfoQueue))))
 			{
 				// Suppress whole categories of messages.
@@ -278,11 +277,8 @@ namespace game
 				pInfoQueue->PushStorageFilter(&NewFilter);
 				pInfoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_WARNING, TRUE);
 				pInfoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_ERROR, TRUE);
-				pInfoQueue->Release();
 			}
 		}
-
-
 
 		// Create the command queue
 		D3D12_COMMAND_QUEUE_DESC commandQueueDesc = { }; // Use defaults
@@ -291,6 +287,7 @@ namespace game
 			lastError = { GameErrors::GameDirectX12Specific, "Could not create command queue." };
 			return false;
 		}
+		_commandQueue->SetName(L"Renderer Command Queue");
 
 		// Create the swap chain
 		DXGI_MODE_DESC backBufferDesc = {}; 
