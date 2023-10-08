@@ -940,7 +940,7 @@ namespace game
 
 	inline void SpriteBatch::Draw(const Texture2D& texture, const uint32_t x, const uint32_t y, const Color color)
 	{
-		if (_numberOfSpritesUsed + 1 > _maxSprites)
+		if (_numberOfSpritesUsed + 1 >= _maxSprites)
 		{
 			Render();
 		}
@@ -1254,7 +1254,7 @@ namespace game
 
 	inline void SpriteBatch::Draw(const Texture2D& texture, const Recti& destination, const Recti& portion, const Color& color)
 	{
-		if (_numberOfSpritesUsed + 1 > _maxSprites)
+		if (_numberOfSpritesUsed + 1 >= _maxSprites)
 		{
 			Render();
 		}
