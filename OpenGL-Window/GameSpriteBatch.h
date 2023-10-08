@@ -478,9 +478,9 @@ namespace game
 
 			// Create texture sampler 
 			samplerDesc.Filter = D3D10_FILTER_MIN_MAG_MIP_POINT; //D3D10_FILTER_ANISOTROPIC
-			samplerDesc.AddressU = D3D10_TEXTURE_ADDRESS_CLAMP;
-			samplerDesc.AddressV = D3D10_TEXTURE_ADDRESS_CLAMP;
-			samplerDesc.AddressW = D3D10_TEXTURE_ADDRESS_CLAMP;
+			samplerDesc.AddressU = D3D10_TEXTURE_ADDRESS_BORDER;
+			samplerDesc.AddressV = D3D10_TEXTURE_ADDRESS_BORDER;
+			samplerDesc.AddressW = D3D10_TEXTURE_ADDRESS_BORDER;
 			samplerDesc.ComparisonFunc = D3D10_COMPARISON_NEVER;
 			samplerDesc.MinLOD = 0;
 			samplerDesc.MaxLOD = D3D10_FLOAT32_MAX;
@@ -1053,12 +1053,12 @@ namespace game
 			windowSize = enginePointer->geGetWindowSize();
 			// Homogenise coordinates to -1.0f to 1.0f
 			scaledPos.left = ((float_t)x * 2.0f / (float_t)windowSize.width) - 1.0f;
-			scaledPos.top = ((float_t)y * 2.0f / (float_t)windowSize.height) - 1.0f;
+			scaledPos.top = 1.0f - ((float_t)y * 2.0f / (float_t)windowSize.height);// -1.0f;
 			scaledPos.right = (((float_t)x + (float_t)texture.width) * 2.0f / (float)windowSize.width) - 1.0f;
-			scaledPos.bottom = (((float_t)y + (float_t)texture.height) * 2.0f / (float)windowSize.height) - 1.0f;
+			scaledPos.bottom = 1.0f - (((float_t)y + (float_t)texture.height) * 2.0f / (float)windowSize.height);// -1.0f;
 			// Flip the y axis
-			scaledPos.top = -scaledPos.top;
-			scaledPos.bottom = -scaledPos.bottom;
+			//scaledPos.top = -scaledPos.top;
+			//scaledPos.bottom = -scaledPos.bottom;
 
 			// Fill vertices
 
@@ -1327,12 +1327,12 @@ namespace game
 			window = enginePointer->geGetWindowSize();
 			// Homogenise coordinates to -1.0f to 1.0f
 			scaledPosition.left = ((float_t)(destination.left) * 2.0f / (float_t)window.width) - 1.0f;
-			scaledPosition.top = ((float_t)(destination.top) * 2.0f / (float_t)window.height) - 1.0f;
+			scaledPosition.top = 1.0f - ((float_t)(destination.top) * 2.0f / (float_t)window.height);// -1.0f;
 			scaledPosition.right = (((float_t)destination.right) * 2.0f / (float)window.width) - 1.0f;
-			scaledPosition.bottom = (((float_t)destination.bottom) * 2.0f / (float)window.height) - 1.0f;
+			scaledPosition.bottom = 1.0f - (((float_t)destination.bottom) * 2.0f / (float)window.height);// -1.0f;
 			// Flip the y axis
-			scaledPosition.top = -scaledPosition.top;
-			scaledPosition.bottom = -scaledPosition.bottom;
+			//scaledPosition.top = -scaledPosition.top;
+			//scaledPosition.bottom = -scaledPosition.bottom;
 			// Homogenise UV coords to 0.0f - 1.0f
 			scaledUV.left = (float_t)portion.left * texture.oneOverWidth;
 			scaledUV.top = (float_t)portion.top * texture.oneOverHeight;
