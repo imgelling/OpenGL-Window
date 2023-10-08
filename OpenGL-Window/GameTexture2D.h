@@ -32,6 +32,7 @@ namespace game
 #endif
 #if defined(GAME_DIRECTX10)
 		ID3D10Texture2D* textureInterface10;
+		ID3D10ShaderResourceView* textureSRV10;
 #endif
 #if defined(GAME_DIRECTX11)
 		ID3D11Texture2D* textureInterface11;
@@ -75,6 +76,7 @@ namespace game
 #endif
 #if defined(GAME_DIRECTX10)
 		textureInterface10 = nullptr;
+		textureSRV10 = nullptr;
 #endif
 #if defined(GAME_DIRECTX11)
 		textureInterface11 = nullptr;

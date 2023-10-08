@@ -76,6 +76,7 @@ public:
 		Setup();
 
 		// Load sprite texture
+		spriteTexture.isMipMapped = false;
 		if (!geLoadTexture("Content/test.png", spriteTexture))
 		{
 			geLogLastError();

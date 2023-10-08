@@ -332,36 +332,53 @@ namespace game
 		desc.MipLevels = desc.ArraySize = 1; // change for mipmapping
 		desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
 		desc.SampleDesc.Count = 1;
-		desc.Usage = D3D10_USAGE_DYNAMIC;
+		desc.Usage = D3D10_USAGE_DEFAULT;// D3D10_USAGE_DYNAMIC;
 		desc.BindFlags = D3D10_BIND_SHADER_RESOURCE;
-		desc.CPUAccessFlags = D3D10_CPU_ACCESS_WRITE;
+		desc.CPUAccessFlags = 0;// D3D10_CPU_ACCESS_WRITE;
+
+		D3D10_SUBRESOURCE_DATA tex = {};
+		tex.pSysMem = data;
+		tex.SysMemPitch = texture.width * 4;
+		tex.SysMemSlicePitch = tex.SysMemPitch * texture.height;
 
 		// Create texture memory
-		if (FAILED(_d3d10Device->CreateTexture2D(&desc, NULL, &texture.textureInterface10)))
+		if (FAILED(_d3d10Device->CreateTexture2D(&desc, &tex, &texture.textureInterface10)))
 		{
 			lastError = { GameErrors::GameDirectX10Specific, "Could not create texture, \"" + fileName + "\"." };
 			return false;
 		}
 
-		// Copy texture data to the memory
-		if (FAILED(texture.textureInterface10->Map(D3D10CalcSubresource(0, 0, 1), D3D10_MAP_WRITE_DISCARD, 0, &lockedRectangle)))
+		D3D10_SHADER_RESOURCE_VIEW_DESC srDesc = {};
+		srDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+		srDesc.ViewDimension = D3D10_SRV_DIMENSION_TEXTURE2D;
+		srDesc.Texture2D.MostDetailedMip = 0;
+		srDesc.Texture2D.MipLevels = 1;
+		if (FAILED(_d3d10Device->CreateShaderResourceView(texture.textureInterface10, &srDesc, &texture.textureSRV10)))
 		{
-			lastError = { GameErrors::GameDirectX10Specific,"Could not map texture, \"" + fileName + "\"." };
-			UnLoadTexture(texture);
+			lastError = { GameErrors::GameDirectX10Specific, "Could not create texture SRV, \"" + fileName + "\"." };
 			return false;
 		}
-		unsigned char* dest = static_cast<unsigned char*>(lockedRectangle.pData);
-		if (dest != NULL)
-		{
-			memcpy(dest, data, sizeof(unsigned char) * texture.width * texture.height * 4);
-		}
-		texture.textureInterface10->Unmap(D3D10CalcSubresource(0, 0, 1));
+
+		//// Copy texture data to the memory
+		//if (FAILED(texture.textureInterface10->Map(D3D10CalcSubresource(0, 0, 1), D3D10_MAP_WRITE_DISCARD, 0, &lockedRectangle)))
+		//{
+		//	lastError = { GameErrors::GameDirectX10Specific,"Could not map texture, \"" + fileName + "\"." };
+		//	UnLoadTexture(texture);
+		//	return false;
+		//}
+		//unsigned char* dest = static_cast<unsigned char*>(lockedRectangle.pData);
+		//if (dest != NULL)
+		//{
+		//	memcpy(dest, data, sizeof(unsigned char) * texture.width * texture.height * 4);
+		//}
+		//texture.textureInterface10->Unmap(D3D10CalcSubresource(0, 0, 1));
 		return true;
 	}
 
 	inline void RendererDX10::UnLoadTexture(Texture2D& texture)
 	{
 		SAFE_RELEASE(texture.textureInterface10);
+		SAFE_RELEASE(texture.textureSRV10);
 		texture.width = 0;
 		texture.height = 0;
 		texture.oneOverWidth = 0.0f;

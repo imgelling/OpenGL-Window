@@ -85,7 +85,7 @@ namespace game
 		ID3D10Buffer* _indexBuffer10;
 		ID3D10BlendState* _spriteBatchBlendState10;
 		// not sure how to store it, maybe name?
-		std::unordered_map<std::string, ID3D10ShaderResourceView*> _knownTextures10;
+		//std::unordered_map<std::string, ID3D10ShaderResourceView*> _knownTextures10;
 
 		// saves state of dx10 states we change to restore
 		uint32_t _oldStride10;
@@ -252,10 +252,10 @@ namespace game
 			SAFE_RELEASE(_indexBuffer10);
 			SAFE_RELEASE(_spriteBatchBlendState10);
 			enginePointer->geUnLoadShader(_spriteBatchShader10);
-			for (auto& textureIterator : _knownTextures10)
-			{
-				SAFE_RELEASE(textureIterator.second);
-			}
+			//for (auto& textureIterator : _knownTextures10)
+			//{
+			//	SAFE_RELEASE(textureIterator.second);
+			//}
 		}
 #endif
 #if defined (GAME_DIRECTX11)
@@ -1062,32 +1062,33 @@ namespace game
 			{
 				Render();
 				_currentTexture = texture;
-				// Change shader texture to new one
-				auto foundTexture = _knownTextures10.find(texture.name);
-				// Texture is known to us, so use the saved SRV
-				if (foundTexture != _knownTextures10.end())
-				{
-					// SRV has been created before
-					// So use it
-					enginePointer->d3d10Device->PSSetShaderResources(0, 1, &foundTexture->second);
-				}
-				else
-				{
-					// New to us texture,so create a SRV for it and save it
+				enginePointer->d3d10Device->PSSetShaderResources(0, 1, &texture.textureSRV10);
+			//	// Change shader texture to new one
+			//	auto foundTexture = _knownTextures10.find(texture.name);
+			//	// Texture is known to us, so use the saved SRV
+			//	if (foundTexture != _knownTextures10.end())
+			//	{
+			//		// SRV has been created before
+			//		// So use it
+			//		enginePointer->d3d10Device->PSSetShaderResources(0, 1, &foundTexture->second);
+			//	}
+			//	else
+			//	{
+			//		// New to us texture,so create a SRV for it and save it
 
-					ID3D10ShaderResourceView* newTextureSRV;
-					D3D10_SHADER_RESOURCE_VIEW_DESC srDesc = {};
-					srDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-					srDesc.ViewDimension = D3D10_SRV_DIMENSION_TEXTURE2D;
-					srDesc.Texture2D.MostDetailedMip = 0;
-					srDesc.Texture2D.MipLevels = 1;
-					if (FAILED(enginePointer->d3d10Device->CreateShaderResourceView(texture.textureInterface10, &srDesc, &newTextureSRV)))
-					{
-						std::cout << "new texture in render CreateSRV spritebatch failed!\n";
-					}
-					_knownTextures10[texture.name] = newTextureSRV;
-					enginePointer->d3d10Device->PSSetShaderResources(0, 1, &newTextureSRV);
-				}
+			//		ID3D10ShaderResourceView* newTextureSRV;
+			//		D3D10_SHADER_RESOURCE_VIEW_DESC srDesc = {};
+			//		srDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+			//		srDesc.ViewDimension = D3D10_SRV_DIMENSION_TEXTURE2D;
+			//		srDesc.Texture2D.MostDetailedMip = 0;
+			//		srDesc.Texture2D.MipLevels = 1;
+			//		if (FAILED(enginePointer->d3d10Device->CreateShaderResourceView(texture.textureInterface10, &srDesc, &newTextureSRV)))
+			//		{
+			//			std::cout << "new texture in render CreateSRV spritebatch failed!\n";
+			//		}
+			//		_knownTextures10[texture.name] = newTextureSRV;
+			//		enginePointer->d3d10Device->PSSetShaderResources(0, 1, &newTextureSRV);
+			//	}
 			}
 
 			access = &_spriteVertices10[_numberOfSpritesUsed * 4];
@@ -1377,39 +1378,40 @@ namespace game
 			{
 				Render();
 				_currentTexture = texture;
+				enginePointer->d3d10Device->PSSetShaderResources(0, 1, &_currentTexture.textureSRV10);
 				// Change shader texture to new one
-				auto foundTexture = _knownTextures10.find(texture.name);
-				// Texture is known to us, so use the saved SRV
-				if (foundTexture != _knownTextures10.end())
-				{
-					// Resource view has been created
-					// So use it
-					enginePointer->d3d10Device->PSSetShaderResources(0, 1, &foundTexture->second);
-				}
-				else
-				{
-					// New to us texture,so create a SRV for it and save it
+				//auto foundTexture = _knownTextures10.find(texture.name);
+				//// Texture is known to us, so use the saved SRV
+				//if (foundTexture != _knownTextures10.end())
+				//{
+				//	// Resource view has been created
+				//	// So use it
+				//	enginePointer->d3d10Device->PSSetShaderResources(0, 1, &foundTexture->second);
+				//}
+				//else
+				//{
+				//	// New to us texture,so create a SRV for it and save it
 
-					ID3D10ShaderResourceView* newTextureSRV;
-					D3D10_SHADER_RESOURCE_VIEW_DESC srDesc = {};
-					srDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-					srDesc.ViewDimension = D3D10_SRV_DIMENSION_TEXTURE2D;
-					srDesc.Texture2D.MostDetailedMip = 0;
-					srDesc.Texture2D.MipLevels = 1;
-					if (FAILED(enginePointer->d3d10Device->CreateShaderResourceView(texture.textureInterface10, &srDesc, &newTextureSRV)))
-					{
-						std::cout << "CreateSRV spritebatch failed!\n";
-					}
-					_knownTextures10[texture.name] = newTextureSRV;
-					enginePointer->d3d10Device->PSSetShaderResources(0, 1, &newTextureSRV);
-				}
+				//	ID3D10ShaderResourceView* newTextureSRV;
+				//	D3D10_SHADER_RESOURCE_VIEW_DESC srDesc = {};
+				//	srDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+				//	srDesc.ViewDimension = D3D10_SRV_DIMENSION_TEXTURE2D;
+				//	srDesc.Texture2D.MostDetailedMip = 0;
+				//	srDesc.Texture2D.MipLevels = 1;
+				//	if (FAILED(enginePointer->d3d10Device->CreateShaderResourceView(texture.textureInterface10, &srDesc, &newTextureSRV)))
+				//	{
+				//		std::cout << "CreateSRV spritebatch failed!\n";
+				//	}
+				//	_knownTextures10[texture.name] = newTextureSRV;
+				//	enginePointer->d3d10Device->PSSetShaderResources(0, 1, &newTextureSRV);
+				//}
 			}
 
 			access = &_spriteVertices10[_numberOfSpritesUsed * 4];
 			window = enginePointer->geGetWindowSize();
 			// Homogenise coordinates to -1.0f to 1.0f
-			scaledPosition.left = ((float_t)destination.left * 2.0f / (float_t)window.width) - 1.0f;
-			scaledPosition.top = ((float_t)destination.top * 2.0f / (float_t)window.height) - 1.0f;
+			scaledPosition.left = ((float_t)(destination.left) * 2.0f / (float_t)window.width) - 1.0f;
+			scaledPosition.top = ((float_t)(destination.top) * 2.0f / (float_t)window.height) - 1.0f;
 			scaledPosition.right = (((float_t)destination.right) * 2.0f / (float)window.width) - 1.0f;
 			scaledPosition.bottom = (((float_t)destination.bottom) * 2.0f / (float)window.height) - 1.0f;
 			// Flip the y axis
