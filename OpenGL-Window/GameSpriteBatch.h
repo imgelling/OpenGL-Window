@@ -497,8 +497,8 @@ namespace game
 			blendStateDesc.SrcBlend = D3D10_BLEND_SRC_ALPHA;
 			blendStateDesc.DestBlend = D3D10_BLEND_INV_SRC_ALPHA;
 			blendStateDesc.BlendOp = D3D10_BLEND_OP_ADD;
-			blendStateDesc.SrcBlendAlpha = D3D10_BLEND_SRC_ALPHA;
-			blendStateDesc.DestBlendAlpha = D3D10_BLEND_INV_SRC_ALPHA;
+			blendStateDesc.SrcBlendAlpha = D3D10_BLEND_ONE;// SRC_ALPHA;
+			blendStateDesc.DestBlendAlpha = D3D10_BLEND_ZERO;// INV_SRC_ALPHA;
 			blendStateDesc.BlendOpAlpha = D3D10_BLEND_OP_ADD;
 			blendStateDesc.RenderTargetWriteMask[0] = D3D10_COLOR_WRITE_ENABLE_ALL;
 			if (FAILED(enginePointer->d3d10Device->CreateBlendState(&blendStateDesc, &_spriteBatchBlendState10)))
@@ -1025,14 +1025,6 @@ namespace game
 			access->color = color.packedARGB;
 			access++;
 
-			//// Top right
-			//access->x = (float_t)x + (float_t)texture.width;
-			//access->y = (float_t)y;
-			//access->u = 1.0f;
-			//access->v = 0.0f;
-			//access->color = color.packedARGB;
-			//access++;
-
 			// Bottom right
 			access->x = (float_t)x + (float_t)texture.width;
 			access->y = (float_t)y + (float_t)texture.height;
@@ -1040,14 +1032,6 @@ namespace game
 			access->v = 1.0f;
 			access->color = color.packedARGB;
 			access++;
-
-			//// Bottom left
-			//access->x = (float_t)x;
-			//access->y = (float_t)y + (float_t)texture.height;
-			//access->u = 0.0f;
-			//access->v = 1.0f;
-			//access->color = color.packedARGB;
-			//access++;
 		}
 #endif
 #if defined (GAME_DIRECTX10)
@@ -1063,32 +1047,6 @@ namespace game
 				Render();
 				_currentTexture = texture;
 				enginePointer->d3d10Device->PSSetShaderResources(0, 1, &texture.textureSRV10);
-			//	// Change shader texture to new one
-			//	auto foundTexture = _knownTextures10.find(texture.name);
-			//	// Texture is known to us, so use the saved SRV
-			//	if (foundTexture != _knownTextures10.end())
-			//	{
-			//		// SRV has been created before
-			//		// So use it
-			//		enginePointer->d3d10Device->PSSetShaderResources(0, 1, &foundTexture->second);
-			//	}
-			//	else
-			//	{
-			//		// New to us texture,so create a SRV for it and save it
-
-			//		ID3D10ShaderResourceView* newTextureSRV;
-			//		D3D10_SHADER_RESOURCE_VIEW_DESC srDesc = {};
-			//		srDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-			//		srDesc.ViewDimension = D3D10_SRV_DIMENSION_TEXTURE2D;
-			//		srDesc.Texture2D.MostDetailedMip = 0;
-			//		srDesc.Texture2D.MipLevels = 1;
-			//		if (FAILED(enginePointer->d3d10Device->CreateShaderResourceView(texture.textureInterface10, &srDesc, &newTextureSRV)))
-			//		{
-			//			std::cout << "new texture in render CreateSRV spritebatch failed!\n";
-			//		}
-			//		_knownTextures10[texture.name] = newTextureSRV;
-			//		enginePointer->d3d10Device->PSSetShaderResources(0, 1, &newTextureSRV);
-			//	}
 			}
 
 			access = &_spriteVertices10[_numberOfSpritesUsed * 4];
@@ -1340,14 +1298,6 @@ namespace game
 			access->color = color.packedARGB;
 			access++;
 
-			//// Top right
-			//access->x = (float_t)destination.right - texture.oneOverWidth;
-			//access->y = (float_t)destination.y - texture.oneOverHeight;
-			//access->u = (float_t)portion.right * texture.oneOverWidth;// 1.0f;
-			//access->v = (float_t)portion.y * texture.oneOverHeight;
-			//access->color = color.packedARGB;
-			//access++;
-
 			// Bottom right
 			access->x = (float_t)destination.right - texture.oneOverWidth;
 			access->y = (float_t)destination.bottom - texture.oneOverHeight;
@@ -1355,14 +1305,6 @@ namespace game
 			access->v = (float_t)portion.bottom * texture.oneOverHeight;
 			access->color = color.packedARGB;
 			access++;
-
-			//// Bottom left
-			//access->x = (float_t)destination.x - texture.oneOverWidth;
-			//access->y = (float_t)destination.bottom - texture.oneOverHeight;
-			//access->u = (float_t)portion.x * texture.oneOverWidth;
-			//access->v = (float_t)portion.bottom * texture.oneOverHeight;
-			//access->color = color.packedARGB;
-
 		}
 #endif
 #if defined (GAME_DIRECTX10)
@@ -1379,32 +1321,6 @@ namespace game
 				Render();
 				_currentTexture = texture;
 				enginePointer->d3d10Device->PSSetShaderResources(0, 1, &_currentTexture.textureSRV10);
-				// Change shader texture to new one
-				//auto foundTexture = _knownTextures10.find(texture.name);
-				//// Texture is known to us, so use the saved SRV
-				//if (foundTexture != _knownTextures10.end())
-				//{
-				//	// Resource view has been created
-				//	// So use it
-				//	enginePointer->d3d10Device->PSSetShaderResources(0, 1, &foundTexture->second);
-				//}
-				//else
-				//{
-				//	// New to us texture,so create a SRV for it and save it
-
-				//	ID3D10ShaderResourceView* newTextureSRV;
-				//	D3D10_SHADER_RESOURCE_VIEW_DESC srDesc = {};
-				//	srDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-				//	srDesc.ViewDimension = D3D10_SRV_DIMENSION_TEXTURE2D;
-				//	srDesc.Texture2D.MostDetailedMip = 0;
-				//	srDesc.Texture2D.MipLevels = 1;
-				//	if (FAILED(enginePointer->d3d10Device->CreateShaderResourceView(texture.textureInterface10, &srDesc, &newTextureSRV)))
-				//	{
-				//		std::cout << "CreateSRV spritebatch failed!\n";
-				//	}
-				//	_knownTextures10[texture.name] = newTextureSRV;
-				//	enginePointer->d3d10Device->PSSetShaderResources(0, 1, &newTextureSRV);
-				//}
 			}
 
 			access = &_spriteVertices10[_numberOfSpritesUsed * 4];
@@ -1434,7 +1350,6 @@ namespace game
 			access->g = color.gf;
 			access->b = color.bf;
 			access->a = color.af;
-
 			access++;
 
 			// Top right
@@ -1468,7 +1383,6 @@ namespace game
 			access->g = color.gf;
 			access->b = color.bf;
 			access->a = color.af;
-			access++;
 		}
 #endif
 #if defined (GAME_DIRECTX11)
