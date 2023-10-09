@@ -71,7 +71,8 @@ namespace game
 		std::size_t index;
 		std::ifstream stream;
 
-		_texture.filterType = TextureFilterType::Point;
+		//_texture.isMipMapped = false;
+		//_texture.filterType = TextureFilterType::Point;
 		if (!enginePointer->geLoadTexture(texture, _texture))
 		{
 			lastError = { GameErrors::GameContent, "Could not load \"" + texture + "\" for SpriteFont." };

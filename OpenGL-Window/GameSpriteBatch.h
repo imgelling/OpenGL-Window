@@ -716,6 +716,7 @@ namespace game
 		{
 			// Save states? thist
 			glEnable(GL_TEXTURE_2D);
+			
 			// and texture bound to it
 		}
 #endif

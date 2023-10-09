@@ -92,8 +92,8 @@ namespace game
 		name = "NULL";
 
 		// Attributes of texture filtering
-		isMipMapped = true;
-		filterType = TextureFilterType::Trilinear;
+		isMipMapped = false;
+		filterType = TextureFilterType::Point;
 		anisotropyLevel = 1;
 	}
 }
