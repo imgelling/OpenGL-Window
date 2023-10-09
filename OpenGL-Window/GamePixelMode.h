@@ -1029,11 +1029,11 @@ namespace game
 		{
 			// Homoginize the scaled rect to -1 to 1 range using
 			_positionOfScaledTexture.x = (_positionOfScaledTexture.x * 2.0f / (float_t)_windowSize.width) - 1.0f;
-			_positionOfScaledTexture.y = (_positionOfScaledTexture.y * 2.0f / (float_t)_windowSize.height) - 1.0f;
+			_positionOfScaledTexture.y = 1.0f - (_positionOfScaledTexture.y * 2.0f / (float_t)_windowSize.height);// -1.0f;
 			_sizeOfScaledTexture.width = ((float_t)_sizeOfScaledTexture.width * 2.0f / (float_t)_windowSize.width) - 1.0f;
-			_sizeOfScaledTexture.height = ((float_t)_sizeOfScaledTexture.height * 2.0f / (float_t)_windowSize.height) - 1.0f;
-			_positionOfScaledTexture.y = -_positionOfScaledTexture.y;
-			_sizeOfScaledTexture.height = -_sizeOfScaledTexture.height;
+			_sizeOfScaledTexture.height = 1.0f - ((float_t)_sizeOfScaledTexture.height * 2.0f / (float_t)_windowSize.height);// -1.0f;
+			//_positionOfScaledTexture.y = -_positionOfScaledTexture.y;
+			//_sizeOfScaledTexture.height = -_sizeOfScaledTexture.height;
 
 			// tl
 			_quadVertices10[0].x = _positionOfScaledTexture.x;
@@ -1060,11 +1060,11 @@ namespace game
 		{
 			// Homoginize the scaled rect to -1 to 1 range using
 			_positionOfScaledTexture.x = (_positionOfScaledTexture.x * 2.0f / (float_t)_windowSize.width) - 1.0f;
-			_positionOfScaledTexture.y = (_positionOfScaledTexture.y * 2.0f / (float_t)_windowSize.height) - 1.0f;
+			_positionOfScaledTexture.y = 1.0f - (_positionOfScaledTexture.y * 2.0f / (float_t)_windowSize.height);// -1.0f;
 			_sizeOfScaledTexture.width = ((float_t)_sizeOfScaledTexture.width * 2.0f / (float_t)_windowSize.width) - 1.0f;
-			_sizeOfScaledTexture.height = ((float_t)_sizeOfScaledTexture.height * 2.0f / (float_t)_windowSize.height) - 1.0f;
-			_positionOfScaledTexture.y = -_positionOfScaledTexture.y;
-			_sizeOfScaledTexture.height = -_sizeOfScaledTexture.height;
+			_sizeOfScaledTexture.height = 1.0f - ((float_t)_sizeOfScaledTexture.height * 2.0f / (float_t)_windowSize.height);// -1.0f;
+			//_positionOfScaledTexture.y = -_positionOfScaledTexture.y;
+			//_sizeOfScaledTexture.height = -_sizeOfScaledTexture.height;
 
 			// tl
 			_quadVertices11[0].x = _positionOfScaledTexture.x;
@@ -1099,11 +1099,11 @@ namespace game
 		{
 			// Homoginize the scaled rect to -1 to 1 range using
 			_positionOfScaledTexture.x = (_positionOfScaledTexture.x * 2.0f / (float_t)_windowSize.width) - 1.0f;
-			_positionOfScaledTexture.y = (_positionOfScaledTexture.y * 2.0f / (float_t)_windowSize.height) - 1.0f;
+			_positionOfScaledTexture.y = 1.0f - (_positionOfScaledTexture.y * 2.0f / (float_t)_windowSize.height);// -1.0f;
 			_sizeOfScaledTexture.width = ((float_t)_sizeOfScaledTexture.width * 2.0f / (float_t)_windowSize.width) - 1.0f;
-			_sizeOfScaledTexture.height = ((float_t)_sizeOfScaledTexture.height * 2.0f / (float_t)_windowSize.height) - 1.0f;
-			_positionOfScaledTexture.y = -_positionOfScaledTexture.y;
-			_sizeOfScaledTexture.height = -_sizeOfScaledTexture.height;
+			_sizeOfScaledTexture.height = 1.0f - ((float_t)_sizeOfScaledTexture.height * 2.0f / (float_t)_windowSize.height);// -1.0f;
+			//_positionOfScaledTexture.y = -_positionOfScaledTexture.y;
+			//_sizeOfScaledTexture.height = -_sizeOfScaledTexture.height;
 
 			// tl -1,1
 			_quadVertices12[0].x = _positionOfScaledTexture.x;

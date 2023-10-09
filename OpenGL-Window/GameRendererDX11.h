@@ -335,9 +335,9 @@ namespace game
 		desc.MipLevels = desc.ArraySize = 1; // change for mipmapping
 		desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
 		desc.SampleDesc.Count = 1;
-		desc.Usage = D3D11_USAGE_DYNAMIC;
+		desc.Usage = D3D11_USAGE_DEFAULT;// DYNAMIC;
 		desc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
-		desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+		desc.CPUAccessFlags = 0;// D3D11_CPU_ACCESS_WRITE;
 
 		D3D11_SUBRESOURCE_DATA initialData = { 0 };
 		initialData.pSysMem = data;
@@ -347,6 +347,17 @@ namespace game
 		if (FAILED(_d3d11Device->CreateTexture2D(&desc, &initialData, &texture.textureInterface11)))
 		{
 			lastError = { GameErrors::GameDirectX11Specific, "Could not create texture, \"" + fileName + "\"." };
+			return false;
+		}
+
+		D3D11_SHADER_RESOURCE_VIEW_DESC srDesc = {};
+		srDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+		srDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+		srDesc.Texture2D.MostDetailedMip = 0;
+		srDesc.Texture2D.MipLevels = 1;
+		if (FAILED(_d3d11Device->CreateShaderResourceView(texture.textureInterface11, &srDesc, &texture.textureSRV11)))
+		{
+			lastError = { GameErrors::GameDirectX11Specific, "Could not create texture SRV, \"" + fileName + "\"." };
 			return false;
 		}
 
@@ -385,6 +396,7 @@ namespace game
 	inline void RendererDX11::UnLoadTexture(Texture2D& texture)
 	{
 		SAFE_RELEASE(texture.textureInterface11);
+		SAFE_RELEASE(texture.textureSRV11);
 		//if (texture.textureInterface11)
 		//{
 		//	texture.textureInterface11->Release();

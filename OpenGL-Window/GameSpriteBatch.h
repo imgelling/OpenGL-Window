@@ -478,9 +478,9 @@ namespace game
 
 			// Create texture sampler 
 			samplerDesc.Filter = D3D10_FILTER_MIN_MAG_MIP_POINT; //D3D10_FILTER_ANISOTROPIC
-			samplerDesc.AddressU = D3D10_TEXTURE_ADDRESS_BORDER;
-			samplerDesc.AddressV = D3D10_TEXTURE_ADDRESS_BORDER;
-			samplerDesc.AddressW = D3D10_TEXTURE_ADDRESS_BORDER;
+			samplerDesc.AddressU = D3D10_TEXTURE_ADDRESS_CLAMP;
+			samplerDesc.AddressV = D3D10_TEXTURE_ADDRESS_CLAMP;
+			samplerDesc.AddressW = D3D10_TEXTURE_ADDRESS_CLAMP;
 			samplerDesc.ComparisonFunc = D3D10_COMPARISON_NEVER;
 			samplerDesc.MinLOD = 0;
 			samplerDesc.MaxLOD = D3D10_FLOAT32_MAX;
@@ -1120,44 +1120,17 @@ namespace game
 			{
 				Render();
 				_currentTexture = texture;
-				// Change shader texture to new one
-				auto foundTexture = _knownTextures11.find(texture.name);
-				// Texture is known to us, so use the saved SRV
-				if (foundTexture != _knownTextures11.end())
-				{
-					// SRV has been created before
-					// So use it
-					enginePointer->d3d11DeviceContext->PSSetShaderResources(0, 1, &foundTexture->second);
-				}
-				else
-				{
-					// New to us texture,so create a SRV for it and save it
-
-					ID3D11ShaderResourceView* newTextureSRV;
-					D3D11_SHADER_RESOURCE_VIEW_DESC srDesc = {};
-					srDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-					srDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
-					srDesc.Texture2D.MostDetailedMip = 0;
-					srDesc.Texture2D.MipLevels = 1;
-					if (FAILED(enginePointer->d3d11Device->CreateShaderResourceView(texture.textureInterface11, &srDesc, &newTextureSRV)))
-					{
-						std::cout << "CreateSRV spritebatch failed!\n";
-					}
-					_knownTextures11[texture.name] = newTextureSRV;
-					enginePointer->d3d11DeviceContext->PSSetShaderResources(0, 1, &newTextureSRV);
-				}
+				enginePointer->d3d11DeviceContext->PSSetShaderResources(0, 1, &texture.textureSRV11);
 			}
 
 			access = &_spriteVertices11[_numberOfSpritesUsed * 4];
 			windowSize = enginePointer->geGetWindowSize();
 			// Homogenise coordinates to -1.0f to 1.0f
 			scaledPos.left = ((float_t)x * 2.0f / (float_t)windowSize.width) - 1.0f;
-			scaledPos.top = ((float_t)y * 2.0f / (float_t)windowSize.height) - 1.0f;
+			scaledPos.top = 1.0f - ((float_t)y * 2.0f / (float_t)windowSize.height);// -1.0f;
 			scaledPos.right = (((float_t)x + (float_t)texture.width) * 2.0f / (float)windowSize.width) - 1.0f;
-			scaledPos.bottom = (((float_t)y + (float_t)texture.height) * 2.0f / (float)windowSize.height) - 1.0f;
-			// Flip the y axis
-			scaledPos.top = -scaledPos.top;
-			scaledPos.bottom = -scaledPos.bottom;
+			scaledPos.bottom = 1.0f - (((float_t)y + (float_t)texture.height) * 2.0f / (float)windowSize.height);// -1.0f;
+
 
 			// Fill vertices
 
@@ -1398,44 +1371,16 @@ namespace game
 			{
 				Render();
 				_currentTexture = texture;
-				// Change shader texture to new one
-				auto foundTexture = _knownTextures11.find(texture.name);
-				// Texture is known to us, so use the saved SRV
-				if (foundTexture != _knownTextures11.end())
-				{
-					// Resource view has been created
-					// So use it
-					enginePointer->d3d11DeviceContext->PSSetShaderResources(0, 1, &foundTexture->second);
-				}
-				else
-				{
-					// New to us texture,so create a SRV for it and save it
-
-					ID3D11ShaderResourceView* newTextureSRV;
-					D3D11_SHADER_RESOURCE_VIEW_DESC srDesc = {};
-					srDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-					srDesc.ViewDimension = D3D10_SRV_DIMENSION_TEXTURE2D;
-					srDesc.Texture2D.MostDetailedMip = 0;
-					srDesc.Texture2D.MipLevels = 1;
-					if (FAILED(enginePointer->d3d11Device->CreateShaderResourceView(texture.textureInterface11, &srDesc, &newTextureSRV)))
-					{
-						std::cout << "CreateSRV spritebatch failed!\n";
-					}
-					_knownTextures11[texture.name] = newTextureSRV;
-					enginePointer->d3d11DeviceContext->PSSetShaderResources(0, 1, &newTextureSRV);
-				}
+				enginePointer->d3d11DeviceContext->PSSetShaderResources(0, 1, &texture.textureSRV11);
 			}
 
 			access = &_spriteVertices11[_numberOfSpritesUsed * 4];
 			window = enginePointer->geGetWindowSize();
 			// Homogenise coordinates to -1.0f to 1.0f
 			scaledPosition.left = ((float_t)destination.left * 2.0f / (float_t)window.width) - 1.0f;
-			scaledPosition.top = ((float_t)destination.top * 2.0f / (float_t)window.height) - 1.0f;
+			scaledPosition.top = 1.0f - ((float_t)destination.top * 2.0f / (float_t)window.height);// -1.0f;
 			scaledPosition.right = (((float_t)destination.right) * 2.0f / (float)window.width) - 1.0f;
-			scaledPosition.bottom = (((float_t)destination.bottom) * 2.0f / (float)window.height) - 1.0f;
-			// Flip the y axis
-			scaledPosition.top = -scaledPosition.top;
-			scaledPosition.bottom = -scaledPosition.bottom;
+			scaledPosition.bottom = 1.0f - (((float_t)destination.bottom) * 2.0f / (float)window.height);// -1.0f;
 			// Homogenise UV coords to 0.0f - 1.0f
 			scaledUV.left = (float_t)portion.left * texture.oneOverWidth;
 			scaledUV.top = (float_t)portion.top * texture.oneOverHeight;
