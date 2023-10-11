@@ -60,10 +60,6 @@ namespace game
 			float_t u, v;
 		};
 		_spriteVertex9* _spriteVertices9;
-#endif
-
-
-#if defined(GAME_DIRECTX9)
 		LPDIRECT3DVERTEXBUFFER9 _vertexBuffer9;
 		LPDIRECT3DINDEXBUFFER9 _indexBuffer9;
 		DWORD _savedFVF;
@@ -84,8 +80,7 @@ namespace game
 		ID3D10SamplerState* _textureSamplerState10;
 		ID3D10Buffer* _indexBuffer10;
 		ID3D10BlendState* _spriteBatchBlendState10;
-		// not sure how to store it, maybe name?
-		//std::unordered_map<std::string, ID3D10ShaderResourceView*> _knownTextures10;
+
 
 		// saves state of dx10 states we change to restore
 		uint32_t _oldStride10;
@@ -117,10 +112,8 @@ namespace game
 		ID3D11SamplerState* _textureSamplerState11;
 		ID3D11Buffer* _indexBuffer11;
 		ID3D11BlendState* _spriteBatchBlendState11;
-		// not sure how to store it, maybe name?
-		std::unordered_map<std::string, ID3D11ShaderResourceView*> _knownTextures11;
 
-		// saves state of dx10 states we change to restore
+		// saves state of dx11 states we change to restore
 		uint32_t _oldStride11;
 		uint32_t _oldOffset11;
 		ID3D11Buffer* _oldVertexBuffer11;
@@ -226,11 +219,6 @@ namespace game
 		{
 			SAFE_RELEASE(_vertexBuffer9);
 			SAFE_RELEASE(_indexBuffer9);
-			//if (_vertexBuffer9)
-			//{
-			//	_vertexBuffer9->Release();
-			//	_vertexBuffer9 = nullptr;
-			//}
 			if (_spriteVertices9)
 			{
 				delete[] _spriteVertices9;
@@ -252,10 +240,6 @@ namespace game
 			SAFE_RELEASE(_indexBuffer10);
 			SAFE_RELEASE(_spriteBatchBlendState10);
 			enginePointer->geUnLoadShader(_spriteBatchShader10);
-			//for (auto& textureIterator : _knownTextures10)
-			//{
-			//	SAFE_RELEASE(textureIterator.second);
-			//}
 		}
 #endif
 #if defined (GAME_DIRECTX11)
@@ -272,10 +256,6 @@ namespace game
 			SAFE_RELEASE(_indexBuffer11);
 			SAFE_RELEASE(_spriteBatchBlendState11);
 			enginePointer->geUnLoadShader(_spriteBatchShader11);
-			for (auto& textureIterator : _knownTextures11)
-			{
-				SAFE_RELEASE(textureIterator.second);
-			}
 		}
 #endif
 	}
@@ -328,9 +308,9 @@ namespace game
 			{
 				_spriteVertices10[vertex].x = 0.0f;
 				_spriteVertices10[vertex].y = 0.0f;
-				_spriteVertices10[vertex].z = 0.01f;
-				_spriteVertices10[vertex].u = 0.01f;
-				_spriteVertices10[vertex].v = 0.01f;
+				_spriteVertices10[vertex].z = 0.0f;
+				_spriteVertices10[vertex].u = 0.0f;
+				_spriteVertices10[vertex].v = 0.0f;
 				_spriteVertices10[vertex].r = Colors::White.rf;
 				_spriteVertices10[vertex].g = Colors::White.gf;
 				_spriteVertices10[vertex].b = Colors::White.bf;
@@ -348,9 +328,9 @@ namespace game
 			{
 				_spriteVertices11[vertex].x = 0.0f;
 				_spriteVertices11[vertex].y = 0.0f;
-				_spriteVertices11[vertex].z = 0.01f;
-				_spriteVertices11[vertex].u = 0.01f;
-				_spriteVertices11[vertex].v = 0.01f;
+				_spriteVertices11[vertex].z = 0.0f;
+				_spriteVertices11[vertex].u = 0.0f;
+				_spriteVertices11[vertex].v = 0.0f;
 				_spriteVertices11[vertex].r = Colors::White.rf;
 				_spriteVertices11[vertex].g = Colors::White.gf;
 				_spriteVertices11[vertex].b = Colors::White.bf;
