@@ -329,27 +329,31 @@ namespace game
 		D3D10_TEXTURE2D_DESC desc = { 0 };
 		desc.Width = texture.width;
 		desc.Height = texture.height;
-		desc.MipLevels = 1;// 0 for mipmaps, 1 for not
+		desc.MipLevels = 0;// 0 for mipmaps, 1 for not
 		desc.ArraySize = 1; 
 		desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
 		desc.SampleDesc.Count = 1;
+		desc.SampleDesc.Quality = 0;
 		desc.Usage = D3D10_USAGE_DEFAULT;// D3D10_USAGE_DYNAMIC;
-		desc.BindFlags = D3D10_BIND_SHADER_RESOURCE;// | D3D10_BIND_RENDER_TARGET;
+		desc.BindFlags = D3D10_BIND_SHADER_RESOURCE | D3D10_BIND_RENDER_TARGET;
 		desc.CPUAccessFlags = 0;// D3D10_CPU_ACCESS_WRITE;
-		desc.MiscFlags = 0;// D3D10_RESOURCE_MISC_GENERATE_MIPS;
+		desc.MiscFlags = D3D10_RESOURCE_MISC_GENERATE_MIPS;
 		
 
 		D3D10_SUBRESOURCE_DATA tex = {};
 		tex.pSysMem = data;
-		tex.SysMemPitch = texture.width * 4;
+		tex.SysMemPitch = texture.width * (uint32_t)4 * sizeof(unsigned char);
 		tex.SysMemSlicePitch = 0;// tex.SysMemPitch* texture.height;
 
 		// Create texture memory
-		if (FAILED(_d3d10Device->CreateTexture2D(&desc, &tex, &texture.textureInterface10)))
+		if (FAILED(_d3d10Device->CreateTexture2D(&desc, NULL, &texture.textureInterface10)))
 		{
 			lastError = { GameErrors::GameDirectX10Specific, "Could not create texture, \"" + fileName + "\"." };
 			return false;
 		}
+
+		// Copy data into memory
+		_d3d10Device->UpdateSubresource(texture.textureInterface10, 0, NULL, data, tex.SysMemPitch, 0);
 
 		D3D10_SHADER_RESOURCE_VIEW_DESC srDesc = {};
 		srDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
@@ -362,7 +366,7 @@ namespace game
 			return false;
 		}
 
-		//_d3d10Device->GenerateMips(texture.textureSRV10);
+		_d3d10Device->GenerateMips(texture.textureSRV10);
 
 
 		//// Copy texture data to the memory

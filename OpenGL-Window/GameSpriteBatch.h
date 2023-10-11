@@ -451,7 +451,7 @@ namespace game
 			}
 
 			// Create texture sampler 
-			samplerDesc.Filter = D3D10_FILTER_MIN_MAG_MIP_LINEAR; //D3D10_FILTER_ANISOTROPIC
+			samplerDesc.Filter = D3D10_FILTER_MIN_MAG_MIP_POINT; //D3D10_FILTER_ANISOTROPIC
 			samplerDesc.AddressU = D3D10_TEXTURE_ADDRESS_CLAMP;
 			samplerDesc.AddressV = D3D10_TEXTURE_ADDRESS_CLAMP;
 			samplerDesc.AddressW = D3D10_TEXTURE_ADDRESS_CLAMP;
