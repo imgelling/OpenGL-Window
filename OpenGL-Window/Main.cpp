@@ -76,7 +76,7 @@ public:
 		Setup();
 
 		// Load sprite texture
-		//spriteTexture.isMipMapped = false;
+		spriteTexture.isMipMapped = true;
 		//spriteTexture.filterType = game::TextureFilterType::Point;
 		if (!geLoadTexture("Content/test.png", spriteTexture))
 		{

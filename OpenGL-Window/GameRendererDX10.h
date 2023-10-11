@@ -329,20 +329,23 @@ namespace game
 		D3D10_TEXTURE2D_DESC desc = { 0 };
 		desc.Width = texture.width;
 		desc.Height = texture.height;
-		desc.MipLevels = 0;// 0 for mipmaps, 1 for not
+		desc.MipLevels = texture.isMipMapped ? 0 : 1;// 0 for mipmaps, 1 for not
 		desc.ArraySize = 1; 
 		desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
 		desc.SampleDesc.Count = 1;
 		desc.SampleDesc.Quality = 0;
 		desc.Usage = D3D10_USAGE_DEFAULT;// D3D10_USAGE_DYNAMIC;
-		desc.BindFlags = D3D10_BIND_SHADER_RESOURCE | D3D10_BIND_RENDER_TARGET;
+		desc.BindFlags = D3D10_BIND_SHADER_RESOURCE;
 		desc.CPUAccessFlags = 0;// D3D10_CPU_ACCESS_WRITE;
-		desc.MiscFlags = D3D10_RESOURCE_MISC_GENERATE_MIPS;
-		
+		if (texture.isMipMapped)
+		{ 
+			desc.BindFlags |= D3D10_BIND_RENDER_TARGET;
+			desc.MiscFlags = D3D10_RESOURCE_MISC_GENERATE_MIPS;
+		}		
 
 		D3D10_SUBRESOURCE_DATA tex = {};
 		tex.pSysMem = data;
-		tex.SysMemPitch = texture.width * (uint32_t)4 * sizeof(unsigned char);
+		tex.SysMemPitch = static_cast<unsigned long long>(texture.width) * (uint32_t)4 * sizeof(unsigned char);
 		tex.SysMemSlicePitch = 0;// tex.SysMemPitch* texture.height;
 
 		// Create texture memory
@@ -359,7 +362,7 @@ namespace game
 		srDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
 		srDesc.ViewDimension = D3D10_SRV_DIMENSION_TEXTURE2D;
 		srDesc.Texture2D.MostDetailedMip = 0;
-		srDesc.Texture2D.MipLevels = 1; // -1 for mipmaps
+		srDesc.Texture2D.MipLevels = texture.isMipMapped ? -1 : 1; // -1 for mipmaps
 		if (FAILED(_d3d10Device->CreateShaderResourceView(texture.textureInterface10, &srDesc, &texture.textureSRV10)))
 		{
 			lastError = { GameErrors::GameDirectX10Specific, "Could not create texture SRV, \"" + fileName + "\"." };
