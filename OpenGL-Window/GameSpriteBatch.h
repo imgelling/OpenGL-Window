@@ -264,8 +264,8 @@ namespace game
 	{
 		// Save max sprites
 		_maxSprites = maxSprites;
-		// OpenGL and DX9 implementation of vertices
-#if defined(GAME_OPENGL)  // OPENGL will break here, changed 6 to 4
+		// OpenGL implementation of vertices
+#if defined(GAME_OPENGL)
 		if (enginePointer->geIsUsing(GAME_OPENGL))
 		{
 			_spriteVertices = new _spriteVertexGL[(uint64_t)(_maxSprites) * 6];
@@ -282,7 +282,7 @@ namespace game
 		}
 #endif
 
-#if defined (GAME_DIRECTX9)  // OPENGL will break here, changed 6 to 4
+#if defined (GAME_DIRECTX9)  
 		if (enginePointer->geIsUsing(GAME_DIRECTX9))
 		{
 			_spriteVertices9 = new _spriteVertex9[(uint64_t)(_maxSprites) * 4];
@@ -319,7 +319,7 @@ namespace game
 		}
 #endif
 
-		// DX10 impementation of vertices
+		// DX11 impementation of vertices
 #if defined(GAME_DIRECTX11)
 		if (enginePointer->geIsUsing(GAME_DIRECTX11))
 		{
@@ -343,9 +343,6 @@ namespace game
 #if defined(GAME_OPENGL)
 		if (enginePointer->geIsUsing(GAME_OPENGL))
 		{
-			GLuint elementBuffer = 0;
-			//wglGetProcAddress
-
 		}
 #endif
 #if defined (GAME_DIRECTX9)
@@ -410,7 +407,6 @@ namespace game
 
 			// Create the vertex buffer
 			vertexBufferDescription.ByteWidth = _maxSprites * (uint32_t)4 * (uint32_t)sizeof(_spriteVertex10);
-			//std::cout << "SpriteBatch VertexBuffer size : " << sizeof(_spriteVertex10) * _maxSprites * 4 / 1024 << "kB\n";
 			vertexBufferDescription.Usage = D3D10_USAGE_DYNAMIC;
 			vertexBufferDescription.BindFlags = D3D10_BIND_VERTEX_BUFFER;
 			vertexBufferDescription.CPUAccessFlags = D3D10_CPU_ACCESS_WRITE;
@@ -441,8 +437,6 @@ namespace game
 			if (FAILED(enginePointer->d3d10Device->CreateBuffer(&indexBufferDescription, &indexInitialData, &_indexBuffer10)))
 			{
 				lastError = { GameErrors::GameDirectX10Specific,"Could not create index buffer for SpriteBatch." };
-				//_vertexBuffer10->Release();
-				//_vertexBuffer10 = nullptr;
 				SAFE_RELEASE(_vertexBuffer10);
 				enginePointer->geUnLoadShader(_spriteBatchShader10);
 				return false;
@@ -457,7 +451,7 @@ namespace game
 			}
 
 			// Create texture sampler 
-			samplerDesc.Filter = D3D10_FILTER_MIN_MAG_MIP_POINT; //D3D10_FILTER_ANISOTROPIC
+			samplerDesc.Filter = D3D10_FILTER_MIN_MAG_MIP_LINEAR; //D3D10_FILTER_ANISOTROPIC
 			samplerDesc.AddressU = D3D10_TEXTURE_ADDRESS_CLAMP;
 			samplerDesc.AddressV = D3D10_TEXTURE_ADDRESS_CLAMP;
 			samplerDesc.AddressW = D3D10_TEXTURE_ADDRESS_CLAMP;
@@ -477,8 +471,8 @@ namespace game
 			blendStateDesc.SrcBlend = D3D10_BLEND_SRC_ALPHA;
 			blendStateDesc.DestBlend = D3D10_BLEND_INV_SRC_ALPHA;
 			blendStateDesc.BlendOp = D3D10_BLEND_OP_ADD;
-			blendStateDesc.SrcBlendAlpha = D3D10_BLEND_ONE;// SRC_ALPHA;
-			blendStateDesc.DestBlendAlpha = D3D10_BLEND_ZERO;// INV_SRC_ALPHA;
+			blendStateDesc.SrcBlendAlpha = D3D10_BLEND_SRC_ALPHA;
+			blendStateDesc.DestBlendAlpha = D3D10_BLEND_INV_SRC_ALPHA;
 			blendStateDesc.BlendOpAlpha = D3D10_BLEND_OP_ADD;
 			blendStateDesc.RenderTargetWriteMask[0] = D3D10_COLOR_WRITE_ENABLE_ALL;
 			if (FAILED(enginePointer->d3d10Device->CreateBlendState(&blendStateDesc, &_spriteBatchBlendState10)))
@@ -513,7 +507,6 @@ namespace game
 
 			// Create the vertex buffer
 			vertexBufferDescription.ByteWidth = _maxSprites * (uint32_t)4 * (uint32_t)sizeof(_spriteVertex11);
-			//std::cout << "SpriteBatch VertexBuffer size : " << sizeof(_spriteVertex10) * _maxSprites * 4 / 1024 << "kB\n";
 			vertexBufferDescription.Usage = D3D11_USAGE_DYNAMIC;
 			vertexBufferDescription.BindFlags = D3D11_BIND_VERTEX_BUFFER;
 			vertexBufferDescription.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
@@ -543,10 +536,8 @@ namespace game
 			indexInitialData.pSysMem = indices.data();
 			if (FAILED(enginePointer->d3d11Device->CreateBuffer(&indexBufferDescription, &indexInitialData, &_indexBuffer11)))
 			{
-				lastError = { GameErrors::GameDirectX10Specific,"Could not create index buffer for SpriteBatch." };
+				lastError = { GameErrors::GameDirectX11Specific,"Could not create index buffer for SpriteBatch." };
 				SAFE_RELEASE(_vertexBuffer11);
-				//_vertexBuffer10->Release();
-				//_vertexBuffer10 = nullptr;
 				enginePointer->geUnLoadShader(_spriteBatchShader11);
 				return false;
 			}
@@ -822,17 +813,6 @@ namespace game
 		if (enginePointer->geIsUsing(GAME_DIRECTX11))
 		{
 			// Send vertices to card
-			//VOID* pVoid = nullptr;
-			//if (FAILED(_vertexBuffer10->Map(D3D10_MAP_WRITE_DISCARD, 0, &pVoid)))
-			//{
-			//	std::cout << "Could not map vertex buffer in SpriteBatch\n";
-			//}
-			//else
-			//{
-			//	memcpy(pVoid, &_spriteVertices10[0], sizeof(_spriteVertex10) * 4 * _numberOfSpritesUsed);
-			//	_vertexBuffer10->Unmap();
-			//}
-
 			D3D11_MAPPED_SUBRESOURCE data;
 			if (FAILED(enginePointer->d3d11DeviceContext->Map(_vertexBuffer11, 0, D3D11_MAP_WRITE_DISCARD, 0, &data)))
 			{
@@ -1037,9 +1017,7 @@ namespace game
 			scaledPos.top = 1.0f - ((float_t)y * 2.0f / (float_t)windowSize.height);// -1.0f;
 			scaledPos.right = (((float_t)x + (float_t)texture.width) * 2.0f / (float)windowSize.width) - 1.0f;
 			scaledPos.bottom = 1.0f - (((float_t)y + (float_t)texture.height) * 2.0f / (float)windowSize.height);// -1.0f;
-			// Flip the y axis
-			//scaledPos.top = -scaledPos.top;
-			//scaledPos.bottom = -scaledPos.bottom;
+
 
 			// Fill vertices
 
