@@ -71,7 +71,7 @@ namespace game
 		std::size_t index;
 		std::ifstream stream;
 
-		//_texture.isMipMapped = false;
+		_texture.isMipMapped = true;
 		//_texture.filterType = TextureFilterType::Point;
 		if (!enginePointer->geLoadTexture(texture, _texture))
 		{

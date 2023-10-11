@@ -1418,14 +1418,14 @@ namespace game
 			source.right = source.left + widthOfLetter;
 			source.bottom = source.top + heightOfLetter;
 
-			destination.left = currentX + font._characterSet.letters[letter].xOffset;
-			destination.top = currentY + font._characterSet.letters[letter].yOffset;
-			destination.right = widthOfLetter + destination.left;
-			destination.bottom = heightOfLetter + destination.top;
+			destination.left = currentX + font._characterSet.letters[letter].xOffset;// *2 to scale;
+			destination.top = currentY + font._characterSet.letters[letter].yOffset;// *2 to scale;
+			destination.right = widthOfLetter/* *2  to scale */ + destination.left;
+			destination.bottom = heightOfLetter/* *2  to scale */ + destination.top;
 
 			Draw(font.Texture(), destination, source, color);
 
-			currentX += font._characterSet.letters[letter].xAdvance;
+			currentX += font._characterSet.letters[letter].xAdvance;// *2; to scale
 		}
 	}
 
