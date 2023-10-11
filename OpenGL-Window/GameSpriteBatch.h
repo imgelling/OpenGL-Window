@@ -38,7 +38,7 @@ namespace game
 		void Draw(const Texture2D& texture, const Pointi& position, const Color color);
 		// Will draw a specified rectangle portion of a texture to location x,y
 		void Draw(const Texture2D& texture, const Recti& destination, const Recti& source, const Color& color);
-		void DrawString(const SpriteFont& font, const std::string& Str, const int x, const int y, const Color& color);
+		void DrawString(const SpriteFont& font, const std::string& Str, const int x, const int y, const Color& color, const float_t scale = 1.0f);
 	private:
 		uint32_t _maxSprites;
 		uint32_t _numberOfSpritesUsed;
@@ -451,7 +451,7 @@ namespace game
 			}
 
 			// Create texture sampler 
-			samplerDesc.Filter = D3D10_FILTER_MIN_MAG_MIP_LINEAR; //D3D10_FILTER_ANISOTROPIC
+			samplerDesc.Filter = D3D10_FILTER_MIN_MAG_MIP_POINT; //D3D10_FILTER_ANISOTROPIC
 			samplerDesc.AddressU = D3D10_TEXTURE_ADDRESS_CLAMP;
 			samplerDesc.AddressV = D3D10_TEXTURE_ADDRESS_CLAMP;
 			samplerDesc.AddressW = D3D10_TEXTURE_ADDRESS_CLAMP;
@@ -1262,9 +1262,6 @@ namespace game
 			scaledPosition.top = 1.0f - ((float_t)(destination.top) * 2.0f / (float_t)window.height);// -1.0f;
 			scaledPosition.right = (((float_t)destination.right) * 2.0f / (float)window.width) - 1.0f;
 			scaledPosition.bottom = 1.0f - (((float_t)destination.bottom) * 2.0f / (float)window.height);// -1.0f;
-			// Flip the y axis
-			//scaledPosition.top = -scaledPosition.top;
-			//scaledPosition.bottom = -scaledPosition.bottom;
 			// Homogenise UV coords to 0.0f - 1.0f
 			scaledUV.left = (float_t)portion.left * texture.oneOverWidth;
 			scaledUV.top = (float_t)portion.top * texture.oneOverHeight;
@@ -1398,7 +1395,7 @@ namespace game
 		_numberOfSpritesUsed++;
 	}
 
-	void SpriteBatch::DrawString(const SpriteFont& font, const std::string& Str, const int x, const int y, const Color& color)
+	void SpriteBatch::DrawString(const SpriteFont& font, const std::string& Str, const int x, const int y, const Color& color, const float_t scale)
 	{
 		int32_t currentX = x;
 		int32_t currentY = y;
@@ -1418,14 +1415,14 @@ namespace game
 			source.right = source.left + widthOfLetter;
 			source.bottom = source.top + heightOfLetter;
 
-			destination.left = currentX + font._characterSet.letters[letter].xOffset;// *2 to scale;
-			destination.top = currentY + font._characterSet.letters[letter].yOffset;// *2 to scale;
-			destination.right = widthOfLetter/* *2  to scale */ + destination.left;
-			destination.bottom = heightOfLetter/* *2  to scale */ + destination.top;
+			destination.left = (uint32_t)(currentX + font._characterSet.letters[letter].xOffset * scale);
+			destination.top = (uint32_t)(currentY + font._characterSet.letters[letter].yOffset * scale);
+			destination.right = (uint32_t)(widthOfLetter * scale + destination.left);
+			destination.bottom = (uint32_t)(heightOfLetter * scale + destination.top);
 
 			Draw(font.Texture(), destination, source, color);
 
-			currentX += font._characterSet.letters[letter].xAdvance;// *2; to scale
+			currentX += (uint32_t)(font._characterSet.letters[letter].xAdvance * scale);
 		}
 	}
 

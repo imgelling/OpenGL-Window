@@ -92,7 +92,7 @@ namespace game
 		name = "NULL";
 
 		// Attributes of texture filtering
-		isMipMapped = false;
+		isMipMapped = true;
 		filterType = TextureFilterType::Point;
 		anisotropyLevel = 1;
 	}

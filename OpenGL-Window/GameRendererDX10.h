@@ -234,43 +234,24 @@ namespace game
 			return false;
 		}
 
-		// set depth state
-		D3D10_DEPTH_STENCIL_DESC dsDesc;
-
-		ZeroMemory(&dsDesc, sizeof(dsDesc));
+		// Set depth state
 		// Depth test parameters
+		D3D10_DEPTH_STENCIL_DESC dsDesc = { 0 };
 		dsDesc.DepthEnable = true;
 		dsDesc.DepthWriteMask = D3D10_DEPTH_WRITE_MASK::D3D10_DEPTH_WRITE_MASK_ALL;
 		dsDesc.DepthFunc = D3D10_COMPARISON_FUNC::D3D10_COMPARISON_LESS_EQUAL;
 
-		// Stencil test parameters
-		dsDesc.StencilEnable = false;
-		dsDesc.StencilReadMask = 0xFF;
-		dsDesc.StencilWriteMask = 0xFF;
-
-		//// Stencil operations if pixel is front-facing.
-		//dsDesc.FrontFace.StencilFailOp = D3D10_STENCIL_OP_KEEP;
-		//dsDesc.FrontFace.StencilDepthFailOp = D3D10_STENCIL_OP_INCR;
-		//dsDesc.FrontFace.StencilPassOp = D3D10_STENCIL_OP_KEEP;
-		//dsDesc.FrontFace.StencilFunc = D3D10_COMPARISON_ALWAYS;
-
-		//// Stencil operations if pixel is back-facing.
-		//dsDesc.BackFace.StencilFailOp = D3D10_STENCIL_OP_KEEP;
-		//dsDesc.BackFace.StencilDepthFailOp = D3D10_STENCIL_OP_DECR;
-		//dsDesc.BackFace.StencilPassOp = D3D10_STENCIL_OP_KEEP;
-		//dsDesc.BackFace.StencilFunc = D3D10_COMPARISON_ALWAYS;
-
 		// Create depth stencil state
-		ID3D10DepthStencilState* dss;
-		if (FAILED(_d3d10Device->CreateDepthStencilState(&dsDesc, &dss)))
+		ID3D10DepthStencilState* depthStencilState10;
+		if (FAILED(_d3d10Device->CreateDepthStencilState(&dsDesc, &depthStencilState10)))
 		{
-			std::cout << "depth state faile\n";
+			lastError = { GameErrors::GameDirectX10Specific, "Could not create Depth Stencil State. " };
 			return false;
 		}
-		//if (FAILED(hr))
-		//	throw EngineException("FAIL");
+
 		// Bind depth stencil state
-		_d3d10Device->OMSetDepthStencilState(dss, 1);
+		_d3d10Device->OMSetDepthStencilState(depthStencilState10, 1);
+		//_d3d10Device->OMGetDepthStencilState(&dss, ? ); to save
 		//SAFE_RELEASE(dss);  NO! MUST KEEP AROUND
 
 		// Create the back buffer texture

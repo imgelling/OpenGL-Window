@@ -49,7 +49,7 @@ public:
 
 		// Enable run-time memory check for debug builds.
 #if defined(DEBUG) | defined(_DEBUG)
-		//_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
+		_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 		//_CrtSetBreakAlloc(613);
 #endif
 		
@@ -76,26 +76,10 @@ public:
 		Setup();
 
 		// Load sprite texture
-		spriteTexture.isMipMapped = true;
-		//spriteTexture.filterType = game::TextureFilterType::Point;
 		if (!geLoadTexture("Content/test.png", spriteTexture))
 		{
 			geLogLastError();
 		}
-
-		// Temp load shader
-		game::Shader shader;
-#if defined(GAME_DIRECTX9) || defined(GAME_DIRECTX10)
-		//shader.isPrecompiled = true;
-		//if (geIsUsing(GAME_DIRECTX9) || geIsUsing(GAME_DIRECTX10))
-		//{
-		//	if (!geLoadShader("Content/VertexShader.cso", "Content/PixelShader.cso", shader))
-		//	{
-		//		geLogLastError();
-		//	}
-		//	geUnLoadShader(shader);
-		//}
-#endif
 
 		// Setup pixel mode
 		if (!pixelMode.Initialize({ 320, 240 }))
@@ -195,9 +179,9 @@ public:
 		for (int i = 0; i < 40; i++)
 			spriteBatch.Draw(spriteTexture, { 10 + (i * 100), 10 }, game::Colors::White);
 		//spriteBatch.DrawString(spriteFont, "Random Circle(s) : " + std::to_string(millionPerSecond) + " million per second.", 10, 0, game::Colors::Red);
-		spriteBatch.DrawString(spriteFont, "FPS : " + std::to_string(geGetFramesPerSecond()) + " UPS : " + std::to_string(geGetUpdatesPerSecond()) + " cpu : " + std::to_string(geGetCPUFrequency()) + "Mhz", 10, 200, game::Colors::White);
-		spriteBatch.DrawString(spriteFont, "Window Pixel Size: " + std::to_string(geGetWindowSize().width) + "x" + std::to_string(geGetWindowSize().height), 10, 240, game::Colors::White);
-		spriteBatch.DrawString(spriteFont, "PixelMode Pixel Size: " + std::to_string(pixelMode.GetPixelFrameBufferSize().width) + "x" + std::to_string(pixelMode.GetPixelFrameBufferSize().height), 10, 280, game::Colors::White);
+		spriteBatch.DrawString(spriteFont, "FPS : " + std::to_string(geGetFramesPerSecond()) + " UPS : " + std::to_string(geGetUpdatesPerSecond()) + " cpu : " + std::to_string(geGetCPUFrequency()) + "Mhz", 10, 200, game::Colors::White,2.0f);
+		spriteBatch.DrawString(spriteFont, "Window Pixel Size: " + std::to_string(geGetWindowSize().width) + "x" + std::to_string(geGetWindowSize().height), 10, 240, game::Colors::White, 2.0f);
+		spriteBatch.DrawString(spriteFont, "PixelMode Pixel Size: " + std::to_string(pixelMode.GetPixelFrameBufferSize().width) + "x" + std::to_string(pixelMode.GetPixelFrameBufferSize().height), 10, 280, game::Colors::White, 2.0f);
 		spriteBatch.End();
 
 		EndScene();
