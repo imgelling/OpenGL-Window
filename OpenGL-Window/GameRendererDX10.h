@@ -248,17 +248,17 @@ namespace game
 		dsDesc.StencilReadMask = 0xFF;
 		dsDesc.StencilWriteMask = 0xFF;
 
-		// Stencil operations if pixel is front-facing.
-		dsDesc.FrontFace.StencilFailOp = D3D10_STENCIL_OP_KEEP;
-		dsDesc.FrontFace.StencilDepthFailOp = D3D10_STENCIL_OP_INCR;
-		dsDesc.FrontFace.StencilPassOp = D3D10_STENCIL_OP_KEEP;
-		dsDesc.FrontFace.StencilFunc = D3D10_COMPARISON_ALWAYS;
+		//// Stencil operations if pixel is front-facing.
+		//dsDesc.FrontFace.StencilFailOp = D3D10_STENCIL_OP_KEEP;
+		//dsDesc.FrontFace.StencilDepthFailOp = D3D10_STENCIL_OP_INCR;
+		//dsDesc.FrontFace.StencilPassOp = D3D10_STENCIL_OP_KEEP;
+		//dsDesc.FrontFace.StencilFunc = D3D10_COMPARISON_ALWAYS;
 
-		// Stencil operations if pixel is back-facing.
-		dsDesc.BackFace.StencilFailOp = D3D10_STENCIL_OP_KEEP;
-		dsDesc.BackFace.StencilDepthFailOp = D3D10_STENCIL_OP_DECR;
-		dsDesc.BackFace.StencilPassOp = D3D10_STENCIL_OP_KEEP;
-		dsDesc.BackFace.StencilFunc = D3D10_COMPARISON_ALWAYS;
+		//// Stencil operations if pixel is back-facing.
+		//dsDesc.BackFace.StencilFailOp = D3D10_STENCIL_OP_KEEP;
+		//dsDesc.BackFace.StencilDepthFailOp = D3D10_STENCIL_OP_DECR;
+		//dsDesc.BackFace.StencilPassOp = D3D10_STENCIL_OP_KEEP;
+		//dsDesc.BackFace.StencilFunc = D3D10_COMPARISON_ALWAYS;
 
 		// Create depth stencil state
 		ID3D10DepthStencilState* dss;
@@ -271,6 +271,7 @@ namespace game
 		//	throw EngineException("FAIL");
 		// Bind depth stencil state
 		_d3d10Device->OMSetDepthStencilState(dss, 1);
+		//SAFE_RELEASE(dss);  NO! MUST KEEP AROUND
 
 		// Create the back buffer texture
 		if (FAILED(_d3d10SwapChain->GetBuffer(0, _uuidof(ID3D10Texture2D), reinterpret_cast<void**>(&backBuffer))))

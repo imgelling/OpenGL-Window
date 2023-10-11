@@ -455,7 +455,7 @@ namespace game
 			samplerDesc.AddressU = D3D10_TEXTURE_ADDRESS_CLAMP;
 			samplerDesc.AddressV = D3D10_TEXTURE_ADDRESS_CLAMP;
 			samplerDesc.AddressW = D3D10_TEXTURE_ADDRESS_CLAMP;
-			samplerDesc.ComparisonFunc = D3D10_COMPARISON_NEVER;
+			samplerDesc.ComparisonFunc = D3D10_COMPARISON_ALWAYS;
 			samplerDesc.MinLOD = 0;
 			samplerDesc.MaxLOD = D3D10_FLOAT32_MAX;
 			if (FAILED(enginePointer->d3d10Device->CreateSamplerState(&samplerDesc, &_textureSamplerState10)))
