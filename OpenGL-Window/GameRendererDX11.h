@@ -332,29 +332,36 @@ namespace game
 		D3D11_TEXTURE2D_DESC desc = { 0 };
 		desc.Width = texture.width;
 		desc.Height = texture.height;
-		desc.MipLevels = desc.ArraySize = 1; // change for mipmapping
+		desc.MipLevels = texture.isMipMapped ? 0 : 1;// 0 for mipmaps, 1 for not
+		desc.ArraySize = 1;
 		desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
 		desc.SampleDesc.Count = 1;
-		desc.Usage = D3D11_USAGE_DEFAULT;// DYNAMIC;
+		desc.SampleDesc.Quality = 0;
+		desc.Usage = D3D11_USAGE_DEFAULT;// D3D10_USAGE_DYNAMIC;
 		desc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
-		desc.CPUAccessFlags = 0;// D3D11_CPU_ACCESS_WRITE;
-
-		D3D11_SUBRESOURCE_DATA initialData = { 0 };
-		initialData.pSysMem = data;
-		initialData.SysMemPitch = desc.Width * sizeof(uint8_t) * 4;
+		desc.CPUAccessFlags = 0;// D3D10_CPU_ACCESS_WRITE;
+		if (texture.isMipMapped)
+		{
+			desc.BindFlags |= D3D11_BIND_RENDER_TARGET;
+			desc.MiscFlags = D3D11_RESOURCE_MISC_GENERATE_MIPS;
+		}
 
 		// Create texture memory
-		if (FAILED(_d3d11Device->CreateTexture2D(&desc, &initialData, &texture.textureInterface11)))
+		if (FAILED(_d3d11Device->CreateTexture2D(&desc, NULL, &texture.textureInterface11)))
 		{
 			lastError = { GameErrors::GameDirectX11Specific, "Could not create texture, \"" + fileName + "\"." };
 			return false;
 		}
 
+		// Copy data into memory
+		_d3d11DeviceContext->UpdateSubresource(texture.textureInterface11, 0, NULL, data, desc.Width * sizeof(uint8_t) * 4, 0);
+
+		// Create SRV for the texture
 		D3D11_SHADER_RESOURCE_VIEW_DESC srDesc = {};
 		srDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
 		srDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
 		srDesc.Texture2D.MostDetailedMip = 0;
-		srDesc.Texture2D.MipLevels = 1;
+		srDesc.Texture2D.MipLevels = texture.isMipMapped ? -1 : 1; // -1 for mipmaps
 		if (FAILED(_d3d11Device->CreateShaderResourceView(texture.textureInterface11, &srDesc, &texture.textureSRV11)))
 		{
 			lastError = { GameErrors::GameDirectX11Specific, "Could not create texture SRV, \"" + fileName + "\"." };

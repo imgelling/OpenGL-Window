@@ -80,11 +80,13 @@ namespace game
 		ID3D10SamplerState* _textureSamplerState10;
 		ID3D10Buffer* _indexBuffer10;
 		ID3D10BlendState* _spriteBatchBlendState10;
+		ID3D10DepthStencilState* _depthStencilState10;
 
 
 		// saves state of dx10 states we change to restore
 		uint32_t _oldStride10;
 		uint32_t _oldOffset10;
+		uint32_t _oldStencilRef10;
 		ID3D10Buffer* _oldVertexBuffer10;
 		ID3D10Buffer* _oldIndexBuffer10;
 		DXGI_FORMAT _oldIndexFormat10;
@@ -95,6 +97,7 @@ namespace game
 		ID3D10SamplerState* _oldTextureSamplerState10;
 		D3D10_PRIMITIVE_TOPOLOGY _oldPrimitiveTopology10;
 		ID3D10BlendState* _oldBlendState10;
+		ID3D10DepthStencilState* _oldDepthStencilState10;
 		float_t _oldBlendFactor10[4];
 		uint32_t _oldSampleMask10;
 #endif
@@ -112,10 +115,12 @@ namespace game
 		ID3D11SamplerState* _textureSamplerState11;
 		ID3D11Buffer* _indexBuffer11;
 		ID3D11BlendState* _spriteBatchBlendState11;
+		ID3D11DepthStencilState* _depthStencilState11;
 
 		// saves state of dx11 states we change to restore
 		uint32_t _oldStride11;
 		uint32_t _oldOffset11;
+		uint32_t _oldStencilRef11;
 		ID3D11Buffer* _oldVertexBuffer11;
 		ID3D11Buffer* _oldIndexBuffer11;
 		DXGI_FORMAT _oldIndexFormat11;
@@ -126,6 +131,7 @@ namespace game
 		ID3D11SamplerState* _oldTextureSamplerState11;
 		D3D11_PRIMITIVE_TOPOLOGY _oldPrimitiveTopology11;
 		ID3D11BlendState* _oldBlendState11;
+		ID3D11DepthStencilState* _oldDepthStencilState11;
 		float_t _oldBlendFactor11[4];
 		uint32_t _oldSampleMask11;
 #endif
@@ -154,12 +160,14 @@ namespace game
 #if defined (GAME_DIRECTX10)
 		//if (enginePointer->geIsUsing(GAME_DIRECTX10))
 		{
+			
 			_spriteVertices10 = nullptr;
 			_indexBuffer10 = nullptr;
 			_vertexBuffer10 = nullptr;
 			_vertexLayout10 = nullptr;
 			_textureSamplerState10 = nullptr;
 			_spriteBatchBlendState10 = nullptr;
+			_oldStencilRef10 = 0;
 			_oldStride10 = 0;
 			_oldOffset10 = 0;
 			_oldVertexBuffer10 = nullptr;
@@ -174,6 +182,8 @@ namespace game
 			_oldBlendState10 = nullptr;
 			ZeroMemory(_oldBlendFactor10, 4 * sizeof(float_t));
 			_oldSampleMask10 = 0;
+			_depthStencilState10 = nullptr;
+			_oldDepthStencilState10 = nullptr;
 		}
 #endif
 #if defined (GAME_DIRECTX11)
@@ -183,8 +193,10 @@ namespace game
 		_vertexLayout11 = nullptr;
 		_textureSamplerState11 = nullptr;
 		_spriteBatchBlendState11 = nullptr;
+		_depthStencilState11 = nullptr;
 		_oldStride11 = 0;
 		_oldOffset11 = 0;
+		_oldStencilRef11 = 0;
 		_oldVertexBuffer11 = nullptr;
 		_oldIndexBuffer11 = nullptr;
 		_oldIndexFormat11 = {};
@@ -196,6 +208,7 @@ namespace game
 		_oldPrimitiveTopology11 = {};
 		_oldBlendState11 = nullptr;
 		ZeroMemory(_oldBlendFactor11, 4 * sizeof(float_t));
+		_oldDepthStencilState11 = nullptr;
 		_oldSampleMask11 = 0;
 #endif
 		_numberOfSpritesUsed = 0;
@@ -239,7 +252,9 @@ namespace game
 			SAFE_RELEASE(_textureSamplerState10);
 			SAFE_RELEASE(_indexBuffer10);
 			SAFE_RELEASE(_spriteBatchBlendState10);
+			SAFE_RELEASE(_depthStencilState10);
 			enginePointer->geUnLoadShader(_spriteBatchShader10);
+
 		}
 #endif
 #if defined (GAME_DIRECTX11)
@@ -255,6 +270,7 @@ namespace game
 			SAFE_RELEASE(_textureSamplerState11);
 			SAFE_RELEASE(_indexBuffer11);
 			SAFE_RELEASE(_spriteBatchBlendState11);
+			SAFE_RELEASE(_depthStencilState11);
 			enginePointer->geUnLoadShader(_spriteBatchShader11);
 		}
 #endif
@@ -480,6 +496,19 @@ namespace game
 				lastError = { GameErrors::GameDirectX10Specific, "Could not create blend state for SpriteBatch." };
 				return false;
 			}
+
+			// Create depth state
+			D3D10_DEPTH_STENCIL_DESC dsDesc = { 0 };
+			dsDesc.DepthEnable = true;
+			dsDesc.DepthWriteMask = D3D10_DEPTH_WRITE_MASK::D3D10_DEPTH_WRITE_MASK_ALL;
+			dsDesc.DepthFunc = D3D10_COMPARISON_FUNC::D3D10_COMPARISON_LESS_EQUAL;
+
+			// Create depth stencil state
+			if (FAILED(enginePointer->d3d10Device->CreateDepthStencilState(&dsDesc, &_depthStencilState10)))
+			{
+				lastError = { GameErrors::GameDirectX10Specific, "Could not create Depth Stencil State. " };
+				return false;
+			}
 		}
 #endif
 #if defined (GAME_DIRECTX11)
@@ -581,6 +610,19 @@ namespace game
 				lastError = { GameErrors::GameDirectX11Specific, "Could not create blend state for SpriteBatch." };
 				return false;
 			}
+
+			// Create depth state
+			D3D11_DEPTH_STENCIL_DESC dsDesc = { 0 };
+			dsDesc.DepthEnable = true;
+			dsDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK::D3D11_DEPTH_WRITE_MASK_ALL;
+			dsDesc.DepthFunc = D3D11_COMPARISON_FUNC::D3D11_COMPARISON_LESS_EQUAL;
+
+			// Create depth stencil state
+			if (FAILED(enginePointer->d3d11Device->CreateDepthStencilState(&dsDesc, &_depthStencilState11)))
+			{
+				lastError = { GameErrors::GameDirectX10Specific, "Could not create Depth Stencil State. " };
+				return false;
+			}
 		}
 #endif 
 		return true;
@@ -628,6 +670,7 @@ namespace game
 			enginePointer->d3d10Device->PSGetSamplers(0, 1, &_oldTextureSamplerState10);
 			enginePointer->d3d10Device->IAGetPrimitiveTopology(&_oldPrimitiveTopology10);
 			enginePointer->d3d10Device->OMGetBlendState(&_oldBlendState10, _oldBlendFactor10, &_oldSampleMask10);
+			enginePointer->d3d10Device->OMGetDepthStencilState(&_oldDepthStencilState10, &_oldStencilRef10);
 
 			// Change what we need
 			enginePointer->d3d10Device->IASetIndexBuffer(_indexBuffer10, DXGI_FORMAT_R32_UINT, 0);
@@ -638,6 +681,8 @@ namespace game
 			enginePointer->d3d10Device->PSSetSamplers(0, 1, &_textureSamplerState10);
 			enginePointer->d3d10Device->IASetPrimitiveTopology(D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 			enginePointer->d3d10Device->OMSetBlendState(_spriteBatchBlendState10, sampleMask, 0xffffffff);
+			enginePointer->d3d10Device->OMSetDepthStencilState(_depthStencilState10, 1);
+			
 
 			// Reset current texture
 			_currentTexture.name = "";
@@ -663,6 +708,7 @@ namespace game
 			enginePointer->d3d11DeviceContext->PSGetSamplers(0, 1, &_oldTextureSamplerState11);
 			enginePointer->d3d11DeviceContext->IAGetPrimitiveTopology(&_oldPrimitiveTopology11);
 			enginePointer->d3d11DeviceContext->OMGetBlendState(&_oldBlendState11, _oldBlendFactor11, &_oldSampleMask11);
+			enginePointer->d3d11DeviceContext->OMGetDepthStencilState(&_oldDepthStencilState11, &_oldStencilRef11);
 
 			// Change what we need
 			enginePointer->d3d11DeviceContext->IASetIndexBuffer(_indexBuffer11, DXGI_FORMAT_R32_UINT, 0);
@@ -673,6 +719,7 @@ namespace game
 			enginePointer->d3d11DeviceContext->PSSetSamplers(0, 1, &_textureSamplerState11);
 			enginePointer->d3d11DeviceContext->IASetPrimitiveTopology(D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 			enginePointer->d3d11DeviceContext->OMSetBlendState(_spriteBatchBlendState11, sampleMask, 0xffffffff);
+			enginePointer->d3d11DeviceContext->OMSetDepthStencilState(_depthStencilState11, 1);
 
 			// Reset current texture
 			_currentTexture.name = "";
@@ -727,6 +774,7 @@ namespace game
 		if (enginePointer->geIsUsing(GAME_DIRECTX10))
 		{
 			// restore everything
+			enginePointer->d3d10Device->OMSetDepthStencilState(_oldDepthStencilState10, _oldStencilRef10 );
 			enginePointer->d3d10Device->IASetIndexBuffer(_oldIndexBuffer10, _oldIndexFormat10, _oldIndexOffset10);
 			enginePointer->d3d10Device->IASetVertexBuffers(0, 1, &_oldVertexBuffer10, &_oldStride10, &_oldOffset10);
 			enginePointer->d3d10Device->IASetInputLayout(_oldInputLayout10);
@@ -755,6 +803,7 @@ namespace game
 				enginePointer->d3d11DeviceContext->IASetPrimitiveTopology(_oldPrimitiveTopology11);
 			}
 			enginePointer->d3d11DeviceContext->OMSetBlendState(_oldBlendState11, _oldBlendFactor11, _oldSampleMask11);
+			enginePointer->d3d11DeviceContext->OMSetDepthStencilState(_oldDepthStencilState11, _oldStencilRef11);
 		}
 #endif
 #if defined (GAME_OPENGL)

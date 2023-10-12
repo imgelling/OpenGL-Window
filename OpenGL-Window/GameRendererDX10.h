@@ -234,26 +234,6 @@ namespace game
 			return false;
 		}
 
-		// Set depth state
-		// Depth test parameters
-		D3D10_DEPTH_STENCIL_DESC dsDesc = { 0 };
-		dsDesc.DepthEnable = true;
-		dsDesc.DepthWriteMask = D3D10_DEPTH_WRITE_MASK::D3D10_DEPTH_WRITE_MASK_ALL;
-		dsDesc.DepthFunc = D3D10_COMPARISON_FUNC::D3D10_COMPARISON_LESS_EQUAL;
-
-		// Create depth stencil state
-		ID3D10DepthStencilState* depthStencilState10;
-		if (FAILED(_d3d10Device->CreateDepthStencilState(&dsDesc, &depthStencilState10)))
-		{
-			lastError = { GameErrors::GameDirectX10Specific, "Could not create Depth Stencil State. " };
-			return false;
-		}
-
-		// Bind depth stencil state
-		_d3d10Device->OMSetDepthStencilState(depthStencilState10, 1);
-		//_d3d10Device->OMGetDepthStencilState(&dss, ? ); to save
-		//SAFE_RELEASE(dss);  NO! MUST KEEP AROUND
-
 		// Create the back buffer texture
 		if (FAILED(_d3d10SwapChain->GetBuffer(0, _uuidof(ID3D10Texture2D), reinterpret_cast<void**>(&backBuffer))))
 		{
