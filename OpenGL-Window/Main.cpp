@@ -57,7 +57,7 @@ public:
 		attributes.GameVersion = "0.01";
 		attributes.FrameLock = MAX_FRAMES;
 		attributes.UpdateLock = MAX_UPDATES;
-		attributes.VsyncOn = true;
+		attributes.VsyncOn = false;
 		attributes.DebugMode = false;
 		attributes.MultiSamples = 8; // Not implemented in most of DX
 		attributes.RenderingAPI = game::RenderAPI::DirectX9; 

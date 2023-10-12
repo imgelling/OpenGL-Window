@@ -553,10 +553,10 @@ namespace game
 		{
 			hr = _swapChain->Present(0, DXGI_PRESENT_ALLOW_TEARING);
 		}
-		if (FAILED(hr))
-		{
-			/*std::cout << "no tearing\n";*/
-		}
+		//if (FAILED(hr))
+		//{
+		//	std::cout << "no tearing\n";
+		//}
 		// Below is needed for VSYNC to work for some reason
 		_WaitForPreviousFrame(false);
 		_midFrame = false;
