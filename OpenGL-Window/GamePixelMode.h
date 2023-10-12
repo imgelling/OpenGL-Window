@@ -659,15 +659,17 @@ namespace game
 
 
 			// resets the command list -----------------------------
-			if (FAILED(temp->_commandAllocator[temp->_frameIndex]->Reset()))
 			{
-				std::cout << "Command allocator reset failed\n";
-			}
+				if (FAILED(temp->_commandAllocator[temp->_frameIndex]->Reset()))
+				{
+					std::cout << "Command allocator reset failed\n";
+				}
 
-			// Reset to start recording
-			if (FAILED(enginePointer->commandList->Reset(temp->_commandAllocator[temp->_frameIndex].Get(), NULL)))
-			{
-				std::cout << "command list reset failed\n";
+				// Reset to start recording
+				if (FAILED(enginePointer->commandList->Reset(temp->_commandAllocator[temp->_frameIndex].Get(), NULL)))
+				{
+					std::cout << "command list reset failed\n";
+				}
 			}
 			// end of command list reset ---------------------------------------
 			
@@ -697,20 +699,22 @@ namespace game
 			CD3DX12_RESOURCE_BARRIER ibufferbar = CD3DX12_RESOURCE_BARRIER::Transition(_indexBufferHeap.Get(), D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER);
 			enginePointer->commandList->ResourceBarrier(1, &ibufferbar);
 
-			// Execture the command list to upload the initial data
-			enginePointer->commandList->Close();
-			ID3D12CommandList* ppCommandLists[] = { enginePointer->commandList.Get() };
-			enginePointer->commandQueue->ExecuteCommandLists(_countof(ppCommandLists), ppCommandLists);
-
-			// ??
-			// increment the fence value now, otherwise the buffer might not be uploaded by the time we start drawing
-			temp->_fenceValue[temp->_frameIndex]++;
-			hr = enginePointer->commandQueue->Signal(temp->_fence[temp->_frameIndex].Get(), temp->_fenceValue[temp->_frameIndex]);
-			if (FAILED(hr))
+			// Execute the command list to upload the initial data
 			{
-				lastError = { GameErrors::GameDirectX12Specific,"Pixel mode signal failed." };
-				AppendHR12(hr);
-				return false;
+				enginePointer->commandList->Close();
+				ID3D12CommandList* ppCommandLists[] = { enginePointer->commandList.Get() };
+				enginePointer->commandQueue->ExecuteCommandLists(_countof(ppCommandLists), ppCommandLists);
+
+				// ??
+				// increment the fence value now, otherwise the buffer might not be uploaded by the time we start drawing
+				temp->_fenceValue[temp->_frameIndex]++;
+				hr = enginePointer->commandQueue->Signal(temp->_fence[temp->_frameIndex].Get(), temp->_fenceValue[temp->_frameIndex]);
+				if (FAILED(hr))
+				{
+					lastError = { GameErrors::GameDirectX12Specific,"Pixel mode signal failed." };
+					AppendHR12(hr);
+					return false;
+				}
 			}
 
 			//temp->_WaitForPreviousFrame(false);

@@ -464,22 +464,25 @@ namespace game
 		// a command list is not used
 		_midFrame = true;
 
-		// we can only reset an allocator once the gpu is done with it
-		// resetting an allocator frees the memory that the command list was stored in
-		if (FAILED(_commandAllocator[_frameIndex]->Reset()))
+		// RESET commandlist
 		{
-			//Running = false;
-			std::cout << "Command allocator reset failed\n";
-		}
+			// we can only reset an allocator once the gpu is done with it
+			// resetting an allocator frees the memory that the command list was stored in
+			if (FAILED(_commandAllocator[_frameIndex]->Reset()))
+			{
+				//Running = false;
+				std::cout << "Command allocator reset failed\n";
+			}
 
-		// reset the command list. 
-		HRESULT hr = _commandList->Reset(_commandAllocator[_frameIndex].Get(), NULL);
-		if (FAILED(hr))
-		{
-			//std::cout << "command list reset failed\n";
-			AppendHR12(hr);
-			std::cout << lastError.lastErrorString << "\n";
-			//Running = false;
+			// reset the command list. 
+			HRESULT hr = _commandList->Reset(_commandAllocator[_frameIndex].Get(), NULL);
+			if (FAILED(hr))
+			{
+				//std::cout << "command list reset failed\n";
+				AppendHR12(hr);
+				std::cout << lastError.lastErrorString << "\n";
+				//Running = false;
+			}
 		}
 
 		// Transition current rendertarget to render target state
@@ -527,19 +530,23 @@ namespace game
 	{
 		HRESULT hr;
 
-		// create an array of command lists (only one command list here)
-		ID3D12CommandList* ppCommandLists[] = { _commandList.Get() };
-
-		// execute the array of command lists
-		_commandQueue->ExecuteCommandLists(_countof(ppCommandLists), ppCommandLists);
-
-		// this command goes in at the end of our command queue. we will know when our command queue 
-		// has finished because the fence value will be set to "fenceValue" from the GPU since the command
-		// queue is being executed on the GPU
-		hr = _commandQueue->Signal(_fence[_frameIndex].Get(), _fenceValue[_frameIndex]);
-		if (FAILED(hr))
+		// EXECUTE
 		{
-			//Running = false;
+			// close it?
+			// create an array of command lists (only one command list here)
+			ID3D12CommandList* ppCommandLists[] = { _commandList.Get() };
+
+			// execute the array of command lists
+			_commandQueue->ExecuteCommandLists(_countof(ppCommandLists), ppCommandLists);
+
+			// this command goes in at the end of our command queue. we will know when our command queue 
+			// has finished because the fence value will be set to "fenceValue" from the GPU since the command
+			// queue is being executed on the GPU
+			hr = _commandQueue->Signal(_fence[_frameIndex].Get(), _fenceValue[_frameIndex]);
+			if (FAILED(hr))
+			{
+				//Running = false;
+			}
 		}
 
 		// present the current backbuffer
@@ -807,15 +814,15 @@ namespace game
 
 		// Upload it here 
 		// Probably need to reset the command list and execute it... dunno fo sho
-		D3D12_SUBRESOURCE_DATA textureData = {};
-		textureData.pData = reinterpret_cast<uint8_t*>(data);
-		textureData.RowPitch = static_cast<int64_t>(texture.width) * 4;
-		textureData.SlicePitch = 0;// textureData.RowPitch* _frameBuffer[_currentBuffer].height;
-		CD3DX12_RESOURCE_BARRIER trans = CD3DX12_RESOURCE_BARRIER::Transition(texture.textureResource12.Get(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_COPY_DEST);
-		_commandList->ResourceBarrier(1, &trans);
-		UpdateSubresources(_commandList.Get(), texture.textureResource12.Get(), texture.textureUploadHeap12.Get(), 0, 0, 1, &textureData);
-		trans = CD3DX12_RESOURCE_BARRIER::Transition(texture.textureResource12.Get(), D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
-		_commandList->ResourceBarrier(1, &trans);
+		//D3D12_SUBRESOURCE_DATA textureData = {};
+		//textureData.pData = reinterpret_cast<uint8_t*>(data);
+		//textureData.RowPitch = static_cast<int64_t>(texture.width) * 4;
+		//textureData.SlicePitch = 0;// textureData.RowPitch* _frameBuffer[_currentBuffer].height;
+		//CD3DX12_RESOURCE_BARRIER trans = CD3DX12_RESOURCE_BARRIER::Transition(texture.textureResource12.Get(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_COPY_DEST);
+		//_commandList->ResourceBarrier(1, &trans);
+		//UpdateSubresources(_commandList.Get(), texture.textureResource12.Get(), texture.textureUploadHeap12.Get(), 0, 0, 1, &textureData);
+		//trans = CD3DX12_RESOURCE_BARRIER::Transition(texture.textureResource12.Get(), D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+		//_commandList->ResourceBarrier(1, &trans);
 
 		//lastError = { GameErrors::GameDirectX12Specific,"Texture not implemented " }; 
 		return true;
