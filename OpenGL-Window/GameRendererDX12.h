@@ -21,7 +21,7 @@
 #define SAFE_RELEASE(p) { if ( (p) ) { (p)->Release(); (p) = nullptr; } }
 #endif
 
-#define frameBufferCount  3
+#define frameBufferCount  2
 
 namespace game
 {
@@ -88,6 +88,7 @@ namespace game
 	protected:
 		void _ReadExtensions() {};
 		bool _midFrame; // Are we in the middle of a frame? If so end the frame before closing (dx12 does not like that)
+		bool _allowTearing;
 		D3D12_VIEWPORT _viewPort = {}; // area that output from rasterizer will be stretched to.
 		D3D12_RECT _scissorRect = {}; // the area to draw in. pixels outside that area will not be drawn onto
 
@@ -127,6 +128,7 @@ namespace game
 		_commandList = nullptr;
 		_fenceEvent = nullptr;
 		_midFrame = false;
+		_allowTearing = false;
 	}
 
 	inline void RendererDX12::DestroyDevice()
@@ -245,6 +247,13 @@ namespace game
 			return false;
 		}
 
+		// do error checcking
+		// Check for variable refresh rate
+		Microsoft::WRL::ComPtr<IDXGIFactory5> factory5;
+		dxgiFactory.As(&factory5);
+		factory5->CheckFeatureSupport(DXGI_FEATURE_PRESENT_ALLOW_TEARING, &_allowTearing, sizeof(_allowTearing));
+
+
 		if (_attributes.DebugMode)
 		{
 			Microsoft::WRL::ComPtr<ID3D12InfoQueue> pInfoQueue = nullptr;
@@ -303,7 +312,12 @@ namespace game
 		swapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
 		swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
 		swapChainDesc.SampleDesc.Count = 1;
-		swapChainDesc.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_TEARING;
+		//if (_allowTearing)
+		if (!_attributes.VsyncOn)
+		{
+			swapChainDesc.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_TEARING;
+		}
+
 
 		Microsoft::WRL::ComPtr<IDXGISwapChain1> tempSwapChain;
 		if (FAILED(dxgiFactory->CreateSwapChainForHwnd(
@@ -531,12 +545,20 @@ namespace game
 		}
 
 		// present the current backbuffer
-		hr = _swapChain->Present(_attributes.VsyncOn ? 1 : 0, DXGI_PRESENT_ALLOW_TEARING);
+		if (_attributes.VsyncOn)
+		{
+			hr = _swapChain->Present(1, 0);
+		}
+		else
+		{
+			hr = _swapChain->Present(0, DXGI_PRESENT_ALLOW_TEARING);
+		}
 		if (FAILED(hr))
 		{
-			//Running = false;
+			/*std::cout << "no tearing\n";*/
 		}
-		//_WaitForPreviousFrame(true);
+		// Below is needed for VSYNC to work for some reason
+		_WaitForPreviousFrame(false);
 		_midFrame = false;
 	}
 

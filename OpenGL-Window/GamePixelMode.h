@@ -219,21 +219,6 @@ namespace game
 			SAFE_RELEASE(_vertexBuffer10);
 			SAFE_RELEASE(_vertexLayout10);
 			SAFE_RELEASE(_indexBuffer10);
-			//if (_vertexBuffer10)
-			//{
-			//	_vertexBuffer10->Release();
-			//	_vertexBuffer10 = nullptr;
-			//}
-			//if (_vertexLayout10)
-			//{
-			//	_vertexLayout10->Release();
-			//	_vertexLayout10 = nullptr;
-			//}
-			//if (_indexBuffer)
-			//{
-			//	_indexBuffer->Release();
-			//	_indexBuffer = nullptr;
-			//}
 			enginePointer->geUnLoadShader(_pixelModeShader10);
 			SAFE_RELEASE(_textureShaderResourceView0_10);
 			SAFE_RELEASE(_textureShaderResourceView1_10);
@@ -246,21 +231,6 @@ namespace game
 			SAFE_RELEASE(_vertexBuffer11);
 			SAFE_RELEASE(_vertexLayout11);
 			SAFE_RELEASE(_indexBuffer11);
-			//if (_vertexBuffer11)
-			//{
-			//	_vertexBuffer11->Release();
-			//	_vertexBuffer11 = nullptr;
-			//}
-			//if (_vertexLayout11)
-			//{
-			//	_vertexLayout11->Release();
-			//	_vertexLayout11 = nullptr;
-			//}
-			//if (_indexBuffer11)
-			//{
-			//	_indexBuffer11->Release();
-			//	_indexBuffer11 = nullptr;
-			//}
 			enginePointer->geUnLoadShader(_pixelModeShader11);
 			SAFE_RELEASE(_textureShaderResourceView0_11);
 			SAFE_RELEASE(_textureShaderResourceView1_11);
@@ -466,8 +436,6 @@ namespace game
 			{
 				lastError = { GameErrors::GameDirectX11Specific,"Could not create index buffer for PixelMode." };
 				SAFE_RELEASE(_vertexBuffer11);
-				//_vertexBuffer11->Release();
-				//_vertexBuffer11 = nullptr;
 				enginePointer->geUnLoadShader(_pixelModeShader11);
 				return false;
 			}
@@ -478,16 +446,11 @@ namespace game
 				lastError = { GameErrors::GameDirectX11Specific,"Could not create input layout for PixelMode." };
 				SAFE_RELEASE(_indexBuffer11);
 				SAFE_RELEASE(_vertexBuffer11);
-				//_indexBuffer11->Release();
-				//_indexBuffer11 = nullptr;
-				//_vertexBuffer11->Release();
-				//_vertexBuffer11 = nullptr;
 				enginePointer->geUnLoadShader(_pixelModeShader11);
 				return false;
 			}
 
 			D3D11_SAMPLER_DESC samplerDesc = { };
-			//ZeroMemory(&samplerDesc, sizeof(samplerDesc));
 			samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_POINT;
 			samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
 			samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
@@ -797,25 +760,6 @@ namespace game
 			srvDesc.Texture2D.MipLevels = 1;
 			enginePointer->d3d12Device->CreateShaderResourceView(_frameBuffer[0].textureResource12.Get(), &srvDesc, _frameBuffer[0].srvHeap->GetCPUDescriptorHandleForHeapStart());
 
-			//srvDesc = {};
-			//srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-			//// needs to be saved in texture 2d
-			//textureDesc = {};
-			//textureDesc.MipLevels = 1;
-			//textureDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-			//textureDesc.Width = _frameBuffer[1].width;
-			//textureDesc.Height = _frameBuffer[1].height;
-			//textureDesc.Flags = D3D12_RESOURCE_FLAG_NONE;
-			//textureDesc.DepthOrArraySize = 1;
-			//textureDesc.SampleDesc.Count = 1;
-			//textureDesc.SampleDesc.Quality = 0;
-			//textureDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
-			//srvDesc.Format = textureDesc.Format;
-			//srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
-			//srvDesc.Texture2D.MipLevels = 1;
-			//enginePointer->d3d12Device->CreateShaderResourceView(_frameBuffer[1].textureResource12.Get(), &srvDesc, _frameBuffer[1].srvHeap->GetCPUDescriptorHandleForHeapStart());
-
-
 			// Record render bundle
 			_renderBundle->SetPipelineState(_pipelineStateObject.Get()); // may not need to record
 			_renderBundle->SetGraphicsRootSignature(_rootSignature.Get());
@@ -964,9 +908,9 @@ namespace game
 
 			// Homoginize the scaled rect to -1 to 1 range using
 			_positionOfScaledTexture.x = (_positionOfScaledTexture.x * 2.0f / (float_t)_windowSize.width) - 1.0f;
-			_positionOfScaledTexture.y = (_positionOfScaledTexture.y * 2.0f / (float_t)_windowSize.height) - 1.0f;
+			_positionOfScaledTexture.y = 1.0f - (_positionOfScaledTexture.y * 2.0f / (float_t)_windowSize.height);// -1.0f;
 			_sizeOfScaledTexture.width = ((float_t)_sizeOfScaledTexture.width * 2.0f / (float_t)_windowSize.width) - 1.0f;
-			_sizeOfScaledTexture.height = ((float_t)_sizeOfScaledTexture.height * 2.0f / (float_t)_windowSize.height) - 1.0f;
+			_sizeOfScaledTexture.height = 1.0f - ((float_t)_sizeOfScaledTexture.height * 2.0f / (float_t)_windowSize.height);// -1.0f;
 
 			glNewList(_compiledQuad, GL_COMPILE);
 			{
@@ -974,19 +918,19 @@ namespace game
 				//bl
 				glColor3f(1.0f, 1.0f, 1.0f);
 				glTexCoord2f(0, 1);
-				glVertex2f(_positionOfScaledTexture.x, -_sizeOfScaledTexture.height);
+				glVertex2f(_positionOfScaledTexture.x, _sizeOfScaledTexture.height);
 				//br
 				glColor3f(1.0f, 1.0f, 1.0f);
 				glTexCoord2f(1, 1);
-				glVertex2f(_sizeOfScaledTexture.width, -_sizeOfScaledTexture.height);
+				glVertex2f(_sizeOfScaledTexture.width, _sizeOfScaledTexture.height);
 				//tr
 				glColor3f(1.0f, 1.0f, 1.0f);
 				glTexCoord2f(1.0f, 0.0f);
-				glVertex2f(_sizeOfScaledTexture.width, -_positionOfScaledTexture.y);
+				glVertex2f(_sizeOfScaledTexture.width, _positionOfScaledTexture.y);
 				// tl
 				glColor3f(1.0f, 1.0f, 1.0f);
 				glTexCoord2f(0, 0);
-				glVertex2f(_positionOfScaledTexture.x, -_positionOfScaledTexture.y);
+				glVertex2f(_positionOfScaledTexture.x, _positionOfScaledTexture.y);
 
 				glEnd();
 			}
@@ -1088,7 +1032,7 @@ namespace game
 			D3D11_MAPPED_SUBRESOURCE data;
 			if (FAILED(enginePointer->d3d11DeviceContext->Map(_vertexBuffer11, 0, D3D11_MAP_WRITE_DISCARD, 0, &data)))
 			{
-				std::cout << "Could not map vertexbuffer in spritebatch\n.";
+				std::cout << "Could not map vertexbuffer in pixelmode\n.";
 			}
 			memcpy(data.pData, _quadVertices11, sizeof(_quadVertices11));
 			enginePointer->d3d11DeviceContext->Unmap(_vertexBuffer11, 0);
@@ -1099,12 +1043,10 @@ namespace game
 		{
 			// Homoginize the scaled rect to -1 to 1 range using
 			_positionOfScaledTexture.x = (_positionOfScaledTexture.x * 2.0f / (float_t)_windowSize.width) - 1.0f;
-			_positionOfScaledTexture.y = 1.0f - (_positionOfScaledTexture.y * 2.0f / (float_t)_windowSize.height);// -1.0f;
+			_positionOfScaledTexture.y = 1.0f - (_positionOfScaledTexture.y * 2.0f / (float_t)_windowSize.height);
 			_sizeOfScaledTexture.width = ((float_t)_sizeOfScaledTexture.width * 2.0f / (float_t)_windowSize.width) - 1.0f;
-			_sizeOfScaledTexture.height = 1.0f - ((float_t)_sizeOfScaledTexture.height * 2.0f / (float_t)_windowSize.height);// -1.0f;
-			//_positionOfScaledTexture.y = -_positionOfScaledTexture.y;
-			//_sizeOfScaledTexture.height = -_sizeOfScaledTexture.height;
-
+			_sizeOfScaledTexture.height = 1.0f - ((float_t)_sizeOfScaledTexture.height * 2.0f / (float_t)_windowSize.height);
+	
 			// tl -1,1
 			_quadVertices12[0].x = _positionOfScaledTexture.x;
 			_quadVertices12[0].y = _positionOfScaledTexture.y;
