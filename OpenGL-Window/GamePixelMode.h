@@ -838,8 +838,8 @@ namespace game
 		{
 			D3D12_SUBRESOURCE_DATA textureData = {};
 			textureData.pData = reinterpret_cast<uint8_t*>(_video);
-			textureData.RowPitch = _frameBuffer[_currentBuffer].width * 4;
-			textureData.SlicePitch = textureData.RowPitch* _frameBuffer[_currentBuffer].height;
+			textureData.RowPitch = static_cast<LONG_PTR>(_frameBuffer[_currentBuffer].width) * 4;
+			textureData.SlicePitch = 0;// textureData.RowPitch* _frameBuffer[_currentBuffer].height;
 			CD3DX12_RESOURCE_BARRIER trans = CD3DX12_RESOURCE_BARRIER::Transition(_frameBuffer[_currentBuffer].textureResource12.Get(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_COPY_DEST);
 			enginePointer->commandList->ResourceBarrier(1, &trans);
 			UpdateSubresources(enginePointer->commandList.Get(), _frameBuffer[_currentBuffer].textureResource12.Get(), _frameBuffer[_currentBuffer].textureUploadHeap12.Get(), 0, 0, 1, &textureData);

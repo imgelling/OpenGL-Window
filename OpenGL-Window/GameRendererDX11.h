@@ -1,6 +1,6 @@
 #if !defined(GAMERENDERERDX11_H)
 #define GAMERENDERERDX11_H
-#include <wrl.h>
+//#include <wrl.h>
 #include <d3d11.h>
 #include <d3dcompiler.h>
 #include "GameErrors.h"

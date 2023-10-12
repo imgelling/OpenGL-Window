@@ -61,9 +61,7 @@ namespace game
 		};
 		void FillOutRendererInfo() {};
 		bool CreateTexture(Texture2D& texture);
-		bool LoadTexture(std::string fileName, Texture2D& texture) {
-			lastError = { GameErrors::GameDirectX12Specific,"Texture not implemented " }; return false;
-		};
+		bool LoadTexture(std::string fileName, Texture2D& texture);
 		void UnLoadTexture(Texture2D& texture) {};
 		bool LoadShader(const std::string vertex, const std::string fragment, Shader& shader);
 		bool LoadShader(const std::string vertex, const std::string fragment, const std::string geometry, Shader& shader)
@@ -717,6 +715,109 @@ namespace game
 		srvDesc.Texture2D.MipLevels = 1;
 		_d3d12Device->CreateShaderResourceView(texture.textureResource12.Get(), &srvDesc, texture.srvHeap->GetCPUDescriptorHandleForHeapStart());
 		
+		return true;
+	};
+
+	inline bool RendererDX12::LoadTexture(std::string fileName, Texture2D& texture) 
+	{
+		ImageLoader loader;
+		void* data = nullptr;
+		int32_t width = 0;
+		int32_t height = 0;
+		int32_t componentsPerPixel = 0;
+
+		data = loader.Load(fileName.c_str(), width, height, componentsPerPixel, false);
+		if (data == nullptr)
+		{
+			lastError = { GameErrors::GameContent, "Failed to load texture : " + fileName };
+			return false;
+		}
+
+		texture.width = width;
+		texture.height = height;
+		texture.oneOverWidth = 1.0f / (float_t)texture.width;
+		texture.oneOverHeight = 1.0f / (float_t)texture.height;
+		texture.isCopy = false;
+		texture.name = fileName;
+
+		D3D12_RESOURCE_DESC textureDesc = {};
+		textureDesc.MipLevels = 1;
+		textureDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+		textureDesc.Width = texture.width;
+		textureDesc.Height = texture.height;
+		textureDesc.Flags = D3D12_RESOURCE_FLAG_NONE;
+		textureDesc.DepthOrArraySize = 1;
+		textureDesc.SampleDesc.Count = 1;
+		textureDesc.SampleDesc.Quality = 0;
+		textureDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
+		CD3DX12_HEAP_PROPERTIES heapProp = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT);
+		HRESULT hr = _d3d12Device->CreateCommittedResource(
+			&heapProp,
+			D3D12_HEAP_FLAG_NONE,
+			&textureDesc,
+			D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE,
+			nullptr,
+			IID_PPV_ARGS(&texture.textureResource12));
+		if (FAILED(hr))
+		{
+			lastError = { GameErrors::GameDirectX12Specific,"Could not create texture " + texture.name + " heap." };
+			AppendHR12(hr);
+			return false;
+		}
+		texture.textureResource12.Get()->SetName(ConvertToWide(texture.name.c_str()).c_str());
+
+		// Create the upload heap for the texture
+		const UINT64 uploadBufferSize = GetRequiredIntermediateSize(texture.textureResource12.Get(), 0, 1);
+		heapProp = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
+		CD3DX12_RESOURCE_DESC resDesc = CD3DX12_RESOURCE_DESC::Buffer(uploadBufferSize);
+		hr = _d3d12Device->CreateCommittedResource(
+			&heapProp,
+			D3D12_HEAP_FLAG_NONE,
+			&resDesc,
+			D3D12_RESOURCE_STATE_GENERIC_READ,
+			nullptr,
+			IID_PPV_ARGS(&texture.textureUploadHeap12));
+		if (FAILED(hr))
+		{
+			lastError = { GameErrors::GameDirectX12Specific,"Could not create texture " + texture.name + " upload heap." };
+			AppendHR12(hr);
+			return false;
+		}
+
+		// Describe and create a SRV heap for the texture.
+		D3D12_DESCRIPTOR_HEAP_DESC srvHeapDesc = {};
+		srvHeapDesc.NumDescriptors = 1;
+		srvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
+		srvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
+		hr = _d3d12Device->CreateDescriptorHeap(&srvHeapDesc, IID_PPV_ARGS(&texture.srvHeap));
+		if (FAILED(hr))
+		{
+			lastError = { GameErrors::GameDirectX12Specific,"Could not create texture " + texture.name + " srv heap." };
+			AppendHR12(hr);
+			return false;
+		}
+
+		// Describe and create a SRV for the texture.
+		D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
+		srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+		srvDesc.Format = textureDesc.Format;
+		srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
+		srvDesc.Texture2D.MipLevels = 1;
+		_d3d12Device->CreateShaderResourceView(texture.textureResource12.Get(), &srvDesc, texture.srvHeap->GetCPUDescriptorHandleForHeapStart());
+
+		// Upload it here 
+		// Probably need to reset the command list and execute it... dunno fo sho
+		D3D12_SUBRESOURCE_DATA textureData = {};
+		textureData.pData = reinterpret_cast<uint8_t*>(data);
+		textureData.RowPitch = static_cast<int64_t>(texture.width) * 4;
+		textureData.SlicePitch = 0;// textureData.RowPitch* _frameBuffer[_currentBuffer].height;
+		CD3DX12_RESOURCE_BARRIER trans = CD3DX12_RESOURCE_BARRIER::Transition(texture.textureResource12.Get(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_COPY_DEST);
+		_commandList->ResourceBarrier(1, &trans);
+		UpdateSubresources(_commandList.Get(), texture.textureResource12.Get(), texture.textureUploadHeap12.Get(), 0, 0, 1, &textureData);
+		trans = CD3DX12_RESOURCE_BARRIER::Transition(texture.textureResource12.Get(), D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+		_commandList->ResourceBarrier(1, &trans);
+
+		//lastError = { GameErrors::GameDirectX12Specific,"Texture not implemented " }; 
 		return true;
 	};
 }
