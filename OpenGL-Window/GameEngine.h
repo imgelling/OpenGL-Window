@@ -236,6 +236,8 @@ namespace game
 		//	d3d11Device->Release();
 		//}
 #endif
+#if defined (GAME_DIRECTX12)
+#endif
 		if (_renderer)
 		{
 			//_renderer->DestroyDevice();

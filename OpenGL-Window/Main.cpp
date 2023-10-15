@@ -227,7 +227,6 @@ public:
 			temp->StartFrame();
 			//temp->Clear();
 			commandList->ClearRenderTargetView(temp->currentFrameBuffer, game::Colors::DarkGray.rgba, 0, nullptr);
-
 		}
 #endif
 	}
@@ -244,8 +243,8 @@ public:
 #if defined(GAME_DIRECTX12)
 		if (geIsUsing(GAME_DIRECTX12))
 		{
-			game::RendererDX12* temp = geGetRenderer();
-			temp->EndFrame();
+		//	game::RendererDX12* temp = geGetRenderer();
+		//	temp->EndFrame();
 
 
 		}

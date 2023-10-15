@@ -135,6 +135,25 @@ namespace game
 		float_t _oldBlendFactor11[4];
 		uint32_t _oldSampleMask11;
 #endif
+#if defined(GAME_DIRECTX12)
+		struct _vertex12
+		{
+			float_t x, y, z;
+			float_t r, g, b, a;
+			float_t u, v;
+		};
+		Shader _spriteBatchShader12;
+		Microsoft::WRL::ComPtr<ID3D12PipelineState> _pipelineStateObject;
+		Microsoft::WRL::ComPtr<ID3D12RootSignature> _rootSignature;
+		Microsoft::WRL::ComPtr<ID3D12Resource> _indexBufferHeap;
+		Microsoft::WRL::ComPtr<ID3D12Resource> _indexBufferUploadHeap;
+		D3D12_INDEX_BUFFER_VIEW _indexBufferView;
+		Microsoft::WRL::ComPtr<ID3D12Resource> _vertexBufferHeap;
+		Microsoft::WRL::ComPtr<ID3D12Resource> _vertexBufferUploadHeap;
+		D3D12_VERTEX_BUFFER_VIEW _vertexBufferView;
+		Microsoft::WRL::ComPtr<ID3D12CommandAllocator> _bundleAllocator;
+		Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> _renderBundle;
+#endif
 	};
 
 	inline SpriteBatch::SpriteBatch()
@@ -211,6 +230,10 @@ namespace game
 		_oldDepthStencilState11 = nullptr;
 		_oldSampleMask11 = 0;
 #endif
+#if defined(GAME_DIRECTX12)
+		_vertexBufferView = {};
+		_indexBufferView = {};
+#endif
 		_numberOfSpritesUsed = 0;
 	}
 
@@ -274,6 +297,10 @@ namespace game
 			enginePointer->geUnLoadShader(_spriteBatchShader11);
 		}
 #endif
+		if (enginePointer->geIsUsing(GAME_DIRECTX12))
+		{
+			enginePointer->geUnLoadShader(_spriteBatchShader12);
+		}
 	}
 
 	inline bool SpriteBatch::Initialize(const uint32_t maxSprites = 2000)

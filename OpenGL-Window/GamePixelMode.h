@@ -660,10 +660,11 @@ namespace game
 
 			// resets the command list -----------------------------
 			{
-				if (FAILED(temp->_commandAllocator[temp->_frameIndex]->Reset()))
-				{
-					std::cout << "Command allocator reset failed\n";
-				}
+				// once per frame
+				//if (FAILED(temp->_commandAllocator[temp->_frameIndex]->Reset()))
+				//{
+				//	std::cout << "Command allocator reset failed\n";
+				//}
 
 				// Reset to start recording
 				if (FAILED(enginePointer->commandList->Reset(temp->_commandAllocator[temp->_frameIndex].Get(), NULL)))

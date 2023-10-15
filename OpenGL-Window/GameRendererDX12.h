@@ -156,7 +156,7 @@ namespace game
 		}
 
 		//// memory check stuff
-		//IDXGIDebug1* pDebug = nullptr;
+		//Microsoft::WRL::ComPtr<IDXGIDebug1> pDebug;// = nullptr;
 		//if (SUCCEEDED(DXGIGetDebugInterface1(0, IID_PPV_ARGS(&pDebug))))
 		//{
 		//	pDebug->ReportLiveObjects(DXGI_DEBUG_ALL, DXGI_DEBUG_RLO_IGNORE_INTERNAL);
@@ -466,8 +466,7 @@ namespace game
 
 		// RESET commandlist
 		{
-			// we can only reset an allocator once the gpu is done with it
-			// resetting an allocator frees the memory that the command list was stored in
+			// Reset this once per frame to free memory
 			if (FAILED(_commandAllocator[_frameIndex]->Reset()))
 			{
 				//Running = false;
@@ -530,6 +529,17 @@ namespace game
 	{
 		HRESULT hr;
 
+		// Transition the render target to the present state.
+		CD3DX12_RESOURCE_BARRIER t = CD3DX12_RESOURCE_BARRIER::Transition(_renderTargets[_frameIndex].Get(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT);
+		_commandList->ResourceBarrier(1, &t);
+
+		hr = _commandList->Close();
+		if (FAILED(hr))
+		{
+			AppendHR12(hr);
+			std::cout << lastError.lastErrorString << "\n";
+		}
+
 		// EXECUTE
 		{
 			// close it?
@@ -558,10 +568,6 @@ namespace game
 		{
 			hr = _swapChain->Present(0, DXGI_PRESENT_ALLOW_TEARING);
 		}
-		//if (FAILED(hr))
-		//{
-		//	std::cout << "no tearing\n";
-		//}
 		// Below is needed for VSYNC to work for some reason
 		_WaitForPreviousFrame(false);
 		_midFrame = false;
