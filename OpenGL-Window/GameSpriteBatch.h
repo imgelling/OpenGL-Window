@@ -136,12 +136,13 @@ namespace game
 		uint32_t _oldSampleMask11;
 #endif
 #if defined(GAME_DIRECTX12)
-		struct _vertex12
+		struct _spriteVertex12
 		{
 			float_t x, y, z;
 			float_t r, g, b, a;
 			float_t u, v;
 		};
+		_spriteVertex12* _spriteVertices12;
 		Shader _spriteBatchShader12;
 		Microsoft::WRL::ComPtr<ID3D12PipelineState> _pipelineStateObject;
 		Microsoft::WRL::ComPtr<ID3D12RootSignature> _rootSignature;
@@ -233,6 +234,7 @@ namespace game
 #if defined(GAME_DIRECTX12)
 		_vertexBufferView = {};
 		_indexBufferView = {};
+		_spriteVertices12 = nullptr;
 #endif
 		_numberOfSpritesUsed = 0;
 	}
@@ -297,10 +299,17 @@ namespace game
 			enginePointer->geUnLoadShader(_spriteBatchShader11);
 		}
 #endif
+#if defined (GAME_DIRECTX12)
 		if (enginePointer->geIsUsing(GAME_DIRECTX12))
 		{
+			if (_spriteVertices12)
+			{
+				delete[] _spriteVertices12;
+				_spriteVertices12 = nullptr;
+			}
 			enginePointer->geUnLoadShader(_spriteBatchShader12);
 		}
+#endif
 	}
 
 	inline bool SpriteBatch::Initialize(const uint32_t maxSprites = 2000)
@@ -379,6 +388,24 @@ namespace game
 				_spriteVertices11[vertex].b = Colors::White.bf;
 				_spriteVertices11[vertex].a = Colors::White.af;
 			}
+		}
+#endif
+#if defined(GAME_DIRECTX12)
+		if (enginePointer->geIsUsing(GAME_DIRECTX12))
+		{
+			_spriteVertices12 = new _spriteVertex12[_maxSprites * 4];
+			for (uint32_t vertex = 0; vertex < _maxSprites * 4; vertex++)
+			{
+				_spriteVertices12[vertex].x = 0.0f;
+				_spriteVertices12[vertex].y = 0.0f;
+				_spriteVertices12[vertex].z = 0.0f;
+				_spriteVertices12[vertex].u = 0.0f;
+				_spriteVertices12[vertex].v = 0.0f;
+				_spriteVertices12[vertex].r = Colors::White.rf;
+				_spriteVertices12[vertex].g = Colors::White.gf;
+				_spriteVertices12[vertex].b = Colors::White.bf;
+				_spriteVertices12[vertex].a = Colors::White.af;
+	}
 		}
 #endif
 
@@ -652,6 +679,12 @@ namespace game
 			}
 		}
 #endif 
+#if defined(GAME_DIRECTX12)
+		if (enginePointer->geIsUsing(GAME_DIRECTX12))
+		{
+
+		}
+#endif
 		return true;
 	}
 
