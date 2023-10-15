@@ -813,16 +813,33 @@ namespace game
 		_d3d12Device->CreateShaderResourceView(texture.textureResource12.Get(), &srvDesc, texture.srvHeap->GetCPUDescriptorHandleForHeapStart());
 
 		// Upload it here 
-		// Probably need to reset the command list and execute it... dunno fo sho
-		//D3D12_SUBRESOURCE_DATA textureData = {};
-		//textureData.pData = reinterpret_cast<uint8_t*>(data);
-		//textureData.RowPitch = static_cast<int64_t>(texture.width) * 4;
-		//textureData.SlicePitch = 0;// textureData.RowPitch* _frameBuffer[_currentBuffer].height;
-		//CD3DX12_RESOURCE_BARRIER trans = CD3DX12_RESOURCE_BARRIER::Transition(texture.textureResource12.Get(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_COPY_DEST);
-		//_commandList->ResourceBarrier(1, &trans);
-		//UpdateSubresources(_commandList.Get(), texture.textureResource12.Get(), texture.textureUploadHeap12.Get(), 0, 0, 1, &textureData);
-		//trans = CD3DX12_RESOURCE_BARRIER::Transition(texture.textureResource12.Get(), D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
-		//_commandList->ResourceBarrier(1, &trans);
+		D3D12_SUBRESOURCE_DATA textureData = {};
+		textureData.pData = reinterpret_cast<uint8_t*>(data);
+		textureData.RowPitch = static_cast<int64_t>(texture.width) * 4;
+		textureData.SlicePitch = 0;
+
+		_commandList->Reset(_commandAllocator->Get(), NULL);
+		CD3DX12_RESOURCE_BARRIER trans = CD3DX12_RESOURCE_BARRIER::Transition(texture.textureResource12.Get(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_COPY_DEST);
+		_commandList->ResourceBarrier(1, &trans);
+		UpdateSubresources(_commandList.Get(), texture.textureResource12.Get(), texture.textureUploadHeap12.Get(), 0, 0, 1, &textureData);
+		trans = CD3DX12_RESOURCE_BARRIER::Transition(texture.textureResource12.Get(), D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+		_commandList->ResourceBarrier(1, &trans);
+
+		_commandList->Close();
+
+		ID3D12CommandList* ppCommandLists[] = { _commandList.Get() };
+
+		// execute the array of command lists
+		_commandQueue->ExecuteCommandLists(_countof(ppCommandLists), ppCommandLists);
+		_fenceValue[_frameIndex]++;
+		hr = _commandQueue->Signal(_fence[_frameIndex].Get(), _fenceValue[_frameIndex]);
+		if (FAILED(hr))
+		{
+			lastError = { GameErrors::GameDirectX12Specific,"LoadTexture signal failed." };
+			AppendHR12(hr);
+			return false;
+		}
+		_WaitForPreviousFrame(false);
 
 		//lastError = { GameErrors::GameDirectX12Specific,"Texture not implemented " }; 
 		return true;
