@@ -108,7 +108,7 @@ public:
 
 	void Update(const float_t msElapsed)
 	{
-		geSetWindowTitle("FPS = " + std::to_string(geGetFramesPerSecond()));
+		//geSetWindowTitle("FPS = " + std::to_string(geGetFramesPerSecond()));
 		// Handle Input
 		if (geKeyboard.WasKeyReleased(geK_F11))
 		{
@@ -158,7 +158,7 @@ public:
 		//perftimer.Stop("CircleClip");
 
 		pixelMode.VerticalPillClip(scaledMousePos.x, scaledMousePos.y, 40, 5, game::Colors::Green);
-		pixelMode.VerticalPillClip(scaledMousePos.x, scaledMousePos.y, 38, 4, game::Colors::White);
+		pixelMode.VerticalPillClip(scaledMousePos.x, scaledMousePos.y, 38, 4, game::Colors::Blue);
 
 		// Weird diagonal
 		pixelMode.LineClip(-20, -10, scaledMousePos.x, scaledMousePos.y, game::Colors::Pink);
@@ -178,8 +178,8 @@ public:
 		//double_t millionPerSecond = perSecond / 1000.0 / 1000.0;
 		for (int i = 0; i < 40; i++)
 			spriteBatch.Draw(spriteTexture, { 10 + (i * 100), 10 }, game::Colors::White);
-		//spriteBatch.DrawString(spriteFont, "Random Circle(s) : " + std::to_string(millionPerSecond) + " million per second.", 10, 0, game::Colors::Red);
 		spriteBatch.DrawString(spriteFont, "FPS : " + std::to_string(geGetFramesPerSecond()) + " UPS : " + std::to_string(geGetUpdatesPerSecond()) + " cpu : " + std::to_string(geGetCPUFrequency()) + "Mhz", 10, 200, game::Colors::White,2.0f);
+		//spriteBatch.DrawString(spriteFont, "Random Circle(s) : " + std::to_string(millionPerSecond) + " million per second.", 10, 0, game::Colors::Red);
 		spriteBatch.DrawString(spriteFont, "Window Pixel Size: " + std::to_string(geGetWindowSize().width) + "x" + std::to_string(geGetWindowSize().height), 10, 240, game::Colors::White, 2.0f);
 		spriteBatch.DrawString(spriteFont, "PixelMode Pixel Size: " + std::to_string(pixelMode.GetPixelFrameBufferSize().width) + "x" + std::to_string(pixelMode.GetPixelFrameBufferSize().height), 10, 280, game::Colors::White, 2.0f);
 		spriteBatch.End();

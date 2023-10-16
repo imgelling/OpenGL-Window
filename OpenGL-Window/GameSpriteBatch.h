@@ -686,14 +686,14 @@ namespace game
 			HRESULT hr = {};
 			// Create the root signature.
 
-			D3D12_FEATURE_DATA_ROOT_SIGNATURE featureData = {};
+			//D3D12_FEATURE_DATA_ROOT_SIGNATURE featureData = {};
 
 			// This is the highest version the sample supports. If CheckFeatureSupport succeeds, the HighestVersion returned will not be greater than this.
-			featureData.HighestVersion = D3D_ROOT_SIGNATURE_VERSION_1_1;
+			//featureData.HighestVersion = D3D_ROOT_SIGNATURE_VERSION_1_1;
 
-			if (FAILED(enginePointer->d3d12Device->CheckFeatureSupport(D3D12_FEATURE_ROOT_SIGNATURE, &featureData, sizeof(featureData))))
+			//if (FAILED(enginePointer->d3d12Device->CheckFeatureSupport(D3D12_FEATURE_ROOT_SIGNATURE, &featureData, sizeof(featureData))))
 			{
-				featureData.HighestVersion = D3D_ROOT_SIGNATURE_VERSION_1_0;
+				//featureData.HighestVersion = D3D_ROOT_SIGNATURE_VERSION_1_0;
 			}
 
 			CD3DX12_DESCRIPTOR_RANGE1 ranges[1] = {};
@@ -825,10 +825,10 @@ namespace game
 
 
 			// Index buffer
-			DWORD iList[] = {
-				0, 1, 2,
-				1, 3, 2
-			};
+			//DWORD iList[] = {
+			//	0, 1, 2,
+			//	1, 3, 2
+			//};
 			//uint32_t iBufferSize = sizeof(iList);
 			std::vector<uint32_t> indices;
 			for (uint32_t index = 0; index < _maxSprites; index++)
@@ -880,7 +880,7 @@ namespace game
 			// Fill out resource data with vertex data
 			D3D12_SUBRESOURCE_DATA vertexData = {};
 			vertexData.pData = reinterpret_cast<uint8_t*>(_spriteVertices12);
-			vertexData.RowPitch = vBufferSize;
+			vertexData.RowPitch = sizeof(_spriteVertex12);
 			vertexData.SlicePitch = vBufferSize;
 
 			// Create a command to copy vertex buffer
@@ -892,7 +892,7 @@ namespace game
 
 			// Fill out resource data with index buffer
 			D3D12_SUBRESOURCE_DATA indexData = {};
-			indexData.pData = reinterpret_cast<uint8_t*>(iList);
+			indexData.pData = reinterpret_cast<uint8_t*>(indices.data());
 			indexData.RowPitch = iBufferSize;
 			indexData.SlicePitch = iBufferSize;
 
@@ -1032,6 +1032,16 @@ namespace game
 			_currentTexture.name = "";
 			// Disable multisampling
 			// not now
+		}
+#endif
+#if defined(GAME_DIRECTX12)
+		if (enginePointer->geIsUsing(GAME_DIRECTX12))
+		{
+			enginePointer->commandList->SetPipelineState(_pipelineStateObject.Get());
+			enginePointer->commandList->SetGraphicsRootSignature(_rootSignature.Get());
+			//enginePointer->commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+			enginePointer->commandList->IASetVertexBuffers(0, 1, &_vertexBufferView);
+			enginePointer->commandList->IASetIndexBuffer(&_indexBufferView);
 		}
 #endif
 
@@ -1184,36 +1194,42 @@ namespace game
 #if defined(GAME_DIRECTX12)
 		if (enginePointer->geIsUsing(GAME_DIRECTX12))
 		{
-			int vBufferSize = _maxSprites * (uint32_t)4 * (uint32_t)sizeof(_spriteVertex12);
-			D3D12_SUBRESOURCE_DATA vertexData = {};
-			vertexData.pData = reinterpret_cast<BYTE*>(_spriteVertices12); // pointer to our vertex array
-			vertexData.RowPitch = vBufferSize; // size of all our triangle vertex data
-			vertexData.SlicePitch = vBufferSize; // also the size of our triangle vertex data
+			// Copy vertex data to gpu
+			{
+				int vBufferSize = _numberOfSpritesUsed * (uint32_t)4 * (uint32_t)sizeof(_spriteVertex12);
+				D3D12_SUBRESOURCE_DATA vertexData = {};
+				vertexData.pData = reinterpret_cast<BYTE*>(_spriteVertices12); // pointer to our vertex array
+				vertexData.RowPitch = vBufferSize; // size of all our triangle vertex data
+				vertexData.SlicePitch = vBufferSize; // also the size of our triangle vertex data
 
-			// Turn vertex buffer into a destination state
-			CD3DX12_RESOURCE_BARRIER resBar = CD3DX12_RESOURCE_BARRIER::Transition(_vertexBufferHeap.Get(), D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, D3D12_RESOURCE_STATE_COPY_DEST);
-			enginePointer->commandList->ResourceBarrier(1, &resBar);
+				// Turn vertex buffer into a destination state
+				CD3DX12_RESOURCE_BARRIER resBar = CD3DX12_RESOURCE_BARRIER::Transition(_vertexBufferHeap.Get(), D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, D3D12_RESOURCE_STATE_COPY_DEST);
+				enginePointer->commandList->ResourceBarrier(1, &resBar);
 
-			// Upload the vertex buffer to the vertex buffer heap
-			UpdateSubresources(enginePointer->commandList.Get(), _vertexBufferHeap.Get(), _vertexBufferUploadHeap.Get(), 0, 0, 1, &vertexData);
+				// Upload the vertex buffer to the vertex buffer heap
+				UpdateSubresources(enginePointer->commandList.Get(), _vertexBufferHeap.Get(), _vertexBufferUploadHeap.Get(), 0, 0, 1, &vertexData);
 
-			// Turn vertex buffer into a vertex buffer state again
-			CD3DX12_RESOURCE_BARRIER resBar2 = CD3DX12_RESOURCE_BARRIER::Transition(_vertexBufferHeap.Get(), D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER);
-			enginePointer->commandList->ResourceBarrier(1, &resBar2);
+				// Turn vertex buffer into a vertex buffer state again
+				CD3DX12_RESOURCE_BARRIER resBar2 = CD3DX12_RESOURCE_BARRIER::Transition(_vertexBufferHeap.Get(), D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER);
+				enginePointer->commandList->ResourceBarrier(1, &resBar2);
+			}
 
-			// Draw the quad
-			enginePointer->commandList->SetPipelineState(_pipelineStateObject.Get());
-			enginePointer->commandList->SetGraphicsRootSignature(_rootSignature.Get());
-			ID3D12DescriptorHeap* ppHeaps[] = { _currentTexture.srvHeap.Get() };// _frameBuffer[_currentBuffer].srvHeap.Get()
-		//};
-			enginePointer->commandList->SetDescriptorHeaps(_countof(ppHeaps), ppHeaps);
+			// Draw the sprites
+			//enginePointer->commandList->SetPipelineState(_pipelineStateObject.Get());
+			//enginePointer->commandList->SetGraphicsRootSignature(_rootSignature.Get());
 
+			// make 10 of these heaps, use instead of srvHeap, with an offset of descriptor size * number of texture (ring loop)
+			// below will go into begin with the big heap
+			{
+				ID3D12DescriptorHeap* ppHeaps[] = { _currentTexture.srvHeap.Get() };
+				enginePointer->commandList->SetDescriptorHeaps(_countof(ppHeaps), ppHeaps);
+			}
 			enginePointer->commandList->SetGraphicsRootDescriptorTable(0, _currentTexture.srvHeap->GetGPUDescriptorHandleForHeapStart());
 
-			enginePointer->commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST); 
-			enginePointer->commandList->IASetVertexBuffers(0, 1, &_vertexBufferView);
-			enginePointer->commandList->IASetIndexBuffer(&_indexBufferView);
-			enginePointer->commandList->DrawIndexedInstanced(6, 1, 0, 0, 0);
+			//enginePointer->commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST); 
+			//enginePointer->commandList->IASetVertexBuffers(0, 1, &_vertexBufferView);
+			//enginePointer->commandList->IASetIndexBuffer(&_indexBufferView);
+			enginePointer->commandList->DrawIndexedInstanced(_numberOfSpritesUsed * 6, 1, 0, 0, 0);
 		}
 #endif
 
@@ -1859,7 +1875,8 @@ namespace game
 		{
 			_spriteVertex12* access = nullptr;
 			Vector2i windowSize;
-			Rectf scaledPos;
+			Rectf scaledPosition;
+			Rectf scaledUV;
 
 			// If texture changed, render and change SRV
 			if (texture.name != _currentTexture.name)
@@ -1868,6 +1885,66 @@ namespace game
 				_currentTexture = texture;
 				//enginePointer->d3d11DeviceContext->PSSetShaderResources(0, 1, &texture.textureSRV11);
 			}
+
+			access = &_spriteVertices12[_numberOfSpritesUsed * 4];
+			windowSize = enginePointer->geGetWindowSize();
+			// Homogenise coordinates to -1.0f to 1.0f
+			scaledPosition.left = ((float_t)destination.left * 2.0f / (float_t)windowSize.width) - 1.0f;
+			scaledPosition.top = 1.0f - ((float_t)destination.top * 2.0f / (float_t)windowSize.height);// -1.0f;
+			scaledPosition.right = (((float_t)destination.right) * 2.0f / (float)windowSize.width) - 1.0f;
+			scaledPosition.bottom = 1.0f - (((float_t)destination.bottom) * 2.0f / (float)windowSize.height);// -1.0f;
+			// Homogenise UV coords to 0.0f - 1.0f
+			scaledUV.left = (float_t)portion.left * texture.oneOverWidth;
+			scaledUV.top = (float_t)portion.top * texture.oneOverHeight;
+			scaledUV.right = (float_t)portion.right * texture.oneOverWidth;
+			scaledUV.bottom = (float_t)portion.bottom * texture.oneOverHeight;
+
+			// Fill vertices
+
+			// Top left
+			access->x = scaledPosition.left;
+			access->y = scaledPosition.top;
+			access->u = scaledUV.left;
+			access->v = scaledUV.top;
+			access->r = color.rf;
+			access->g = color.gf;
+			access->b = color.bf;
+			access->a = color.af;
+
+			access++;
+
+			// Top right
+			access->x = scaledPosition.right;
+			access->y = scaledPosition.top;
+			access->u = scaledUV.right;
+			access->v = scaledUV.top;
+			access->r = color.rf;
+			access->g = color.gf;
+			access->b = color.bf;
+			access->a = color.af;
+			access++;
+
+			// Bottom left
+			access->x = scaledPosition.left;
+			access->y = scaledPosition.bottom;
+			access->u = scaledUV.left;
+			access->v = scaledUV.bottom;
+			access->r = color.rf;
+			access->g = color.gf;
+			access->b = color.bf;
+			access->a = color.af;
+			access++;
+
+			// Bottom right
+			access->x = scaledPosition.right;
+			access->y = scaledPosition.bottom;
+			access->u = scaledUV.right;
+			access->v = scaledUV.bottom;
+			access->r = color.rf;
+			access->g = color.gf;
+			access->b = color.bf;
+			access->a = color.af;
+			access++;
 		}
 #endif
 
