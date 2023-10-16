@@ -829,7 +829,18 @@ namespace game
 				0, 1, 2,
 				1, 3, 2
 			};
-			uint32_t iBufferSize = sizeof(iList);
+			//uint32_t iBufferSize = sizeof(iList);
+			std::vector<uint32_t> indices;
+			for (uint32_t index = 0; index < _maxSprites; index++)
+			{
+				indices.emplace_back(0 + (index * 4));  // 4 indices per quad, not 6 like I had
+				indices.emplace_back(1 + (index * 4));
+				indices.emplace_back(2 + (index * 4));
+				indices.emplace_back(1 + (index * 4));
+				indices.emplace_back(3 + (index * 4));
+				indices.emplace_back(2 + (index * 4));
+			}
+			uint32_t iBufferSize = (uint32_t)indices.size();
 
 			// Create index buffer heap
 			heapProp = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT);
@@ -1170,6 +1181,42 @@ namespace game
 		}
 #endif
 
+#if defined(GAME_DIRECTX12)
+		if (enginePointer->geIsUsing(GAME_DIRECTX12))
+		{
+			int vBufferSize = _maxSprites * (uint32_t)4 * (uint32_t)sizeof(_spriteVertex12);
+			D3D12_SUBRESOURCE_DATA vertexData = {};
+			vertexData.pData = reinterpret_cast<BYTE*>(_spriteVertices12); // pointer to our vertex array
+			vertexData.RowPitch = vBufferSize; // size of all our triangle vertex data
+			vertexData.SlicePitch = vBufferSize; // also the size of our triangle vertex data
+
+			// Turn vertex buffer into a destination state
+			CD3DX12_RESOURCE_BARRIER resBar = CD3DX12_RESOURCE_BARRIER::Transition(_vertexBufferHeap.Get(), D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, D3D12_RESOURCE_STATE_COPY_DEST);
+			enginePointer->commandList->ResourceBarrier(1, &resBar);
+
+			// Upload the vertex buffer to the vertex buffer heap
+			UpdateSubresources(enginePointer->commandList.Get(), _vertexBufferHeap.Get(), _vertexBufferUploadHeap.Get(), 0, 0, 1, &vertexData);
+
+			// Turn vertex buffer into a vertex buffer state again
+			CD3DX12_RESOURCE_BARRIER resBar2 = CD3DX12_RESOURCE_BARRIER::Transition(_vertexBufferHeap.Get(), D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER);
+			enginePointer->commandList->ResourceBarrier(1, &resBar2);
+
+			// Draw the quad
+			enginePointer->commandList->SetPipelineState(_pipelineStateObject.Get());
+			enginePointer->commandList->SetGraphicsRootSignature(_rootSignature.Get());
+			ID3D12DescriptorHeap* ppHeaps[] = { _currentTexture.srvHeap.Get() };// _frameBuffer[_currentBuffer].srvHeap.Get()
+		//};
+			enginePointer->commandList->SetDescriptorHeaps(_countof(ppHeaps), ppHeaps);
+
+			enginePointer->commandList->SetGraphicsRootDescriptorTable(0, _currentTexture.srvHeap->GetGPUDescriptorHandleForHeapStart());
+
+			enginePointer->commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST); 
+			enginePointer->commandList->IASetVertexBuffers(0, 1, &_vertexBufferView);
+			enginePointer->commandList->IASetIndexBuffer(&_indexBufferView);
+			enginePointer->commandList->DrawIndexedInstanced(6, 1, 0, 0, 0);
+		}
+#endif
+
 #if defined(GAME_OPENGL)
 		if (enginePointer->geIsUsing(GAME_OPENGL))
 		{
@@ -1484,6 +1531,77 @@ namespace game
 			access++;
 		}
 #endif
+#if defined (GAME_DIRECTX12)
+		if (enginePointer->geIsUsing(GAME_DIRECTX12))
+		{
+			_spriteVertex12* access = nullptr;
+			Vector2i windowSize;
+			Rectf scaledPos;
+
+			// If texture changed, render and change SRV
+			if (texture.name != _currentTexture.name)
+			{
+				Render();
+				_currentTexture = texture;
+				//enginePointer->d3d11DeviceContext->PSSetShaderResources(0, 1, &texture.textureSRV11);
+			}
+			access = &_spriteVertices12[_numberOfSpritesUsed * 4];
+			windowSize = enginePointer->geGetWindowSize();
+			// Homogenise coordinates to -1.0f to 1.0f
+			scaledPos.left = ((float_t)x * 2.0f / (float_t)windowSize.width) - 1.0f;
+			scaledPos.top = 1.0f - ((float_t)y * 2.0f / (float_t)windowSize.height);// -1.0f;
+			scaledPos.right = (((float_t)x + (float_t)texture.width) * 2.0f / (float)windowSize.width) - 1.0f;
+			scaledPos.bottom = 1.0f - (((float_t)y + (float_t)texture.height) * 2.0f / (float)windowSize.height);// -1.0f;
+
+
+			// Fill vertices
+
+			// Top left
+			access->x = scaledPos.left;
+			access->y = scaledPos.top;
+			access->u = 0.0f;
+			access->v = 0.0f;
+			access->r = color.rf;
+			access->g = color.gf;
+			access->b = color.bf;
+			access->a = color.af;
+
+			access++;
+
+			// Top right
+			access->x = scaledPos.right;
+			access->y = scaledPos.top;
+			access->u = 1.0f;
+			access->v = 0.0f;
+			access->r = color.rf;
+			access->g = color.gf;
+			access->b = color.bf;
+			access->a = color.af;
+			access++;
+
+			// Bottom left
+			access->x = scaledPos.left;
+			access->y = scaledPos.bottom;
+			access->u = 0.0f;
+			access->v = 1.0f;
+			access->r = color.rf;
+			access->g = color.gf;
+			access->b = color.bf;
+			access->a = color.af;
+			access++;
+
+			// Bottom right
+			access->x = scaledPos.right;
+			access->y = scaledPos.bottom;
+			access->u = 1.0f;
+			access->v = 1.0f;
+			access->r = color.rf;
+			access->g = color.gf;
+			access->b = color.bf;
+			access->a = color.af;
+			access++;
+		}
+#endif
 
 		_numberOfSpritesUsed++;
 	}
@@ -1734,6 +1852,22 @@ namespace game
 			access->b = color.bf;
 			access->a = color.af;
 			access++;
+		}
+#endif
+#if defined (GAME_DIRECTX12)
+		if (enginePointer->geIsUsing(GAME_DIRECTX12))
+		{
+			_spriteVertex12* access = nullptr;
+			Vector2i windowSize;
+			Rectf scaledPos;
+
+			// If texture changed, render and change SRV
+			if (texture.name != _currentTexture.name)
+			{
+				Render();
+				_currentTexture = texture;
+				//enginePointer->d3d11DeviceContext->PSSetShaderResources(0, 1, &texture.textureSRV11);
+			}
 		}
 #endif
 
