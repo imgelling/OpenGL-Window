@@ -682,7 +682,243 @@ namespace game
 #if defined(GAME_DIRECTX12)
 		if (enginePointer->geIsUsing(GAME_DIRECTX12))
 		{
+			// Root signature description
+			HRESULT hr = {};
+			// Create the root signature.
 
+			D3D12_FEATURE_DATA_ROOT_SIGNATURE featureData = {};
+
+			// This is the highest version the sample supports. If CheckFeatureSupport succeeds, the HighestVersion returned will not be greater than this.
+			featureData.HighestVersion = D3D_ROOT_SIGNATURE_VERSION_1_1;
+
+			if (FAILED(enginePointer->d3d12Device->CheckFeatureSupport(D3D12_FEATURE_ROOT_SIGNATURE, &featureData, sizeof(featureData))))
+			{
+				featureData.HighestVersion = D3D_ROOT_SIGNATURE_VERSION_1_0;
+			}
+
+			CD3DX12_DESCRIPTOR_RANGE1 ranges[1] = {};
+			ranges[0].Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 0, 0, D3D12_DESCRIPTOR_RANGE_FLAG_DATA_STATIC);
+
+			CD3DX12_ROOT_PARAMETER1 rootParameters[1] = {};
+			rootParameters[0].InitAsDescriptorTable(1, &ranges[0], D3D12_SHADER_VISIBILITY_PIXEL);
+
+			D3D12_STATIC_SAMPLER_DESC sampler = {};
+			sampler.Filter = D3D12_FILTER_MIN_MAG_MIP_POINT;
+			sampler.AddressU = D3D12_TEXTURE_ADDRESS_MODE_BORDER;
+			sampler.AddressV = D3D12_TEXTURE_ADDRESS_MODE_BORDER;
+			sampler.AddressW = D3D12_TEXTURE_ADDRESS_MODE_BORDER;
+			sampler.MipLODBias = 0;
+			sampler.MaxAnisotropy = 0;
+			sampler.ComparisonFunc = D3D12_COMPARISON_FUNC_NEVER;
+			sampler.BorderColor = D3D12_STATIC_BORDER_COLOR_TRANSPARENT_BLACK;
+			sampler.MinLOD = 0.0f;
+			sampler.MaxLOD = D3D12_FLOAT32_MAX;
+			sampler.ShaderRegister = 0;
+			sampler.RegisterSpace = 0;
+			sampler.ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+
+			CD3DX12_VERSIONED_ROOT_SIGNATURE_DESC rootSignatureDesc = {};
+			rootSignatureDesc.Init_1_1(_countof(rootParameters), rootParameters, 1, &sampler, D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT);
+
+			Microsoft::WRL::ComPtr<ID3DBlob> signature;
+			hr = D3DX12SerializeVersionedRootSignature(&rootSignatureDesc, D3D_ROOT_SIGNATURE_VERSION_1, &signature, nullptr);
+			if (FAILED(hr))
+			{
+				lastError = { GameErrors::GameDirectX12Specific, "Could not serialize root signature in SpriteBatch." };
+				AppendHR12(hr);
+				return false;
+			}
+
+			// create the root signature
+			hr = enginePointer->d3d12Device->CreateRootSignature(0, signature->GetBufferPointer(), signature->GetBufferSize(), IID_PPV_ARGS(&_rootSignature));
+			if (FAILED(hr))
+			{
+				lastError = { GameErrors::GameDirectX12Specific, "Could not create root signature in SpriteBatch." };
+				AppendHR12(hr);
+				return false;
+			}
+			_rootSignature->SetName(L"SpriteBatch Root Signature");
+
+
+			// Load shaders for sprite mode
+			if (!enginePointer->geLoadShader("Content/VertexShader.hlsl", "Content/PixelShader.hlsl", _spriteBatchShader12))
+			{
+				return false;
+			}
+
+			// Input layout
+			D3D12_INPUT_ELEMENT_DESC inputElementDescs[] =
+			{
+				{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
+				{ "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
+				{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT,    0, D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0}
+			};
+
+			// Describe input layout
+			D3D12_INPUT_LAYOUT_DESC inputLayoutDesc = {};
+			inputLayoutDesc.NumElements = ARRAYSIZE(inputElementDescs);
+			inputLayoutDesc.pInputElementDescs = inputElementDescs;
+
+
+			// Describe PSO
+			D3D12_GRAPHICS_PIPELINE_STATE_DESC psoDesc = {};
+			psoDesc.InputLayout = inputLayoutDesc;
+			psoDesc.pRootSignature = _rootSignature.Get();
+			psoDesc.VS = CD3DX12_SHADER_BYTECODE(_spriteBatchShader12.compiledVertexShader12.Get());
+			psoDesc.PS = CD3DX12_SHADER_BYTECODE(_spriteBatchShader12.compiledPixelShader12.Get());
+			psoDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
+			psoDesc.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM;
+			psoDesc.SampleDesc = { 1, 0 };
+			psoDesc.SampleMask = 0xffffffff;
+			D3D12_RASTERIZER_DESC rasterDesc = CD3DX12_RASTERIZER_DESC(D3D12_DEFAULT);
+			//rasterDesc.FrontCounterClockwise = FALSE;
+			psoDesc.RasterizerState = rasterDesc;
+			psoDesc.BlendState = CD3DX12_BLEND_DESC(D3D12_DEFAULT);
+			const D3D12_RENDER_TARGET_BLEND_DESC defaultRenderTargetBlendDesc =
+			{
+				TRUE,FALSE,
+				D3D12_BLEND_SRC_ALPHA, D3D12_BLEND_INV_SRC_ALPHA, D3D12_BLEND_OP_ADD,
+				D3D12_BLEND_SRC_ALPHA, D3D12_BLEND_INV_SRC_ALPHA, D3D12_BLEND_OP_ADD,
+				D3D12_LOGIC_OP_NOOP,
+				D3D12_COLOR_WRITE_ENABLE_ALL,
+			};
+			psoDesc.BlendState.RenderTarget[0] = defaultRenderTargetBlendDesc;
+			psoDesc.NumRenderTargets = 1;
+			psoDesc.Flags = D3D12_PIPELINE_STATE_FLAG_NONE;
+
+			// Create the pso
+			hr = enginePointer->d3d12Device->CreateGraphicsPipelineState(&psoDesc, IID_PPV_ARGS(&_pipelineStateObject));
+			if (FAILED(hr))
+			{
+				lastError = { GameErrors::GameDirectX12Specific,"Could not create pipline state for SpriteBatch." };
+				AppendHR12(hr);
+				return false;
+			}
+			_pipelineStateObject->SetName(L"SpriteBatch PSO");
+
+			// Create vertex buffer
+			uint32_t vBufferSize = _maxSprites * (uint32_t)4 * (uint32_t)sizeof(_spriteVertex12);
+
+			// Create vertex buffer heap
+			D3D12_HEAP_PROPERTIES heapProp = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT);
+			D3D12_RESOURCE_DESC resDesc = CD3DX12_RESOURCE_DESC::Buffer(vBufferSize);
+			hr = enginePointer->d3d12Device->CreateCommittedResource(&heapProp, D3D12_HEAP_FLAG_NONE, &resDesc, D3D12_RESOURCE_STATE_COMMON, nullptr, IID_PPV_ARGS(&_vertexBufferHeap));
+			if (FAILED(hr))
+			{
+				lastError = { GameErrors::GameDirectX12Specific,"Could not create vertex buffer heap for SpriteBatch." };
+				AppendHR12(hr);
+				return false;
+			}
+			_vertexBufferHeap->SetName(L"SpriteBatch Vertex Buffer Heap");
+
+			// Create vertex buffer upload heap
+			heapProp = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
+			resDesc = CD3DX12_RESOURCE_DESC::Buffer(vBufferSize);
+			hr = enginePointer->d3d12Device->CreateCommittedResource(&heapProp, D3D12_HEAP_FLAG_NONE, &resDesc, D3D12_RESOURCE_STATE_GENERIC_READ, nullptr, IID_PPV_ARGS(&_vertexBufferUploadHeap));
+			if (FAILED(hr))
+			{
+				lastError = { GameErrors::GameDirectX12Specific,"Could not create vertex buffer upload heap for SpriteBatch." };
+				AppendHR12(hr);
+				return false;
+			}
+			_vertexBufferUploadHeap->SetName(L"SpriteBatch Vertex Buffer Upload Heap");
+
+
+			// Index buffer
+			DWORD iList[] = {
+				0, 1, 2,
+				1, 3, 2
+			};
+			uint32_t iBufferSize = sizeof(iList);
+
+			// Create index buffer heap
+			heapProp = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT);
+			resDesc = CD3DX12_RESOURCE_DESC::Buffer(iBufferSize);
+			hr = enginePointer->d3d12Device->CreateCommittedResource(&heapProp, D3D12_HEAP_FLAG_NONE, &resDesc, D3D12_RESOURCE_STATE_COMMON, nullptr, IID_PPV_ARGS(&_indexBufferHeap));
+			if (FAILED(hr))
+			{
+				lastError = { GameErrors::GameDirectX12Specific,"Could not create index buffer upload heap for SpriteBatch." };
+				AppendHR12(hr);
+				return false;
+			}
+			_indexBufferHeap->SetName(L"SpriteBatch Index Buffer Heap");
+
+			// create upload heap to upload index buffer
+			heapProp = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
+			resDesc = CD3DX12_RESOURCE_DESC::Buffer(iBufferSize);
+			hr = enginePointer->d3d12Device->CreateCommittedResource(&heapProp, D3D12_HEAP_FLAG_NONE, &resDesc, D3D12_RESOURCE_STATE_GENERIC_READ, nullptr, IID_PPV_ARGS(&_indexBufferUploadHeap));
+			if (FAILED(hr))
+			{
+				lastError = { GameErrors::GameDirectX12Specific,"Could not create vertex buffer upload heap for SpriteBatch." };
+				AppendHR12(hr);
+				return false;
+			}
+			_indexBufferUploadHeap->SetName(L"SpriteBatch Index Buffer Upload Heap");
+
+			RendererDX12* temp = enginePointer->geGetRenderer();
+			// resets the command list -----------------------------
+			{
+				// Reset to start recording
+				if (FAILED(enginePointer->commandList->Reset(temp->_commandAllocator[temp->_frameIndex].Get(), NULL)))
+				{
+					std::cout << "command list reset failed\n";
+				}
+			}
+			// end of command list reset ---------------------------------------
+
+			// Fill out resource data with vertex data
+			D3D12_SUBRESOURCE_DATA vertexData = {};
+			vertexData.pData = reinterpret_cast<uint8_t*>(_spriteVertices12);
+			vertexData.RowPitch = vBufferSize;
+			vertexData.SlicePitch = vBufferSize;
+
+			// Create a command to copy vertex buffer
+			UpdateSubresources(enginePointer->commandList.Get(), _vertexBufferHeap.Get(), _vertexBufferUploadHeap.Get(), 0, 0, 1, &vertexData);
+
+			// Transition the vertex buffer data from copy destination state to vertex buffer state
+			CD3DX12_RESOURCE_BARRIER resBar = CD3DX12_RESOURCE_BARRIER::Transition(_vertexBufferHeap.Get(), D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER);
+			enginePointer->commandList->ResourceBarrier(1, &resBar);
+
+			// Fill out resource data with index buffer
+			D3D12_SUBRESOURCE_DATA indexData = {};
+			indexData.pData = reinterpret_cast<uint8_t*>(iList);
+			indexData.RowPitch = iBufferSize;
+			indexData.SlicePitch = iBufferSize;
+
+			// Create a command to copy index buffer
+			UpdateSubresources(enginePointer->commandList.Get(), _indexBufferHeap.Get(), _indexBufferUploadHeap.Get(), 0, 0, 1, &indexData);
+
+			// Transition the index buffer data from copy destination state to vertex buffer state
+			CD3DX12_RESOURCE_BARRIER ibufferbar = CD3DX12_RESOURCE_BARRIER::Transition(_indexBufferHeap.Get(), D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER);
+			enginePointer->commandList->ResourceBarrier(1, &ibufferbar);
+
+			// Execute the command list to upload the initial data
+			{
+				enginePointer->commandList->Close();
+				ID3D12CommandList* ppCommandLists[] = { enginePointer->commandList.Get() };
+				enginePointer->commandQueue->ExecuteCommandLists(_countof(ppCommandLists), ppCommandLists);
+
+				// ??
+				// increment the fence value now, otherwise the buffer might not be uploaded by the time we start drawing
+				temp->_fenceValue[temp->_frameIndex]++;
+				hr = enginePointer->commandQueue->Signal(temp->_fence[temp->_frameIndex].Get(), temp->_fenceValue[temp->_frameIndex]);
+				if (FAILED(hr))
+				{
+					lastError = { GameErrors::GameDirectX12Specific,"SpriteBatch signal failed." };
+					AppendHR12(hr);
+					return false;
+				}
+			}
+
+			// Create a vertex buffer view for the quad
+			_vertexBufferView.BufferLocation = _vertexBufferHeap->GetGPUVirtualAddress();
+			_vertexBufferView.StrideInBytes = sizeof(_spriteVertex12);
+			_vertexBufferView.SizeInBytes = vBufferSize;
+
+			// Create a index buffer view for the quad
+			_indexBufferView.BufferLocation = _indexBufferHeap->GetGPUVirtualAddress();
+			_indexBufferView.Format = DXGI_FORMAT_R32_UINT;
+			_indexBufferView.SizeInBytes = iBufferSize;
 		}
 #endif
 		return true;
