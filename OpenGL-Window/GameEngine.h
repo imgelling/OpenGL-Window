@@ -222,6 +222,10 @@ namespace game
 		d3d10Device = nullptr;
 #endif
 #if defined(GAME_DIRECTX11)
+		//SAFE_RELEASE(d3d11RenderTarget);
+		//SAFE_RELEASE(d3d11DepthStencilView);
+		//SAFE_RELEASE(d3d11DeviceContext);
+		//SAFE_RELEASE(d3d11Device);
 		// just nullptr them
 		//if (d3d11RenderTarget)
 		//{

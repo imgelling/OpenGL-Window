@@ -678,7 +678,7 @@ namespace game
 			D3D12_SUBRESOURCE_DATA vertexData = {};
 			vertexData.pData = reinterpret_cast<uint8_t*>(_quadVertices12);
 			vertexData.RowPitch = vBufferSize;
-			vertexData.SlicePitch = vBufferSize;
+			vertexData.SlicePitch = 0;
 
 			// Create a command to copy vertex buffer
 			UpdateSubresources(enginePointer->commandList.Get(), _vertexBufferHeap.Get(), _vertexBufferUploadHeap.Get(), 0, 0, 1, &vertexData);
@@ -691,7 +691,7 @@ namespace game
 			D3D12_SUBRESOURCE_DATA indexData = {};
 			indexData.pData = reinterpret_cast<uint8_t*>(iList);
 			indexData.RowPitch = iBufferSize;
-			indexData.SlicePitch = iBufferSize;
+			indexData.SlicePitch = 0;
 
 			// Create a command to copy index buffer
 			UpdateSubresources(enginePointer->commandList.Get(), _indexBufferHeap.Get(), _indexBufferUploadHeap.Get(), 0, 0, 1, &indexData);
@@ -1070,7 +1070,7 @@ namespace game
 			D3D12_SUBRESOURCE_DATA vertexData = {};
 			vertexData.pData = reinterpret_cast<BYTE*>(_quadVertices12); // pointer to our vertex array
 			vertexData.RowPitch = vBufferSize; // size of all our triangle vertex data
-			vertexData.SlicePitch = vBufferSize; // also the size of our triangle vertex data
+			vertexData.SlicePitch = 0; // also the size of our triangle vertex data
 
 			// Turn vertex buffer into a destination state
 			CD3DX12_RESOURCE_BARRIER resBar = CD3DX12_RESOURCE_BARRIER::Transition(_vertexBufferHeap.Get(), D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, D3D12_RESOURCE_STATE_COPY_DEST);

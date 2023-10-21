@@ -158,7 +158,7 @@ public:
 		//perftimer.Stop("CircleClip");
 
 		pixelMode.VerticalPillClip(scaledMousePos.x, scaledMousePos.y, 40, 5, game::Colors::Green);
-		pixelMode.VerticalPillClip(scaledMousePos.x, scaledMousePos.y, 38, 4, game::Colors::Blue);
+		pixelMode.VerticalPillClip(scaledMousePos.x, scaledMousePos.y, 38, 4, game::Colors::White);
 
 		// Weird diagonal
 		pixelMode.LineClip(-20, -10, scaledMousePos.x, scaledMousePos.y, game::Colors::Pink);
@@ -177,7 +177,7 @@ public:
 		//double_t perSecond = 500000.0 / (perftimer.LastRun("CircleClip") / 1000000000.0);  // throws if not found
 		//double_t millionPerSecond = perSecond / 1000.0 / 1000.0;
 		for (int i = 0; i < 40; i++)
-			spriteBatch.Draw(spriteTexture, { 10 + (i * 100), 10 }, game::Colors::White);
+			spriteBatch.Draw(spriteFont.Texture(), {10 + (i * 100), 10}, game::Colors::White);
 		spriteBatch.DrawString(spriteFont, "FPS : " + std::to_string(geGetFramesPerSecond()) + " UPS : " + std::to_string(geGetUpdatesPerSecond()) + " cpu : " + std::to_string(geGetCPUFrequency()) + "Mhz", 10, 200, game::Colors::White,2.0f);
 		//spriteBatch.DrawString(spriteFont, "Random Circle(s) : " + std::to_string(millionPerSecond) + " million per second.", 10, 0, game::Colors::Red);
 		spriteBatch.DrawString(spriteFont, "Window Pixel Size: " + std::to_string(geGetWindowSize().width) + "x" + std::to_string(geGetWindowSize().height), 10, 240, game::Colors::White, 2.0f);
