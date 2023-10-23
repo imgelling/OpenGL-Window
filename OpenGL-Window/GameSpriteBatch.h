@@ -801,7 +801,7 @@ namespace game
 			_pipelineStateObject->SetName(L"SpriteBatch PSO");
 
 			// Create vertex buffer
-			uint32_t vBufferSize = _maxSprites * (uint32_t)4 * (uint32_t)sizeof(_spriteVertex12);
+			uint32_t vBufferSize = _maxSprites * sizeof(float_t) * (uint32_t)sizeof(_spriteVertex12);
 
 			// Create vertex buffer heap
 			D3D12_HEAP_PROPERTIES heapProp = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT);
@@ -1087,7 +1087,6 @@ namespace game
 		{
 			Render();
 		}
-		_numberOfSpritesUsed = 0;
 
 
 #if defined (GAME_DIRECTX9)
@@ -1158,6 +1157,7 @@ namespace game
 #if defined (GAME_DIRECTX12)
 		if (enginePointer->geIsUsing(GAME_DIRECTX12))
 		{
+			_numberOfSpritesUsed = 0;
 			vertexOffset = 0;
 		}
 #endif
