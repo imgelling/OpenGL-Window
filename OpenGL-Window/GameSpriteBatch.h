@@ -147,7 +147,6 @@ namespace game
 		Microsoft::WRL::ComPtr<ID3D12PipelineState> _pipelineStateObject;
 		Microsoft::WRL::ComPtr<ID3D12RootSignature> _rootSignature;
 		Microsoft::WRL::ComPtr<ID3D12Resource> _indexBufferHeap;
-		Microsoft::WRL::ComPtr<ID3D12Resource> _indexBufferUploadHeap;
 		D3D12_INDEX_BUFFER_VIEW _indexBufferView;
 		Microsoft::WRL::ComPtr<ID3D12Resource> _vertexBufferHeap;
 		Microsoft::WRL::ComPtr<ID3D12Resource> _vertexBufferUploadHeap;
@@ -859,7 +858,8 @@ namespace game
 			}
 			_indexBufferHeap->SetName(L"SpriteBatch Index Buffer Heap");
 
-			// create upload heap to upload index buffer
+			// Create a temporary upload heap to upload index buffer
+			Microsoft::WRL::ComPtr<ID3D12Resource> _indexBufferUploadHeap;
 			heapProp = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
 			resDesc = CD3DX12_RESOURCE_DESC::Buffer(iBufferSize);
 			hr = enginePointer->d3d12Device->CreateCommittedResource(&heapProp, D3D12_HEAP_FLAG_NONE, &resDesc, D3D12_RESOURCE_STATE_GENERIC_READ, nullptr, IID_PPV_ARGS(&_indexBufferUploadHeap));
