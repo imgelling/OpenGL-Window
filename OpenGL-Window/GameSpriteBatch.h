@@ -154,6 +154,11 @@ namespace game
 		D3D12_VERTEX_BUFFER_VIEW _vertexBufferView;
 		Microsoft::WRL::ComPtr<ID3D12CommandAllocator> _bundleAllocator;
 		Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> _renderBundle;
+		Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> _textureHeap;
+		uint32_t _currentSRVIndex;
+		uint32_t _maxSRVIndex;
+		uint32_t _descriptorSize;
+		uint32_t vertexOffset = 0;
 #endif
 	};
 
@@ -235,6 +240,10 @@ namespace game
 		_vertexBufferView = {};
 		_indexBufferView = {};
 		_spriteVertices12 = nullptr;
+		_maxSRVIndex = 100;
+		_currentSRVIndex = 0;
+		_descriptorSize = 0;
+		vertexOffset = 0;
 #endif
 		_numberOfSpritesUsed = 0;
 	}
@@ -686,27 +695,17 @@ namespace game
 			HRESULT hr = {};
 			// Create the root signature.
 
-			//D3D12_FEATURE_DATA_ROOT_SIGNATURE featureData = {};
-
-			// This is the highest version the sample supports. If CheckFeatureSupport succeeds, the HighestVersion returned will not be greater than this.
-			//featureData.HighestVersion = D3D_ROOT_SIGNATURE_VERSION_1_1;
-
-			//if (FAILED(enginePointer->d3d12Device->CheckFeatureSupport(D3D12_FEATURE_ROOT_SIGNATURE, &featureData, sizeof(featureData))))
-			{
-				//featureData.HighestVersion = D3D_ROOT_SIGNATURE_VERSION_1_0;
-			}
-
 			CD3DX12_DESCRIPTOR_RANGE1 ranges[1] = {};
-			ranges[0].Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 0, 0, D3D12_DESCRIPTOR_RANGE_FLAG_DATA_STATIC);
+			ranges[0].Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, _maxSRVIndex, 0, 0, D3D12_DESCRIPTOR_RANGE_FLAG_DATA_STATIC);
 
 			CD3DX12_ROOT_PARAMETER1 rootParameters[1] = {};
 			rootParameters[0].InitAsDescriptorTable(1, &ranges[0], D3D12_SHADER_VISIBILITY_PIXEL);
 
 			D3D12_STATIC_SAMPLER_DESC sampler = {};
 			sampler.Filter = D3D12_FILTER_MIN_MAG_MIP_POINT;
-			sampler.AddressU = D3D12_TEXTURE_ADDRESS_MODE_BORDER;
-			sampler.AddressV = D3D12_TEXTURE_ADDRESS_MODE_BORDER;
-			sampler.AddressW = D3D12_TEXTURE_ADDRESS_MODE_BORDER;
+			sampler.AddressU = D3D12_TEXTURE_ADDRESS_MODE_CLAMP;
+			sampler.AddressV = D3D12_TEXTURE_ADDRESS_MODE_CLAMP;
+			sampler.AddressW = D3D12_TEXTURE_ADDRESS_MODE_CLAMP;
 			sampler.MipLODBias = 0;
 			sampler.MaxAnisotropy = 0;
 			sampler.ComparisonFunc = D3D12_COMPARISON_FUNC_NEVER;
@@ -717,8 +716,14 @@ namespace game
 			sampler.RegisterSpace = 0;
 			sampler.ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
 
+			D3D12_ROOT_SIGNATURE_FLAGS rootSignatureFlags =
+				D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT |
+				D3D12_ROOT_SIGNATURE_FLAG_DENY_HULL_SHADER_ROOT_ACCESS |
+				D3D12_ROOT_SIGNATURE_FLAG_DENY_DOMAIN_SHADER_ROOT_ACCESS |
+				D3D12_ROOT_SIGNATURE_FLAG_DENY_GEOMETRY_SHADER_ROOT_ACCESS;
+
 			CD3DX12_VERSIONED_ROOT_SIGNATURE_DESC rootSignatureDesc = {};
-			rootSignatureDesc.Init_1_1(_countof(rootParameters), rootParameters, 1, &sampler, D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT);
+			rootSignatureDesc.Init_1_1(_countof(rootParameters), rootParameters, 1, &sampler, rootSignatureFlags);
 
 			Microsoft::WRL::ComPtr<ID3DBlob> signature;
 			hr = D3DX12SerializeVersionedRootSignature(&rootSignatureDesc, D3D_ROOT_SIGNATURE_VERSION_1, &signature, nullptr);
@@ -930,6 +935,22 @@ namespace game
 			_indexBufferView.BufferLocation = _indexBufferHeap->GetGPUVirtualAddress();
 			_indexBufferView.Format = DXGI_FORMAT_R32_UINT;
 			_indexBufferView.SizeInBytes = iBufferSize;
+
+			// Create a texture heap for use
+			D3D12_DESCRIPTOR_HEAP_DESC srvHeapDesc = {};
+			srvHeapDesc.NumDescriptors = _maxSRVIndex;
+			srvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
+			srvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
+			hr = enginePointer->d3d12Device->CreateDescriptorHeap(&srvHeapDesc, IID_PPV_ARGS(&_textureHeap));
+			if (FAILED(hr))
+			{
+				lastError = { GameErrors::GameDirectX12Specific,"Could not create texture srv heap for SpriteBatch." };
+				AppendHR12(hr);
+				return false;
+			}
+
+			_descriptorSize = enginePointer->d3d12Device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+
 		}
 #endif
 		return true;
@@ -1039,9 +1060,11 @@ namespace game
 		{
 			enginePointer->commandList->SetPipelineState(_pipelineStateObject.Get());
 			enginePointer->commandList->SetGraphicsRootSignature(_rootSignature.Get());
-			//enginePointer->commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+			enginePointer->commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 			enginePointer->commandList->IASetVertexBuffers(0, 1, &_vertexBufferView);
 			enginePointer->commandList->IASetIndexBuffer(&_indexBufferView);
+			ID3D12DescriptorHeap* ppHeaps[] = { _textureHeap.Get() };
+			enginePointer->commandList->SetDescriptorHeaps(_countof(ppHeaps), ppHeaps);
 		}
 #endif
 
@@ -1064,6 +1087,7 @@ namespace game
 		{
 			Render();
 		}
+		_numberOfSpritesUsed = 0;
 
 
 #if defined (GAME_DIRECTX9)
@@ -1129,6 +1153,12 @@ namespace game
 			// restore saved this stuff
 			glBindTexture(GL_TEXTURE_2D, 0);
 			glDisable(GL_TEXTURE_2D);
+		}
+#endif
+#if defined (GAME_DIRECTX12)
+		if (enginePointer->geIsUsing(GAME_DIRECTX12))
+		{
+			vertexOffset = 0;
 		}
 #endif
 	}
@@ -1208,28 +1238,23 @@ namespace game
 
 				// Upload the vertex buffer to the vertex buffer heap
 				UpdateSubresources(enginePointer->commandList.Get(), _vertexBufferHeap.Get(), _vertexBufferUploadHeap.Get(), 0, 0, 1, &vertexData);
-
 				// Turn vertex buffer into a vertex buffer state again
 				CD3DX12_RESOURCE_BARRIER resBar2 = CD3DX12_RESOURCE_BARRIER::Transition(_vertexBufferHeap.Get(), D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER);
 				enginePointer->commandList->ResourceBarrier(1, &resBar2);
 			}
 
 			// Draw the sprites
-			//enginePointer->commandList->SetPipelineState(_pipelineStateObject.Get());
-			//enginePointer->commandList->SetGraphicsRootSignature(_rootSignature.Get());
-
-			// make 10 of these heaps, use instead of srvHeap, with an offset of descriptor size * number of texture (ring loop)
-			// below will go into begin with the big heap
-			{
-				ID3D12DescriptorHeap* ppHeaps[] = { _currentTexture.srvHeap.Get() };
-				enginePointer->commandList->SetDescriptorHeaps(_countof(ppHeaps), ppHeaps);
-			}
-			enginePointer->commandList->SetGraphicsRootDescriptorTable(0, _currentTexture.srvHeap->GetGPUDescriptorHandleForHeapStart());
+			CD3DX12_GPU_DESCRIPTOR_HANDLE gpuHandle(_textureHeap->GetGPUDescriptorHandleForHeapStart());
+			gpuHandle.Offset(_currentSRVIndex, _descriptorSize);
+			enginePointer->commandList->SetGraphicsRootDescriptorTable(0, gpuHandle);
 
 			//enginePointer->commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST); 
 			//enginePointer->commandList->IASetVertexBuffers(0, 1, &_vertexBufferView);
 			//enginePointer->commandList->IASetIndexBuffer(&_indexBufferView);
-			enginePointer->commandList->DrawIndexedInstanced(_numberOfSpritesUsed * 6, 1, 0, 0, 0);
+			enginePointer->commandList->DrawIndexedInstanced(_numberOfSpritesUsed * 6, 1, 0, vertexOffset, 0);
+			vertexOffset += _numberOfSpritesUsed * 4;
+
+			return;
 		}
 #endif
 
@@ -1559,7 +1584,23 @@ namespace game
 			{
 				Render();
 				_currentTexture = texture;
-				//enginePointer->d3d11DeviceContext->PSSetShaderResources(0, 1, &texture.textureSRV11);
+				_currentSRVIndex++;
+				if (_currentSRVIndex >= _maxSRVIndex)
+				{
+					_currentSRVIndex = 0;
+				}
+
+
+				// Allocate space from the GPU-visible descriptor heap.
+				CD3DX12_CPU_DESCRIPTOR_HANDLE gpuHandle(_textureHeap->GetCPUDescriptorHandleForHeapStart());
+				gpuHandle.Offset(_currentSRVIndex, _descriptorSize);
+
+				// Copy from the various CPU-visible descriptors you have for it.
+				CD3DX12_CPU_DESCRIPTOR_HANDLE cpuHandle(_currentTexture.srvHeap->GetCPUDescriptorHandleForHeapStart());
+				enginePointer->d3d12Device->CopyDescriptorsSimple(1, gpuHandle, cpuHandle, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+				//CD3DX12_GPU_DESCRIPTOR_HANDLE gpuHandle2(_textureHeap->GetGPUDescriptorHandleForHeapStart());
+				//gpuHandle.Offset(_currentSRVIndex, _descriptorSize);
+				//enginePointer->commandList->SetGraphicsRootDescriptorTable(0, gpuHandle2);
 			}
 			access = &_spriteVertices12[_numberOfSpritesUsed * 4];
 			windowSize = enginePointer->geGetWindowSize();
@@ -1883,7 +1924,24 @@ namespace game
 			{
 				Render();
 				_currentTexture = texture;
-				//enginePointer->d3d11DeviceContext->PSSetShaderResources(0, 1, &texture.textureSRV11);
+				_currentSRVIndex++;
+				if (_currentSRVIndex >= _maxSRVIndex)
+				{
+					_currentSRVIndex = 0;
+				}
+
+				// Allocate space from the GPU-visible descriptor heap.
+				CD3DX12_CPU_DESCRIPTOR_HANDLE gpuHandle(_textureHeap->GetCPUDescriptorHandleForHeapStart());
+				//D3D12_GPU_DESCRIPTOR_HANDLE gpuHandle = {};
+				//gpuHandle.
+				gpuHandle.Offset(_currentSRVIndex, _descriptorSize);
+
+				// Copy from the various CPU-visible descriptors you have for it.
+				CD3DX12_CPU_DESCRIPTOR_HANDLE cpuHandle(_currentTexture.srvHeap->GetCPUDescriptorHandleForHeapStart());
+				enginePointer->d3d12Device->CopyDescriptorsSimple(1, gpuHandle, cpuHandle, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+				//CD3DX12_GPU_DESCRIPTOR_HANDLE gpuHandle2(_textureHeap->GetGPUDescriptorHandleForHeapStart());
+				//gpuHandle.Offset(_currentSRVIndex, _descriptorSize);
+				//enginePointer->commandList->SetGraphicsRootDescriptorTable(0, gpuHandle2);
 			}
 
 			access = &_spriteVertices12[_numberOfSpritesUsed * 4];
