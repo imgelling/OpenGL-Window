@@ -845,7 +845,7 @@ namespace game
 				indices.emplace_back(3 + (index * 4));
 				indices.emplace_back(2 + (index * 4));
 			}
-			uint32_t iBufferSize = (uint32_t)indices.size();
+			uint32_t iBufferSize = (uint32_t)indices.size() * sizeof(uint32_t);
 
 			// Create index buffer heap
 			heapProp = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT);
