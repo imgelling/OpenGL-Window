@@ -1243,6 +1243,14 @@ namespace game
 				enginePointer->commandList->ResourceBarrier(1, &resBar2);
 			}
 
+			// Allocate space from the GPU-visible descriptor heap.
+			CD3DX12_CPU_DESCRIPTOR_HANDLE toHandle(_textureHeap->GetCPUDescriptorHandleForHeapStart());
+			toHandle.Offset(_currentSRVIndex, _descriptorSize);
+
+			// Copy from the various CPU-visible descriptors you have for it.
+			CD3DX12_CPU_DESCRIPTOR_HANDLE cpuHandle(_currentTexture.srvHeap->GetCPUDescriptorHandleForHeapStart());
+			enginePointer->d3d12Device->CopyDescriptorsSimple(1, toHandle, cpuHandle, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+
 			// Draw the sprites
 			CD3DX12_GPU_DESCRIPTOR_HANDLE gpuHandle(_textureHeap->GetGPUDescriptorHandleForHeapStart());
 			gpuHandle.Offset(_currentSRVIndex, _descriptorSize);
@@ -1589,18 +1597,6 @@ namespace game
 				{
 					_currentSRVIndex = 0;
 				}
-
-
-				// Allocate space from the GPU-visible descriptor heap.
-				CD3DX12_CPU_DESCRIPTOR_HANDLE gpuHandle(_textureHeap->GetCPUDescriptorHandleForHeapStart());
-				gpuHandle.Offset(_currentSRVIndex, _descriptorSize);
-
-				// Copy from the various CPU-visible descriptors you have for it.
-				CD3DX12_CPU_DESCRIPTOR_HANDLE cpuHandle(_currentTexture.srvHeap->GetCPUDescriptorHandleForHeapStart());
-				enginePointer->d3d12Device->CopyDescriptorsSimple(1, gpuHandle, cpuHandle, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-				//CD3DX12_GPU_DESCRIPTOR_HANDLE gpuHandle2(_textureHeap->GetGPUDescriptorHandleForHeapStart());
-				//gpuHandle.Offset(_currentSRVIndex, _descriptorSize);
-				//enginePointer->commandList->SetGraphicsRootDescriptorTable(0, gpuHandle2);
 			}
 			access = &_spriteVertices12[_numberOfSpritesUsed * 4];
 			windowSize = enginePointer->geGetWindowSize();
@@ -1929,19 +1925,6 @@ namespace game
 				{
 					_currentSRVIndex = 0;
 				}
-
-				// Allocate space from the GPU-visible descriptor heap.
-				CD3DX12_CPU_DESCRIPTOR_HANDLE gpuHandle(_textureHeap->GetCPUDescriptorHandleForHeapStart());
-				//D3D12_GPU_DESCRIPTOR_HANDLE gpuHandle = {};
-				//gpuHandle.
-				gpuHandle.Offset(_currentSRVIndex, _descriptorSize);
-
-				// Copy from the various CPU-visible descriptors you have for it.
-				CD3DX12_CPU_DESCRIPTOR_HANDLE cpuHandle(_currentTexture.srvHeap->GetCPUDescriptorHandleForHeapStart());
-				enginePointer->d3d12Device->CopyDescriptorsSimple(1, gpuHandle, cpuHandle, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-				//CD3DX12_GPU_DESCRIPTOR_HANDLE gpuHandle2(_textureHeap->GetGPUDescriptorHandleForHeapStart());
-				//gpuHandle.Offset(_currentSRVIndex, _descriptorSize);
-				//enginePointer->commandList->SetGraphicsRootDescriptorTable(0, gpuHandle2);
 			}
 
 			access = &_spriteVertices12[_numberOfSpritesUsed * 4];
