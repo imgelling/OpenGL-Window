@@ -51,13 +51,13 @@ namespace game
 		Pointi GetScaledMousePosition() noexcept;
 		Pointi GetPixelFrameBufferSize() noexcept;
 	private:
-		Texture2D _frameBuffer[2];
+		Texture2D _frameBuffer;// [2] ;
 		Vector2f _oneOverScale;
 		Vector2f _savedPositionOfScaledTexture;
 		uint32_t* _video;
 		Vector2i _bufferSize;
 		Vector2i _windowSize;
-		uint32_t _currentBuffer;
+		//uint32_t _currentBuffer;
 		void _UpdateFrameBuffer();
 		void _ScaleQuadToWindow();
 #if defined(GAME_OPENGL) & !defined(GAME_ENABLE_SHADERS)
@@ -107,7 +107,6 @@ namespace game
 		Shader _pixelModeShader10;
 		ID3D10InputLayout* _vertexLayout10;
 		ID3D10ShaderResourceView* _textureShaderResourceView0_10;
-		ID3D10ShaderResourceView* _textureShaderResourceView1_10;
 		ID3D10SamplerState* _textureSamplerState10;
 #endif
 #if defined(GAME_DIRECTX11)
@@ -133,7 +132,6 @@ namespace game
 		Shader _pixelModeShader11;
 		ID3D11InputLayout* _vertexLayout11;
 		ID3D11ShaderResourceView* _textureShaderResourceView0_11;
-		ID3D11ShaderResourceView* _textureShaderResourceView1_11;
 		ID3D11SamplerState* _textureSamplerState11;
 #endif
 #if defined(GAME_DIRECTX12)
@@ -158,7 +156,6 @@ namespace game
 		Microsoft::WRL::ComPtr<ID3D12PipelineState> _pipelineStateObject; 
 		Microsoft::WRL::ComPtr<ID3D12RootSignature> _rootSignature; 
 		Microsoft::WRL::ComPtr<ID3D12Resource> _indexBufferHeap; 
-		Microsoft::WRL::ComPtr<ID3D12Resource> _indexBufferUploadHeap;
 		D3D12_INDEX_BUFFER_VIEW _indexBufferView; 
 		Microsoft::WRL::ComPtr<ID3D12Resource> _vertexBufferHeap; 
 		Microsoft::WRL::ComPtr<ID3D12Resource> _vertexBufferUploadHeap;
@@ -171,7 +168,6 @@ namespace game
 	inline PixelMode::PixelMode()
 	{
 		_video = nullptr;
-		_currentBuffer = 0;
 #if defined(GAME_OPENGL) & !defined(GAME_ENABLE_SHADERS)
 		_compiledQuad = 0;
 #endif
@@ -183,7 +179,6 @@ namespace game
 		_vertexLayout10 = nullptr;
 		_indexBuffer10 = nullptr;
 		_textureShaderResourceView0_10 = nullptr;
-		_textureShaderResourceView1_10 = nullptr;
 		_textureSamplerState10 = nullptr;
 #endif
 #if defined(GAME_DIRECTX11)
@@ -191,7 +186,6 @@ namespace game
 		_vertexLayout11 = nullptr;
 		_indexBuffer11 = nullptr;
 		_textureShaderResourceView0_11 = nullptr;
-		_textureShaderResourceView1_11 = nullptr;
 		_textureSamplerState11 = nullptr;
 #endif
 #if defined(GAME_DIRECTX12)
@@ -221,7 +215,6 @@ namespace game
 			SAFE_RELEASE(_indexBuffer10);
 			enginePointer->geUnLoadShader(_pixelModeShader10);
 			SAFE_RELEASE(_textureShaderResourceView0_10);
-			SAFE_RELEASE(_textureShaderResourceView1_10);
 			SAFE_RELEASE(_textureSamplerState10);
 		}
 #endif
@@ -233,7 +226,6 @@ namespace game
 			SAFE_RELEASE(_indexBuffer11);
 			enginePointer->geUnLoadShader(_pixelModeShader11);
 			SAFE_RELEASE(_textureShaderResourceView0_11);
-			SAFE_RELEASE(_textureShaderResourceView1_11);
 			SAFE_RELEASE(_textureSamplerState11);
 		}
 #endif
@@ -243,8 +235,7 @@ namespace game
 			enginePointer->geUnLoadShader(_pixelModeShader12);
 		}
 #endif
-		enginePointer->geUnLoadTexture(_frameBuffer[0]);
-		enginePointer->geUnLoadTexture(_frameBuffer[1]);
+		enginePointer->geUnLoadTexture(_frameBuffer);
 	}
 
 	inline bool PixelMode::Initialize(const Vector2i& sizeOfScreen)
@@ -264,21 +255,20 @@ namespace game
 
 		Clear(Colors::Black);
 
-		// Create frame buffer textures
-		for (uint32_t loop = 0; loop < 2; loop++)
+		// Create frame buffer texture
+
+		_frameBuffer.width = _bufferSize.width;
+		_frameBuffer.height = _bufferSize.height;
+		_frameBuffer.componentsPerPixel = 4;
+		_frameBuffer.filterType = game::TextureFilterType::Point;
+		_frameBuffer.isMipMapped = false;
+		_frameBuffer.name = "PixelMode FrameBuffer";
+		if (!enginePointer->geCreateTexture(_frameBuffer))
 		{
-			_frameBuffer[loop].width = _bufferSize.width;
-			_frameBuffer[loop].height = _bufferSize.height;
-			_frameBuffer[loop].componentsPerPixel = 4;
-			_frameBuffer[loop].filterType = game::TextureFilterType::Point;
-			_frameBuffer[loop].isMipMapped = false;
-			_frameBuffer[loop].name = "PixelMode FrameBuffer" + std::to_string(loop);
-			if (!enginePointer->geCreateTexture(_frameBuffer[loop]))
-			{
-				lastError = { GameErrors::GameRenderer, "Could not create textures for PixelMode frame buffers." };
-				return false;
-			}
+			lastError = { GameErrors::GameRenderer, "Could not create textures for PixelMode frame buffers." };
+			return false;
 		}
+
 
 #if defined(GAME_OPENGL) & !defined(GAME_ENABLE_SHADERS)
 		if (enginePointer->geIsUsing(GAME_OPENGL))
@@ -380,13 +370,9 @@ namespace game
 			srDesc.ViewDimension = D3D10_SRV_DIMENSION_TEXTURE2D;
 			srDesc.Texture2D.MostDetailedMip = 0;
 			srDesc.Texture2D.MipLevels = 1;
-			if (FAILED(enginePointer->d3d10Device->CreateShaderResourceView(_frameBuffer[0].textureInterface10, &srDesc, &_textureShaderResourceView0_10)))
+			if (FAILED(enginePointer->d3d10Device->CreateShaderResourceView(_frameBuffer.textureInterface10, &srDesc, &_textureShaderResourceView0_10)))
 			{
 				std::cout << "CreateSRV0 failed!\n";
-			}
-			if (FAILED(enginePointer->d3d10Device->CreateShaderResourceView(_frameBuffer[1].textureInterface10, &srDesc, &_textureShaderResourceView1_10)))
-			{
-				std::cout << "CreateSRV1 failed!\n";
 			}
 		}
 #endif
@@ -469,13 +455,9 @@ namespace game
 			srDesc.ViewDimension = D3D10_SRV_DIMENSION_TEXTURE2D;
 			srDesc.Texture2D.MostDetailedMip = 0;
 			srDesc.Texture2D.MipLevels = 1;
-			if (FAILED(enginePointer->d3d11Device->CreateShaderResourceView(_frameBuffer[0].textureInterface11, &srDesc, &_textureShaderResourceView0_11)))
+			if (FAILED(enginePointer->d3d11Device->CreateShaderResourceView(_frameBuffer.textureInterface11, &srDesc, &_textureShaderResourceView0_11)))
 			{
 				std::cout << "CreateSRV0 failed!\n";
-			}
-			if (FAILED(enginePointer->d3d11Device->CreateShaderResourceView(_frameBuffer[1].textureInterface11, &srDesc, &_textureShaderResourceView1_11)))
-			{
-				std::cout << "CreateSRV1 failed!\n";
 			}
 		}
 #endif
@@ -650,6 +632,7 @@ namespace game
 			_indexBufferHeap->SetName(L"PixelMode Index Buffer Heap");
 
 			// create upload heap to upload index buffer
+			Microsoft::WRL::ComPtr<ID3D12Resource> _indexBufferUploadHeap;
 			heapProp = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
 			resDesc = CD3DX12_RESOURCE_DESC::Buffer(iBufferSize);
 			hr = enginePointer->d3d12Device->CreateCommittedResource(&heapProp,	D3D12_HEAP_FLAG_NONE, &resDesc,	D3D12_RESOURCE_STATE_GENERIC_READ, nullptr, IID_PPV_ARGS(&_indexBufferUploadHeap));
@@ -759,8 +742,8 @@ namespace game
 			D3D12_RESOURCE_DESC textureDesc = {};
 			textureDesc.MipLevels = 1;
 			textureDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-			textureDesc.Width = _frameBuffer[0].width;
-			textureDesc.Height = _frameBuffer[0].height;
+			textureDesc.Width = _frameBuffer.width;
+			textureDesc.Height = _frameBuffer.height;
 			textureDesc.Flags = D3D12_RESOURCE_FLAG_NONE;
 			textureDesc.DepthOrArraySize = 1;
 			textureDesc.SampleDesc.Count = 1;
@@ -769,14 +752,14 @@ namespace game
 			srvDesc.Format = textureDesc.Format;
 			srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
 			srvDesc.Texture2D.MipLevels = 1;
-			enginePointer->d3d12Device->CreateShaderResourceView(_frameBuffer[0].textureResource12.Get(), &srvDesc, _frameBuffer[0].srvHeap->GetCPUDescriptorHandleForHeapStart());
+			enginePointer->d3d12Device->CreateShaderResourceView(_frameBuffer.textureResource12.Get(), &srvDesc, _frameBuffer.srvHeap->GetCPUDescriptorHandleForHeapStart());
 
 			// Record render bundle
 			_renderBundle->SetPipelineState(_pipelineStateObject.Get()); // may not need to record
 			_renderBundle->SetGraphicsRootSignature(_rootSignature.Get());
-			ID3D12DescriptorHeap* ppHeaps[] = { _frameBuffer[_currentBuffer].srvHeap.Get() };
+			ID3D12DescriptorHeap* ppHeaps[] = { _frameBuffer.srvHeap.Get() };
 			_renderBundle->SetDescriptorHeaps(_countof(ppHeaps), ppHeaps);
-			_renderBundle->SetGraphicsRootDescriptorTable(0, _frameBuffer[_currentBuffer].srvHeap->GetGPUDescriptorHandleForHeapStart());
+			_renderBundle->SetGraphicsRootDescriptorTable(0, _frameBuffer.srvHeap->GetGPUDescriptorHandleForHeapStart());
 			_renderBundle->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 			_renderBundle->IASetVertexBuffers(0, 1, &_vertexBufferView);
 			_renderBundle->IASetIndexBuffer(&_indexBufferView);
@@ -800,9 +783,9 @@ namespace game
 #if defined(GAME_OPENGL)
 		if (enginePointer->geIsUsing(GAME_OPENGL))
 		{
-			glBindTexture(GL_TEXTURE_2D, _frameBuffer[_currentBuffer].bind);
+			glBindTexture(GL_TEXTURE_2D, _frameBuffer.bind);
 
-			glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, _frameBuffer[_currentBuffer].width, _frameBuffer[_currentBuffer].height, GL_RGBA, game::systemInfo.gpuInfo.internalPixelType, (GLvoid*)_video);
+			glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, _frameBuffer.width, _frameBuffer.height, GL_RGBA, game::systemInfo.gpuInfo.internalPixelType, (GLvoid*)_video);
 			glBindTexture(GL_TEXTURE_2D, 0);
 		}
 #endif
@@ -811,37 +794,37 @@ namespace game
 		{
 			D3DLOCKED_RECT rect;
 			unsigned char* test = (unsigned char*)_video;
-			_frameBuffer[_currentBuffer].textureInterface9->LockRect(0, &rect, 0, 0);
+			_frameBuffer.textureInterface9->LockRect(0, &rect, 0, 0);
 			unsigned char* dest = static_cast<unsigned char*>(rect.pBits);
-			memcpy(dest, test, sizeof(unsigned char) * _frameBuffer[_currentBuffer].width * _frameBuffer[_currentBuffer].height * 4);
-			_frameBuffer[_currentBuffer].textureInterface9->UnlockRect(0);
+			memcpy(dest, test, sizeof(unsigned char) * _frameBuffer.width * _frameBuffer.height * 4);
+			_frameBuffer.textureInterface9->UnlockRect(0);
 		}
 #endif
 #if defined(GAME_DIRECTX10)
 		if (enginePointer->geIsUsing(GAME_DIRECTX10))
 		{
 			D3D10_MAPPED_TEXTURE2D mappedTex = { 0 };
-			if (FAILED(_frameBuffer[_currentBuffer].textureInterface10->Map(D3D10CalcSubresource(0, 0, 1), D3D10_MAP_WRITE_DISCARD, 0, &mappedTex)))
+			if (FAILED(_frameBuffer.textureInterface10->Map(D3D10CalcSubresource(0, 0, 1), D3D10_MAP_WRITE_DISCARD, 0, &mappedTex)))
 			{
 				std::cout << "Could not map texture\n";
 				return;
 			}
 			unsigned char* dest = (unsigned char*)mappedTex.pData;
-			memcpy(dest, (unsigned char*)_video, sizeof(unsigned char) * _frameBuffer[_currentBuffer].width * _frameBuffer[_currentBuffer].height * 4);
+			memcpy(dest, (unsigned char*)_video, sizeof(unsigned char) * _frameBuffer.width * _frameBuffer.height * 4);
 
-			_frameBuffer[_currentBuffer].textureInterface10->Unmap(D3D10CalcSubresource(0, 0, 1));
+			_frameBuffer.textureInterface10->Unmap(D3D10CalcSubresource(0, 0, 1));
 		}
 #endif
 #if defined(GAME_DIRECTX11)
 		if (enginePointer->geIsUsing(GAME_DIRECTX11))
 		{
 			D3D11_MAPPED_SUBRESOURCE data;
-			if (FAILED(enginePointer->d3d11DeviceContext->Map(_frameBuffer[_currentBuffer].textureInterface11, 0, D3D11_MAP_WRITE_DISCARD, 0, &data)))
+			if (FAILED(enginePointer->d3d11DeviceContext->Map(_frameBuffer.textureInterface11, 0, D3D11_MAP_WRITE_DISCARD, 0, &data)))
 			{
 				std::cout << "Could not map framebuffer in spritebatch\n.";
 			}
-			memcpy(data.pData, (unsigned char*)_video, sizeof(unsigned char) * _frameBuffer[_currentBuffer].width * _frameBuffer[_currentBuffer].height * 4);
-			enginePointer->d3d11DeviceContext->Unmap(_frameBuffer[_currentBuffer].textureInterface11, 0);
+			memcpy(data.pData, (unsigned char*)_video, sizeof(unsigned char) * _frameBuffer.width * _frameBuffer.height * 4);
+			enginePointer->d3d11DeviceContext->Unmap(_frameBuffer.textureInterface11, 0);
 		}
 #endif
 #if defined(GAME_DIRECTX12)
@@ -849,12 +832,12 @@ namespace game
 		{
 			D3D12_SUBRESOURCE_DATA textureData = {};
 			textureData.pData = reinterpret_cast<uint8_t*>(_video);
-			textureData.RowPitch = static_cast<LONG_PTR>(_frameBuffer[_currentBuffer].width) * 4;
+			textureData.RowPitch = static_cast<LONG_PTR>(_frameBuffer.width) * 4;
 			textureData.SlicePitch = 0;// textureData.RowPitch* _frameBuffer[_currentBuffer].height;
-			CD3DX12_RESOURCE_BARRIER trans = CD3DX12_RESOURCE_BARRIER::Transition(_frameBuffer[_currentBuffer].textureResource12.Get(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_COPY_DEST);
+			CD3DX12_RESOURCE_BARRIER trans = CD3DX12_RESOURCE_BARRIER::Transition(_frameBuffer.textureResource12.Get(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_COPY_DEST);
 			enginePointer->commandList->ResourceBarrier(1, &trans);
-			UpdateSubresources(enginePointer->commandList.Get(), _frameBuffer[_currentBuffer].textureResource12.Get(), _frameBuffer[_currentBuffer].textureUploadHeap12.Get(), 0, 0, 1, &textureData);
-			trans = CD3DX12_RESOURCE_BARRIER::Transition(_frameBuffer[_currentBuffer].textureResource12.Get(), D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+			UpdateSubresources(enginePointer->commandList.Get(), _frameBuffer.textureResource12.Get(), _frameBuffer.textureUploadHeap12.Get(), 0, 0, 1, &textureData);
+			trans = CD3DX12_RESOURCE_BARRIER::Transition(_frameBuffer.textureResource12.Get(), D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 			enginePointer->commandList->ResourceBarrier(1, &trans);
 		}
 #endif
@@ -869,8 +852,8 @@ namespace game
 
 		if (_windowSize.height < _windowSize.width)
 		{
-			_scale.y = (float_t)_windowSize.height * _frameBuffer[_currentBuffer].oneOverHeight;
-			tempScale = (float_t)_windowSize.width * _frameBuffer[_currentBuffer].oneOverWidth;
+			_scale.y = (float_t)_windowSize.height * _frameBuffer.oneOverHeight;
+			tempScale = (float_t)_windowSize.width * _frameBuffer.oneOverWidth;
 			if (tempScale > _scale.y)
 			{
 				_scale.x = _scale.y;
@@ -878,15 +861,15 @@ namespace game
 			else
 			{
 				_scale.x = _scale.y = tempScale;
-				_positionOfScaledTexture.y = ((_windowSize.height >> 1) - ((float_t)_frameBuffer[_currentBuffer].height * _scale.y / 2.0f));
+				_positionOfScaledTexture.y = ((_windowSize.height >> 1) - ((float_t)_frameBuffer.height * _scale.y / 2.0f));
 			}
-			_positionOfScaledTexture.x = ((_windowSize.width >> 1) - ((float_t)_frameBuffer[_currentBuffer].width * _scale.x / 2.0f));
+			_positionOfScaledTexture.x = ((_windowSize.width >> 1) - ((float_t)_frameBuffer.width * _scale.x / 2.0f));
 		}
 		else if (_windowSize.height > _windowSize.width)
 		{
-			_scale.x = (float_t)_windowSize.width * _frameBuffer[_currentBuffer].oneOverWidth;
+			_scale.x = (float_t)_windowSize.width * _frameBuffer.oneOverWidth;
 			_scale.y = _scale.x;
-			_positionOfScaledTexture.y = ((_windowSize.height >> 1) - ((float_t)_frameBuffer[_currentBuffer].height * _scale.y / 2.0f));
+			_positionOfScaledTexture.y = ((_windowSize.height >> 1) - ((float_t)_frameBuffer.height * _scale.y / 2.0f));
 		}
 		else
 		{
@@ -897,17 +880,17 @@ namespace game
 		_oneOverScale.y = 1.0f / _scale.y;
 
 		// Set the size of the scaled texture
-		_sizeOfScaledTexture.width = _positionOfScaledTexture.x + (_frameBuffer[_currentBuffer].width * _scale.x);
-		_sizeOfScaledTexture.height = _positionOfScaledTexture.y + (_frameBuffer[_currentBuffer].height * _scale.y);
+		_sizeOfScaledTexture.width = _positionOfScaledTexture.x + (_frameBuffer.width * _scale.x);
+		_sizeOfScaledTexture.height = _positionOfScaledTexture.y + (_frameBuffer.height * _scale.y);
 
 		// Pixel offset fix (may be wrecking dx10 and 11)
 //#if !defined(GAME_DIRECTX10)  && !defined(GAME_DIRECTX11) && !defined(GAME_DIRECTX12)
 		//if (enginePointer->geIsUsing(GAME_DIRECTX9) || enginePointer->geIsUsing(GAME_OPENGL))
 		{
-			_positionOfScaledTexture.x -= _frameBuffer[_currentBuffer].oneOverWidth;
-			_positionOfScaledTexture.y -= _frameBuffer[_currentBuffer].oneOverHeight;
-			_sizeOfScaledTexture.width -= _frameBuffer[_currentBuffer].oneOverWidth;
-			_sizeOfScaledTexture.height -= _frameBuffer[_currentBuffer].oneOverHeight;
+			_positionOfScaledTexture.x -= _frameBuffer.oneOverWidth;
+			_positionOfScaledTexture.y -= _frameBuffer.oneOverHeight;
+			_sizeOfScaledTexture.width -= _frameBuffer.oneOverWidth;
+			_sizeOfScaledTexture.height -= _frameBuffer.oneOverHeight;
 		}
 //#endif
 
@@ -1117,7 +1100,7 @@ namespace game
 		if (enginePointer->geIsUsing(GAME_OPENGL))
 		{
 			glEnable(GL_TEXTURE_2D);
-			glBindTexture(GL_TEXTURE_2D, _frameBuffer[_currentBuffer].bind);
+			glBindTexture(GL_TEXTURE_2D, _frameBuffer.bind);
 			if (enginePointer->_attributes.MultiSamples > 1)
 			{
 				glDisable(0x809D); // 0x809D is GL_MULTISAMPLE
@@ -1146,7 +1129,7 @@ namespace game
 				enginePointer->d3d9Device->SetRenderState(D3DRS_MULTISAMPLEANTIALIAS, FALSE);
 			}
 
-			enginePointer->d3d9Device->SetTexture(0, _frameBuffer[_currentBuffer].textureInterface9);
+			enginePointer->d3d9Device->SetTexture(0, _frameBuffer.textureInterface9);
 			enginePointer->d3d9Device->SetFVF((D3DFVF_XYZRHW | D3DFVF_DIFFUSE | D3DFVF_TEX1));
 			enginePointer->d3d9Device->SetStreamSource(0, _vertexBuffer9, 0, sizeof(_vertex9));
 			enginePointer->d3d9Device->DrawPrimitive(D3DPT_TRIANGLELIST, 0, 2);
@@ -1207,14 +1190,8 @@ namespace game
 			enginePointer->d3d10Device->PSSetSamplers(0, 1, &_textureSamplerState10);
 			enginePointer->d3d10Device->IASetPrimitiveTopology(D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
-			if (!_currentBuffer)
-			{
-				enginePointer->d3d10Device->PSSetShaderResources(0, 1, &_textureShaderResourceView0_10);
-			}
-			else
-			{
-				enginePointer->d3d10Device->PSSetShaderResources(0, 1, &_textureShaderResourceView1_10);
-			}
+			enginePointer->d3d10Device->PSSetShaderResources(0, 1, &_textureShaderResourceView0_10);
+
 
 			enginePointer->d3d10Device->DrawIndexed(6, 0, 0);
 			
@@ -1268,14 +1245,8 @@ namespace game
 			enginePointer->d3d11DeviceContext->PSSetSamplers(0, 1, &_textureSamplerState11);
 			enginePointer->d3d11DeviceContext->IASetPrimitiveTopology(D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
-			if (!_currentBuffer)
-			{
-				enginePointer->d3d11DeviceContext->PSSetShaderResources(0, 1, &_textureShaderResourceView0_11);
-			}
-			else
-			{
-				enginePointer->d3d11DeviceContext->PSSetShaderResources(0, 1, &_textureShaderResourceView1_11);
-			}
+			enginePointer->d3d11DeviceContext->PSSetShaderResources(0, 1, &_textureShaderResourceView0_11);
+
 
 			enginePointer->d3d11DeviceContext->DrawIndexed(6, 0, 0);
 
@@ -1298,7 +1269,7 @@ namespace game
 			// Draw the quad
 			//enginePointer->commandList->SetPipelineState(_pipelineStateObject.Get());
 			//enginePointer->commandList->SetGraphicsRootSignature(_rootSignature.Get());
-			ID3D12DescriptorHeap* ppHeaps[] = { _frameBuffer[_currentBuffer].srvHeap.Get() };
+			ID3D12DescriptorHeap* ppHeaps[] = { _frameBuffer.srvHeap.Get() };
 			enginePointer->commandList->SetDescriptorHeaps(_countof(ppHeaps), ppHeaps);
 
 			//enginePointer->commandList->SetGraphicsRootDescriptorTable(0, _frameBuffer[_currentBuffer].srvHeap->GetGPUDescriptorHandleForHeapStart());

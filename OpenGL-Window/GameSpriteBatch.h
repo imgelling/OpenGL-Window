@@ -157,7 +157,7 @@ namespace game
 		uint32_t _currentSRVIndex;
 		uint32_t _maxSRVIndex;
 		uint32_t _descriptorSize;
-		uint32_t vertexOffset = 0;
+		uint32_t _vertexOffset;
 #endif
 	};
 
@@ -239,10 +239,10 @@ namespace game
 		_vertexBufferView = {};
 		_indexBufferView = {};
 		_spriteVertices12 = nullptr;
-		_maxSRVIndex = 100;
+		_maxSRVIndex = 20;
 		_currentSRVIndex = 0;
 		_descriptorSize = 0;
-		vertexOffset = 0;
+		_vertexOffset = 0;
 #endif
 		_numberOfSpritesUsed = 0;
 	}
@@ -1158,7 +1158,7 @@ namespace game
 		if (enginePointer->geIsUsing(GAME_DIRECTX12))
 		{
 			_numberOfSpritesUsed = 0;
-			vertexOffset = 0;
+			_vertexOffset = 0;
 		}
 #endif
 	}
@@ -1259,8 +1259,8 @@ namespace game
 			//enginePointer->commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST); 
 			//enginePointer->commandList->IASetVertexBuffers(0, 1, &_vertexBufferView);
 			//enginePointer->commandList->IASetIndexBuffer(&_indexBufferView);
-			enginePointer->commandList->DrawIndexedInstanced(_numberOfSpritesUsed * 6, 1, 0, vertexOffset, 0);
-			vertexOffset += _numberOfSpritesUsed * 4;
+			enginePointer->commandList->DrawIndexedInstanced(_numberOfSpritesUsed * 6, 1, 0, _vertexOffset, 0);
+			_vertexOffset = _numberOfSpritesUsed * 4;
 
 			return;
 		}
