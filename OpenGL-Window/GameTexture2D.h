@@ -35,8 +35,8 @@ namespace game
 		ID3D10ShaderResourceView* textureSRV10;
 #endif
 #if defined(GAME_DIRECTX11)
-		ID3D11Texture2D* textureInterface11;
-		ID3D11ShaderResourceView* textureSRV11;
+		Microsoft::WRL::ComPtr<ID3D11Texture2D> textureInterface11;
+		Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> textureSRV11;
 #endif
 #if defined(GAME_DIRECTX12)
 		Microsoft::WRL::ComPtr<ID3D12Resource> textureResource12;
@@ -80,8 +80,8 @@ namespace game
 		textureSRV10 = nullptr;
 #endif
 #if defined(GAME_DIRECTX11)
-		textureInterface11 = nullptr;
-		textureSRV11 = nullptr;
+		//textureInterface11 = nullptr;
+		//textureSRV11 = nullptr;
 #endif
 		width = 0;
 		height = 0;

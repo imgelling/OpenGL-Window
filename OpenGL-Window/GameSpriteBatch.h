@@ -1520,7 +1520,7 @@ namespace game
 			{
 				Render();
 				_currentTexture = texture;
-				enginePointer->d3d11DeviceContext->PSSetShaderResources(0, 1, &texture.textureSRV11);
+				enginePointer->d3d11DeviceContext->PSSetShaderResources(0, 1, texture.textureSRV11.GetAddressOf());
 			}
 
 			access = &_spriteVertices11[_numberOfSpritesUsed * 4];
@@ -1843,7 +1843,7 @@ namespace game
 			{
 				Render();
 				_currentTexture = texture;
-				enginePointer->d3d11DeviceContext->PSSetShaderResources(0, 1, &texture.textureSRV11);
+				enginePointer->d3d11DeviceContext->PSSetShaderResources(0, 1, texture.textureSRV11.GetAddressOf());
 			}
 
 			access = &_spriteVertices11[_numberOfSpritesUsed * 4];

@@ -131,7 +131,7 @@ namespace game
 		ID3D11Buffer* _indexBuffer11;
 		Shader _pixelModeShader11;
 		ID3D11InputLayout* _vertexLayout11;
-		ID3D11ShaderResourceView* _textureShaderResourceView0_11;
+		Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> _textureShaderResourceView0_11;
 		ID3D11SamplerState* _textureSamplerState11;
 #endif
 #if defined(GAME_DIRECTX12)
@@ -185,7 +185,7 @@ namespace game
 		_vertexBuffer11 = nullptr;
 		_vertexLayout11 = nullptr;
 		_indexBuffer11 = nullptr;
-		_textureShaderResourceView0_11 = nullptr;
+		//_textureShaderResourceView0_11 = nullptr;
 		_textureSamplerState11 = nullptr;
 #endif
 #if defined(GAME_DIRECTX12)
@@ -225,7 +225,7 @@ namespace game
 			SAFE_RELEASE(_vertexLayout11);
 			SAFE_RELEASE(_indexBuffer11);
 			enginePointer->geUnLoadShader(_pixelModeShader11);
-			SAFE_RELEASE(_textureShaderResourceView0_11);
+			//SAFE_RELEASE(_textureShaderResourceView0_11);
 			SAFE_RELEASE(_textureSamplerState11);
 		}
 #endif
@@ -455,9 +455,9 @@ namespace game
 			srDesc.ViewDimension = D3D10_SRV_DIMENSION_TEXTURE2D;
 			srDesc.Texture2D.MostDetailedMip = 0;
 			srDesc.Texture2D.MipLevels = 1;
-			if (FAILED(enginePointer->d3d11Device->CreateShaderResourceView(_frameBuffer.textureInterface11, &srDesc, &_textureShaderResourceView0_11)))
+			if (FAILED(enginePointer->d3d11Device->CreateShaderResourceView(_frameBuffer.textureInterface11.Get(), &srDesc, _textureShaderResourceView0_11.GetAddressOf())))
 			{
-				std::cout << "CreateSRV0 failed!\n";
+				std::cout << "CreateSRV failed!\n";
 			}
 		}
 #endif
@@ -819,12 +819,12 @@ namespace game
 		if (enginePointer->geIsUsing(GAME_DIRECTX11))
 		{
 			D3D11_MAPPED_SUBRESOURCE data;
-			if (FAILED(enginePointer->d3d11DeviceContext->Map(_frameBuffer.textureInterface11, 0, D3D11_MAP_WRITE_DISCARD, 0, &data)))
+			if (FAILED(enginePointer->d3d11DeviceContext->Map(_frameBuffer.textureInterface11.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &data)))
 			{
 				std::cout << "Could not map framebuffer in spritebatch\n.";
 			}
 			memcpy(data.pData, (unsigned char*)_video, sizeof(unsigned char) * _frameBuffer.width * _frameBuffer.height * 4);
-			enginePointer->d3d11DeviceContext->Unmap(_frameBuffer.textureInterface11, 0);
+			enginePointer->d3d11DeviceContext->Unmap(_frameBuffer.textureInterface11.Get(), 0);
 		}
 #endif
 #if defined(GAME_DIRECTX12)
@@ -1245,7 +1245,7 @@ namespace game
 			enginePointer->d3d11DeviceContext->PSSetSamplers(0, 1, &_textureSamplerState11);
 			enginePointer->d3d11DeviceContext->IASetPrimitiveTopology(D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
-			enginePointer->d3d11DeviceContext->PSSetShaderResources(0, 1, &_textureShaderResourceView0_11);
+			enginePointer->d3d11DeviceContext->PSSetShaderResources(0, 1, _textureShaderResourceView0_11.GetAddressOf());
 
 
 			enginePointer->d3d11DeviceContext->DrawIndexed(6, 0, 0);

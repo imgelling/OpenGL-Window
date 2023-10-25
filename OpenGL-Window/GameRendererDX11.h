@@ -318,14 +318,14 @@ namespace game
 		}
 
 		// Create texture memory
-		if (FAILED(_d3d11Device->CreateTexture2D(&desc, NULL, &texture.textureInterface11)))
+		if (FAILED(_d3d11Device->CreateTexture2D(&desc, NULL, texture.textureInterface11.GetAddressOf())))
 		{
 			lastError = { GameErrors::GameDirectX11Specific, "Could not create texture, \"" + fileName + "\"." };
 			return false;
 		}
 
 		// Copy data into memory
-		_d3d11DeviceContext->UpdateSubresource(texture.textureInterface11, 0, NULL, data, desc.Width * sizeof(uint8_t) * 4, 0);
+		_d3d11DeviceContext->UpdateSubresource(texture.textureInterface11.Get(), 0, NULL, data, desc.Width * sizeof(uint8_t) * 4, 0);
 
 		// Create SRV for the texture
 		D3D11_SHADER_RESOURCE_VIEW_DESC srDesc = {};
@@ -333,7 +333,7 @@ namespace game
 		srDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
 		srDesc.Texture2D.MostDetailedMip = 0;
 		srDesc.Texture2D.MipLevels = texture.isMipMapped ? -1 : 1; // -1 for mipmaps
-		if (FAILED(_d3d11Device->CreateShaderResourceView(texture.textureInterface11, &srDesc, &texture.textureSRV11)))
+		if (FAILED(_d3d11Device->CreateShaderResourceView(texture.textureInterface11.Get(), &srDesc, texture.textureSRV11.GetAddressOf())))
 		{
 			lastError = { GameErrors::GameDirectX11Specific, "Could not create texture SRV, \"" + fileName + "\"." };
 			return false;
@@ -373,8 +373,10 @@ namespace game
 
 	inline void RendererDX11::UnLoadTexture(Texture2D& texture)
 	{
-		SAFE_RELEASE(texture.textureInterface11);
-		SAFE_RELEASE(texture.textureSRV11);
+		//SAFE_RELEASE(texture.textureInterface11);
+		//SAFE_RELEASE(texture.textureSRV11);
+		texture.textureInterface11.Reset();
+		texture.textureSRV11.Reset();
 		//if (texture.textureInterface11)
 		//{
 		//	texture.textureInterface11->Release();
