@@ -42,7 +42,7 @@ namespace game
 	private:
 		Microsoft::WRL::ComPtr<ID3D11Device> _d3d11Device;
 		Microsoft::WRL::ComPtr<ID3D11DeviceContext> _d3d11DeviceContext;
-		IDXGISwapChain* _d3d11SwapChain;
+		Microsoft::WRL::ComPtr<IDXGISwapChain> _d3d11SwapChain;
 		ID3D11RenderTargetView* _d3d11RenderTargetView;
 		ID3D11DepthStencilView* _d3d11DepthStencilView;
 	};
@@ -51,7 +51,7 @@ namespace game
 	{
 		//_d3d11Device = nullptr;
 		//_d3d11DeviceContext = nullptr;
-		_d3d11SwapChain = nullptr;
+		//_d3d11SwapChain = nullptr;
 		_d3d11RenderTargetView = nullptr;
 		_d3d11DepthStencilView = nullptr;
 		//_d3d11DepthStencilBuffer = nullptr;
@@ -105,7 +105,7 @@ namespace game
 		}
 
 		// Create device and swap chain
-		if (FAILED(D3D11CreateDeviceAndSwapChain(NULL, D3D_DRIVER_TYPE_HARDWARE, 0, deviceFlags, featureLevels, ARRAYSIZE(featureLevels), D3D11_SDK_VERSION, &scd, &_d3d11SwapChain, &_d3d11Device, &featureLevelCreated, &_d3d11DeviceContext)))
+		if (FAILED(D3D11CreateDeviceAndSwapChain(NULL, D3D_DRIVER_TYPE_HARDWARE, 0, deviceFlags, featureLevels, ARRAYSIZE(featureLevels), D3D11_SDK_VERSION, &scd, _d3d11SwapChain.GetAddressOf(), _d3d11Device.GetAddressOf(), &featureLevelCreated, _d3d11DeviceContext.GetAddressOf())))
 		{
 			lastError = { GameErrors::GameDirectX10Specific, "Could not create device." };
 			return false;
@@ -186,7 +186,7 @@ namespace game
 		//if (_d3d11Context) _d3d11Context->Release();
 		//SAFE_RELEASE(_d3d11DeviceContext);
 		//if (_d3d11SwapChain) _d3d11SwapChain->Release();
-		SAFE_RELEASE(_d3d11SwapChain);
+		//SAFE_RELEASE(_d3d11SwapChain);
 		//if (_d3d11RenderTarget) _d3d11RenderTarget->Release();
 		SAFE_RELEASE(_d3d11RenderTargetView);
 		SAFE_RELEASE(_d3d11DepthStencilView);
