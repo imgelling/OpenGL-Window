@@ -209,10 +209,7 @@ namespace game
 		_d3d11DeviceContext->Flush();
 
 		// Resize the new buffers
-		if (FAILED(_d3d11SwapChain->ResizeBuffers(1, 0, 0, DXGI_FORMAT_UNKNOWN, 0)))
-		{
-			std::cout << "Resize Buffers failed in resize.\n";
-		}
+		_d3d11SwapChain->ResizeBuffers(1, 0, 0, DXGI_FORMAT_UNKNOWN, 0);
 
 		// Create depth and stencil buffer
 		depthStencilDesc.Width = _attributes.WindowWidth;
