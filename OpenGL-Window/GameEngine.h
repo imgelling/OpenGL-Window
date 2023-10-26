@@ -89,7 +89,7 @@ namespace game
 #endif
 #if defined(GAME_DIRECTX11)
 		Microsoft::WRL::ComPtr<ID3D11DeviceContext> d3d11DeviceContext;
-		ID3D11RenderTargetView* d3d11RenderTarget;
+		Microsoft::WRL::ComPtr<ID3D11RenderTargetView> d3d11RenderTarget;
 		Microsoft::WRL::ComPtr<ID3D11Device> d3d11Device;
 		ID3D11DepthStencilView* d3d11DepthStencilView;
 #endif
@@ -197,7 +197,7 @@ namespace game
 #endif
 #if defined(GAME_DIRECTX11)
 		//d3d11DeviceContext = nullptr;
-		d3d11RenderTarget = nullptr;
+		//d3d11RenderTarget = nullptr;
 		//d3d11Device = nullptr;
 		d3d11DepthStencilView = nullptr;
 #endif
@@ -702,15 +702,12 @@ namespace game
 	{
 		_attributes.WindowWidth = width;
 		_attributes.WindowHeight = height;
-		if (_renderer)
-		{
-			_renderer->HandleWindowResize(width, height, doReset);
-		}
 #if defined(GAME_DIRECTX9)
 			if (geIsUsing(GAME_DIRECTX9))
 			{
 				if (_renderer)
 				{
+					_renderer->HandleWindowResize(width, height, doReset);
 					dynamic_cast<RendererDX9*>(_renderer)->GetDevice(d3d9Device);
 				}
 			}
@@ -720,6 +717,7 @@ namespace game
 		{
 			if (_renderer)
 			{
+				_renderer->HandleWindowResize(width, height, doReset);
 				dynamic_cast<RendererDX10*>(_renderer)->GetDevice(d3d10Device, d3d10SwapChain, d3d10RenderTargetView, d3d10DepthStencilView);
 			}
 		}
@@ -729,6 +727,8 @@ namespace game
 		{
 			if (_renderer)
 			{
+				d3d11RenderTarget.Reset();
+				_renderer->HandleWindowResize(width, height, doReset);
 				dynamic_cast<RendererDX11*>(_renderer)->GetDevice(d3d11Device, d3d11DeviceContext, d3d11RenderTarget, d3d11DepthStencilView);
 			}
 		}

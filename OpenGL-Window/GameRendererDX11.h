@@ -36,14 +36,14 @@ namespace game
 			return false;
 		}
 		void UnLoadShader(Shader& shader);
-		void GetDevice(Microsoft::WRL::ComPtr<ID3D11Device>&device, Microsoft::WRL::ComPtr <ID3D11DeviceContext>& context, ID3D11RenderTargetView*& target, ID3D11DepthStencilView*& depth);
+		void GetDevice(Microsoft::WRL::ComPtr<ID3D11Device>&device, Microsoft::WRL::ComPtr <ID3D11DeviceContext>& context, Microsoft::WRL::ComPtr<ID3D11RenderTargetView>& target, ID3D11DepthStencilView*& depth);
 	protected:
 		void _ReadExtensions() {};
 	private:
 		Microsoft::WRL::ComPtr<ID3D11Device> _d3d11Device;
 		Microsoft::WRL::ComPtr<ID3D11DeviceContext> _d3d11DeviceContext;
 		Microsoft::WRL::ComPtr<IDXGISwapChain> _d3d11SwapChain;
-		ID3D11RenderTargetView* _d3d11RenderTargetView;
+		Microsoft::WRL::ComPtr<ID3D11RenderTargetView> _d3d11RenderTargetView;
 		ID3D11DepthStencilView* _d3d11DepthStencilView;
 	};
 
@@ -52,7 +52,7 @@ namespace game
 		//_d3d11Device = nullptr;
 		//_d3d11DeviceContext = nullptr;
 		//_d3d11SwapChain = nullptr;
-		_d3d11RenderTargetView = nullptr;
+		//_d3d11RenderTargetView = nullptr;
 		_d3d11DepthStencilView = nullptr;
 		//_d3d11DepthStencilBuffer = nullptr;
 	}
@@ -147,7 +147,7 @@ namespace game
 		}
 
 		//Create our Render Target
-		hr = _d3d11Device->CreateRenderTargetView(backBuffer.Get(), NULL, &_d3d11RenderTargetView);
+		hr = _d3d11Device->CreateRenderTargetView(backBuffer.Get(), NULL, _d3d11RenderTargetView.GetAddressOf());
 		if (FAILED(hr))
 		{
 			lastError = { GameErrors::GameDirectX11Specific, "Could not create render target view." };
@@ -155,7 +155,7 @@ namespace game
 		}
 
 		//Set our Render Target
-		_d3d11DeviceContext->OMSetRenderTargets(1, &_d3d11RenderTargetView, _d3d11DepthStencilView);
+		_d3d11DeviceContext->OMSetRenderTargets(1, _d3d11RenderTargetView.GetAddressOf(), _d3d11DepthStencilView);
 
 		// Set the viewport
 		viewPort.TopLeftX = 0;
@@ -171,7 +171,7 @@ namespace game
 		return true; 
 	}
 	
-	inline void RendererDX11::GetDevice(Microsoft::WRL::ComPtr<ID3D11Device>& device, Microsoft::WRL::ComPtr <ID3D11DeviceContext>& context, ID3D11RenderTargetView*& target, ID3D11DepthStencilView*& depth)
+	inline void RendererDX11::GetDevice(Microsoft::WRL::ComPtr<ID3D11Device>& device, Microsoft::WRL::ComPtr <ID3D11DeviceContext>& context, Microsoft::WRL::ComPtr<ID3D11RenderTargetView>& target, ID3D11DepthStencilView*& depth)
 	{
 		device = _d3d11Device;
 		context = _d3d11DeviceContext;
@@ -181,14 +181,6 @@ namespace game
 
 	inline void RendererDX11::DestroyDevice()
 	{
-		//if (_d3d11Device) _d3d11Device->Release();
-		//SAFE_RELEASE(_d3d11Device);
-		//if (_d3d11Context) _d3d11Context->Release();
-		//SAFE_RELEASE(_d3d11DeviceContext);
-		//if (_d3d11SwapChain) _d3d11SwapChain->Release();
-		//SAFE_RELEASE(_d3d11SwapChain);
-		//if (_d3d11RenderTarget) _d3d11RenderTarget->Release();
-		SAFE_RELEASE(_d3d11RenderTargetView);
 		SAFE_RELEASE(_d3d11DepthStencilView);
 	}
 
@@ -212,12 +204,17 @@ namespace game
 
 		// Destory old buffers
 		_d3d11DeviceContext->OMSetRenderTargets(NULL, NULL, NULL);
-		SAFE_RELEASE(_d3d11RenderTargetView);
+		_d3d11RenderTargetView.Reset();
+		//_d3d11RenderTargetView = nullptr;
+		//SAFE_RELEASE(_d3d11RenderTargetView);
 		SAFE_RELEASE(_d3d11DepthStencilView);
 		_d3d11DeviceContext->Flush();
 
 		// Resize the new buffers
-		_d3d11SwapChain->ResizeBuffers(1, 0, 0, DXGI_FORMAT_UNKNOWN, 0);
+		if (FAILED(_d3d11SwapChain->ResizeBuffers(1, 0, 0, DXGI_FORMAT_UNKNOWN, 0)))
+		{
+			std::cout << "Resize Buffers failed in resize.\n";
+		}
 
 		// Create depth and stencil buffer
 		depthStencilDesc.Width = _attributes.WindowWidth;
@@ -257,7 +254,7 @@ namespace game
 		}
 
 		// Create the render target
-		if (FAILED(_d3d11Device->CreateRenderTargetView(backBuffer.Get(), 0, &_d3d11RenderTargetView)))
+		if (FAILED(_d3d11Device->CreateRenderTargetView(backBuffer.Get(), 0, _d3d11RenderTargetView.GetAddressOf())))
 		{
 			lastError = { GameErrors::GameDirectX11Specific, "Could not create render target on resize." };
 			DestroyDevice();
@@ -265,7 +262,7 @@ namespace game
 		}
 
 		// Set the render target
-		_d3d11DeviceContext->OMSetRenderTargets(1, &_d3d11RenderTargetView, _d3d11DepthStencilView);
+		_d3d11DeviceContext->OMSetRenderTargets(1, _d3d11RenderTargetView.GetAddressOf(), _d3d11DepthStencilView);
 
 		// Set the viewport
 		viewPort.TopLeftX = 0;
@@ -373,15 +370,8 @@ namespace game
 
 	inline void RendererDX11::UnLoadTexture(Texture2D& texture)
 	{
-		//SAFE_RELEASE(texture.textureInterface11);
-		//SAFE_RELEASE(texture.textureSRV11);
 		texture.textureInterface11.Reset();
 		texture.textureSRV11.Reset();
-		//if (texture.textureInterface11)
-		//{
-		//	texture.textureInterface11->Release();
-		//	texture.textureInterface11 = nullptr;
-		//}
 		texture.width = 0;
 		texture.height = 0;
 		texture.oneOverWidth = 0.0f;
