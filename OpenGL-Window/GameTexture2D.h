@@ -80,8 +80,6 @@ namespace game
 		textureSRV10 = nullptr;
 #endif
 #if defined(GAME_DIRECTX11)
-		//textureInterface11 = nullptr;
-		//textureSRV11 = nullptr;
 #endif
 		width = 0;
 		height = 0;

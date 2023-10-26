@@ -36,12 +36,12 @@ namespace game
 			return false;
 		}
 		void UnLoadShader(Shader& shader);
-		void GetDevice(Microsoft::WRL::ComPtr<ID3D11Device>&device, ID3D11DeviceContext*& context, ID3D11RenderTargetView*& target, ID3D11DepthStencilView*& depth);
+		void GetDevice(Microsoft::WRL::ComPtr<ID3D11Device>&device, Microsoft::WRL::ComPtr <ID3D11DeviceContext>& context, ID3D11RenderTargetView*& target, ID3D11DepthStencilView*& depth);
 	protected:
 		void _ReadExtensions() {};
 	private:
 		Microsoft::WRL::ComPtr<ID3D11Device> _d3d11Device;
-		ID3D11DeviceContext *_d3d11DeviceContext;
+		Microsoft::WRL::ComPtr<ID3D11DeviceContext> _d3d11DeviceContext;
 		IDXGISwapChain* _d3d11SwapChain;
 		ID3D11RenderTargetView* _d3d11RenderTargetView;
 		ID3D11DepthStencilView* _d3d11DepthStencilView;
@@ -50,7 +50,7 @@ namespace game
 	inline RendererDX11::RendererDX11()
 	{
 		//_d3d11Device = nullptr;
-		_d3d11DeviceContext = nullptr;
+		//_d3d11DeviceContext = nullptr;
 		_d3d11SwapChain = nullptr;
 		_d3d11RenderTargetView = nullptr;
 		_d3d11DepthStencilView = nullptr;
@@ -171,7 +171,7 @@ namespace game
 		return true; 
 	}
 	
-	inline void RendererDX11::GetDevice(Microsoft::WRL::ComPtr<ID3D11Device>& device, ID3D11DeviceContext*& context, ID3D11RenderTargetView*& target, ID3D11DepthStencilView*& depth)
+	inline void RendererDX11::GetDevice(Microsoft::WRL::ComPtr<ID3D11Device>& device, Microsoft::WRL::ComPtr <ID3D11DeviceContext>& context, ID3D11RenderTargetView*& target, ID3D11DepthStencilView*& depth)
 	{
 		device = _d3d11Device;
 		context = _d3d11DeviceContext;
@@ -184,7 +184,7 @@ namespace game
 		//if (_d3d11Device) _d3d11Device->Release();
 		//SAFE_RELEASE(_d3d11Device);
 		//if (_d3d11Context) _d3d11Context->Release();
-		SAFE_RELEASE(_d3d11DeviceContext);
+		//SAFE_RELEASE(_d3d11DeviceContext);
 		//if (_d3d11SwapChain) _d3d11SwapChain->Release();
 		SAFE_RELEASE(_d3d11SwapChain);
 		//if (_d3d11RenderTarget) _d3d11RenderTarget->Release();
@@ -200,7 +200,7 @@ namespace game
 	inline void RendererDX11::HandleWindowResize(const uint32_t width, const uint32_t height, const bool doReset)
 	{
 		D3D11_VIEWPORT viewPort = { 0 };
-		Microsoft::WRL::ComPtr<ID3D11Texture2D> backBuffer;// = nullptr;
+		Microsoft::WRL::ComPtr<ID3D11Texture2D> backBuffer;
 		D3D11_TEXTURE2D_DESC depthStencilDesc = { 0 };
 		Microsoft::WRL::ComPtr<ID3D11Texture2D> d3d11DepthStencilBuffer;
 
