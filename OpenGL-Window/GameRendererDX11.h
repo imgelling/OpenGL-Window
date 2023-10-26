@@ -205,8 +205,6 @@ namespace game
 		// Destory old buffers
 		_d3d11DeviceContext->OMSetRenderTargets(NULL, NULL, NULL);
 		_d3d11RenderTargetView.Reset();
-		//_d3d11RenderTargetView = nullptr;
-		//SAFE_RELEASE(_d3d11RenderTargetView);
 		SAFE_RELEASE(_d3d11DepthStencilView);
 		_d3d11DeviceContext->Flush();
 
