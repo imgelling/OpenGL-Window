@@ -249,8 +249,13 @@ namespace game
 		// do error checcking
 		// Check for variable refresh rate
 		Microsoft::WRL::ComPtr<IDXGIFactory5> factory5;
-		dxgiFactory.As(&factory5);
-		factory5->CheckFeatureSupport(DXGI_FEATURE_PRESENT_ALLOW_TEARING, &_allowTearing, sizeof(_allowTearing));
+		if (SUCCEEDED(dxgiFactory.As(&factory5)))
+		{
+			if (FAILED(factory5->CheckFeatureSupport(DXGI_FEATURE_PRESENT_ALLOW_TEARING, &_allowTearing, sizeof(_allowTearing))))
+			{
+				std::cout << "Check Feature Support failed." << _allowTearing << "\n";
+			}
+		}
 
 
 		if (_attributes.DebugMode)
