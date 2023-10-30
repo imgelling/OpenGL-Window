@@ -51,7 +51,7 @@ namespace game
 		Pointi GetScaledMousePosition() noexcept;
 		Pointi GetPixelFrameBufferSize() noexcept;
 	private:
-		Texture2D _frameBuffer;// [2] ;
+		Texture2D _frameBuffer;
 		Vector2f _oneOverScale;
 		Vector2f _savedPositionOfScaledTexture;
 		uint32_t* _video;
@@ -871,7 +871,7 @@ namespace game
 		_sizeOfScaledTexture.height = _positionOfScaledTexture.y + (_frameBuffer.height * _scale.y);
 
 		// Pixel offset fix (may be wrecking dx10 and 11)
-//#if !defined(GAME_DIRECTX10)  && !defined(GAME_DIRECTX11) && !defined(GAME_DIRECTX12)
+#if defined(GAME_DIRECTX9)  ||  defined(GAME_OPENGL)
 		//if (enginePointer->geIsUsing(GAME_DIRECTX9) || enginePointer->geIsUsing(GAME_OPENGL))
 		{
 			_positionOfScaledTexture.x -= _frameBuffer.oneOverWidth;
@@ -879,7 +879,7 @@ namespace game
 			_sizeOfScaledTexture.width -= _frameBuffer.oneOverWidth;
 			_sizeOfScaledTexture.height -= _frameBuffer.oneOverHeight;
 		}
-//#endif
+#endif
 
 		_savedPositionOfScaledTexture = _positionOfScaledTexture;
 
@@ -988,8 +988,6 @@ namespace game
 			_positionOfScaledTexture.y = 1.0f - (_positionOfScaledTexture.y * 2.0f / (float_t)_windowSize.height);// -1.0f;
 			_sizeOfScaledTexture.width = ((float_t)_sizeOfScaledTexture.width * 2.0f / (float_t)_windowSize.width) - 1.0f;
 			_sizeOfScaledTexture.height = 1.0f - ((float_t)_sizeOfScaledTexture.height * 2.0f / (float_t)_windowSize.height);// -1.0f;
-			//_positionOfScaledTexture.y = -_positionOfScaledTexture.y;
-			//_sizeOfScaledTexture.height = -_sizeOfScaledTexture.height;
 
 			// tl
 			_quadVertices11[0].x = _positionOfScaledTexture.x;
@@ -1000,15 +998,9 @@ namespace game
 			// bl
 			_quadVertices11[2].x = _positionOfScaledTexture.x;
 			_quadVertices11[2].y = _sizeOfScaledTexture.height;
-
 			// br
 			_quadVertices11[3].x = _sizeOfScaledTexture.width;
 			_quadVertices11[3].y = _sizeOfScaledTexture.height;
-
-			//VOID* pVoid = nullptr;
-			//_vertexBuffer11->Map(D3D10_MAP_WRITE_DISCARD, 0, &pVoid);
-			//memcpy(pVoid, _quadVertices10, sizeof(_quadVertices10));
-			//_vertexBuffer11->Unmap();
 
 			D3D11_MAPPED_SUBRESOURCE data;
 			if (FAILED(enginePointer->d3d11DeviceContext->Map(_vertexBuffer11.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &data)))
@@ -1268,10 +1260,6 @@ namespace game
 			enginePointer->commandList->ExecuteBundle(_renderBundle.Get());
 		}
 #endif
-
-		//_currentBuffer++;
-		//if (_currentBuffer > 1) _currentBuffer = 0;
-
 	}
 
 	inline void PixelMode::Clear(const Color &color) noexcept
@@ -1280,33 +1268,10 @@ namespace game
 		if (enginePointer->geIsUsing(GAME_DIRECTX9))
 		{
 			std::fill_n(_video, _bufferSize.width * _bufferSize.height, color.packedARGB);
+			return;
 		}
 #endif
-#if defined(GAME_DIRECTX10)
-		if (enginePointer->geIsUsing(GAME_DIRECTX10))
-		{
-			std::fill_n(_video, _bufferSize.width * _bufferSize.height, color.packedABGR);
-		}
-#endif
-#if defined(GAME_DIRECTX11)
-		if (enginePointer->geIsUsing(GAME_DIRECTX11))
-		{
-			std::fill_n(_video, _bufferSize.width * _bufferSize.height, color.packedABGR);
-		}
-#endif
-#if defined(GAME_DIRECTX12)
-		if (enginePointer->geIsUsing(GAME_DIRECTX12))
-		{
-			std::fill_n(_video, _bufferSize.width * _bufferSize.height, color.packedABGR);
-		}
-#endif
-#if defined(GAME_OPENGL)
-		if (enginePointer->geIsUsing(GAME_OPENGL))
-		{
-			std::fill_n(_video, _bufferSize.width * _bufferSize.height, color.packedABGR);
-		}
-#endif
-
+		std::fill_n(_video, _bufferSize.width * _bufferSize.height, color.packedABGR);
 	}
 
 	inline void PixelMode::Pixel(const int32_t x, const int32_t y, const game::Color& color) noexcept
@@ -1340,34 +1305,35 @@ namespace game
 			return;
 		}
 #endif
-#if defined(GAME_DIRECTX10)
-		if (enginePointer->geIsUsing(GAME_DIRECTX10))
-		{
-			_video[y * _bufferSize.width + x] = color.packedABGR;
-			return;
-		}
-#endif
-#if defined(GAME_DIRECTX11)
-		if (enginePointer->geIsUsing(GAME_DIRECTX11))
-		{
-			_video[y * _bufferSize.width + x] = color.packedABGR;
-			return;
-		}
-#endif
-#if defined(GAME_DIRECTX12)
-		if (enginePointer->geIsUsing(GAME_DIRECTX12))
-		{
-			_video[(y) * _bufferSize.width + x] = color.packedABGR;
-			return;
-		}
-#endif
-#if defined(GAME_OPENGL)
-		if (enginePointer->geIsUsing(GAME_OPENGL))
-		{
-			_video[y * _bufferSize.width + x] = color.packedABGR;
-			return;
-		}
-#endif
+		_video[y * _bufferSize.width + x] = color.packedABGR;
+//#if defined(GAME_DIRECTX10)
+//		if (enginePointer->geIsUsing(GAME_DIRECTX10))
+//		{
+//			_video[y * _bufferSize.width + x] = color.packedABGR;
+//			return;
+//		}
+//#endif
+//#if defined(GAME_DIRECTX11)
+//		if (enginePointer->geIsUsing(GAME_DIRECTX11))
+//		{
+//			_video[y * _bufferSize.width + x] = color.packedABGR;
+//			return;
+//		}
+//#endif
+//#if defined(GAME_DIRECTX12)
+//		if (enginePointer->geIsUsing(GAME_DIRECTX12))
+//		{
+//			_video[(y) * _bufferSize.width + x] = color.packedABGR;
+//			return;
+//		}
+//#endif
+//#if defined(GAME_OPENGL)
+//		if (enginePointer->geIsUsing(GAME_OPENGL))
+//		{
+//			_video[y * _bufferSize.width + x] = color.packedABGR;
+//			return;
+//		}
+//#endif
 	}
 
 	inline void PixelMode::PixelClip(const int32_t x, const int32_t y, const game::Color& color) noexcept

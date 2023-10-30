@@ -681,6 +681,15 @@ namespace game
 	{
 		_attributes.WindowWidth = width;
 		_attributes.WindowHeight = height;
+#if defined(GAME_OPENGL)
+		if (geIsUsing(GAME_OPENGL))
+		{
+			if (_renderer)
+			{
+				_renderer->HandleWindowResize(width, height, doReset);
+			}
+		}
+#endif
 #if defined(GAME_DIRECTX9)
 			if (geIsUsing(GAME_DIRECTX9))
 			{
