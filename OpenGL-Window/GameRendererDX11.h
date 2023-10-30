@@ -10,9 +10,6 @@
 #include "GameSystemInfo.h"
 #include "GameTexture2D.h"
 
-#if !defined(SAFE_RELEASE)
-#define SAFE_RELEASE(p) { if ( (p) ) { (p)->Release(); (p) = nullptr; } }
-#endif
 
 namespace game
 {
@@ -36,7 +33,7 @@ namespace game
 			return false;
 		}
 		void UnLoadShader(Shader& shader);
-		void GetDevice(Microsoft::WRL::ComPtr<ID3D11Device>&device, Microsoft::WRL::ComPtr <ID3D11DeviceContext>& context, Microsoft::WRL::ComPtr<ID3D11RenderTargetView>& target, ID3D11DepthStencilView*& depth);
+		void GetDevice(Microsoft::WRL::ComPtr<ID3D11Device>&device, Microsoft::WRL::ComPtr <ID3D11DeviceContext>& context, Microsoft::WRL::ComPtr<ID3D11RenderTargetView>& target, Microsoft::WRL::ComPtr<ID3D11DepthStencilView>& depth);
 	protected:
 		void _ReadExtensions() {};
 	private:
@@ -44,7 +41,7 @@ namespace game
 		Microsoft::WRL::ComPtr<ID3D11DeviceContext> _d3d11DeviceContext;
 		Microsoft::WRL::ComPtr<IDXGISwapChain> _d3d11SwapChain;
 		Microsoft::WRL::ComPtr<ID3D11RenderTargetView> _d3d11RenderTargetView;
-		ID3D11DepthStencilView* _d3d11DepthStencilView;
+		Microsoft::WRL::ComPtr<ID3D11DepthStencilView> _d3d11DepthStencilView;
 	};
 
 	inline RendererDX11::RendererDX11()
@@ -53,7 +50,7 @@ namespace game
 		//_d3d11DeviceContext = nullptr;
 		//_d3d11SwapChain = nullptr;
 		//_d3d11RenderTargetView = nullptr;
-		_d3d11DepthStencilView = nullptr;
+		//_d3d11DepthStencilView = nullptr;
 		//_d3d11DepthStencilBuffer = nullptr;
 	}
 
@@ -155,7 +152,7 @@ namespace game
 		}
 
 		//Set our Render Target
-		_d3d11DeviceContext->OMSetRenderTargets(1, _d3d11RenderTargetView.GetAddressOf(), _d3d11DepthStencilView);
+		_d3d11DeviceContext->OMSetRenderTargets(1, _d3d11RenderTargetView.GetAddressOf(), _d3d11DepthStencilView.Get());
 
 		// Set the viewport
 		viewPort.TopLeftX = 0;
@@ -171,7 +168,7 @@ namespace game
 		return true; 
 	}
 	
-	inline void RendererDX11::GetDevice(Microsoft::WRL::ComPtr<ID3D11Device>& device, Microsoft::WRL::ComPtr <ID3D11DeviceContext>& context, Microsoft::WRL::ComPtr<ID3D11RenderTargetView>& target, ID3D11DepthStencilView*& depth)
+	inline void RendererDX11::GetDevice(Microsoft::WRL::ComPtr<ID3D11Device>& device, Microsoft::WRL::ComPtr <ID3D11DeviceContext>& context, Microsoft::WRL::ComPtr<ID3D11RenderTargetView>& target, Microsoft::WRL::ComPtr<ID3D11DepthStencilView>& depth)
 	{
 		device = _d3d11Device;
 		context = _d3d11DeviceContext;
@@ -181,7 +178,6 @@ namespace game
 
 	inline void RendererDX11::DestroyDevice()
 	{
-		SAFE_RELEASE(_d3d11DepthStencilView);
 	}
 
 	inline void RendererDX11::Swap()
@@ -205,7 +201,7 @@ namespace game
 		// Destory old buffers
 		_d3d11DeviceContext->OMSetRenderTargets(NULL, NULL, NULL);
 		_d3d11RenderTargetView.Reset();
-		SAFE_RELEASE(_d3d11DepthStencilView);
+		_d3d11DepthStencilView.Reset();
 		_d3d11DeviceContext->Flush();
 
 		// Resize the new buffers
@@ -257,7 +253,7 @@ namespace game
 		}
 
 		// Set the render target
-		_d3d11DeviceContext->OMSetRenderTargets(1, _d3d11RenderTargetView.GetAddressOf(), _d3d11DepthStencilView);
+		_d3d11DeviceContext->OMSetRenderTargets(1, _d3d11RenderTargetView.GetAddressOf(), _d3d11DepthStencilView.Get());
 
 		// Set the viewport
 		viewPort.TopLeftX = 0;
@@ -389,9 +385,9 @@ namespace game
 			{
 				flags |= D3DCOMPILE_DEBUG;
 			}
-			ID3DBlob* compiledVertexShader = nullptr;
-			ID3DBlob* compiledPixelShader = nullptr;
-			ID3DBlob* compilationMsgs = nullptr;
+			Microsoft::WRL::ComPtr<ID3DBlob> compiledVertexShader;
+			Microsoft::WRL::ComPtr<ID3DBlob> compiledPixelShader;
+			Microsoft::WRL::ComPtr<ID3DBlob> compilationMsgs;
 
 			// Compile the vertex shader
 			if (FAILED(D3DCompileFromFile(ConvertToWide(vertex).c_str(), NULL, NULL, "main", "vs_4_0", flags, NULL, &compiledVertexShader, &compilationMsgs)))
@@ -403,8 +399,6 @@ namespace game
 				{
 					lastError.lastErrorString += p[bytes];
 				}
-				SAFE_RELEASE(compilationMsgs);
-				SAFE_RELEASE(compiledVertexShader);
 				return false;
 			}
 
@@ -418,23 +412,13 @@ namespace game
 				{
 					lastError.lastErrorString += p[bytes];
 				}
-				SAFE_RELEASE(compilationMsgs);
-				SAFE_RELEASE(compiledVertexShader);
-				SAFE_RELEASE(compiledPixelShader);
 				return false;
 			}
-
-			// Free up any messages from compilation if any
-			SAFE_RELEASE(compilationMsgs);
 
 			// Create vertex shader
 			if (FAILED(_d3d11Device->CreateVertexShader(compiledVertexShader->GetBufferPointer(), compiledVertexShader->GetBufferSize(), NULL, &shader.vertexShader11)))
 			{
 				lastError = { GameErrors::GameDirectX11Specific,"Could not create vertex shader from \"" + vertex + "\"." };
-				SAFE_RELEASE(compiledVertexShader);
-				SAFE_RELEASE(compiledPixelShader);
-				SAFE_RELEASE(shader.pixelShader11);
-
 				return false;
 			}
 
@@ -442,41 +426,31 @@ namespace game
 			if (FAILED(_d3d11Device->CreatePixelShader((DWORD*)(compiledPixelShader->GetBufferPointer()), compiledPixelShader->GetBufferSize(), NULL, &shader.pixelShader11)))
 			{
 				lastError = { GameErrors::GameDirectX11Specific,"Could not create pixel shader from \"" + fragment + "\"." };
-				SAFE_RELEASE(compiledVertexShader);
-				SAFE_RELEASE(compiledPixelShader);
-				SAFE_RELEASE(shader.vertexShader11);
 				return false;
 			}
 
 			// Shaders created, save a reference and release this one
-			compiledVertexShader->AddRef();
 			shader.compiledVertexShader11 = compiledVertexShader;
-			SAFE_RELEASE(compiledVertexShader);
-
-			compiledPixelShader->AddRef();
 			shader.compiledPixelShader11 = compiledPixelShader;
-			SAFE_RELEASE(compiledPixelShader);
 
 			return true;
 		}
 		else
 		{
 			// Load compiled vertex shader
-			ID3DBlob* compiledPixelShader = nullptr;
-			ID3DBlob* compiledVertexShader = nullptr;
+			Microsoft::WRL::ComPtr<ID3DBlob> compiledPixelShader;
+			Microsoft::WRL::ComPtr<ID3DBlob> compiledVertexShader;
 
 			// Create vertex shader
 			if (FAILED(D3DReadFileToBlob((ConvertToWide(vertex).c_str()), &compiledVertexShader)))
 			{
 				lastError = { GameErrors::GameDirectX11Specific,"Could not read vertex file \"" + vertex + "\"." };
-				SAFE_RELEASE(compiledVertexShader);
 				return false;
 			}
 			HRESULT hr = _d3d11Device->CreateVertexShader((DWORD*)compiledVertexShader->GetBufferPointer(), compiledVertexShader->GetBufferSize(), NULL, &shader.vertexShader11);
 			if (FAILED(hr))
 			{
 				lastError = { GameErrors::GameDirectX11Specific,"Could not create vertex shader from \"" + vertex + "\"." };
-				SAFE_RELEASE(compiledVertexShader);
 				return false;
 			}
 
@@ -484,41 +458,31 @@ namespace game
 			if (FAILED(D3DReadFileToBlob((ConvertToWide(fragment).c_str()), &compiledPixelShader)))
 			{
 				lastError = { GameErrors::GameDirectX11Specific,"Could not read pixel file \"" + fragment + "\"." };
-				SAFE_RELEASE(compiledVertexShader);
-				SAFE_RELEASE(shader.vertexShader11);
-				SAFE_RELEASE(compiledPixelShader);
 			}
 
 			if (FAILED(_d3d11Device->CreatePixelShader((DWORD*)compiledPixelShader->GetBufferPointer(), compiledPixelShader->GetBufferSize(), NULL, &shader.pixelShader11)))
 			{
 				lastError = { GameErrors::GameDirectX11Specific,"Could not create pixel shader from \"" + fragment + "\"." };
-				SAFE_RELEASE(compiledVertexShader);
-				SAFE_RELEASE(shader.vertexShader11);
-				SAFE_RELEASE(compiledPixelShader);
-				SAFE_RELEASE(shader.pixelShader11);
 				return false;
 			}
 
 			// Shaders created, save a reference and release this one
-			compiledVertexShader->AddRef();
 			shader.compiledVertexShader11 = compiledVertexShader;
-			SAFE_RELEASE(compiledVertexShader);
-
-			compiledPixelShader->AddRef();
 			shader.compiledPixelShader11 = compiledPixelShader;
-			SAFE_RELEASE(compiledPixelShader);
+
 		}
 		return true;
 	}
 
 	inline void RendererDX11::UnLoadShader(Shader& shader)
 	{
-		SAFE_RELEASE(shader.compiledVertexShader11);
-		SAFE_RELEASE(shader.vertexShader11);
-		SAFE_RELEASE(shader.compiledPixelShader11);
-		SAFE_RELEASE(shader.pixelShader11);
-		SAFE_RELEASE(shader.compiledGeometryShader11);
-		SAFE_RELEASE(shader.geometryShader11);
+		// Maybe should be resets?
+		//SAFE_RELEASE(shader.compiledVertexShader11);
+		//SAFE_RELEASE(shader.vertexShader11);
+		//SAFE_RELEASE(shader.compiledPixelShader11);
+		//SAFE_RELEASE(shader.pixelShader11);
+		//SAFE_RELEASE(shader.compiledGeometryShader11);
+		//SAFE_RELEASE(shader.geometryShader11);
 	}
 }
 

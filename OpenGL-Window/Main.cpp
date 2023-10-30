@@ -216,7 +216,7 @@ public:
 		if (geIsUsing(GAME_DIRECTX11))
 		{
 			d3d11DeviceContext->ClearRenderTargetView(d3d11RenderTarget.Get(), game::Colors::DarkGray.rgba);
-			d3d11DeviceContext->ClearDepthStencilView(d3d11DepthStencilView, D3D10_CLEAR_DEPTH | D3D10_CLEAR_STENCIL, 1.0f, 0);
+			d3d11DeviceContext->ClearDepthStencilView(d3d11DepthStencilView.Get(), D3D10_CLEAR_DEPTH | D3D10_CLEAR_STENCIL, 1.0f, 0);
 		}
 #endif
 #if defined(GAME_DIRECTX12)

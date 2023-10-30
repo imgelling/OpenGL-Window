@@ -127,12 +127,12 @@ namespace game
 			// br
 			{0.5f, 0.5f, 0.1f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f},
 		};
-		ID3D11Buffer* _vertexBuffer11;
-		ID3D11Buffer* _indexBuffer11;
+		Microsoft::WRL::ComPtr<ID3D11Buffer> _vertexBuffer11;
+		Microsoft::WRL::ComPtr<ID3D11Buffer> _indexBuffer11;
 		Shader _pixelModeShader11;
-		ID3D11InputLayout* _vertexLayout11;
+		Microsoft::WRL::ComPtr<ID3D11InputLayout> _vertexLayout11;
 		Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> _textureShaderResourceView0_11;
-		ID3D11SamplerState* _textureSamplerState11;
+		Microsoft::WRL::ComPtr<ID3D11SamplerState> _textureSamplerState11;
 #endif
 #if defined(GAME_DIRECTX12)
 		struct _vertex12
@@ -182,11 +182,6 @@ namespace game
 		_textureSamplerState10 = nullptr;
 #endif
 #if defined(GAME_DIRECTX11)
-		_vertexBuffer11 = nullptr;
-		_vertexLayout11 = nullptr;
-		_indexBuffer11 = nullptr;
-		//_textureShaderResourceView0_11 = nullptr;
-		_textureSamplerState11 = nullptr;
 #endif
 #if defined(GAME_DIRECTX12)
 		_vertexBufferView = {};
@@ -221,12 +216,7 @@ namespace game
 #if defined(GAME_DIRECTX11)
 		if (enginePointer->geIsUsing(GAME_DIRECTX11))
 		{
-			SAFE_RELEASE(_vertexBuffer11);
-			SAFE_RELEASE(_vertexLayout11);
-			SAFE_RELEASE(_indexBuffer11);
 			enginePointer->geUnLoadShader(_pixelModeShader11);
-			//SAFE_RELEASE(_textureShaderResourceView0_11);
-			SAFE_RELEASE(_textureSamplerState11);
 		}
 #endif
 #if defined(GAME_DIRECTX12)
@@ -404,7 +394,7 @@ namespace game
 			vertexBufferDescription.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE; //0;
 			vertexBufferDescription.MiscFlags = 0;
 			vertexInitialData.pSysMem = _quadVertices11;
-			if (FAILED(enginePointer->d3d11Device->CreateBuffer(&vertexBufferDescription, &vertexInitialData, &_vertexBuffer11)))
+			if (FAILED(enginePointer->d3d11Device->CreateBuffer(&vertexBufferDescription, &vertexInitialData, _vertexBuffer11.GetAddressOf())))
 			{
 				lastError = { GameErrors::GameDirectX10Specific,"Could not create vertex buffer for PixelMode." };
 				enginePointer->geUnLoadShader(_pixelModeShader11);
@@ -418,20 +408,17 @@ namespace game
 			indexBufferDescription.CPUAccessFlags = 0;
 			indexBufferDescription.MiscFlags = 0;
 			indexInitialData.pSysMem = indices;
-			if (FAILED(enginePointer->d3d11Device->CreateBuffer(&indexBufferDescription, &indexInitialData, &_indexBuffer11)))
+			if (FAILED(enginePointer->d3d11Device->CreateBuffer(&indexBufferDescription, &indexInitialData, _indexBuffer11.GetAddressOf())))
 			{
 				lastError = { GameErrors::GameDirectX11Specific,"Could not create index buffer for PixelMode." };
-				SAFE_RELEASE(_vertexBuffer11);
 				enginePointer->geUnLoadShader(_pixelModeShader11);
 				return false;
 			}
 
 			// Create input layout for shaders
-			if (FAILED(enginePointer->d3d11Device->CreateInputLayout(inputLayout, 3, _pixelModeShader11.compiledVertexShader11->GetBufferPointer(), _pixelModeShader11.compiledVertexShader11->GetBufferSize(), &_vertexLayout11)))
+			if (FAILED(enginePointer->d3d11Device->CreateInputLayout(inputLayout, 3, _pixelModeShader11.compiledVertexShader11->GetBufferPointer(), _pixelModeShader11.compiledVertexShader11->GetBufferSize(), _vertexLayout11.GetAddressOf())))
 			{
 				lastError = { GameErrors::GameDirectX11Specific,"Could not create input layout for PixelMode." };
-				SAFE_RELEASE(_indexBuffer11);
-				SAFE_RELEASE(_vertexBuffer11);
 				enginePointer->geUnLoadShader(_pixelModeShader11);
 				return false;
 			}
@@ -445,7 +432,7 @@ namespace game
 			samplerDesc.MinLOD = 0;
 			samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
 
-			if (FAILED(enginePointer->d3d11Device->CreateSamplerState(&samplerDesc, &_textureSamplerState11)))
+			if (FAILED(enginePointer->d3d11Device->CreateSamplerState(&samplerDesc, _textureSamplerState11.GetAddressOf())))
 			{
 				std::cout << "Create sampler failed!\n";
 			}
@@ -1024,12 +1011,12 @@ namespace game
 			//_vertexBuffer11->Unmap();
 
 			D3D11_MAPPED_SUBRESOURCE data;
-			if (FAILED(enginePointer->d3d11DeviceContext->Map(_vertexBuffer11, 0, D3D11_MAP_WRITE_DISCARD, 0, &data)))
+			if (FAILED(enginePointer->d3d11DeviceContext->Map(_vertexBuffer11.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &data)))
 			{
 				std::cout << "Could not map vertexbuffer in pixelmode\n.";
 			}
 			memcpy(data.pData, _quadVertices11, sizeof(_quadVertices11));
-			enginePointer->d3d11DeviceContext->Unmap(_vertexBuffer11, 0);
+			enginePointer->d3d11DeviceContext->Unmap(_vertexBuffer11.Get(), 0);
 		}
 #endif
 #if defined(GAME_DIRECTX12)
@@ -1237,12 +1224,12 @@ namespace game
 
 
 			// Change what we need
-			enginePointer->d3d11DeviceContext->IASetIndexBuffer(_indexBuffer11, DXGI_FORMAT_R32_UINT, 0);
-			enginePointer->d3d11DeviceContext->IASetVertexBuffers(0, 1, &_vertexBuffer11, &stride, &offset);
-			enginePointer->d3d11DeviceContext->IASetInputLayout(_vertexLayout11);
-			enginePointer->d3d11DeviceContext->VSSetShader(_pixelModeShader11.vertexShader11,NULL,NULL);
-			enginePointer->d3d11DeviceContext->PSSetShader(_pixelModeShader11.pixelShader11,NULL,NULL);
-			enginePointer->d3d11DeviceContext->PSSetSamplers(0, 1, &_textureSamplerState11);
+			enginePointer->d3d11DeviceContext->IASetIndexBuffer(_indexBuffer11.Get(), DXGI_FORMAT_R32_UINT, 0);
+			enginePointer->d3d11DeviceContext->IASetVertexBuffers(0, 1, _vertexBuffer11.GetAddressOf(), &stride, &offset);
+			enginePointer->d3d11DeviceContext->IASetInputLayout(_vertexLayout11.Get());
+			enginePointer->d3d11DeviceContext->VSSetShader(_pixelModeShader11.vertexShader11.Get(), NULL, NULL);
+			enginePointer->d3d11DeviceContext->PSSetShader(_pixelModeShader11.pixelShader11.Get(), NULL, NULL);
+			enginePointer->d3d11DeviceContext->PSSetSamplers(0, 1, _textureSamplerState11.GetAddressOf());
 			enginePointer->d3d11DeviceContext->IASetPrimitiveTopology(D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 			enginePointer->d3d11DeviceContext->PSSetShaderResources(0, 1, _textureShaderResourceView0_11.GetAddressOf());

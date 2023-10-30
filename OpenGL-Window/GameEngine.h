@@ -91,7 +91,7 @@ namespace game
 		Microsoft::WRL::ComPtr<ID3D11DeviceContext> d3d11DeviceContext;
 		Microsoft::WRL::ComPtr<ID3D11RenderTargetView> d3d11RenderTarget;
 		Microsoft::WRL::ComPtr<ID3D11Device> d3d11Device;
-		ID3D11DepthStencilView* d3d11DepthStencilView;
+		Microsoft::WRL::ComPtr<ID3D11DepthStencilView> d3d11DepthStencilView;
 #endif
 #if defined (GAME_DIRECTX12)
 		Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> commandList;
@@ -196,10 +196,6 @@ namespace game
 		d3d10DepthStencilView = nullptr;
 #endif
 #if defined(GAME_DIRECTX11)
-		//d3d11DeviceContext = nullptr;
-		//d3d11RenderTarget = nullptr;
-		//d3d11Device = nullptr;
-		d3d11DepthStencilView = nullptr;
 #endif
 	}
 
@@ -222,23 +218,6 @@ namespace game
 		d3d10Device = nullptr;
 #endif
 #if defined(GAME_DIRECTX11)
-		//SAFE_RELEASE(d3d11RenderTarget);
-		//SAFE_RELEASE(d3d11DepthStencilView);
-		//SAFE_RELEASE(d3d11DeviceContext);
-		//SAFE_RELEASE(d3d11Device);
-		// just nullptr them
-		//if (d3d11RenderTarget)
-		//{
-		//	d3d11RenderTarget->Release();
-		//}
-		//if (d3d11Context)
-		//{
-		//	d3d11Context->Release();
-		//}
-		//if (d3d11Device)
-		//{
-		//	d3d11Device->Release();
-		//}
 #endif
 #if defined (GAME_DIRECTX12)
 #endif
@@ -728,6 +707,7 @@ namespace game
 			if (_renderer)
 			{
 				d3d11RenderTarget.Reset();
+				d3d11DepthStencilView.Reset();
 				_renderer->HandleWindowResize(width, height, doReset);
 				dynamic_cast<RendererDX11*>(_renderer)->GetDevice(d3d11Device, d3d11DeviceContext, d3d11RenderTarget, d3d11DepthStencilView);
 			}

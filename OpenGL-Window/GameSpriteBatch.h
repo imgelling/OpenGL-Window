@@ -108,14 +108,14 @@ namespace game
 			float_t r, g, b, a;
 			float_t u, v;
 		};
-		_spriteVertex11* _spriteVertices11;
-		ID3D11Buffer* _vertexBuffer11;
 		Shader _spriteBatchShader11;
-		ID3D11InputLayout* _vertexLayout11;
-		ID3D11SamplerState* _textureSamplerState11;
-		ID3D11Buffer* _indexBuffer11;
-		ID3D11BlendState* _spriteBatchBlendState11;
-		ID3D11DepthStencilState* _depthStencilState11;
+		_spriteVertex11* _spriteVertices11;
+		Microsoft::WRL::ComPtr<ID3D11Buffer> _vertexBuffer11;
+		Microsoft::WRL::ComPtr<ID3D11InputLayout> _vertexLayout11;
+		Microsoft::WRL::ComPtr<ID3D11SamplerState> _textureSamplerState11;
+		Microsoft::WRL::ComPtr<ID3D11Buffer> _indexBuffer11;
+		Microsoft::WRL::ComPtr<ID3D11BlendState> _spriteBatchBlendState11;
+		Microsoft::WRL::ComPtr<ID3D11DepthStencilState> _depthStencilState11;
 
 		// saves state of dx11 states we change to restore
 		uint32_t _oldStride11;
@@ -212,12 +212,6 @@ namespace game
 #endif
 #if defined (GAME_DIRECTX11)
 		_spriteVertices11 = nullptr;
-		_indexBuffer11 = nullptr;
-		_vertexBuffer11 = nullptr;
-		_vertexLayout11 = nullptr;
-		_textureSamplerState11 = nullptr;
-		_spriteBatchBlendState11 = nullptr;
-		_depthStencilState11 = nullptr;
 		_oldStride11 = 0;
 		_oldOffset11 = 0;
 		_oldStencilRef11 = 0;
@@ -298,12 +292,6 @@ namespace game
 				delete[] _spriteVertices11;
 				_spriteVertices11 = nullptr;
 			}
-			SAFE_RELEASE(_vertexBuffer11);
-			SAFE_RELEASE(_vertexLayout11);
-			SAFE_RELEASE(_textureSamplerState11);
-			SAFE_RELEASE(_indexBuffer11);
-			SAFE_RELEASE(_spriteBatchBlendState11);
-			SAFE_RELEASE(_depthStencilState11);
 			enginePointer->geUnLoadShader(_spriteBatchShader11);
 		}
 #endif
@@ -602,7 +590,7 @@ namespace game
 			vertexBufferDescription.BindFlags = D3D11_BIND_VERTEX_BUFFER;
 			vertexBufferDescription.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 			vertexBufferDescription.MiscFlags = 0;
-			if (FAILED(enginePointer->d3d11Device->CreateBuffer(&vertexBufferDescription, NULL, &_vertexBuffer11)))
+			if (FAILED(enginePointer->d3d11Device->CreateBuffer(&vertexBufferDescription, NULL, _vertexBuffer11.GetAddressOf())))
 			{
 				lastError = { GameErrors::GameDirectX11Specific, "Could not create vertex buffer for SpriteBatch." };
 				return false;
@@ -625,17 +613,16 @@ namespace game
 			indexBufferDescription.CPUAccessFlags = 0;
 			indexBufferDescription.MiscFlags = 0;
 			indexInitialData.pSysMem = indices.data();
-			if (FAILED(enginePointer->d3d11Device->CreateBuffer(&indexBufferDescription, &indexInitialData, &_indexBuffer11)))
+			if (FAILED(enginePointer->d3d11Device->CreateBuffer(&indexBufferDescription, &indexInitialData, _indexBuffer11.GetAddressOf())))
 			{
 				lastError = { GameErrors::GameDirectX11Specific,"Could not create index buffer for SpriteBatch." };
-				SAFE_RELEASE(_vertexBuffer11);
 				enginePointer->geUnLoadShader(_spriteBatchShader11);
 				return false;
 			}
 
 
 			// Create input layout for shaders
-			if (FAILED(enginePointer->d3d11Device->CreateInputLayout(inputLayout, 3, _spriteBatchShader11.compiledVertexShader11->GetBufferPointer(), _spriteBatchShader11.compiledVertexShader11->GetBufferSize(), &_vertexLayout11)))
+			if (FAILED(enginePointer->d3d11Device->CreateInputLayout(inputLayout, 3, _spriteBatchShader11.compiledVertexShader11->GetBufferPointer(), _spriteBatchShader11.compiledVertexShader11->GetBufferSize(), _vertexLayout11.GetAddressOf())))
 			{
 				lastError = { GameErrors::GameDirectX11Specific, "Could not create input layout for SpriteBatch." };
 				return false;
@@ -649,7 +636,7 @@ namespace game
 			samplerDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;
 			samplerDesc.MinLOD = 0;
 			samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
-			if (FAILED(enginePointer->d3d11Device->CreateSamplerState(&samplerDesc, &_textureSamplerState11)))
+			if (FAILED(enginePointer->d3d11Device->CreateSamplerState(&samplerDesc, _textureSamplerState11.GetAddressOf())))
 			{
 				lastError = { GameErrors::GameDirectX10Specific,"Could not create sampler state for SpriteBatch." };
 				return false;
@@ -667,7 +654,7 @@ namespace game
 			blendStateDesc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_INV_SRC_ALPHA;
 			blendStateDesc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
 			blendStateDesc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
-			if (FAILED(enginePointer->d3d11Device->CreateBlendState(&blendStateDesc, &_spriteBatchBlendState11)))
+			if (FAILED(enginePointer->d3d11Device->CreateBlendState(&blendStateDesc, _spriteBatchBlendState11.GetAddressOf())))
 			{
 				lastError = { GameErrors::GameDirectX11Specific, "Could not create blend state for SpriteBatch." };
 				return false;
@@ -680,7 +667,7 @@ namespace game
 			dsDesc.DepthFunc = D3D11_COMPARISON_FUNC::D3D11_COMPARISON_LESS_EQUAL;
 
 			// Create depth stencil state
-			if (FAILED(enginePointer->d3d11Device->CreateDepthStencilState(&dsDesc, &_depthStencilState11)))
+			if (FAILED(enginePointer->d3d11Device->CreateDepthStencilState(&dsDesc, _depthStencilState11.GetAddressOf())))
 			{
 				lastError = { GameErrors::GameDirectX10Specific, "Could not create Depth Stencil State. " };
 				return false;
@@ -1039,15 +1026,15 @@ namespace game
 			enginePointer->d3d11DeviceContext->OMGetDepthStencilState(&_oldDepthStencilState11, &_oldStencilRef11);
 
 			// Change what we need
-			enginePointer->d3d11DeviceContext->IASetIndexBuffer(_indexBuffer11, DXGI_FORMAT_R32_UINT, 0);
-			enginePointer->d3d11DeviceContext->IASetVertexBuffers(0, 1, &_vertexBuffer11, &stride, &offset);
-			enginePointer->d3d11DeviceContext->IASetInputLayout(_vertexLayout11);
-			enginePointer->d3d11DeviceContext->VSSetShader(_spriteBatchShader11.vertexShader11, NULL, NULL);
-			enginePointer->d3d11DeviceContext->PSSetShader(_spriteBatchShader11.pixelShader11, NULL, NULL);
-			enginePointer->d3d11DeviceContext->PSSetSamplers(0, 1, &_textureSamplerState11);
+			enginePointer->d3d11DeviceContext->IASetIndexBuffer(_indexBuffer11.Get(), DXGI_FORMAT_R32_UINT, 0);
+			enginePointer->d3d11DeviceContext->IASetVertexBuffers(0, 1, _vertexBuffer11.GetAddressOf(), &stride, &offset);
+			enginePointer->d3d11DeviceContext->IASetInputLayout(_vertexLayout11.Get());
+			enginePointer->d3d11DeviceContext->VSSetShader(_spriteBatchShader11.vertexShader11.Get(), NULL, NULL);
+			enginePointer->d3d11DeviceContext->PSSetShader(_spriteBatchShader11.pixelShader11.Get(), NULL, NULL);
+			enginePointer->d3d11DeviceContext->PSSetSamplers(0, 1, _textureSamplerState11.GetAddressOf());
 			enginePointer->d3d11DeviceContext->IASetPrimitiveTopology(D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-			enginePointer->d3d11DeviceContext->OMSetBlendState(_spriteBatchBlendState11, sampleMask, 0xffffffff);
-			enginePointer->d3d11DeviceContext->OMSetDepthStencilState(_depthStencilState11, 1);
+			enginePointer->d3d11DeviceContext->OMSetBlendState(_spriteBatchBlendState11.Get(), sampleMask, 0xffffffff);
+			enginePointer->d3d11DeviceContext->OMSetDepthStencilState(_depthStencilState11.Get(), 1);
 
 			// Reset current texture
 			_currentTexture.name = "";
@@ -1210,12 +1197,12 @@ namespace game
 		{
 			// Send vertices to card
 			D3D11_MAPPED_SUBRESOURCE data;
-			if (FAILED(enginePointer->d3d11DeviceContext->Map(_vertexBuffer11, 0, D3D11_MAP_WRITE_DISCARD, 0, &data)))
+			if (FAILED(enginePointer->d3d11DeviceContext->Map(_vertexBuffer11.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &data)))
 			{
 				std::cout << "Could not map framebuffer in spritebatch\n.";
 			}
 			memcpy(data.pData, &_spriteVertices11[0], sizeof(_spriteVertex11) * _numberOfSpritesUsed * 4);
-			enginePointer->d3d11DeviceContext->Unmap(_vertexBuffer11, 0);
+			enginePointer->d3d11DeviceContext->Unmap(_vertexBuffer11.Get(), 0);
 
 			enginePointer->d3d11DeviceContext->DrawIndexed(_numberOfSpritesUsed * 6, 0, 0);
 		}

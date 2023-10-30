@@ -34,12 +34,12 @@ namespace game
 		ID3DBlob* compiledGeometryShader10;
 #endif
 #if defined(GAME_DIRECTX11)
-		ID3D11VertexShader* vertexShader11;
-		ID3D11PixelShader* pixelShader11;
-		ID3D11GeometryShader* geometryShader11;
-		ID3DBlob* compiledPixelShader11;
-		ID3DBlob* compiledVertexShader11;
-		ID3DBlob* compiledGeometryShader11;
+		Microsoft::WRL::ComPtr<ID3D11VertexShader> vertexShader11;
+		Microsoft::WRL::ComPtr<ID3D11PixelShader> pixelShader11;
+		Microsoft::WRL::ComPtr<ID3D11GeometryShader> geometryShader11;
+		Microsoft::WRL::ComPtr<ID3DBlob> compiledPixelShader11;
+		Microsoft::WRL::ComPtr<ID3DBlob> compiledVertexShader11;
+		Microsoft::WRL::ComPtr<ID3DBlob> compiledGeometryShader11;
 #endif
 #if defined(GAME_DIRECTX12)
 		Microsoft::WRL::ComPtr<ID3DBlob> compiledPixelShader12;
@@ -73,12 +73,6 @@ namespace game
 		compiledGeometryShader10 = nullptr;
 #endif
 #if defined(GAME_DIRECTX11)
-		vertexShader11 = nullptr;
-		pixelShader11 = nullptr;
-		geometryShader11 = nullptr;
-		compiledPixelShader11 = nullptr;
-		compiledVertexShader11 = nullptr;
-		compiledGeometryShader11 = nullptr;
 #endif
 #if defined(GAME_DIRECTX12)
 #endif
