@@ -1094,6 +1094,7 @@ namespace game
 			enginePointer->d3d9Device->SetRenderState(D3DRS_ALPHABLENDENABLE, _savedBlending);
 			if (_savedTexture)
 			{
+				// This may be a bug
 				_savedTexture->Release();
 				_savedTexture = nullptr;
 			}
@@ -1270,7 +1271,7 @@ namespace game
 			glBegin(GL_QUADS);
 
 
-			for (uint32_t i = 0; i < _numberOfSpritesUsed; i++, access++)
+			for (uint32_t i = 0; i < _numberOfSpritesUsed; i++)
 			{
 				r = (access->color & 0xff) / 255.0f;
 				g = (access->color >> 8 & 0xff) / 255.0f;
@@ -1311,7 +1312,7 @@ namespace game
 				access->y = (access->y * 2.0f / (float_t)windowSize.height) - pixelOffsetFixY;
 				access->y *= -1.0f;
 				glVertex2f(access->x, access->y);
-				//access++;
+				access++;
 			}
 
 
@@ -1375,7 +1376,7 @@ namespace game
 			access->u = 0.0f;
 			access->v = 0.0f;
 			access->color = color.packedABGR;
-			access++;
+			//access++;
 
 		}
 #endif
@@ -1695,7 +1696,7 @@ namespace game
 			access->u = (float_t)portion.x * texture.oneOverWidth;
 			access->v = (float_t)portion.y * texture.oneOverHeight;
 			access->color = color.packedABGR;
-			access++;
+			//access++;
 		}
 #endif
 
