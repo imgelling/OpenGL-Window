@@ -1617,9 +1617,9 @@ namespace game
 			windowSize = enginePointer->geGetWindowSize();
 			// Homogenise coordinates to -1.0f to 1.0f
 			scaledPos.left = ((float_t)x * 2.0f / (float_t)windowSize.width) - 1.0f;
-			scaledPos.top = 1.0f - ((float_t)y * 2.0f / (float_t)windowSize.height);// -1.0f;
+			scaledPos.top = 1.0f - ((float_t)y * 2.0f / (float_t)windowSize.height);
 			scaledPos.right = (((float_t)x + (float_t)texture.width) * 2.0f / (float)windowSize.width) - 1.0f;
-			scaledPos.bottom = 1.0f - (((float_t)y + (float_t)texture.height) * 2.0f / (float)windowSize.height);// -1.0f;
+			scaledPos.bottom = 1.0f - (((float_t)y + (float_t)texture.height) * 2.0f / (float)windowSize.height);
 
 
 			// Fill vertices
