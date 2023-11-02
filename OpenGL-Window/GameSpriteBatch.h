@@ -158,6 +158,8 @@ namespace game
 		uint32_t _maxSRVIndex;
 		uint32_t _descriptorSize;
 		uint32_t _vertexOffset;
+		uint32_t old_sprites = 0;
+		uint32_t old_tex_sprites = 0;
 #endif
 	};
 
@@ -1052,6 +1054,8 @@ namespace game
 			enginePointer->commandList->IASetIndexBuffer(&_indexBufferView);
 			ID3D12DescriptorHeap* ppHeaps[] = { _textureHeap.Get() };
 			enginePointer->commandList->SetDescriptorHeaps(_countof(ppHeaps), ppHeaps);
+			old_sprites = 0;
+			old_tex_sprites = 0;
 		}
 #endif
 
@@ -1146,6 +1150,8 @@ namespace game
 		{
 			_numberOfSpritesUsed = 0;
 			_vertexOffset = 0;
+			old_sprites = 0;
+			old_tex_sprites = 0;
 		}
 #endif
 	}
@@ -1211,6 +1217,7 @@ namespace game
 #if defined(GAME_DIRECTX12)
 		if (enginePointer->geIsUsing(GAME_DIRECTX12))
 		{
+
 			// Copy vertex data to gpu
 			{
 				int vBufferSize = _numberOfSpritesUsed * (uint32_t)4 * (uint32_t)sizeof(_spriteVertex12);
@@ -1222,12 +1229,13 @@ namespace game
 				// Turn vertex buffer into a destination state
 				CD3DX12_RESOURCE_BARRIER resBar = CD3DX12_RESOURCE_BARRIER::Transition(_vertexBufferHeap.Get(), D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, D3D12_RESOURCE_STATE_COPY_DEST);
 				enginePointer->commandList->ResourceBarrier(1, &resBar);
-
+				
 				// Upload the vertex buffer to the vertex buffer heap
 				UpdateSubresources(enginePointer->commandList.Get(), _vertexBufferHeap.Get(), _vertexBufferUploadHeap.Get(), 0, 0, 1, &vertexData);
 				// Turn vertex buffer into a vertex buffer state again
 				CD3DX12_RESOURCE_BARRIER resBar2 = CD3DX12_RESOURCE_BARRIER::Transition(_vertexBufferHeap.Get(), D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER);
 				enginePointer->commandList->ResourceBarrier(1, &resBar2);
+				//enginePointer->commandList->CopyBufferRegion()
 			}
 
 			// Allocate space from the GPU-visible descriptor heap.
@@ -1246,8 +1254,14 @@ namespace game
 			//enginePointer->commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST); 
 			//enginePointer->commandList->IASetVertexBuffers(0, 1, &_vertexBufferView);
 			//enginePointer->commandList->IASetIndexBuffer(&_indexBufferView);
-			enginePointer->commandList->DrawIndexedInstanced(_numberOfSpritesUsed * 6, 1, 0, _vertexOffset, 0);
-			_vertexOffset = _numberOfSpritesUsed * 4;
+			//old_tex_sprites++;
+			
+			//_vertexBufferView.BufferLocation = _vertexBufferHeap->GetGPUVirtualAddress() + (_numberOfSpritesUsed - old_tex_sprites) * (uint32_t)4 * (uint32_t)sizeof(_spriteVertex12);
+			//_vertexBufferView.SizeInBytes = (_maxSprites * sizeof(float_t) * (uint32_t)sizeof(_spriteVertex12)) - ((_numberOfSpritesUsed - old_tex_sprites) * (uint32_t)4 * (uint32_t)sizeof(_spriteVertex12));
+			enginePointer->commandList->IASetVertexBuffers(0, 1, &_vertexBufferView);
+			enginePointer->commandList->DrawIndexedInstanced((_numberOfSpritesUsed - old_tex_sprites) * 6, 1, old_tex_sprites * 6, 0, 0);
+			//old_sprites = _numberOfSpritesUsed - old_tex_sprites;
+			//_vertexOffset += old_sprites * 4;
 
 			return;
 		}
@@ -1584,6 +1598,9 @@ namespace game
 				{
 					_currentSRVIndex = 0;
 				}
+				//_numberOfSpritesUsed = 0;
+				old_sprites = 0;
+				old_tex_sprites = _numberOfSpritesUsed;
 			}
 			access = &_spriteVertices12[_numberOfSpritesUsed * 4];
 			windowSize = enginePointer->geGetWindowSize();
@@ -1912,6 +1929,9 @@ namespace game
 				{
 					_currentSRVIndex = 0;
 				}
+				//_numberOfSpritesUsed = 0;
+				old_sprites = 0;
+				old_tex_sprites = _numberOfSpritesUsed;
 			}
 
 			access = &_spriteVertices12[_numberOfSpritesUsed * 4];
