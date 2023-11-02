@@ -1169,50 +1169,43 @@ namespace game
 #if defined(GAME_DIRECTX9)
 		if (enginePointer->geIsUsing(GAME_DIRECTX9))
 		{
-			VOID* pVoid = nullptr;
-
+			void* lockedDest = nullptr;
+			uint32_t sizeToCopy = sizeof(_spriteVertex9) * 4 * _numberOfSpritesUsed;
 
 			// Send sprite vertices to gpu
-			_vertexBuffer9->Lock(0, 0, (void**)&pVoid, 0);
-			memcpy(pVoid, &_spriteVertices9[0], sizeof(_spriteVertex9) * 4 * _numberOfSpritesUsed);
+			_vertexBuffer9->Lock(0, sizeToCopy, (void**)&lockedDest, 0);
+			memcpy(lockedDest, &_spriteVertices9[0], sizeToCopy);
 			_vertexBuffer9->Unlock();
 
 			// Draw the sprites
-
-			//enginePointer->d3d9Device->DrawPrimitive(D3DPT_TRIANGLELIST, 0, _numberOfSpritesUsed * 2);
 			enginePointer->d3d9Device->DrawIndexedPrimitive(D3DPT_TRIANGLELIST, 0, 0, _numberOfSpritesUsed * 6, 0, _numberOfSpritesUsed * 2);
 		}
 #endif
 #if defined (GAME_DIRECTX10)
 		if (enginePointer->geIsUsing(GAME_DIRECTX10))
 		{
-			// Send vertices to card
-			VOID* pVoid = nullptr;
-			if (FAILED(_vertexBuffer10->Map(D3D10_MAP_WRITE_DISCARD, 0, &pVoid)))
-			{
-				std::cout << "Could not map vertex buffer in SpriteBatch\n";
-			}
-			else
-			{
-				memcpy(pVoid, &_spriteVertices10[0], sizeof(_spriteVertex10) * 4 * _numberOfSpritesUsed);
-				_vertexBuffer10->Unmap();
-			}
+			void* lockedDest = nullptr;
 
+			// Send vertices to card
+			_vertexBuffer10->Map(D3D10_MAP_WRITE_DISCARD, 0, &lockedDest);
+			memcpy(lockedDest, &_spriteVertices10[0], sizeof(_spriteVertex10) * 4 * _numberOfSpritesUsed);
+			_vertexBuffer10->Unmap();
+
+			// Draw the sprites
 			enginePointer->d3d10Device->DrawIndexed(_numberOfSpritesUsed * 6, 0, 0);
 		}
 #endif
 #if defined (GAME_DIRECTX11)
 		if (enginePointer->geIsUsing(GAME_DIRECTX11))
 		{
+			D3D11_MAPPED_SUBRESOURCE lockedDest = {};
+
 			// Send vertices to card
-			D3D11_MAPPED_SUBRESOURCE data;
-			if (FAILED(enginePointer->d3d11DeviceContext->Map(_vertexBuffer11.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &data)))
-			{
-				std::cout << "Could not map framebuffer in spritebatch\n.";
-			}
-			memcpy(data.pData, &_spriteVertices11[0], sizeof(_spriteVertex11) * _numberOfSpritesUsed * 4);
+			enginePointer->d3d11DeviceContext->Map(_vertexBuffer11.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &lockedDest);
+			memcpy(lockedDest.pData, &_spriteVertices11[0], sizeof(_spriteVertex11) * _numberOfSpritesUsed * 4);
 			enginePointer->d3d11DeviceContext->Unmap(_vertexBuffer11.Get(), 0);
 
+			// Draw the sprites
 			enginePointer->d3d11DeviceContext->DrawIndexed(_numberOfSpritesUsed * 6, 0, 0);
 		}
 #endif
@@ -1222,37 +1215,19 @@ namespace game
 		{
 
 			// Copy vertex data to gpu
+
+			uint8_t* lockedDest = nullptr;
+			HRESULT hr = _vertexBufferHeap.Get()->Map(0, NULL, (void**)&lockedDest);
+			if (FAILED(hr))
 			{
-				//int vBufferSize = _numberOfSpritesUsed * (uint32_t)4 * (uint32_t)sizeof(_spriteVertex12);
-				//D3D12_SUBRESOURCE_DATA vertexData = {};
-				//vertexData.pData = reinterpret_cast<BYTE*>(_spriteVertices12); // pointer to our vertex array
-				//vertexData.RowPitch = vBufferSize; // size of all our triangle vertex data
-				//vertexData.SlicePitch = 0; // also the size of our triangle vertex data
-
-				//// Turn vertex buffer into a destination state
-				//CD3DX12_RESOURCE_BARRIER resBar = CD3DX12_RESOURCE_BARRIER::Transition(_vertexBufferHeap.Get(), D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, D3D12_RESOURCE_STATE_COPY_DEST);
-				//enginePointer->commandList->ResourceBarrier(1, &resBar);
-				//
-				//// Upload the vertex buffer to the vertex buffer heap
-				//UpdateSubresources(enginePointer->commandList.Get(), _vertexBufferHeap.Get(), _vertexBufferUploadHeap.Get(), 0, 0, 1, &vertexData);
-				//// Turn vertex buffer into a vertex buffer state again
-				//CD3DX12_RESOURCE_BARRIER resBar2 = CD3DX12_RESOURCE_BARRIER::Transition(_vertexBufferHeap.Get(), D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER);
-				//enginePointer->commandList->ResourceBarrier(1, &resBar2);
-				//enginePointer->commandList->CopyBufferRegion()
-
-				uint8_t* temp = nullptr;
-				HRESULT hr = _vertexBufferHeap.Get()->Map(0, NULL, (void**)&temp);
-				if (FAILED(hr))
-				{
-					AppendHR12(hr);
-					std::cout << lastError.lastErrorString << "\n";
-				}
-				uint32_t usedBufferOffset = _spritesUsed * (uint32_t)4 * (uint32_t)sizeof(_spriteVertex12);
-				uint32_t newSpriteBytes = (_numberOfSpritesUsed - _spritesUsed) * (uint32_t)4 * (uint32_t)sizeof(_spriteVertex12);
-				memcpy(temp + usedBufferOffset, reinterpret_cast<BYTE*>(_spriteVertices12)+ usedBufferOffset, newSpriteBytes);
-				_vertexBufferHeap.Get()->Unmap(0, 0);
-
+				AppendHR12(hr);
+				std::cout << lastError.lastErrorString << "\n";
 			}
+			uint32_t usedBufferOffset = _spritesUsed * (uint32_t)4 * (uint32_t)sizeof(_spriteVertex12);
+			uint32_t newSpriteBytes = (_numberOfSpritesUsed - _spritesUsed) * (uint32_t)4 * (uint32_t)sizeof(_spriteVertex12);
+			memcpy(lockedDest + usedBufferOffset, reinterpret_cast<BYTE*>(_spriteVertices12) + usedBufferOffset, newSpriteBytes);
+			_vertexBufferHeap.Get()->Unmap(0, 0);
+
 
 			// Allocate space from the GPU-visible descriptor heap.
 			CD3DX12_CPU_DESCRIPTOR_HANDLE toHandle(_textureHeap->GetCPUDescriptorHandleForHeapStart());
@@ -1271,7 +1246,7 @@ namespace game
 			//enginePointer->commandList->IASetVertexBuffers(0, 1, &_vertexBufferView);
 			//enginePointer->commandList->IASetIndexBuffer(&_indexBufferView);
 			
-			_vertexBufferView.BufferLocation = _vertexBufferHeap->GetGPUVirtualAddress() + (_spritesUsed);// *(uint32_t)4 * (uint32_t)sizeof(_spriteVertex12);
+			//_vertexBufferView.BufferLocation = _vertexBufferHeap->GetGPUVirtualAddress() + (_spritesUsed) *(uint32_t)4 * (uint32_t)sizeof(_spriteVertex12);
 			enginePointer->commandList->DrawIndexedInstanced((_numberOfSpritesUsed - _spritesUsed) * 6, 1, _spritesUsed * 6, 0, 0);
 
 
