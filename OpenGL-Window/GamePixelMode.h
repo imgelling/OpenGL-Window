@@ -618,7 +618,7 @@ namespace game
 			}
 			_indexBufferHeap->SetName(L"PixelMode Index Buffer Heap");
 
-			// create upload heap to upload index buffer
+			// Create a temporary upload heap to upload index buffer
 			Microsoft::WRL::ComPtr<ID3D12Resource> _indexBufferUploadHeap;
 			heapProp = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
 			resDesc = CD3DX12_RESOURCE_DESC::Buffer(iBufferSize);
@@ -757,6 +757,7 @@ namespace game
 				AppendHR12(hr);
 				return false;
 			}
+			enginePointer->geGetRenderer()->_WaitForPreviousFrame(false);
 		}
 #endif
 

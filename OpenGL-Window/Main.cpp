@@ -8,7 +8,7 @@
 #define GAME_SUPPORT_DIRECTX12
 //#define GAME_SUPPORT_OPENGL
 //#define GAME_SUPPORT_VULKAN 
-//#define GAME_SUPPORT_ALL
+#define GAME_SUPPORT_ALL
 #include "Game.h"
 
 constexpr uint32_t MAX_UPDATES = 0;
@@ -61,9 +61,9 @@ public:
 		attributes.DebugMode = true;
 		attributes.MultiSamples = 8; // Not implemented in most of DX, if any
 		attributes.RenderingAPI = game::RenderAPI::DirectX9; 
-		attributes.RenderingAPI = game::RenderAPI::DirectX10;
-		attributes.RenderingAPI = game::RenderAPI::DirectX11;
-		attributes.RenderingAPI = game::RenderAPI::DirectX12;
+		//attributes.RenderingAPI = game::RenderAPI::DirectX10;
+		//attributes.RenderingAPI = game::RenderAPI::DirectX11;
+		//attributes.RenderingAPI = game::RenderAPI::DirectX12;
 		//attributes.RenderingAPI = game::RenderAPI::OpenGL;
 		
 		geSetAttributes(attributes);
@@ -89,7 +89,7 @@ public:
 		}
 
 		// Setup sprite batch
-		if (!spriteBatch.Initialize())
+		if (!spriteBatch.Initialize(2000000))
 		{
 			geLogLastError();
 		}
@@ -176,7 +176,7 @@ public:
 		spriteBatch.Begin();
 		//double_t perSecond = 500000.0 / (perftimer.LastRun("CircleClip") / 1000000000.0);  // throws if not found
 		//double_t millionPerSecond = perSecond / 1000.0 / 1000.0;
-		for (int i = 0; i < 40; i++)
+		for (int i = 0; i < 2040; i++)
 			spriteBatch.Draw(spriteTexture, {10 + (i * 100), 10}, game::Colors::White);
 		spriteBatch.DrawString(spriteFont, "FPS : " + std::to_string(geGetFramesPerSecond()) + " UPS : " + std::to_string(geGetUpdatesPerSecond()) + " cpu : " + std::to_string(geGetCPUFrequency()) + "Mhz", 10, 200, game::Colors::White,2.0f);
 		//spriteBatch.DrawString(spriteFont, "Random Circle(s) : " + std::to_string(millionPerSecond) + " million per second.", 10, 0, game::Colors::Red);

@@ -147,6 +147,7 @@ namespace game
 		Microsoft::WRL::ComPtr<ID3D12PipelineState> _pipelineStateObject;
 		Microsoft::WRL::ComPtr<ID3D12RootSignature> _rootSignature;
 		Microsoft::WRL::ComPtr<ID3D12Resource> _indexBufferHeap;
+		//Microsoft::WRL::ComPtr<ID3D12Resource> _indexBufferUploadHeap;
 		D3D12_INDEX_BUFFER_VIEW _indexBufferView;
 		Microsoft::WRL::ComPtr<ID3D12Resource> _vertexBufferHeap;
 		Microsoft::WRL::ComPtr<ID3D12Resource> _vertexBufferUploadHeap;
@@ -942,6 +943,7 @@ namespace game
 
 			_descriptorSize = enginePointer->d3d12Device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 
+			enginePointer->geGetRenderer()->_WaitForPreviousFrame(false);
 		}
 #endif
 		return true;
