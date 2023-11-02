@@ -1052,6 +1052,7 @@ namespace game
 			enginePointer->commandList->SetPipelineState(_pipelineStateObject.Get());
 			enginePointer->commandList->SetGraphicsRootSignature(_rootSignature.Get());
 			enginePointer->commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+			_vertexBufferView.BufferLocation = _vertexBufferHeap->GetGPUVirtualAddress();
 			enginePointer->commandList->IASetVertexBuffers(0, 1, &_vertexBufferView);
 			enginePointer->commandList->IASetIndexBuffer(&_indexBufferView);
 			ID3D12DescriptorHeap* ppHeaps[] = { _textureHeap.Get() };
@@ -1238,7 +1239,6 @@ namespace game
 				//enginePointer->commandList->CopyBufferRegion()
 
 				uint8_t* temp = nullptr;
-				//(void**)&pVoid
 				HRESULT hr = _vertexBufferHeap.Get()->Map(0, NULL, (void**)&temp);
 				if (FAILED(hr))
 				{
@@ -1268,11 +1268,8 @@ namespace game
 			//enginePointer->commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST); 
 			//enginePointer->commandList->IASetVertexBuffers(0, 1, &_vertexBufferView);
 			//enginePointer->commandList->IASetIndexBuffer(&_indexBufferView);
-			//old_tex_sprites++;
 			
-			//_vertexBufferView.BufferLocation = _vertexBufferHeap->GetGPUVirtualAddress() + (_numberOfSpritesUsed - old_tex_sprites) * (uint32_t)4 * (uint32_t)sizeof(_spriteVertex12);
-			//_vertexBufferView.SizeInBytes = (_maxSprites * sizeof(float_t) * (uint32_t)sizeof(_spriteVertex12)) - ((_numberOfSpritesUsed - old_tex_sprites) * (uint32_t)4 * (uint32_t)sizeof(_spriteVertex12));
-			//enginePointer->commandList->IASetVertexBuffers(0, 1, &_vertexBufferView);
+			_vertexBufferView.BufferLocation = _vertexBufferHeap->GetGPUVirtualAddress() + (_spritesUsed);// *(uint32_t)4 * (uint32_t)sizeof(_spriteVertex12);
 			enginePointer->commandList->DrawIndexedInstanced((_numberOfSpritesUsed - _spritesUsed) * 6, 1, _spritesUsed * 6, 0, 0);
 
 
