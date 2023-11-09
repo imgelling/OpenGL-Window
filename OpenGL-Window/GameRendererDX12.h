@@ -86,7 +86,7 @@ namespace game
 	protected:
 		void _ReadExtensions() {};
 		bool _midFrame; // Are we in the middle of a frame? If so end the frame before closing (dx12 does not like that)
-		bool _allowTearing;
+		int32_t _allowTearing;
 		D3D12_VIEWPORT _viewPort = {}; // area that output from rasterizer will be stretched to.
 		D3D12_RECT _scissorRect = {}; // the area to draw in. pixels outside that area will not be drawn onto
 
@@ -126,7 +126,7 @@ namespace game
 		_commandList = nullptr;
 		_fenceEvent = nullptr;
 		_midFrame = false;
-		_allowTearing = false;
+		_allowTearing = 0;
 	}
 
 	inline void RendererDX12::DestroyDevice()
@@ -240,9 +240,11 @@ namespace game
 		}
 
 		// Create the device
-		if (FAILED(D3D12CreateDevice(adapter.Get(), D3D_FEATURE_LEVEL_12_0, IID_PPV_ARGS(&_d3d12Device))))
+		HRESULT hr = D3D12CreateDevice(adapter.Get(), D3D_FEATURE_LEVEL_12_0, IID_PPV_ARGS(&_d3d12Device));
+		if (FAILED(hr))
 		{
 			lastError = { GameErrors::GameDirectX12Specific, "Could not create device." };
+			AppendHR12(hr);
 			return false;
 		}
 
@@ -254,6 +256,7 @@ namespace game
 			{
 				std::cout << "Check Feature Support failed." << _allowTearing << "\n";
 			}
+			std::cout << "Allow Tearing = " << _allowTearing << "\n";
 		}
 
 
@@ -315,7 +318,7 @@ namespace game
 		swapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
 		swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
 		swapChainDesc.SampleDesc.Count = 1;
-		if (!_attributes.VsyncOn)
+		if (!_attributes.VsyncOn || _allowTearing)
 		{
 			swapChainDesc.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_TEARING;
 		}
