@@ -39,10 +39,14 @@ namespace game
 		// Will draw a specified rectangle portion of a texture to location x,y
 		void Draw(const Texture2D& texture, const Recti& destination, const Recti& source, const Color& color);
 		void DrawString(const SpriteFont& font, const std::string& Str, const int x, const int y, const Color& color, const float_t scale = 1.0f);
+		// How many sprites did it draw last frame
+		uint32_t SpritesDrawnLastFrame() noexcept;
 	private:
 		uint32_t _maxSprites;
 		uint32_t _numberOfSpritesUsed;
 		Texture2D _currentTexture;
+		uint32_t _spritesDrawnLastFrame;
+		uint32_t _currentSpritesDrawn;
 #if defined(GAME_OPENGL)
 		struct _spriteVertexGL
 		{
@@ -163,9 +167,16 @@ namespace game
 #endif
 	};
 
+	inline uint32_t SpriteBatch::SpritesDrawnLastFrame() noexcept
+	{
+		return _spritesDrawnLastFrame;
+	}
+
 	inline SpriteBatch::SpriteBatch()
 	{
 		_maxSprites = 0;
+		_spritesDrawnLastFrame = 0;
+		_currentSpritesDrawn = 0;
 #if defined(GAME_OPENGL)
 		//if (enginePointer->geIsUsing(GAME_OPENGL))
 		{
@@ -392,7 +403,7 @@ namespace game
 #if defined(GAME_DIRECTX12)
 		if (enginePointer->geIsUsing(GAME_DIRECTX12))
 		{
-			_spriteVertices12 = new _spriteVertex12[_maxSprites * 4];
+			_spriteVertices12 = new _spriteVertex12[(size_t)_maxSprites * 4];
 			for (uint32_t vertex = 0; vertex < _maxSprites * 4; vertex++)
 			{
 				_spriteVertices12[vertex].x = 0.0f;
@@ -951,6 +962,8 @@ namespace game
 
 	inline void SpriteBatch::Begin()
 	{
+		_spritesDrawnLastFrame = _currentSpritesDrawn;
+		_currentSpritesDrawn = 0;
 		// needs to save and retore ALL changed states
 #if defined (GAME_DIRECTX9)
 		if (enginePointer->geIsUsing(GAME_DIRECTX9))
@@ -1166,6 +1179,7 @@ namespace game
 		{
 			return;
 		}
+		_currentSpritesDrawn += _numberOfSpritesUsed;
 
 #if defined(GAME_DIRECTX9)
 		if (enginePointer->geIsUsing(GAME_DIRECTX9))

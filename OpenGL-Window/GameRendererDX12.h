@@ -246,8 +246,7 @@ namespace game
 			return false;
 		}
 
-		// do error checcking
-// Check for variable refresh rate
+		// Check for variable refresh rate
 		Microsoft::WRL::ComPtr<IDXGIFactory5> factory5;
 		if (SUCCEEDED(dxgiFactory.As(&factory5)))
 		{

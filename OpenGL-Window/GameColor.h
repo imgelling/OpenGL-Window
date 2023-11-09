@@ -51,7 +51,7 @@ namespace game
 		b = 0;
 		a = 255;
 //#if defined(GAME_OPENGL) || defined(GAME_DIRECTX10) || defined(GAME_DIRECTX11)|| defined(GAME_DIRECTX12)
-//		packedABGR = a << 24;
+		packedABGR = a << 24;
 //#endif
 //#if defined(GAME_DIRECTX9)
 		packedARGB = a << 24;

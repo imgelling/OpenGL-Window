@@ -5,10 +5,10 @@
 //#define GAME_SUPPORT_DIRECTX9
 //#define GAME_SUPPORT_DIRECTX10
 //#define GAME_SUPPORT_DIRECTX11
-//#define GAME_SUPPORT_DIRECTX12
+#define GAME_SUPPORT_DIRECTX12
 //#define GAME_SUPPORT_OPENGL
 //#define GAME_SUPPORT_VULKAN 
-#define GAME_SUPPORT_ALL
+//#define GAME_SUPPORT_ALL
 #include "Game.h"
 
 constexpr uint32_t MAX_UPDATES = 0;
@@ -65,6 +65,7 @@ public:
 		//attributes.RenderingAPI = game::RenderAPI::DirectX11;
 		attributes.RenderingAPI = game::RenderAPI::DirectX12;
 		//attributes.RenderingAPI = game::RenderAPI::OpenGL;
+		//attributes.RenderingAPI = game::RenderAPI::Vulkan;
 		
 		geSetAttributes(attributes);
 		
@@ -82,14 +83,13 @@ public:
 		}
 
 		// Setup pixel mode
-		if (!pixelMode.Initialize({ 320, 240 }))
+		if (!pixelMode.Initialize({ 320, 180 }))
 		{
-			std::cout << "failt!\n";
 			geLogLastError();
 		}
 
 		// Setup sprite batch
-		if (!spriteBatch.Initialize(2000000))
+		if (!spriteBatch.Initialize())//2000000))
 		{
 			geLogLastError();
 		}
@@ -108,7 +108,6 @@ public:
 
 	void Update(const float_t msElapsed)
 	{
-		//geSetWindowTitle("FPS = " + std::to_string(geGetFramesPerSecond()));
 		// Handle Input
 		if (geKeyboard.WasKeyReleased(geK_F11))
 		{
@@ -133,7 +132,7 @@ public:
 
 		// Top and bottom
 		pixelMode.LineClip(340, 0, -1, 0, game::Colors::Pink);
-		pixelMode.LineClip(-10, 239, 409, 239, game::Colors::Pink);
+		pixelMode.LineClip(-10, 179, 409, 179, game::Colors::Pink);
 
 		// Left and right
 		pixelMode.LineClip(0, -10, 0, 300, game::Colors::Pink);
@@ -168,20 +167,21 @@ public:
 		rect.left = 1;
 		rect.top = 1;
 		rect.right = 318;
-		rect.bottom = 238;
-		pixelMode.Rect(rect, game::Colors::White);
+		rect.bottom = 178;
+		pixelMode.RectClip(rect, game::Colors::White);
 
 		pixelMode.Render();
 
 		spriteBatch.Begin();
 		//double_t perSecond = 500000.0 / (perftimer.LastRun("CircleClip") / 1000000000.0);  // throws if not found
 		//double_t millionPerSecond = perSecond / 1000.0 / 1000.0;
-		for (int i = 0; i < 2040; i++)
+		for (int i = 0; i < 40; i++)
 			spriteBatch.Draw(spriteTexture, {10 + (i * 100), 10}, game::Colors::White);
 		spriteBatch.DrawString(spriteFont, "FPS : " + std::to_string(geGetFramesPerSecond()) + " UPS : " + std::to_string(geGetUpdatesPerSecond()) + " cpu : " + std::to_string(geGetCPUFrequency()) + "Mhz", 10, 200, game::Colors::White,2.0f);
 		//spriteBatch.DrawString(spriteFont, "Random Circle(s) : " + std::to_string(millionPerSecond) + " million per second.", 10, 0, game::Colors::Red);
 		spriteBatch.DrawString(spriteFont, "Window Pixel Size: " + std::to_string(geGetWindowSize().width) + "x" + std::to_string(geGetWindowSize().height), 10, 240, game::Colors::White, 2.0f);
 		spriteBatch.DrawString(spriteFont, "PixelMode Pixel Size: " + std::to_string(pixelMode.GetPixelFrameBufferSize().width) + "x" + std::to_string(pixelMode.GetPixelFrameBufferSize().height), 10, 280, game::Colors::White, 2.0f);
+		spriteBatch.DrawString(spriteFont, "Sprites Drawn Last Frame: " + std::to_string(spriteBatch.SpritesDrawnLastFrame()), 10, 320, game::Colors::White, 2.0f);
 		spriteBatch.End();
 		EndScene();
 	}

@@ -92,14 +92,14 @@ namespace game
 		std::vector<VkExtensionProperties> extensions(extensionCount);
 		vkEnumerateInstanceExtensionProperties(nullptr, &extensionCount, extensions.data());
 
-		_logger->WriteQuiet("Listing " + std::to_string(extensionCount) + " Vulkan Extensions Available.");
+		_logger->Write("Listing " + std::to_string(extensionCount) + " Vulkan Extensions Available.");
 
 		// Convert extension names to char*
 		std::vector<const char*> extenChar;
 		for (const auto& extension : extensions) {
 			extenChar.push_back(extension.extensionName);
 			_extensionsAvailable.emplace_back(extension.extensionName);
-			_logger->WriteQuiet(extension.extensionName);
+			_logger->Write(extension.extensionName);
 		}
 
 		VkInstanceCreateInfo createInfo{};

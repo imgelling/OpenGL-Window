@@ -564,14 +564,13 @@ namespace game
 		}
 		else if (_attributes.RenderingAPI == RenderAPI::Vulkan)
 		{
-			lastError = { GameErrors::GameInvalidParameter, "Not implemented." };
+			//lastError = { GameErrors::GameInvalidParameter, "Not implemented." };
 #if defined(GAME_VULKAN)
 			_renderer = new game::RendererVK;
 #else
 			lastError = { GameErrors::GameInvalidParameter, "Requested Vulkan without #defining GAME_SUPPORT_VULKAN or GAME_SUPPORT ALL." };
 			return false;
 #endif
-			return false;
 		}
 		else if (_attributes.RenderingAPI == RenderAPI::DirectX9)
 		{
