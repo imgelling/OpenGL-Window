@@ -70,21 +70,24 @@ namespace game
 			return false;
 		}
 		void UnLoadShader(Shader& shader);
-		void StartFrame();
-		void EndFrame();
+		void StartFrame(); // can go away after clear implemented
+		//void EndFrame();
 		void GetDevice(Microsoft::WRL::ComPtr<ID3D12Device2> &d3d12Device, Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> &commandList, Microsoft::WRL::ComPtr <ID3D12CommandQueue> &commandQueue);
+		void Clear(const uint32_t bufferFlags) {}
+		CD3DX12_CPU_DESCRIPTOR_HANDLE currentFrameBuffer; // can go away after clear implemented
 
-		CD3DX12_CPU_DESCRIPTOR_HANDLE currentFrameBuffer;
-
+		// Below can go away if implement reset and execute
 		Microsoft::WRL::ComPtr<ID3D12Fence> _fence[frameBufferCount];    // an object that is locked while our command list is being executed by the gpu. We need as many 
 		//as we have allocators (more if we want to know when the gpu is finished with an asset)
 		Microsoft::WRL::ComPtr<ID3D12CommandAllocator> _commandAllocator[frameBufferCount]; // we want enough allocators for each buffer * number of threads (we only have one thread)
 		HANDLE _fenceEvent; // a handle to an event when our fence is unlocked by the gpu
 		uint64_t _fenceValue[frameBufferCount]; // this value is incremented each frame. each fence will have its own value
 		uint32_t _frameIndex; // current rtv we are on
+		// not sure if can go away after reset and execute
 		void _WaitForPreviousFrame(bool nextFrame);
 	protected:
 		void _ReadExtensions() {};
+	private:
 		bool _midFrame; // Are we in the middle of a frame? If so end the frame before closing (dx12 does not like that)
 		int32_t _allowTearing;
 		D3D12_VIEWPORT _viewPort = {}; // area that output from rasterizer will be stretched to.
@@ -135,10 +138,9 @@ namespace game
 		// command list
 		if (_midFrame)
 		{
-			//EndFrame();
 			Swap();
-			//_WaitForPreviousFrame(true);
 		}
+
 		// get swapchain out of full screen before exiting
 		BOOL fs = false;
 		if (_swapChain)
@@ -160,7 +162,6 @@ namespace game
 		//if (SUCCEEDED(DXGIGetDebugInterface1(0, IID_PPV_ARGS(&pDebug))))
 		//{
 		//	pDebug->ReportLiveObjects(DXGI_DEBUG_ALL, DXGI_DEBUG_RLO_FLAGS(DXGI_DEBUG_RLO_SUMMARY | DXGI_DEBUG_RLO_IGNORE_INTERNAL));
-
 		//	//pDebug->Release();
 		//}
 
@@ -474,21 +475,10 @@ namespace game
 		// RESET commandlist
 		{
 			// Reset this once per frame to free memory
-			if (FAILED(_commandAllocator[_frameIndex]->Reset()))
-			{
-				//Running = false;
-				std::cout << "Command allocator reset failed\n";
-			}
+			_commandAllocator[_frameIndex]->Reset();
 
 			// reset the command list. 
-			HRESULT hr = _commandList->Reset(_commandAllocator[_frameIndex].Get(), NULL);
-			if (FAILED(hr))
-			{
-				//std::cout << "command list reset failed\n";
-				AppendHR12(hr);
-				std::cout << lastError.lastErrorString << "\n";
-				//Running = false;
-			}
+			_commandList->Reset(_commandAllocator[_frameIndex].Get(), NULL);
 		}
 
 		// Transition current rendertarget to render target state
@@ -518,39 +508,38 @@ namespace game
 		_commandList->RSSetScissorRects(1, &_scissorRect);
 	}
 
-	inline void RendererDX12::EndFrame()
-	{
-		// Transition the render target to the present state.
-		CD3DX12_RESOURCE_BARRIER t = CD3DX12_RESOURCE_BARRIER::Transition(_renderTargets[_frameIndex].Get(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT);
-		_commandList->ResourceBarrier(1, &t);
+	//inline void RendererDX12::EndFrame()
+	//{
+		//// Transition the render target to the present state.
+		//CD3DX12_RESOURCE_BARRIER t = CD3DX12_RESOURCE_BARRIER::Transition(_renderTargets[_frameIndex].Get(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT);
+		//_commandList->ResourceBarrier(1, &t);
 
-		HRESULT hr = _commandList->Close();
-		if (FAILED(hr))
-		{
-			AppendHR12(hr);
-			std::cout << lastError.lastErrorString << "\n";
-		}
-	}
+		//_commandList->Close();
+
+		//// EXECUTE
+		//{
+		//	ID3D12CommandList* ppCommandLists[] = { _commandList.Get() };
+
+		//	// execute the array of command lists
+		//	_commandQueue->ExecuteCommandLists(_countof(ppCommandLists), ppCommandLists);
+
+		//	// this command goes in at the end of our command queue. we will know when our command queue 
+		//	// has finished because the fence value will be set to "fenceValue" from the GPU since the command
+		//	// queue is being executed on the GPU
+		//	_commandQueue->Signal(_fence[_frameIndex].Get(), _fenceValue[_frameIndex]);
+		//}
+	//}
 
 	inline void RendererDX12::Swap()
 	{
-		HRESULT hr;
-
 		// Transition the render target to the present state.
 		CD3DX12_RESOURCE_BARRIER t = CD3DX12_RESOURCE_BARRIER::Transition(_renderTargets[_frameIndex].Get(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT);
 		_commandList->ResourceBarrier(1, &t);
 
-		hr = _commandList->Close();
-		if (FAILED(hr))
-		{
-			AppendHR12(hr);
-			std::cout << lastError.lastErrorString << "\n";
-		}
+		_commandList->Close();
 
 		// EXECUTE
 		{
-			// close it?
-			// create an array of command lists (only one command list here)
 			ID3D12CommandList* ppCommandLists[] = { _commandList.Get() };
 
 			// execute the array of command lists
@@ -559,21 +548,17 @@ namespace game
 			// this command goes in at the end of our command queue. we will know when our command queue 
 			// has finished because the fence value will be set to "fenceValue" from the GPU since the command
 			// queue is being executed on the GPU
-			hr = _commandQueue->Signal(_fence[_frameIndex].Get(), _fenceValue[_frameIndex]);
-			if (FAILED(hr))
-			{
-				//Running = false;
-			}
+			_commandQueue->Signal(_fence[_frameIndex].Get(), _fenceValue[_frameIndex]);
 		}
 
 		// present the current backbuffer
 		if (_attributes.VsyncOn)
 		{
-			hr = _swapChain->Present(1, 0);
+			_swapChain->Present(1, 0);
 		}
 		else
 		{
-			hr = _swapChain->Present(0, DXGI_PRESENT_ALLOW_TEARING);
+			_swapChain->Present(0, DXGI_PRESENT_ALLOW_TEARING);
 		}
 		// Below is needed for VSYNC to work for some reason
 		_WaitForPreviousFrame(false);

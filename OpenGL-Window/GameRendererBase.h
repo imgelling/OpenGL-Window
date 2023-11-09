@@ -28,6 +28,7 @@ namespace game
 		virtual bool LoadShader(const std::string vertex, const std::string fragment, Shader& shader) = 0;
 		virtual bool LoadShader(const std::string vertex, const std::string fragment, const std::string geometry, Shader& shader) = 0;
 		virtual void UnLoadShader(Shader& shader) = 0;
+		virtual void Clear(const uint32_t bufferFlags) = 0;
 	protected:
 		Attributes _attributes;
 		std::vector<std::string> _extensionsAvailable;

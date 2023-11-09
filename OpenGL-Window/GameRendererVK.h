@@ -31,6 +31,7 @@ namespace game
 			return false;
 		}
 		void UnLoadShader(Shader& shader);
+		void Clear(const uint32_t bufferFlags) {}
 	protected:
 		void _ReadExtensions();
 

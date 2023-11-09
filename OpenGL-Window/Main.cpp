@@ -5,10 +5,10 @@
 //#define GAME_SUPPORT_DIRECTX9
 //#define GAME_SUPPORT_DIRECTX10
 //#define GAME_SUPPORT_DIRECTX11
-#define GAME_SUPPORT_DIRECTX12
+//#define GAME_SUPPORT_DIRECTX12
 //#define GAME_SUPPORT_OPENGL
 //#define GAME_SUPPORT_VULKAN 
-//#define GAME_SUPPORT_ALL
+#define GAME_SUPPORT_ALL
 #include "Game.h"
 
 constexpr uint32_t MAX_UPDATES = 0;
@@ -64,7 +64,7 @@ public:
 		//attributes.RenderingAPI = game::RenderAPI::DirectX10;
 		//attributes.RenderingAPI = game::RenderAPI::DirectX11;
 		attributes.RenderingAPI = game::RenderAPI::DirectX12;
-		//attributes.RenderingAPI = game::RenderAPI::OpenGL;
+		attributes.RenderingAPI = game::RenderAPI::OpenGL;
 		//attributes.RenderingAPI = game::RenderAPI::Vulkan;
 		
 		geSetAttributes(attributes);
@@ -126,6 +126,7 @@ public:
 		scaledMousePos = pixelMode.GetScaledMousePosition();
 
 		// Clears and starts new scene
+		geClear(GAME_FRAME_BUFFER_BIT | GAME_DEPTH_STENCIL_BUFFER_BIT);
 		BeginScene();
 
 		pixelMode.Clear(game::Colors::Blue);
@@ -192,7 +193,7 @@ public:
 #if defined (GAME_OPENGL)
 		if (geIsUsing(GAME_OPENGL))
 		{
-			glClear(GL_COLOR_BUFFER_BIT);
+			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		}
 #endif
 
@@ -205,8 +206,7 @@ public:
 #endif
 #if defined (GAME_DIRECTX10)
 		if (geIsUsing(GAME_DIRECTX10))
-		{
-			
+		{			
 			d3d10Device->ClearRenderTargetView(d3d10RenderTargetView, game::Colors::DarkGray.rgba);
 			d3d10Device->ClearDepthStencilView(d3d10DepthStencilView, D3D10_CLEAR_DEPTH | D3D10_CLEAR_STENCIL, 1.0f, 0);
 		}
@@ -224,7 +224,6 @@ public:
 		{
 			game::RendererDX12* temp = geGetRenderer();
 			temp->StartFrame();
-			//temp->Clear();
 			commandList->ClearRenderTargetView(temp->currentFrameBuffer, game::Colors::DarkGray.rgba, 0, nullptr);
 		}
 #endif
@@ -236,15 +235,12 @@ public:
 #if defined (GAME_DIRECTX9)
 		if (geIsUsing(GAME_DIRECTX9))
 		{
-			d3d9Device->EndScene();
+			//d3d9Device->EndScene();
 		}
 #endif
 #if defined(GAME_DIRECTX12)
 		if (geIsUsing(GAME_DIRECTX12))
 		{
-		//	game::RendererDX12* temp = geGetRenderer();
-		//	temp->EndFrame();
-
 
 		}
 #endif

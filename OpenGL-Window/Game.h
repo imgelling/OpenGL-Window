@@ -1,6 +1,9 @@
 #if !defined(GAME_H)
 #define GAME_H
 
+#define GAME_FRAME_BUFFER_BIT (1)
+#define GAME_DEPTH_STENCIL_BUFFER_BIT (1 << 1)
+
 #if defined(_WIN32)
 #define WIN32_LEAN_AND_MEAN
 #include <Windows.h>

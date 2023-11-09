@@ -106,6 +106,7 @@ namespace game
 		bool LoadShader(const std::string vertex, const std::string fragment, Shader& shader);
 		bool LoadShader(const std::string vertex, const std::string fragment, const std::string geometry, Shader& shader);
 		void UnLoadShader(Shader& shader);
+		void Clear(const uint32_t bufferFlags) {}
 	protected:
 		void _ReadExtensions();
 

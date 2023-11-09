@@ -39,6 +39,7 @@ namespace game
 		bool LoadShader(const std::string vertex, const std::string fragment, const std::string geometry, Shader& shader);
 		void UnLoadShader(Shader& shader);
 		void GetDevice(ID3D10Device*& device, IDXGISwapChain*& swapChain, ID3D10RenderTargetView*& renderTargetView, ID3D10DepthStencilView*& depthStencilView);
+		void Clear(const uint32_t bufferFlags) {}
 	protected:
 		void _ReadExtensions() {};
 	private:

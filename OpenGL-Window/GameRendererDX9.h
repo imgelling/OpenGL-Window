@@ -42,6 +42,7 @@ namespace game
 		}
 		void UnLoadShader(Shader& shader);
 		void GetDevice(LPDIRECT3DDEVICE9& device);
+		void Clear(const uint32_t bufferFlags) {}
 	protected:
 		void _ReadExtensions() {};
 	private:
@@ -260,6 +261,7 @@ namespace game
 		
 	inline void RendererDX9::Swap()
 	{
+		_d3d9Device->EndScene();
 		_d3d9Device->Present(NULL, NULL, NULL, NULL);
 	}
 
