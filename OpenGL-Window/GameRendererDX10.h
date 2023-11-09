@@ -39,7 +39,7 @@ namespace game
 		bool LoadShader(const std::string vertex, const std::string fragment, const std::string geometry, Shader& shader);
 		void UnLoadShader(Shader& shader);
 		void GetDevice(ID3D10Device*& device, IDXGISwapChain*& swapChain, ID3D10RenderTargetView*& renderTargetView, ID3D10DepthStencilView*& depthStencilView);
-		void Clear(const uint32_t bufferFlags) {}
+		void Clear(const uint32_t bufferFlags);
 	protected:
 		void _ReadExtensions() {};
 	private:
@@ -278,6 +278,12 @@ namespace game
 		SAFE_RELEASE(_d3d10DepthStencilView);
 		SAFE_RELEASE(_d3d10RenderTargetView);
 		SAFE_RELEASE(_d3d10Device);
+	}
+
+	inline void RendererDX10::Clear(const uint32_t bufferFlags)
+	{
+		_d3d10Device->ClearRenderTargetView(_d3d10RenderTargetView, game::Colors::DarkGray.rgba);
+		_d3d10Device->ClearDepthStencilView(_d3d10DepthStencilView, bufferFlags, 1.0f, 0);
 	}
 
 	inline bool RendererDX10::CreateTexture(Texture2D& texture)
