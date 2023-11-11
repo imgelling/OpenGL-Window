@@ -49,7 +49,7 @@ public:
 
 		// Enable run-time memory check for debug builds.
 #if defined(DEBUG) | defined(_DEBUG)
-		//_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
+		_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 		//_CrtSetBreakAlloc(613);
 #endif
 		
@@ -83,7 +83,7 @@ public:
 		}
 
 		// Setup pixel mode
-		if (!pixelMode.Initialize({ 320, 200 }))//180	}))
+		if (!pixelMode.Initialize({ 320, 180 }))
 		{
 			geLogLastError();
 		}
@@ -118,7 +118,7 @@ public:
 			geStopEngine();
 		}
 	}
-		
+	
 	void Render(const float_t msElapsed)
 	{
 		game::Pointi scaledMousePos;
@@ -148,9 +148,9 @@ public:
 		//for (uint32_t count = 0; count < 500000; count++)
 		//{
 		//	rx1 = random.RndRange(10, 310);;
-		//	ry1 = random.RndRange(10, 240-11);;
+		//	ry1 = random.RndRange(10, 200-11);;
 		//	rndColor.Set(random.RndRange(0, 255), random.RndRange(0, 255), random.RndRange(0, 255), 255);
-		//	pixelMode.CircleClip(rx1, ry1, 10, rndColor);
+		//	pixelMode.CircleFilledClip(rx1, ry1, 10, rndColor);
 		//	//rx2 = random.RndRange(11, 329);;
 		//	//ry2 = random.RndRange(11, 329);;
 		//}
@@ -158,7 +158,7 @@ public:
 
 		pixelMode.VerticalPillClip(scaledMousePos.x, scaledMousePos.y, 40, 5, game::Colors::Green);
 		pixelMode.VerticalPillClip(scaledMousePos.x, scaledMousePos.y, 38, 4, game::Colors::White);
-
+		
 		// Weird diagonal
 		pixelMode.LineClip(-20, -10, scaledMousePos.x, scaledMousePos.y, game::Colors::Pink);
 
@@ -178,7 +178,7 @@ public:
 		for (int i = 0; i < 40; i++)
 			spriteBatch.Draw(spriteTexture, {10 + (i * 100), 10}, game::Colors::White);
 		spriteBatch.DrawString(spriteFont, "FPS : " + std::to_string(geGetFramesPerSecond()) + " UPS : " + std::to_string(geGetUpdatesPerSecond()) + " cpu : " + std::to_string(geGetCPUFrequency()) + "Mhz", 10, 200, game::Colors::White,2.0f);
-		//spriteBatch.DrawString(spriteFont, "Random Circle(s) : " + std::to_string(millionPerSecond) + " million per second.", 10, 0, game::Colors::Red);
+		//spriteBatch.DrawString(spriteFont, "Random Circle(s) : " + std::to_string(millionPerSecond) + " million per second.", 10, 0, game::Colors::Red, 2.0f);
 		spriteBatch.DrawString(spriteFont, "Window Pixel Size: " + std::to_string(geGetWindowSize().width) + "x" + std::to_string(geGetWindowSize().height), 10, 240, game::Colors::White, 2.0f);
 		spriteBatch.DrawString(spriteFont, "PixelMode Pixel Size: " + std::to_string(pixelMode.GetPixelFrameBufferSize().width) + "x" + std::to_string(pixelMode.GetPixelFrameBufferSize().height), 10, 280, game::Colors::White, 2.0f);
 		spriteBatch.DrawString(spriteFont, "Sprites Drawn Last Frame: " + std::to_string(spriteBatch.SpritesDrawnLastFrame()), 10, 320, game::Colors::White, 2.0f);
@@ -191,7 +191,7 @@ public:
 #if defined (GAME_OPENGL)
 		if (geIsUsing(GAME_OPENGL))
 		{
-			glClearColor(0.25f, 0.25f, 0.25f, 1.0f);
+			//glClearColor(0.25f, 0.25f, 0.25f, 1.0f);
 			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 			glEnable(GL_BLEND);
 			glEnable(GL_CULL_FACE);

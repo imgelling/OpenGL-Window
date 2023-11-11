@@ -272,6 +272,9 @@ namespace game
 		{
 			_d3d9Device->Clear(0, NULL, D3DCLEAR_TARGET, color.packedARGB, 1.0f, 0);
 		}
+		//D3DCLEAR_STENCIL	Clear the stencil buffer.
+		//D3DCLEAR_TARGET	Clear a render target, or all targets in a multiple render target.See Multiple Render Targets(Direct3D 9).
+		//D3DCLEAR_ZBUFFER	Clear the depth buffer.
 
 	}
 

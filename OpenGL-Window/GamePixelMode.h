@@ -1622,8 +1622,8 @@ namespace game
 			{
 				if (sx < 0) sx = 0;
 				if (ex > _bufferSize.width - 1) ex = _bufferSize.width - 1;
-				if (y < 0) y = 0;
-				if (y > _bufferSize.height - 1) y = _bufferSize.height - 1;
+				if (y < 0) return;// y = 0;
+				if (y > _bufferSize.height - 1) return;// y = _bufferSize.height - 1;
 				for (int x = sx; x <= ex; x++)
 					Pixel(x, y, color);
 			};
