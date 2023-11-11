@@ -106,7 +106,7 @@ namespace game
 		bool LoadShader(const std::string vertex, const std::string fragment, Shader& shader);
 		bool LoadShader(const std::string vertex, const std::string fragment, const std::string geometry, Shader& shader);
 		void UnLoadShader(Shader& shader);
-		void Clear(const uint32_t bufferFlags);
+		void Clear(const uint32_t bufferFlags, const Color color);
 	protected:
 		void _ReadExtensions();
 
@@ -836,11 +836,12 @@ namespace game
 
 	}
 	
-	inline void RendererGL::Clear(const uint32_t bufferFlags)
+	inline void RendererGL::Clear(const uint32_t bufferFlags, const Color color)
 	{
 		uint32_t flags = 0;
 		if (bufferFlags | GAME_FRAME_BUFFER_BIT)
 		{
+			glClearColor(color.rf, color.gf, color.bf, color.af);
 			flags = GL_COLOR_BUFFER_BIT;
 		}
 		if (bufferFlags | GAME_DEPTH_STENCIL_BUFFER_BIT)

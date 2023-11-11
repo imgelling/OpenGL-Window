@@ -73,7 +73,7 @@ namespace game
 		void StartFrame(); // can go away after clear implemented
 		//void EndFrame();
 		void GetDevice(Microsoft::WRL::ComPtr<ID3D12Device2> &d3d12Device, Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> &commandList, Microsoft::WRL::ComPtr <ID3D12CommandQueue> &commandQueue);
-		void Clear(const uint32_t bufferFlags) {}
+		void Clear(const uint32_t bufferFlags, const Color color);
 		CD3DX12_CPU_DESCRIPTOR_HANDLE currentFrameBuffer; // can go away after clear implemented
 
 		// Below can go away if implement reset and execute
@@ -461,6 +461,12 @@ namespace game
 			_fenceValue[_frameIndex]++;
 			_frameIndex = _swapChain->GetCurrentBackBufferIndex();
 		}
+	}
+
+	inline void RendererDX12::Clear(const uint32_t bufferFlags, const Color color)
+	{
+		StartFrame();
+		_commandList->ClearRenderTargetView(currentFrameBuffer, color.rgba, 0, nullptr);
 	}
 
 	inline void RendererDX12::StartFrame()

@@ -42,7 +42,7 @@ namespace game
 		}
 		void UnLoadShader(Shader& shader);
 		void GetDevice(LPDIRECT3DDEVICE9& device);
-		void Clear(const uint32_t bufferFlags);
+		void Clear(const uint32_t bufferFlags, const Color color);
 	protected:
 		void _ReadExtensions() {};
 	private:
@@ -265,12 +265,12 @@ namespace game
 		_d3d9Device->Present(NULL, NULL, NULL, NULL);
 	}
 
-	inline void RendererDX9::Clear(const uint32_t bufferFlags)
+	inline void RendererDX9::Clear(const uint32_t bufferFlags, const Color color)
 	{
 		_d3d9Device->BeginScene();
 		if (bufferFlags & GAME_FRAME_BUFFER_BIT)
 		{
-			_d3d9Device->Clear(0, NULL, D3DCLEAR_TARGET, game::Colors::DarkGray.packedARGB, 1.0f, 0);
+			_d3d9Device->Clear(0, NULL, D3DCLEAR_TARGET, color.packedARGB, 1.0f, 0);
 		}
 
 	}

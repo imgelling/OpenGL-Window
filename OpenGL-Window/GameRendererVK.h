@@ -31,7 +31,7 @@ namespace game
 			return false;
 		}
 		void UnLoadShader(Shader& shader);
-		void Clear(const uint32_t bufferFlags) {}
+		void Clear(const uint32_t bufferFlags, const Color color) {}
 	protected:
 		void _ReadExtensions();
 

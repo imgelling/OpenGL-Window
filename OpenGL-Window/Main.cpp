@@ -62,8 +62,8 @@ public:
 		attributes.MultiSamples = 8; // Not implemented in most of DX, if any
 		attributes.RenderingAPI = game::RenderAPI::DirectX9; 
 		attributes.RenderingAPI = game::RenderAPI::DirectX10;
-		//attributes.RenderingAPI = game::RenderAPI::DirectX11;
-		//attributes.RenderingAPI = game::RenderAPI::DirectX12;
+		attributes.RenderingAPI = game::RenderAPI::DirectX11;
+		attributes.RenderingAPI = game::RenderAPI::DirectX12;
 		//attributes.RenderingAPI = game::RenderAPI::OpenGL;
 		//attributes.RenderingAPI = game::RenderAPI::Vulkan;
 		
@@ -126,8 +126,7 @@ public:
 		scaledMousePos = pixelMode.GetScaledMousePosition();
 
 		// Clears and starts new scene
-		geClear(GAME_FRAME_BUFFER_BIT | GAME_DEPTH_STENCIL_BUFFER_BIT);
-		BeginScene();
+		geClear(GAME_FRAME_BUFFER_BIT | GAME_DEPTH_STENCIL_BUFFER_BIT, game::Colors::DarkGray);
 
 		pixelMode.Clear(game::Colors::Blue);
 
@@ -184,66 +183,6 @@ public:
 		spriteBatch.DrawString(spriteFont, "PixelMode Pixel Size: " + std::to_string(pixelMode.GetPixelFrameBufferSize().width) + "x" + std::to_string(pixelMode.GetPixelFrameBufferSize().height), 10, 280, game::Colors::White, 2.0f);
 		spriteBatch.DrawString(spriteFont, "Sprites Drawn Last Frame: " + std::to_string(spriteBatch.SpritesDrawnLastFrame()), 10, 320, game::Colors::White, 2.0f);
 		spriteBatch.End();
-		EndScene();
-	}
-
-	// Clears the screen
-	void BeginScene()
-	{
-#if defined (GAME_OPENGL)
-		//if (geIsUsing(GAME_OPENGL))
-		//{
-		//	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		//}
-#endif
-
-#if defined (GAME_DIRECTX9)
-		//if (geIsUsing(GAME_DIRECTX9))
-		//{
-		//	d3d9Device->BeginScene();
-		//	d3d9Device->Clear(0, NULL, D3DCLEAR_TARGET, game::Colors::DarkGray.packedARGB, 1.0f, 0);
-		//}
-#endif
-#if defined (GAME_DIRECTX10)
-		//if (geIsUsing(GAME_DIRECTX10))
-		//{			
-		//	d3d10Device->ClearRenderTargetView(d3d10RenderTargetView, game::Colors::DarkGray.rgba);
-		//	d3d10Device->ClearDepthStencilView(d3d10DepthStencilView, D3D10_CLEAR_DEPTH | D3D10_CLEAR_STENCIL, 1.0f, 0);
-		//}
-#endif
-
-#if defined(GAME_DIRECTX11)
-		if (geIsUsing(GAME_DIRECTX11))
-		{
-			d3d11DeviceContext->ClearRenderTargetView(d3d11RenderTarget.Get(), game::Colors::DarkGray.rgba);
-			d3d11DeviceContext->ClearDepthStencilView(d3d11DepthStencilView.Get(), D3D10_CLEAR_DEPTH | D3D10_CLEAR_STENCIL, 1.0f, 0);
-		}
-#endif
-#if defined(GAME_DIRECTX12)
-		if (geIsUsing(GAME_DIRECTX12))
-		{
-			game::RendererDX12* temp = geGetRenderer();
-			temp->StartFrame();
-			commandList->ClearRenderTargetView(temp->currentFrameBuffer, game::Colors::DarkGray.rgba, 0, nullptr);
-		}
-#endif
-	}
-
-	// Ends the scene
-	void EndScene()
-	{
-#if defined (GAME_DIRECTX9)
-		if (geIsUsing(GAME_DIRECTX9))
-		{
-			//d3d9Device->EndScene();
-		}
-#endif
-#if defined(GAME_DIRECTX12)
-		if (geIsUsing(GAME_DIRECTX12))
-		{
-
-		}
-#endif
 	}
 
 	// Sets up API stuff

@@ -119,7 +119,7 @@ namespace game
 
 		
 		// Renderer specific
-		void geClear(const uint32_t bufferFlags);
+		void geClear(const uint32_t bufferFlags, const Color color);
 		bool geCreateTexture(Texture2D& texture);
 		bool geLoadTexture(const std::string fileName, Texture2D& texture);
 		void geUnLoadTexture(Texture2D& texture);
@@ -433,11 +433,11 @@ namespace game
 		return { (int)_attributes.WindowWidth, (int)_attributes.WindowHeight};
 	}
 
-	inline void Engine::geClear(const uint32_t bufferFlags)
+	inline void Engine::geClear(const uint32_t bufferFlags, const Color color)
 	{
 		if (bufferFlags)
 		{
-			_renderer->Clear(bufferFlags);
+			_renderer->Clear(bufferFlags, color);
 		}
 	}
 	

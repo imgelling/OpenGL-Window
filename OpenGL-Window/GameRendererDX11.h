@@ -34,7 +34,7 @@ namespace game
 		}
 		void UnLoadShader(Shader& shader);
 		void GetDevice(Microsoft::WRL::ComPtr<ID3D11Device>&device, Microsoft::WRL::ComPtr <ID3D11DeviceContext>& context, Microsoft::WRL::ComPtr<ID3D11RenderTargetView>& target, Microsoft::WRL::ComPtr<ID3D11DepthStencilView>& depth);
-		void Clear(const uint32_t bufferFlags) {}
+		void Clear(const uint32_t bufferFlags, const Color color);
 	protected:
 		void _ReadExtensions() {};
 	private:
@@ -53,6 +53,12 @@ namespace game
 		//_d3d11RenderTargetView = nullptr;
 		//_d3d11DepthStencilView = nullptr;
 		//_d3d11DepthStencilBuffer = nullptr;
+	}
+
+	inline void RendererDX11::Clear(const uint32_t bufferFlags, const Color color)
+	{
+		_d3d11DeviceContext->ClearRenderTargetView(_d3d11RenderTargetView.Get(), color.rgba);
+		_d3d11DeviceContext->ClearDepthStencilView(_d3d11DepthStencilView.Get(), bufferFlags, 1.0f, 0);
 	}
 
 	inline bool RendererDX11::CreateDevice(Window& window) 
