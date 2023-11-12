@@ -139,7 +139,7 @@ namespace game
 		Vector2i geGetWindowSize() const noexcept;
 		void geSetWindowTitle(const std::string title);
 		void geToggleFullscreen();
-		void HandleWindowResize(const uint32_t width, const uint32_t height, const bool doReset);
+		void HandleWindowResize(const uint32_t width, const uint32_t height);
 		
 		// Created by end user		
 
@@ -509,7 +509,7 @@ namespace game
 		#elif defined(__linux__)
 		Recti size;  // get window size on linux
 		#endif
-		HandleWindowResize(size.right, size.bottom, true);
+		HandleWindowResize(size.right, size.bottom);
 		geFullScreenToggled = true;
 	}
 
@@ -684,7 +684,7 @@ namespace game
 		}
 	}
 
-	inline void Engine::HandleWindowResize(const uint32_t width, const uint32_t height, const bool doReset)
+	inline void Engine::HandleWindowResize(const uint32_t width, const uint32_t height)
 	{
 		_attributes.WindowWidth = width;
 		_attributes.WindowHeight = height;
@@ -693,7 +693,7 @@ namespace game
 		{
 			if (_renderer)
 			{
-				_renderer->HandleWindowResize(width, height, doReset);
+				_renderer->HandleWindowResize(width, height);
 			}
 		}
 #endif
@@ -702,7 +702,7 @@ namespace game
 			{
 				if (_renderer)
 				{
-					_renderer->HandleWindowResize(width, height, doReset);
+					_renderer->HandleWindowResize(width, height);
 					dynamic_cast<RendererDX9*>(_renderer)->GetDevice(d3d9Device);
 				}
 			}
@@ -712,7 +712,7 @@ namespace game
 		{
 			if (_renderer)
 			{
-				_renderer->HandleWindowResize(width, height, doReset);
+				_renderer->HandleWindowResize(width, height);
 				dynamic_cast<RendererDX10*>(_renderer)->GetDevice(d3d10Device, d3d10SwapChain, d3d10RenderTargetView, d3d10DepthStencilView);
 			}
 		}
@@ -724,7 +724,7 @@ namespace game
 			{
 				d3d11RenderTarget.Reset();
 				d3d11DepthStencilView.Reset();
-				_renderer->HandleWindowResize(width, height, doReset);
+				_renderer->HandleWindowResize(width, height);
 				dynamic_cast<RendererDX11*>(_renderer)->GetDevice(d3d11Device, d3d11DeviceContext, d3d11RenderTarget, d3d11DepthStencilView);
 			}
 		}
@@ -761,17 +761,17 @@ namespace game
 			case SIZE_MINIMIZED:
 				enginePointer->geIsMinimized = true;
 				enginePointer->geIsMaximized = false;
-				enginePointer->HandleWindowResize(lParam & 0xFFF, (lParam >> 16) & 0xFFFF, true); 
+				enginePointer->HandleWindowResize(lParam & 0xFFF, (lParam >> 16) & 0xFFFF); 
 				break;
 			case SIZE_MAXIMIZED:
 				enginePointer->geIsMaximized = true;
 				enginePointer->geIsMinimized = false;
-				enginePointer->HandleWindowResize(lParam & 0xFFF, (lParam >> 16) & 0xFFFF, true); 
+				enginePointer->HandleWindowResize(lParam & 0xFFF, (lParam >> 16) & 0xFFFF); 
 				break;
 			case SIZE_RESTORED:
 				if (enginePointer->geIsMaximized)
 				{
-					enginePointer->HandleWindowResize(lParam & 0xFFF, (lParam >> 16) & 0xFFFF, true);
+					enginePointer->HandleWindowResize(lParam & 0xFFF, (lParam >> 16) & 0xFFFF);
 					enginePointer->geIsMaximized = false;
 				}
 				if (enginePointer->geFullScreenToggled)
@@ -784,13 +784,13 @@ namespace game
 				break;
 			}
 			// Tell the application the window changed size
-			enginePointer->HandleWindowResize(lParam & 0xFFF, (lParam >> 16) & 0xFFFF, false);
+			enginePointer->HandleWindowResize(lParam & 0xFFF, (lParam >> 16) & 0xFFFF);
 
 			return 0;
 		}
 		case WM_EXITSIZEMOVE: 
 		{
-			enginePointer->HandleWindowResize(enginePointer->geGetWindowSize().x, enginePointer->geGetWindowSize().y, true);
+			enginePointer->HandleWindowResize(enginePointer->geGetWindowSize().x, enginePointer->geGetWindowSize().y);
 			return 0;
 		}
 

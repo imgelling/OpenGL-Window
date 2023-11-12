@@ -29,7 +29,7 @@ namespace game
 		bool CreateDevice(Window& window);
 		void DestroyDevice();
 		void Swap();
-		void HandleWindowResize(const uint32_t width, const uint32_t height, const bool doReset);
+		void HandleWindowResize(const uint32_t width, const uint32_t height);
 		void FillOutRendererInfo();
 		bool CreateTexture(Texture2D& texture);
 		bool LoadTexture(std::string fileName, Texture2D& texture);
@@ -66,7 +66,7 @@ namespace game
 		device = _d3d9Device;
 	}
 
-	inline void RendererDX9::HandleWindowResize(const uint32_t width, const uint32_t height, const bool doReset)
+	inline void RendererDX9::HandleWindowResize(const uint32_t width, const uint32_t height)
 	{
 		D3DVIEWPORT9 view { 0, 0, width, height, 0.0f, 1.0f};
 		
@@ -75,11 +75,8 @@ namespace game
 		_d3d9Device->Clear(0, NULL, D3DCLEAR_TARGET, Colors::Black.packedARGB, 1.0f, 0);
 		_d3dpp.BackBufferWidth = width;
 		_d3dpp.BackBufferHeight = height;
-		if (doReset) _d3d9Device->Reset(&_d3dpp);
-		if (_d3d9Device->SetViewport(&view) != D3D_OK)
-		{
-			std::cout << "viewport";
-		}
+		_d3d9Device->Reset(&_d3dpp);
+		_d3d9Device->SetViewport(&view);
 	}
 
 	inline void RendererDX9::DestroyDevice()
@@ -268,10 +265,10 @@ namespace game
 	inline void RendererDX9::Clear(const uint32_t bufferFlags, const Color color)
 	{
 		_d3d9Device->BeginScene();
-		if (bufferFlags & GAME_FRAME_BUFFER_BIT)
-		{
-			_d3d9Device->Clear(0, NULL, D3DCLEAR_TARGET, color.packedARGB, 1.0f, 0);
-		}
+		//if (bufferFlags & GAME_FRAME_BUFFER_BIT)
+		//{
+		_d3d9Device->Clear(0, NULL, bufferFlags, color.packedARGB, 1.0f, 0);
+		//}
 		//D3DCLEAR_STENCIL	Clear the stencil buffer.
 		//D3DCLEAR_TARGET	Clear a render target, or all targets in a multiple render target.See Multiple Render Targets(Direct3D 9).
 		//D3DCLEAR_ZBUFFER	Clear the depth buffer.

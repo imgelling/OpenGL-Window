@@ -21,7 +21,7 @@ namespace game
 		bool CreateDevice(Window& window);
 		void DestroyDevice();
 		void Swap();
-		void HandleWindowResize(const uint32_t width, const uint32_t height, const bool doReset);
+		void HandleWindowResize(const uint32_t width, const uint32_t height);
 		void FillOutRendererInfo() {}
 		bool CreateTexture(Texture2D& texture);
 		bool LoadTexture(std::string fileName, Texture2D& texture);
@@ -192,7 +192,7 @@ namespace game
 		_d3d11SwapChain->Present(0, 0);
 	}
 
-	inline void RendererDX11::HandleWindowResize(const uint32_t width, const uint32_t height, const bool doReset)
+	inline void RendererDX11::HandleWindowResize(const uint32_t width, const uint32_t height)
 	{
 		D3D11_VIEWPORT viewPort = { 0 };
 		Microsoft::WRL::ComPtr<ID3D11Texture2D> backBuffer;

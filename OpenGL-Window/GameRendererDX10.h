@@ -30,7 +30,7 @@ namespace game
 		bool CreateDevice(Window& window);
 		void DestroyDevice();
 		void Swap();
-		void HandleWindowResize(const uint32_t width, const uint32_t height, const bool doReset);
+		void HandleWindowResize(const uint32_t width, const uint32_t height);
 		void FillOutRendererInfo() {};
 		bool CreateTexture(Texture2D& texture);
 		bool LoadTexture(std::string fileName, Texture2D& texture);
@@ -50,7 +50,7 @@ namespace game
 		ID3D10Texture2D* _d3d10DepthStencilBuffer;
 	};
 
-	inline void RendererDX10::HandleWindowResize(const uint32_t width, const uint32_t height, const bool doReset)
+	inline void RendererDX10::HandleWindowResize(const uint32_t width, const uint32_t height)
 	{
 		D3D10_VIEWPORT viewPort = { 0 };
 		ID3D10Texture2D* backBuffer = nullptr;

@@ -20,7 +20,7 @@ namespace game
 		virtual bool CreateDevice(Window& window) = 0;
 		virtual void DestroyDevice() = 0;
 		virtual void Swap() = 0;
-		virtual void HandleWindowResize(const uint32_t width, const uint32_t height, const bool doReset) = 0;
+		virtual void HandleWindowResize(const uint32_t width, const uint32_t height) = 0;
 		virtual void FillOutRendererInfo() = 0;
 		virtual bool CreateTexture(Texture2D& texture) = 0;
 		virtual bool LoadTexture(std::string fileName, Texture2D& texture) = 0;

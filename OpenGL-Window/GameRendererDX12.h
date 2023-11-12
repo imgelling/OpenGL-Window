@@ -53,7 +53,7 @@ namespace game
 		bool CreateDevice(Window& window);
 		void DestroyDevice();
 		void Swap();
-		void HandleWindowResize(const uint32_t width, const uint32_t height, const bool doReset) 
+		void HandleWindowResize(const uint32_t width, const uint32_t height) 
 		{
 			// Save new size
 			//_attributes.WindowWidth = width;

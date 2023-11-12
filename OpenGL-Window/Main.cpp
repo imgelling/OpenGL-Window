@@ -61,10 +61,10 @@ public:
 		attributes.DebugMode = true;
 		attributes.MultiSamples = 8; // Not implemented in most of DX, if any
 		attributes.RenderingAPI = game::RenderAPI::DirectX9; 
-		attributes.RenderingAPI = game::RenderAPI::DirectX10;
-		attributes.RenderingAPI = game::RenderAPI::DirectX11;
-		attributes.RenderingAPI = game::RenderAPI::DirectX12;
-		//attributes.RenderingAPI = game::RenderAPI::OpenGL;
+		//attributes.RenderingAPI = game::RenderAPI::DirectX10;
+		//attributes.RenderingAPI = game::RenderAPI::DirectX11;
+		//attributes.RenderingAPI = game::RenderAPI::DirectX12;
+		attributes.RenderingAPI = game::RenderAPI::OpenGL;
 		//attributes.RenderingAPI = game::RenderAPI::Vulkan;
 		
 		geSetAttributes(attributes);
@@ -83,13 +83,13 @@ public:
 		}
 
 		// Setup pixel mode
-		if (!pixelMode.Initialize({ 320, 180 }))
+		if (!pixelMode.Initialize({ 320, 200 }))// 180 }))
 		{
 			geLogLastError();
 		}
 
 		// Setup sprite batch
-		if (!spriteBatch.Initialize())//2000000))
+		if (!spriteBatch.Initialize()) //2000000))
 		{
 			geLogLastError();
 		}
