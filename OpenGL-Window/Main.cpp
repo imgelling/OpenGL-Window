@@ -83,7 +83,7 @@ public:
 		}
 
 		// Setup pixel mode
-		if (!pixelMode.Initialize({ 320, 200 }))// 180 }))
+		if (!pixelMode.Initialize({ 320, 180 }))
 		{
 			geLogLastError();
 		}
@@ -148,7 +148,7 @@ public:
 		//for (uint32_t count = 0; count < 500000; count++)
 		//{
 		//	rx1 = random.RndRange(10, 310);;
-		//	ry1 = random.RndRange(10, 200-11);;
+		//	ry1 = random.RndRange(10, 180-11);;
 		//	rndColor.Set(random.RndRange(0, 255), random.RndRange(0, 255), random.RndRange(0, 255), 255);
 		//	pixelMode.CircleFilledClip(rx1, ry1, 10, rndColor);
 		//	//rx2 = random.RndRange(11, 329);;

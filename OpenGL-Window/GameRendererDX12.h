@@ -257,7 +257,9 @@ namespace game
 			{
 				std::cout << "Check Feature Support failed." << _allowTearing << "\n";
 			}
-			std::cout << "Allow Tearing = " << _allowTearing << "\n";
+			std::cout << "Allow Tearing = " << (_allowTearing ? "true" : "false") << "\n";
+			// Disable alt enter
+			factory5->MakeWindowAssociation(window.GetHandle(), DXGI_MWA_NO_ALT_ENTER);
 		}
 
 
