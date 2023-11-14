@@ -1,5 +1,5 @@
 // Engine header
-//#define GAME_USE_DEDICATED_GPU
+#define GAME_USE_DEDICATED_GPU
 //#define GAME_ENABLE_NETWORKING
 //#define GAME_ENABLE_SHADERS
 //#define GAME_SUPPORT_DIRECTX9
@@ -61,10 +61,10 @@ public:
 		attributes.DebugMode = true;
 		attributes.MultiSamples = 8; // Not implemented in most of DX, if any
 		attributes.RenderingAPI = game::RenderAPI::DirectX9; 
-		//attributes.RenderingAPI = game::RenderAPI::DirectX10;
-		//attributes.RenderingAPI = game::RenderAPI::DirectX11;
-		//attributes.RenderingAPI = game::RenderAPI::DirectX12;
-		attributes.RenderingAPI = game::RenderAPI::OpenGL;
+		attributes.RenderingAPI = game::RenderAPI::DirectX10;
+		attributes.RenderingAPI = game::RenderAPI::DirectX11;
+		attributes.RenderingAPI = game::RenderAPI::DirectX12;
+		//attributes.RenderingAPI = game::RenderAPI::OpenGL;
 		//attributes.RenderingAPI = game::RenderAPI::Vulkan;
 		
 		geSetAttributes(attributes);
@@ -131,12 +131,12 @@ public:
 		pixelMode.Clear(game::Colors::Blue);
 
 		// Top and bottom
-		pixelMode.LineClip(340, 0, -1, 0, game::Colors::Pink);
-		pixelMode.LineClip(-10, 179, 409, 179, game::Colors::Pink);
+		pixelMode.HLineClip(340, -1, 0, game::Colors::Pink);
+		pixelMode.HLineClip(-10, 409, 179, game::Colors::Pink);
 
 		// Left and right
-		pixelMode.LineClip(0, -10, 0, 300, game::Colors::Pink);
-		pixelMode.LineClip(319, 500, 319, -10, game::Colors::Pink);
+		pixelMode.VLineClip(0, -10, 300, game::Colors::Pink);
+		pixelMode.VLineClip(319, 500, -10, game::Colors::Pink);
 
 		//int32_t rx1 = random.RndRange(0, 340);
 		//int32_t ry1 = random.RndRange(0, 340);
@@ -169,6 +169,13 @@ public:
 		rect.right = 318;
 		rect.bottom = 178;
 		pixelMode.RectClip(rect, game::Colors::White);
+
+		// Draw a bunch of horizontal and vertical lines
+		for (uint32_t pos = 2; pos < 10; pos++)
+		{
+			pixelMode.HLine(2, 320 - 1 - 2, pos, game::Colors::Black);
+			pixelMode.VLine(pos, 2, 180 - 1 - 2, game::Colors::White);
+		}
 
 		pixelMode.Render();
 

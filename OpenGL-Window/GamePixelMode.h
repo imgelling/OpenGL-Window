@@ -39,6 +39,10 @@ namespace game
 		void PixelClip(const int32_t x, const int32_t y, const game::Color& color) noexcept;
 		void Line(int32_t x1, int32_t y1, int32_t x2, int32_t y2, const Color& color) noexcept;
 		void LineClip(const int32_t x1, const int32_t y1, const int32_t x2,  int32_t y2, const Color& color) noexcept;
+		void HLine(const int32_t x1, const int32_t x2, const int32_t y, const Color& color) noexcept;
+		void HLineClip(const int32_t x1, const int32_t x2, const int32_t y, const Color& color) noexcept;
+		void VLine(const int32_t x, const int32_t y1, const int32_t y2, const Color& color) noexcept;
+		void VLineClip(const int32_t x, const int32_t y1, const int32_t y2, const Color& color) noexcept;
 		void Circle(const int32_t x, const int32_t y, const int32_t radius, const Color& color) noexcept;
 		void CircleClip(const int32_t x, const int32_t y, const int32_t radius, const Color& color) noexcept;
 		void CircleFilled(const int32_t x, const int32_t y, const int32_t radius, const Color& color) noexcept;
@@ -1494,6 +1498,84 @@ namespace game
 						Line((int32_t)std::round(x1f), (int32_t)std::round(y1f), (int32_t)std::round(x2f), (int32_t)std::round(y2f), color);
 					}
 			}
+	}
+
+	inline void PixelMode::HLine(const int32_t x1, const int32_t x2, const int32_t y, const Color& color) noexcept
+	{
+		if (x1 == x2)
+		{
+			Pixel(x1, y, color);
+			return;
+		}
+		int32_t start = (x1 < x2) ? x1 : x2;// std::min(x1, x2);
+		int32_t end = (x1 > x2) ? x1 : x2;// std::max(x1, x2);
+
+		for (int32_t startX = start; startX <= end; startX++)
+		{
+			Pixel(startX, y, color);
+		}
+	}
+
+	inline void PixelMode::HLineClip(const int32_t x1, const int32_t x2, const int32_t y, const Color& color) noexcept
+	{
+		if (y < 0) return;
+		if (y > _bufferSize.height - 1) return;
+
+		int32_t start = (x1 < x2) ? x1 : x2;// std::min(x1, x2);
+		int32_t end = (x1 > x2) ? x1 : x2;// std::max(x1, x2);
+
+		if (start < 0) start = 0;
+		if (end > _bufferSize.width - 1) end = _bufferSize.width - 1;
+		
+		if (start == end)
+		{
+			Pixel(start, y, color);
+			return;
+		}
+
+		for (int32_t startX = start; startX <= end; startX++)
+		{
+			Pixel(startX, y, color);
+		}
+	}
+
+	inline void PixelMode::VLine(const int32_t x, const int32_t y1, const int32_t y2, const Color& color) noexcept
+	{
+		if (y1 == y2)
+		{
+			Pixel(x, y1, color);
+			return;
+		}
+		int32_t start = (y1 < y2) ? y1 : y2;
+		int32_t end = (y1 > y2) ? y1 : y2;
+
+		for (int32_t startY = start; startY <= end; startY++)
+		{
+			Pixel(x, startY, color);
+		}
+	}
+
+	inline void PixelMode::VLineClip(const int32_t x, const int32_t y1, const int32_t y2, const Color& color) noexcept
+	{
+		if (x < 0) return;
+		if (x > _bufferSize.width - 1) return;
+
+		int32_t start = (y1 < y2) ? y1 : y2;
+		int32_t end = (y1 > y2) ? y1 : y2;
+
+		if (start < 0) start = 0;
+		if (end > _bufferSize.height - 1) end = _bufferSize.height - 1;
+
+		if (start == end)
+		{
+			Pixel(x, start, color);
+			return;
+		}
+
+		for (int32_t startY = start; startY <= end; startY++)
+		{
+			Pixel(x, startY, color);
+		}
 	}
 
 	inline void PixelMode::Circle(const int32_t x, const int32_t y, const int32_t radius, const Color& color) noexcept
