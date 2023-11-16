@@ -365,7 +365,7 @@ namespace game
 #if defined(GAME_DIRECTX10)
 		if (enginePointer->geIsUsing(GAME_DIRECTX10))
 		{
-			_spriteVertices10 = new _spriteVertex10[_maxSprites * 4];
+			_spriteVertices10 = new _spriteVertex10[(size_t)_maxSprites * 4];
 			for (uint32_t vertex = 0; vertex < _maxSprites * 4; vertex++)
 			{
 				_spriteVertices10[vertex].x = 0.0f;
@@ -385,7 +385,7 @@ namespace game
 #if defined(GAME_DIRECTX11)
 		if (enginePointer->geIsUsing(GAME_DIRECTX11))
 		{
-			_spriteVertices11 = new _spriteVertex11[_maxSprites * 4];
+			_spriteVertices11 = new _spriteVertex11[(size_t)_maxSprites * 4];
 			for (uint32_t vertex = 0; vertex < _maxSprites * 4; vertex++)
 			{
 				_spriteVertices11[vertex].x = 0.0f;

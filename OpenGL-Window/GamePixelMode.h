@@ -49,6 +49,8 @@ namespace game
 		void CircleFilledClip(const int32_t x, const int32_t y, const int32_t radius, const Color& color) noexcept;
 		void Rect(const Recti& rectangle, const Color& color) noexcept;
 		void RectClip(const Recti& rectangle, const Color& color) noexcept;
+		void RectFilled(const Recti& rectangle, const Color& color) noexcept;
+		void RectFilledClip(const Recti& rectangle, const Color& color) noexcept;
 		void HPillClip(const int32_t x, const int32_t y, const int32_t length, const int32_t radius, const game::Color& color) noexcept;
 		void VPillClip(const int32_t x, const int32_t y, const int32_t height, const int32_t radius, const game::Color& color) noexcept;
 
@@ -1728,6 +1730,22 @@ namespace game
 		VLineClip(rectangle.left, rectangle.top, rectangle.bottom, color);
 		// Right
 		VLineClip(rectangle.right, rectangle.top, rectangle.bottom, color);
+	}
+
+	inline void PixelMode::RectFilled(const Recti& rectangle, const Color& color) noexcept
+	{
+		for (uint32_t y = rectangle.top; y <= (uint32_t)rectangle.bottom; y++)
+		{
+			HLine(rectangle.left, rectangle.right, y, color);
+		}
+	}
+
+	inline void PixelMode::RectFilledClip(const Recti& rectangle, const Color& color) noexcept
+	{
+		for (uint32_t y = rectangle.top; y <= (uint32_t)rectangle.bottom; y++)
+		{
+			HLineClip(rectangle.left, rectangle.right, y, color);
+		}
 	}
 
 	inline void PixelMode::HPillClip(const int32_t x, const int32_t y, const int32_t length, const int32_t radius, const game::Color& color) noexcept
