@@ -63,8 +63,8 @@ public:
 		attributes.RenderingAPI = game::RenderAPI::DirectX9; 
 		attributes.RenderingAPI = game::RenderAPI::DirectX10;
 		attributes.RenderingAPI = game::RenderAPI::DirectX11;
-		attributes.RenderingAPI = game::RenderAPI::DirectX12;
-		//attributes.RenderingAPI = game::RenderAPI::OpenGL;
+		//attributes.RenderingAPI = game::RenderAPI::DirectX12;
+		attributes.RenderingAPI = game::RenderAPI::OpenGL;
 		//attributes.RenderingAPI = game::RenderAPI::Vulkan;
 		
 		geSetAttributes(attributes);
@@ -156,8 +156,8 @@ public:
 		//}
 		//perftimer.Stop("CircleClip");
 
-		pixelMode.VerticalPillClip(scaledMousePos.x, scaledMousePos.y, 40, 5, game::Colors::Green);
-		pixelMode.VerticalPillClip(scaledMousePos.x, scaledMousePos.y, 38, 4, game::Colors::White);
+		pixelMode.VPillClip(scaledMousePos.x, scaledMousePos.y, 40, 5, game::Colors::Green);
+		pixelMode.VPillClip(scaledMousePos.x, scaledMousePos.y, 38, 4, game::Colors::White);
 		
 		// Weird diagonal
 		pixelMode.LineClip(-20, -10, scaledMousePos.x, scaledMousePos.y, game::Colors::Pink);

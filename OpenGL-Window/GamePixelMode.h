@@ -49,8 +49,8 @@ namespace game
 		void CircleFilledClip(const int32_t x, const int32_t y, const int32_t radius, const Color& color) noexcept;
 		void Rect(const Recti& rectangle, const Color& color) noexcept;
 		void RectClip(const Recti& rectangle, const Color& color) noexcept;
-		void HorizontalPillClip(const int32_t x, const int32_t y, const int32_t length, const int32_t radius, const game::Color& color) noexcept;
-		void VerticalPillClip(const int32_t x, const int32_t y, const int32_t height, const int32_t radius, const game::Color& color) noexcept;
+		void HPillClip(const int32_t x, const int32_t y, const int32_t length, const int32_t radius, const game::Color& color) noexcept;
+		void VPillClip(const int32_t x, const int32_t y, const int32_t height, const int32_t radius, const game::Color& color) noexcept;
 
 		Pointi GetScaledMousePosition() noexcept;
 		Pointi GetPixelFrameBufferSize() noexcept;
@@ -1349,36 +1349,10 @@ namespace game
 		if (enginePointer->geIsUsing(GAME_DIRECTX9))
 		{
 			_video[y * _bufferSize.width + x] = color.packedARGB;
-		}
-#endif
-#if defined(GAME_DIRECTX10)
-		if (enginePointer->geIsUsing(GAME_DIRECTX10))
-		{
-			_video[y * _bufferSize.width + x] = color.packedABGR;
 			return;
 		}
 #endif
-#if defined(GAME_DIRECTX11)
-		if (enginePointer->geIsUsing(GAME_DIRECTX11))
-		{
-			_video[y * _bufferSize.width + x] = color.packedABGR;
-			return;
-		}
-#endif
-#if defined(GAME_DIRECTX12)
-		if (enginePointer->geIsUsing(GAME_DIRECTX12))
-		{
-			//y = _bufferSize.height - y;
-			_video[(y) * _bufferSize.width + x] = color.packedABGR;
-			return;
-		}
-#endif
-#if defined(GAME_OPENGL)
-		if (enginePointer->geIsUsing(GAME_OPENGL))
-		{
-			_video[y * _bufferSize.width + x] = color.packedABGR;
-		}
-#endif
+		_video[(y) * _bufferSize.width + x] = color.packedABGR;
 	}
 
 	inline void PixelMode::Line(int32_t x1, int32_t y1, const int32_t x2, const int32_t y2, const Color& color) noexcept
@@ -1735,28 +1709,28 @@ namespace game
 	inline void PixelMode::Rect(const Recti& rectangle, const Color& color) noexcept
 	{
 		// Top
-		Line(rectangle.x, rectangle.y, rectangle.right, rectangle.y, color);
+		HLine(rectangle.left, rectangle.right, rectangle.top, color);
 		// Bottom
-		Line(rectangle.x, rectangle.bottom, rectangle.right, rectangle.bottom, color);
+		HLine(rectangle.left, rectangle.right, rectangle.bottom, color);
 		// Left
-		Line(rectangle.x, rectangle.y, rectangle.x, rectangle.bottom, color);
+		VLine(rectangle.left, rectangle.top, rectangle.bottom, color);
 		// Right
-		Line(rectangle.right, rectangle.y, rectangle.right, rectangle.bottom, color);
+		VLine(rectangle.right, rectangle.top, rectangle.bottom, color);
 	}
 
 	inline void PixelMode::RectClip(const Recti& rectangle, const Color& color) noexcept
 	{
 		// Top
-		LineClip(rectangle.x, rectangle.y, rectangle.right, rectangle.y, color);
+		HLineClip(rectangle.left, rectangle.right, rectangle.top, color);
 		// Bottom
-		LineClip(rectangle.x, rectangle.bottom, rectangle.right, rectangle.bottom, color);
+		HLineClip(rectangle.left, rectangle.right, rectangle.bottom, color);
 		// Left
-		LineClip(rectangle.x, rectangle.y, rectangle.x, rectangle.bottom, color);
+		VLineClip(rectangle.left, rectangle.top, rectangle.bottom, color);
 		// Right
-		LineClip(rectangle.right, rectangle.y, rectangle.right, rectangle.bottom, color);
+		VLineClip(rectangle.right, rectangle.top, rectangle.bottom, color);
 	}
 
-	inline void PixelMode::HorizontalPillClip(const int32_t x, const int32_t y, const int32_t length, const int32_t radius, const game::Color& color) noexcept
+	inline void PixelMode::HPillClip(const int32_t x, const int32_t y, const int32_t length, const int32_t radius, const game::Color& color) noexcept
 	{
 		int32_t calculatedLength = length - (radius * 2);
 
@@ -1771,10 +1745,10 @@ namespace game
 
 			while (y0 >= x0)
 			{
-				LineClip(x - y0, y - x0, x + y0 + calculatedLength, y - x0, color);
+				HLineClip(x - y0, x + y0 + calculatedLength, y - x0, color);
 				if (x0 > 0)
 				{
-					LineClip(x - y0, y + x0, x + y0 + calculatedLength, y + x0, color);
+					HLineClip(x - y0, x + y0 + calculatedLength, y + x0, color);
 				}
 
 				if (d < 0)
@@ -1783,8 +1757,8 @@ namespace game
 				{
 					if (x0 != y0)
 					{
-						LineClip(x - x0, y - y0, x + x0 + calculatedLength, y - y0, color);
-						LineClip(x - x0, y + y0, x + x0 + calculatedLength, y + y0, color);
+						HLineClip(x - x0, x + x0 + calculatedLength, y - y0, color);
+						HLineClip(x - x0, x + x0 + calculatedLength, y + y0, color);
 					}
 					d += 4 * (x0++ - y0--) + 10;
 				}
@@ -1794,7 +1768,7 @@ namespace game
 			Pixel(x, y, color);
 	}
 
-	inline void PixelMode::VerticalPillClip(const int32_t x, const int32_t y, const int32_t height, const int32_t radius, const game::Color& color) noexcept
+	inline void PixelMode::VPillClip(const int32_t x, const int32_t y, const int32_t height, const int32_t radius, const game::Color& color) noexcept
 	{
 		int32_t calculatedHeight = y + (height - (radius * 2));
 
@@ -1810,11 +1784,11 @@ namespace game
 			while (y0 >= x0)
 			{
 				// Top half
-				LineClip(x - y0, y - x0, x + y0, y - x0, color);
+				HLineClip(x - y0, x + y0, y - x0, color);
 				if (x0 > 0)
 				{
 					// Bottom half
-					LineClip(x - y0, calculatedHeight + x0, x + y0, calculatedHeight + x0, color);
+					HLineClip(x - y0, x + y0, calculatedHeight + x0, color);
 				}
 
 				if (d < 0)
@@ -1824,9 +1798,9 @@ namespace game
 					if (x0 != y0)
 					{
 						// Top half
-						LineClip(x - x0, y - y0, x + x0, y - y0, color);
+						HLineClip(x - x0, x + x0, y - y0, color);
 						// Bottom half
-						LineClip(x - x0, calculatedHeight + y0, x + x0, calculatedHeight + y0, color);
+						HLineClip(x - x0, x + x0, calculatedHeight + y0, color);
 					}
 					d += 4 * (x0++ - y0--) + 10;
 				}
@@ -1837,7 +1811,7 @@ namespace game
 
 		for (int32_t width = -radius; width <= radius; width++)
 		{
-			LineClip(x + width, y, x + width, calculatedHeight, color);
+			VLineClip(x + width, y, calculatedHeight, color);
 		}
 	}
 
