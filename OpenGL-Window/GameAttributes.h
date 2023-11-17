@@ -52,7 +52,7 @@ namespace game
 		DoubleBuffer = 1; // may need to be -1 as was set in GameLib1
 		GLBackwardsCompatible = true;
 		DepthSize = 24; // 32 bit for amd only, 24 for nvidia
-		MultiSamples = 1;
+		MultiSamples = 0;
 		DebugMode = false;
 		FrameLock = 0.0f;
 		UpdateLock = 0.0f;

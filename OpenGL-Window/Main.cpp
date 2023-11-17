@@ -59,7 +59,7 @@ public:
 		attributes.UpdateLock = MAX_UPDATES;
 		attributes.VsyncOn = false;
 		attributes.DebugMode = true;
-		attributes.MultiSamples = 8; // Not implemented in most of DX, if any
+		//attributes.MultiSamples = 8; // Not implemented in most of DX, if any
 		attributes.RenderingAPI = game::RenderAPI::DirectX9; 
 		attributes.RenderingAPI = game::RenderAPI::DirectX10;
 		attributes.RenderingAPI = game::RenderAPI::DirectX11;
