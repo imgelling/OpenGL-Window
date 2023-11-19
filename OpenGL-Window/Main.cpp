@@ -30,7 +30,7 @@ public:
 	//temp
 	uint8_t* fontROM;
 
-	Game(game::Logger& logger) : game::Engine(&logger)
+	Game() : game::Engine()
 	{
 		fontROM = nullptr;
 	}
@@ -297,7 +297,8 @@ public:
 int main()
 {
 	game::Logger logger("Log.html");
-	Game engine(logger);
+	Game engine;
+	engine.geSetLogger(&logger);
 
 	// Create the needed bits for the engine
 	if (!engine.geCreate())

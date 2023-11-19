@@ -101,12 +101,13 @@ namespace game
 
 		// Engine setup
 
-		Engine(Logger* logger);
+		Engine();
 		~Engine();
 		void geSetAttributes(const Attributes &attrib);
 		bool geCreate();
 		void geStartEngine();
 		void geStopEngine();
+		void geSetLogger(Logger* logger);
 
 		// Frame and update timing 
 		
@@ -127,7 +128,7 @@ namespace game
 		bool geLoadShader(const std::string vertex, const std::string fragment, Shader& shader);
 		bool geLoadShader(const std::string vertex, const std::string fragment, const std::string geometry, Shader& shader);
 		void geUnLoadShader(Shader& shader);
-		bool geIsUsing(const uint32_t renderer);
+		bool geIsUsing(const uint32_t renderer) const;
 #if defined (GAME_DIRECTX12)
 		RendererDX12* geGetRenderer()
 		{
@@ -173,9 +174,10 @@ namespace game
 		void _Swap();
 	};
 
-	inline Engine::Engine(Logger* logger)
+	inline Engine::Engine()
 	{
 		geIsRunning = false;
+		geLogger = nullptr;
 		enginePointer = this;
 		_renderer = nullptr;
 		_frameTime = 0.0f;
@@ -183,7 +185,6 @@ namespace game
 		_updatesPerSecond = 0;
 		_framesPerSecond = 0;
 		_cpuFrequency = 0;
-		this->geLogger = logger;
 		geIsMinimized = false;
 		geIsMaximized = false;
 		geFullScreenToggled = false;
@@ -231,7 +232,7 @@ namespace game
 
 	}
 
-	inline bool Engine::geIsUsing(const uint32_t renderer)
+	inline bool Engine::geIsUsing(const uint32_t renderer) const
 	{
 #if defined(GAME_OPENGL)
 		if ((renderer == 1) && (_attributes.RenderingAPI == RenderAPI::OpenGL))
@@ -354,6 +355,11 @@ namespace game
 	inline void Engine::geStopEngine()
 	{
 		geIsRunning = false;
+	}
+
+	inline void Engine::geSetLogger(Logger* logger)
+	{
+		geLogger = logger;
 	}
 
 	inline void Engine::_ProcessMessages() noexcept
@@ -549,6 +555,15 @@ namespace game
 		// Let user choose how they want things
 		Initialize();
 
+		// Make sure a logger is attached
+		if (geLogger == nullptr)
+		{
+			//std::exception err;
+			//err.what("Must set a logger with geSetLogger().");
+			throw std::logic_error("Must set a logger with geSetLogger() before calling geCreate().");
+			return false;
+		}
+
 		geLogger->Header(_attributes.WindowTitle, _attributes.GameVersion);
 
 		// Get and log the cpu info
@@ -735,7 +750,10 @@ namespace game
 
 	inline void Engine::geLogLastError()
 	{
-		geLogger->Error(lastError);
+		if (geLogger)
+		{
+			geLogger->Error(lastError);
+		}
 	}
 
 #if defined(_WIN32)
