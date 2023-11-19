@@ -747,12 +747,14 @@ namespace game
 			//case WM_MOUSELEAVE: ptrPGE->olc_UpdateMouseFocus(false);                                    return 0;
 			//case WM_SETFOCUS:	ptrPGE->olc_UpdateKeyFocus(true);                                       return 0;
 			//case WM_KILLFOCUS:	ptrPGE->olc_UpdateKeyFocus(false);                                      return 0;
-		case WM_LBUTTONDOWN:enginePointer->geMouse.SetMouseState(0, true); return 0;
-		case WM_LBUTTONUP:	enginePointer->geMouse.SetMouseState(0, false); return 0;
-		case WM_RBUTTONDOWN:enginePointer->geMouse.SetMouseState(2, true); return 0;
-		case WM_RBUTTONUP:	enginePointer->geMouse.SetMouseState(2, false); return 0;
-		case WM_MBUTTONDOWN:enginePointer->geMouse.SetMouseState(1, true); return 0;
-		case WM_MBUTTONUP:	enginePointer->geMouse.SetMouseState(1, false); return 0;
+		case WM_LBUTTONDOWN:enginePointer->geMouse.SetMouseState(geMOUSE_LEFT, true); return 0;
+		case WM_LBUTTONUP:	enginePointer->geMouse.SetMouseState(geMOUSE_LEFT, false); return 0;
+		case WM_RBUTTONDOWN:enginePointer->geMouse.SetMouseState(geMOUSE_RIGHT, true); return 0;
+		case WM_RBUTTONUP:	enginePointer->geMouse.SetMouseState(geMOUSE_RIGHT, false); return 0;
+		case WM_MBUTTONDOWN:enginePointer->geMouse.SetMouseState(geMOUSE_MIDDLE, true); return 0;
+		case WM_MBUTTONUP:	enginePointer->geMouse.SetMouseState(geMOUSE_MIDDLE, false); return 0;
+		//case WM_XBUTTONDOWN: 
+		//case WM_XBUTTONUP:
 		case WM_SIZING: break;
 		case WM_SIZE: 
 		{

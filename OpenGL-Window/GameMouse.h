@@ -1,6 +1,10 @@
 #pragma once
 #include "GameMath.h"
 
+#define geMOUSE_LEFT   0
+#define geMOUSE_MIDDLE 1
+#define geMOUSE_RIGHT  2
+
 namespace game
 {
 	class Mouse
