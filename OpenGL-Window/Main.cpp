@@ -87,7 +87,7 @@ public:
 		}
 
 		// Setup pixel mode
-		if (!pixelMode.Initialize({ 320, 180 }))
+		if (!pixelMode.Initialize({ 640, 360 }))
 		{
 			geLogLastError();
 		}
@@ -105,7 +105,7 @@ public:
 		}	
 
 		fontROM = new uint8_t[128 * 48];
-		FillMemory(fontROM,(uint8_t)0, (size_t)128 * (size_t)48);
+		ZeroMemory(fontROM, (size_t)128 * (size_t)48);
 		std::string data;
 		data += "?Q`0001oOch0o01o@F40o0<AGD4090LAGD<090@A7ch0?00O7Q`0600>00000000";
 		data += "O000000nOT0063Qo4d8>?7a14Gno94AA4gno94AaOT0>o3`oO400o7QN00000400";
@@ -124,11 +124,7 @@ public:
 		data += "O`000P08Od400g`<3V=P0G`673IP0`@3>1`00P@6O`P00g`<O`000GP800000000";
 		data += "?P9PL020O`<`N3R0@E4HC7b0@ET<ATB0@@l6C4B0O`H3N7b0?P01L3R000000020";
 
-		//fontRenderable.Create(128, 48);
-
 		int px = 0, py = 0;
-		int32_t ox = ('a' - 32) % 16;
-		int32_t oy = ('a' - 32) / 16;
 		for (size_t b = 0; b < 1024; b += 4)
 		{
 			uint32_t sym1 = (uint32_t)data[b + 0] - 48;
@@ -140,11 +136,9 @@ public:
 			for (int i = 0; i < 24; i++)
 			{
 				uint32_t k = r & (1 << i) ? 255 : 0;
-				//pixelMode.PixelClip(px, py, game::Color(k, k, k, k));
 				fontROM[py * 128 + px] = k;
 				if (++py == 48) { px++; py = 0; }
 			}
-			// render this into a quad (placing font into "ROM"
 		}
 
 		geMouse.UseMouseAcceleration(false);
@@ -206,8 +200,8 @@ public:
 		//}
 		//perftimer.Stop("CircleClip");
 
-		pixelMode.VPillClip(scaledMousePos.x, scaledMousePos.y, 40, 5, game::Colors::Green);
-		pixelMode.VPillClip(scaledMousePos.x, scaledMousePos.y, 38, 4, game::Colors::White);
+		//pixelMode.VPillClip(scaledMousePos.x, scaledMousePos.y, 40, 5, game::Colors::Green);
+		//pixelMode.VPillClip(scaledMousePos.x, scaledMousePos.y, 38, 4, game::Colors::White);
 		
 		// Weird diagonal
 		pixelMode.LineClip(-20, -10, scaledMousePos.x, scaledMousePos.y, game::Colors::Pink);
@@ -221,19 +215,26 @@ public:
 		pixelMode.RectClip(rect, game::Colors::White);
 
 
-		//int px = 1, py = 1;
-		int32_t ox = ('A' - 32) % 16;
-		int32_t oy = ('A' - 32) / 16;
+		// text drawing
 
-		game::Recti rect2;
-		rect2.Set(0, 0, 16*8+1, 6*8+1); // 128,48
-		pixelMode.RectClip(rect2, game::Colors::Pink);
-
-		int x = 20; int y = 20;
-		for (uint32_t i = 0; i < 8; i++)
-			for (uint32_t j = 0; j < 8; j++)
-				if (fontROM[(j+oy*8)*128+(i+ox*8)] > 0)
-					pixelMode.PixelClip(x+i, y+j, game::Colors::White);
+		std::string test = "FPS : " + std::to_string(geGetFramesPerSecond());
+		uint32_t count = 0;
+		int32_t x = 0;
+		int32_t y = 0;
+		int32_t ox = 0;
+		int32_t oy = 0;
+		for (uint8_t letter : test)
+		{
+			x = scaledMousePos.x + 8 + count;
+			y = scaledMousePos.y;
+			ox = (letter - 32) % 16;
+			oy = (letter - 32) / 16;
+			for (uint32_t i = 0; i < 8; i++)
+				for (uint32_t j = 0; j < 8; j++)
+					if (fontROM[(j + oy * 8) * 128 + (i + ox * 8)] > 0)
+						pixelMode.PixelClip(x + i, y + j, game::Colors::Black);
+			count += 8;
+		}
 
 		//// then draw
 		//for (auto c : sText)
@@ -260,31 +261,22 @@ public:
 		//							for (uint32_t js = 0; js < scale; js++)
 		//								Draw(x + sx + (i * scale) + is, y + sy + (j * scale) + js, col);
 		//		}
-		//		else
-		//		{
-		//			for (uint32_t i = 0; i < 8; i++)
-		//				for (uint32_t j = 0; j < 8; j++)
-		//					if (fontRenderable.Sprite()->GetPixel(i + ox * 8, j + oy * 8).r > 0)
-		//						Draw(x + sx + i, y + sy + j, col);
-		//		}
-		//		sx += 8 * scale;
-		//	}
-		//}
+
 
 
 		pixelMode.Render();
 
-		spriteBatch.Begin();
-		//double_t perSecond = 500000.0 / (perftimer.LastRun("CircleClip") / 1000000000.0);  // throws if not found
-		//double_t millionPerSecond = perSecond / 1000.0 / 1000.0;
-		for (int i = 0; i < 40; i++)
-			spriteBatch.Draw(spriteTexture, {10 + (i * 100), 10}, game::Colors::White);
-		spriteBatch.DrawString(spriteFont, "FPS : " + std::to_string(geGetFramesPerSecond()) + " UPS : " + std::to_string(geGetUpdatesPerSecond()) + " cpu : " + std::to_string(geGetCPUFrequency()) + "Mhz", 10, 200, game::Colors::White,2.0f);
-		//spriteBatch.DrawString(spriteFont, "Random Circle(s) : " + std::to_string(millionPerSecond) + " million per second.", 10, 0, game::Colors::Red, 2.0f);
-		spriteBatch.DrawString(spriteFont, "Window Pixel Size: " + std::to_string(geGetWindowSize().width) + "x" + std::to_string(geGetWindowSize().height), 10, 240, game::Colors::White, 2.0f);
-		spriteBatch.DrawString(spriteFont, "PixelMode Pixel Size: " + std::to_string(pixelMode.GetPixelFrameBufferSize().width) + "x" + std::to_string(pixelMode.GetPixelFrameBufferSize().height), 10, 280, game::Colors::White, 2.0f);
-		spriteBatch.DrawString(spriteFont, "Sprites Drawn Last Frame: " + std::to_string(spriteBatch.SpritesDrawnLastFrame()), 10, 320, game::Colors::White, 2.0f);
-		spriteBatch.End();
+		//spriteBatch.Begin();
+		////double_t perSecond = 500000.0 / (perftimer.LastRun("CircleClip") / 1000000000.0);  // throws if not found
+		////double_t millionPerSecond = perSecond / 1000.0 / 1000.0;
+		//for (int i = 0; i < 40; i++)
+		//	spriteBatch.Draw(spriteTexture, {10 + (i * 100), 10}, game::Colors::White);
+		//spriteBatch.DrawString(spriteFont, "FPS : " + std::to_string(geGetFramesPerSecond()) + " UPS : " + std::to_string(geGetUpdatesPerSecond()) + " cpu : " + std::to_string(geGetCPUFrequency()) + "Mhz", 10, 200, game::Colors::White,2.0f);
+		////spriteBatch.DrawString(spriteFont, "Random Circle(s) : " + std::to_string(millionPerSecond) + " million per second.", 10, 0, game::Colors::Red, 2.0f);
+		//spriteBatch.DrawString(spriteFont, "Window Pixel Size: " + std::to_string(geGetWindowSize().width) + "x" + std::to_string(geGetWindowSize().height), 10, 240, game::Colors::White, 2.0f);
+		//spriteBatch.DrawString(spriteFont, "PixelMode Pixel Size: " + std::to_string(pixelMode.GetPixelFrameBufferSize().width) + "x" + std::to_string(pixelMode.GetPixelFrameBufferSize().height), 10, 280, game::Colors::White, 2.0f);
+		//spriteBatch.DrawString(spriteFont, "Sprites Drawn Last Frame: " + std::to_string(spriteBatch.SpritesDrawnLastFrame()), 10, 320, game::Colors::White, 2.0f);
+		//spriteBatch.End();
 	}
 
 	// Sets up API stuff
