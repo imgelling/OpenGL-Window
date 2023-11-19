@@ -365,20 +365,20 @@ namespace game
 		}
 
 		// Copy data into memory
-		_d3d10Device->UpdateSubresource(texture.textureInterface10, 0, NULL, data, tex.SysMemPitch, 0);
+		_d3d10Device->UpdateSubresource(texture.textureInterface10.Get(), 0, NULL, data, tex.SysMemPitch, 0);
 
 		D3D10_SHADER_RESOURCE_VIEW_DESC srDesc = {};
 		srDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
 		srDesc.ViewDimension = D3D10_SRV_DIMENSION_TEXTURE2D;
 		srDesc.Texture2D.MostDetailedMip = 0;
 		srDesc.Texture2D.MipLevels = texture.isMipMapped ? -1 : 1; // -1 for mipmaps
-		if (FAILED(_d3d10Device->CreateShaderResourceView(texture.textureInterface10, &srDesc, &texture.textureSRV10)))
+		if (FAILED(_d3d10Device->CreateShaderResourceView(texture.textureInterface10.Get(), &srDesc, texture.textureSRV10.GetAddressOf())))
 		{
 			lastError = { GameErrors::GameDirectX10Specific, "Could not create texture SRV, \"" + fileName + "\"." };
 			return false;
 		}
 
-		_d3d10Device->GenerateMips(texture.textureSRV10);
+		_d3d10Device->GenerateMips(texture.textureSRV10.Get());
 
 
 		//// Copy texture data to the memory
@@ -399,8 +399,6 @@ namespace game
 
 	inline void RendererDX10::UnLoadTexture(Texture2D& texture)
 	{
-		SAFE_RELEASE(texture.textureInterface10);
-		SAFE_RELEASE(texture.textureSRV10);
 		texture.width = 0;
 		texture.height = 0;
 		texture.oneOverWidth = 0.0f;

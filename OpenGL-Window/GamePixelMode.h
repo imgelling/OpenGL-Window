@@ -408,7 +408,7 @@ namespace game
 			srDesc.ViewDimension = D3D10_SRV_DIMENSION_TEXTURE2D;
 			srDesc.Texture2D.MostDetailedMip = 0;
 			srDesc.Texture2D.MipLevels = 1;
-			if (FAILED(enginePointer->d3d10Device->CreateShaderResourceView(_frameBuffer.textureInterface10, &srDesc, &_textureShaderResourceView0_10)))
+			if (FAILED(enginePointer->d3d10Device->CreateShaderResourceView(_frameBuffer.textureInterface10.Get(), &srDesc, &_textureShaderResourceView0_10)))
 			{
 				std::cout << "CreateSRV0 failed!\n";
 			}

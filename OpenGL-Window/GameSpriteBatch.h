@@ -1451,7 +1451,7 @@ namespace game
 			{
 				Render();
 				_currentTexture = texture;
-				enginePointer->d3d10Device->PSSetShaderResources(0, 1, &texture.textureSRV10);
+				enginePointer->d3d10Device->PSSetShaderResources(0, 1, texture.textureSRV10.GetAddressOf());
 			}
 
 			access = &_spriteVertices10[_numberOfSpritesUsed * 4];

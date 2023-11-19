@@ -6,6 +6,7 @@
 #include <d3d11.h>
 #endif
 #if defined(GAME_DIRECTX10)
+#include <wrl.h>
 #include <d3d10.h>
 #endif
 #if defined(GAME_DIRECTX9)
@@ -31,8 +32,8 @@ namespace game
 		LPDIRECT3DTEXTURE9 textureInterface9;
 #endif
 #if defined(GAME_DIRECTX10)
-		ID3D10Texture2D* textureInterface10;
-		ID3D10ShaderResourceView* textureSRV10;
+		Microsoft::WRL::ComPtr<ID3D10Texture2D> textureInterface10;
+		Microsoft::WRL::ComPtr<ID3D10ShaderResourceView> textureSRV10;
 #endif
 #if defined(GAME_DIRECTX11)
 		Microsoft::WRL::ComPtr<ID3D11Texture2D> textureInterface11;
@@ -76,8 +77,6 @@ namespace game
 		textureInterface9 = nullptr;
 #endif
 #if defined(GAME_DIRECTX10)
-		textureInterface10 = nullptr;
-		textureSRV10 = nullptr;
 #endif
 #if defined(GAME_DIRECTX11)
 #endif
