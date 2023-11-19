@@ -8,7 +8,9 @@ namespace game
 	public:
 		Mouse();
 		~Mouse();
-		bool IsButtonPressed(const int32_t button);
+		bool IsButtonHeld(const int32_t button);
+		bool WasButtonPressend(const int32_t button);
+		bool WasButtonReleased(const int32_t button);
 		void HandleMouseMove(const int32_t xPosition, const int32_t yPosition);
 		void HandleMouseWheel(const int32_t delta);
 		void SetMouseState(const uint32_t button, const bool pressed);
@@ -22,29 +24,43 @@ namespace game
 		Pointi _position;
 		Pointi _positionOld;
 		Pointi _positionRelative;
-		bool* _buttons;
+		bool* _currentButtonState;
+		bool* _oldButtonState;
 	};
 
 	inline Mouse::Mouse()
 	{
 		_wheelDelta = 0;
-		_buttons = new bool[10];
+		_currentButtonState = new bool[10];
+		_oldButtonState = new bool[10];
 		for (uint8_t button = 0; button < 10; button++)
 		{
-			_buttons[button] = false;
+			_currentButtonState[button] = false;
+			_oldButtonState[button] = false;
 		}
 	}
 
 	inline Mouse::~Mouse()
 	{
-		delete[] _buttons;
+		delete[] _currentButtonState;
+		delete[] _oldButtonState;
 	}
 
-	inline bool Mouse::IsButtonPressed(const int32_t button)
+	inline bool Mouse::IsButtonHeld(const int32_t button)
 	{
 		if ((button < 0) || (button > 9)) return false;
 
-		return _buttons[button];
+		return _currentButtonState[button];
+	}
+
+	inline bool Mouse::WasButtonPressend(const int32_t button)
+	{
+		return false;
+	}
+
+	inline bool Mouse::WasButtonReleased(const int32_t button)
+	{
+		return false;
 	}
 
 	inline void Mouse::HandleMouseMove(const int32_t xPosition, const int32_t yPosition)
@@ -64,7 +80,8 @@ namespace game
 
 	inline void Mouse::SetMouseState(const uint32_t button, const bool pressed)
 	{
-		_buttons[button] = pressed;
+		_oldButtonState[button] = _currentButtonState[button];
+		_currentButtonState[button] = pressed;
 	}
 
 	inline void Mouse::ResetMouseValues()
