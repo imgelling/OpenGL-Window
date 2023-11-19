@@ -119,6 +119,7 @@ namespace game
 
 		
 		// Renderer specific
+
 		void geClear(const uint32_t bufferFlags, const Color color);
 		bool geCreateTexture(Texture2D& texture);
 		bool geLoadTexture(const std::string fileName, Texture2D& texture);

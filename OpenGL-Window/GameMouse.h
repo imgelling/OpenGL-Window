@@ -23,6 +23,7 @@ namespace game
 		Pointi GetPositionRelative() const noexcept;
 		int32_t GetWheelDelta() const noexcept;
 		void ShowMouse(const bool isShown);
+		void UseMouseAcceleration(const bool useAcceleration) noexcept;
 	private:
 		int32_t _wheelDelta;
 		Pointi _position;
@@ -30,10 +31,14 @@ namespace game
 		Pointi _positionRelative;
 		bool* _currentButtonState;
 		bool* _oldButtonState;
+		int32_t _userMouseParams[3];
 	};
 
 	inline Mouse::Mouse()
 	{
+		// Save the user mouse parameters
+		SystemParametersInfo(SPI_GETMOUSE, 0, _userMouseParams, 0);
+
 		_wheelDelta = 0;
 		_currentButtonState = new bool[10];
 		_oldButtonState = new bool[10];
@@ -48,6 +53,23 @@ namespace game
 	{
 		delete[] _currentButtonState;
 		delete[] _oldButtonState;
+
+		// Restore user mouse parameters
+		SystemParametersInfo(SPI_SETMOUSE, 0, _userMouseParams, SPIF_SENDCHANGE);
+	}
+
+	inline void Mouse::UseMouseAcceleration(const bool useAcceleration) noexcept
+	{
+		int32_t mouseParams[3] = {};
+
+		// Get the current values.
+		SystemParametersInfo(SPI_GETMOUSE, 0, mouseParams, 0);
+
+		// Modify the acceleration value as directed.
+		mouseParams[2] = useAcceleration;
+
+		// Update the system setting.
+		SystemParametersInfo(SPI_SETMOUSE, 0, mouseParams, SPIF_SENDCHANGE);
 	}
 
 	inline bool Mouse::IsButtonHeld(const int32_t button) noexcept

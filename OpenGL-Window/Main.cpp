@@ -99,6 +99,8 @@ public:
 		{
 			geLogLastError();
 		}		
+
+		geMouse.UseMouseAcceleration(false);
 	}
 
 	void Shutdown()
