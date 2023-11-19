@@ -70,8 +70,6 @@ namespace game
 
 	inline bool Keyboard::IsKeyHeld(const uint8_t key)
 	{
-		static uint32_t temp = 0;
-
 		bool currentState = _keyCurrentState[key];
 		bool oldState = _keyOldState[key];
 
@@ -88,7 +86,6 @@ namespace game
 			return true;
 		}
 		return false;
-
 	}
 }
 
