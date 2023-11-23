@@ -176,6 +176,7 @@
     <ClInclude Include="GameSpriteSheet.h" />
     <ClInclude Include="GameSystemInfo.h" />
     <ClInclude Include="GameTerminal.h" />
+    <ClInclude Include="GameTextShaders.h" />
     <ClInclude Include="GameTexture2D.h" />
     <ClInclude Include="GameTimer.h" />
     <ClInclude Include="GameMath.h" />

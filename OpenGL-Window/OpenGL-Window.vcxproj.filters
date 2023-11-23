@@ -119,6 +119,9 @@
     <ClInclude Include="GameWindowsKeys.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="GameTextShaders.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Content\PixelShader.hlsl">

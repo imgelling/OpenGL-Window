@@ -8,6 +8,24 @@
 #define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
 
+// If user has not chosen a renderer, default to OpenGL
+#if !defined(GAME_SUPPORT_DIRECTX12)
+#if !defined(GAME_SUPPORT_DIRECTX11)
+#if !defined(GAME_SUPPORT_DIRECTX10)
+#if !defined(GAME_SUPPORT_DIRECTX9)
+#if !defined(GAME_SUPPORT_OPENGL)
+#if !defined(GAME_SUPPORT_VULKAN)
+#if !defined(GAME_SUPPORT_ALL)
+#define GAME_SUPPORT_OPENGL
+#endif
+#endif
+#endif
+#endif
+#endif
+#endif
+#endif
+
+
 #if defined(GAME_SUPPORT_DIRECTX12) || defined(GAME_SUPPORT_ALL)
 #define GAME_DIRECTX12 5
 #endif

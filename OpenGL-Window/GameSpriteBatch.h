@@ -15,6 +15,7 @@
 #include "GameMath.h"
 #include "GameSpriteFont.h"
 #include "GameTexture2D.h"
+#include "GameTextShaders.h"
 
 namespace game
 {

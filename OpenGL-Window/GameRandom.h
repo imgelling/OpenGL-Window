@@ -11,17 +11,31 @@ namespace game
 	public:
 		Random();
 		void SetSeed(const uint32_t seed);
-		uint32_t GetSeed();
+		void NewSeed();
+		uint32_t GetSeed() const noexcept;
 		uint32_t Rnd();
 		uint32_t RndRange(const uint32_t min, const uint32_t max);
 		~Random();
 	private:
-		unsigned int _seed;
+		uint32_t _seed;
 		std::mt19937 _mt19937Generator;
 
 	};
 
 	Random::Random()
+	{
+		std::random_device rd;
+		_seed = rd() ^
+			(
+				(std::mt19937::result_type)
+				std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch()).count() +
+				(std::mt19937::result_type)
+				std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count()
+				);
+		_mt19937Generator.seed(_seed);
+	}
+
+	inline void Random::NewSeed()
 	{
 		std::random_device rd;
 		_seed = rd() ^
@@ -40,7 +54,7 @@ namespace game
 		_mt19937Generator.seed(seed);
 	}
 
-	inline uint32_t Random::GetSeed()
+	inline uint32_t Random::GetSeed() const noexcept
 	{
 		return _seed;
 	}

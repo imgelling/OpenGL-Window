@@ -37,7 +37,7 @@ namespace game
 		void Set(const uint32_t r, const uint32_t g, const uint32_t b, const uint32_t a) noexcept;
 
 	private:
-		const float_t _convert256toF = 1.0f / 255.0f;
+		float_t _convert256toF = 1.0f / 255.0f;
 	};
 
 	inline Color::Color()

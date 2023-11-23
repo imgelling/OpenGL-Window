@@ -16,6 +16,7 @@
 #include "GameEngine.h"
 #include "GameMath.h"
 #include "GameTexture2D.h"
+#include "GameTextShaders.h"
 
 // Just a test to make sure defines are working
 #if defined(GAME_ENABLE_SHADERS)
