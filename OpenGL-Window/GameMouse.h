@@ -4,6 +4,8 @@
 #define geMOUSE_LEFT   0
 #define geMOUSE_MIDDLE 1
 #define geMOUSE_RIGHT  2
+#define geMOUSE_X1 geMOUSE_RIGHT + 1
+#define geMOUSE_X2 geMOUSE_X1 + 1
 
 namespace game
 {
@@ -136,6 +138,7 @@ namespace game
 	{
 		_oldButtonState[button] = _currentButtonState[button];
 		_currentButtonState[button] = pressed;
+		std::cout << "Mouse button " << button << " pressed\n";
 	}
 
 	inline void Mouse::ResetMouseValues() noexcept

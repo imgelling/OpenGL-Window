@@ -772,8 +772,8 @@ namespace game
 		case WM_RBUTTONUP:	enginePointer->geMouse.SetMouseState(geMOUSE_RIGHT, false); return 0;
 		case WM_MBUTTONDOWN:enginePointer->geMouse.SetMouseState(geMOUSE_MIDDLE, true); return 0;
 		case WM_MBUTTONUP:	enginePointer->geMouse.SetMouseState(geMOUSE_MIDDLE, false); return 0;
-		//case WM_XBUTTONDOWN: 
-		//case WM_XBUTTONUP:
+		case WM_XBUTTONDOWN: enginePointer->geMouse.SetMouseState(GET_XBUTTON_WPARAM(wParam) + geMOUSE_RIGHT, true); return true;
+		case WM_XBUTTONUP: enginePointer->geMouse.SetMouseState(GET_XBUTTON_WPARAM(wParam) + geMOUSE_RIGHT, false); return true;
 		case WM_SIZING: break;
 		case WM_SIZE: 
 		{

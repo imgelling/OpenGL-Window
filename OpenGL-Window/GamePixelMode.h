@@ -114,7 +114,7 @@ namespace game
 		ID3D10Buffer* _indexBuffer10;
 		Shader _pixelModeShader10;
 		ID3D10InputLayout* _vertexLayout10;
-		ID3D10ShaderResourceView* _textureShaderResourceView0_10;
+		Microsoft::WRL::ComPtr<ID3D10ShaderResourceView> _textureShaderResourceView_10;
 		ID3D10SamplerState* _textureSamplerState10;
 #endif
 #if defined(GAME_DIRECTX11)
@@ -187,7 +187,6 @@ namespace game
 		_vertexBuffer10 = nullptr;
 		_vertexLayout10 = nullptr;
 		_indexBuffer10 = nullptr;
-		_textureShaderResourceView0_10 = nullptr;
 		_textureSamplerState10 = nullptr;
 #endif
 #if defined(GAME_DIRECTX11)
@@ -219,7 +218,6 @@ namespace game
 			SAFE_RELEASE(_vertexLayout10);
 			SAFE_RELEASE(_indexBuffer10);
 			enginePointer->geUnLoadShader(_pixelModeShader10);
-			SAFE_RELEASE(_textureShaderResourceView0_10);
 			SAFE_RELEASE(_textureSamplerState10);
 		}
 #endif
@@ -408,7 +406,7 @@ namespace game
 			srDesc.ViewDimension = D3D10_SRV_DIMENSION_TEXTURE2D;
 			srDesc.Texture2D.MostDetailedMip = 0;
 			srDesc.Texture2D.MipLevels = 1;
-			if (FAILED(enginePointer->d3d10Device->CreateShaderResourceView(_frameBuffer.textureInterface10.Get(), &srDesc, &_textureShaderResourceView0_10)))
+			if (FAILED(enginePointer->d3d10Device->CreateShaderResourceView(_frameBuffer.textureInterface10.Get(), &srDesc, _textureShaderResourceView_10.GetAddressOf())))
 			{
 				std::cout << "CreateSRV0 failed!\n";
 			}
@@ -1218,7 +1216,7 @@ namespace game
 			enginePointer->d3d10Device->PSSetSamplers(0, 1, &_textureSamplerState10);
 			enginePointer->d3d10Device->IASetPrimitiveTopology(D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
-			enginePointer->d3d10Device->PSSetShaderResources(0, 1, &_textureShaderResourceView0_10);
+			enginePointer->d3d10Device->PSSetShaderResources(0, 1, _textureShaderResourceView_10.GetAddressOf());
 
 
 			enginePointer->d3d10Device->DrawIndexed(6, 0, 0);
