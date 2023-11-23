@@ -5,11 +5,8 @@
 #define SAFE_RELEASE(p) { if ( (p) ) { (p)->Release(); (p) = nullptr; } }
 #endif
 
-
-
 #include <d3d10.h>
 #include <d3dcompiler.h>
-
 
 #include "GameColor.h"
 #include "GameErrors.h"
@@ -38,14 +35,14 @@ namespace game
 		bool LoadShader(const std::string vertex, const std::string fragment, Shader& shader);
 		bool LoadShader(const std::string vertex, const std::string fragment, const std::string geometry, Shader& shader);
 		void UnLoadShader(Shader& shader);
-		void GetDevice(ID3D10Device*& device, IDXGISwapChain*& swapChain, ID3D10RenderTargetView*& renderTargetView, ID3D10DepthStencilView*& depthStencilView);
+		void GetDevice(Microsoft::WRL::ComPtr<ID3D10Device>& device, Microsoft::WRL::ComPtr<IDXGISwapChain>& swapChain, Microsoft::WRL::ComPtr<ID3D10RenderTargetView>& renderTargetView, ID3D10DepthStencilView*& depthStencilView);
 		void Clear(const uint32_t bufferFlags, const Color color);
 	protected:
 		void _ReadExtensions() {};
 	private:
-		ID3D10Device* _d3d10Device;
-		IDXGISwapChain* _d3d10SwapChain;
-		ID3D10RenderTargetView* _d3d10RenderTargetView;
+		Microsoft::WRL::ComPtr<ID3D10Device> _d3d10Device;
+		Microsoft::WRL::ComPtr<IDXGISwapChain> _d3d10SwapChain;
+		Microsoft::WRL::ComPtr<ID3D10RenderTargetView> _d3d10RenderTargetView;
 		ID3D10DepthStencilView* _d3d10DepthStencilView;
 		ID3D10Texture2D* _d3d10DepthStencilBuffer;
 	};
@@ -66,7 +63,8 @@ namespace game
 
 		// Destory old buffers
 		_d3d10Device->OMSetRenderTargets(NULL, NULL, NULL);
-		SAFE_RELEASE(_d3d10RenderTargetView);
+		//SAFE_RELEASE(_d3d10RenderTargetView);
+		_d3d10RenderTargetView.Reset();
 		SAFE_RELEASE(_d3d10DepthStencilView);
 		SAFE_RELEASE(_d3d10DepthStencilBuffer);
 		_d3d10Device->Flush();
@@ -113,7 +111,7 @@ namespace game
 		}
 
 		// Create the render target
-		if (FAILED(_d3d10Device->CreateRenderTargetView(backBuffer, 0, &_d3d10RenderTargetView)))
+		if (FAILED(_d3d10Device->CreateRenderTargetView(backBuffer, 0, _d3d10RenderTargetView.GetAddressOf())))
 		{
 			lastError = { GameErrors::GameDirectX10Specific, "Could not create render target on resize." };
 			DestroyDevice();
@@ -124,7 +122,7 @@ namespace game
 		SAFE_RELEASE(backBuffer);
 
 		// Set the render target
-		_d3d10Device->OMSetRenderTargets(1, &_d3d10RenderTargetView, _d3d10DepthStencilView);
+		_d3d10Device->OMSetRenderTargets(1, _d3d10RenderTargetView.GetAddressOf(), _d3d10DepthStencilView);
 
 		// Set the viewport
 		viewPort.TopLeftX = 0;
@@ -138,19 +136,12 @@ namespace game
 
 	inline RendererDX10::RendererDX10()
 	{
-		_d3d10Device = nullptr;
-		_d3d10SwapChain = nullptr;
-		_d3d10RenderTargetView = nullptr;
 		_d3d10DepthStencilView = nullptr;
 		_d3d10DepthStencilBuffer = nullptr;
 	}
 
-	inline void RendererDX10::GetDevice(ID3D10Device*& device, IDXGISwapChain*& swapChain, ID3D10RenderTargetView*& renderTargetView, ID3D10DepthStencilView*& depthStencilView)
+	inline void RendererDX10::GetDevice(Microsoft::WRL::ComPtr<ID3D10Device>&device, Microsoft::WRL::ComPtr<IDXGISwapChain>& swapChain, Microsoft::WRL::ComPtr<ID3D10RenderTargetView>& renderTargetView, ID3D10DepthStencilView*& depthStencilView)
 	{
-		//		_d3d10Device->AddRef();
-				//_d3d10SwapChain->AddRef();
-				//_d3d10RenderTargetView->AddRef();
-				//_d3d10DepthStencilView->AddRef();
 		device = _d3d10Device;
 		swapChain = _d3d10SwapChain;
 		renderTargetView = _d3d10RenderTargetView;
@@ -192,7 +183,7 @@ namespace game
 
 		try
 		{
-			if (FAILED(D3D10CreateDeviceAndSwapChain(0, D3D10_DRIVER_TYPE_HARDWARE, NULL, debug, D3D10_SDK_VERSION, &scd, &_d3d10SwapChain, &_d3d10Device)))
+			if (FAILED(D3D10CreateDeviceAndSwapChain(0, D3D10_DRIVER_TYPE_HARDWARE, NULL, debug, D3D10_SDK_VERSION, &scd, _d3d10SwapChain.GetAddressOf(), _d3d10Device.GetAddressOf())))
 			{
 				lastError = { GameErrors::GameDirectX10Specific, "Could not create device." };
 				return false;
@@ -244,7 +235,7 @@ namespace game
 		}
 
 		// Create the render target
-		if (FAILED(_d3d10Device->CreateRenderTargetView(backBuffer, 0, &_d3d10RenderTargetView)))
+		if (FAILED(_d3d10Device->CreateRenderTargetView(backBuffer, 0, _d3d10RenderTargetView.GetAddressOf())))
 		{
 			lastError = { GameErrors::GameDirectX10Specific, "Could not create render target." };
 			DestroyDevice();
@@ -255,7 +246,7 @@ namespace game
 		SAFE_RELEASE(backBuffer);
 
 		// Set the render target
-		_d3d10Device->OMSetRenderTargets(1, &_d3d10RenderTargetView, _d3d10DepthStencilView);
+		_d3d10Device->OMSetRenderTargets(1, _d3d10RenderTargetView.GetAddressOf(), _d3d10DepthStencilView);
 
 
 		// Set the viewport
@@ -273,16 +264,16 @@ namespace game
 
 	inline void RendererDX10::DestroyDevice()
 	{
-		SAFE_RELEASE(_d3d10SwapChain);
+		_d3d10Device.Reset();
+		_d3d10SwapChain.Reset();
+		_d3d10RenderTargetView.Reset();
 		SAFE_RELEASE(_d3d10DepthStencilBuffer);
 		SAFE_RELEASE(_d3d10DepthStencilView);
-		SAFE_RELEASE(_d3d10RenderTargetView);
-		SAFE_RELEASE(_d3d10Device);
 	}
 
 	inline void RendererDX10::Clear(const uint32_t bufferFlags, const Color color)
 	{
-		_d3d10Device->ClearRenderTargetView(_d3d10RenderTargetView, color.rgba);
+		_d3d10Device->ClearRenderTargetView(_d3d10RenderTargetView.Get(), color.rgba);
 		_d3d10Device->ClearDepthStencilView(_d3d10DepthStencilView, bufferFlags, 1.0f, 0);
 	}
 
@@ -399,6 +390,8 @@ namespace game
 
 	inline void RendererDX10::UnLoadTexture(Texture2D& texture)
 	{
+		texture.textureInterface10.Reset();
+		texture.textureSRV10.Reset();
 		texture.width = 0;
 		texture.height = 0;
 		texture.oneOverWidth = 0.0f;

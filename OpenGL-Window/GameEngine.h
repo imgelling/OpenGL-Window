@@ -84,9 +84,9 @@ namespace game
 		LPDIRECT3DDEVICE9 d3d9Device;
 #endif
 #if defined(GAME_DIRECTX10)
-		ID3D10Device* d3d10Device;
-		IDXGISwapChain* d3d10SwapChain;
-		ID3D10RenderTargetView* d3d10RenderTargetView;
+		Microsoft::WRL::ComPtr<ID3D10Device> d3d10Device;
+		Microsoft::WRL::ComPtr<IDXGISwapChain> d3d10SwapChain;
+		Microsoft::WRL::ComPtr<ID3D10RenderTargetView> d3d10RenderTargetView;
 		ID3D10DepthStencilView* d3d10DepthStencilView;
 #endif
 #if defined(GAME_DIRECTX11)
@@ -194,9 +194,6 @@ namespace game
 		d3d9Device = nullptr;
 #endif
 #if defined(GAME_DIRECTX10)
-		d3d10Device = nullptr;
-		d3d10SwapChain = nullptr;
-		d3d10RenderTargetView = nullptr;
 		d3d10DepthStencilView = nullptr;
 #endif
 #if defined(GAME_DIRECTX11)
@@ -216,10 +213,10 @@ namespace game
 		}
 #endif
 #if defined(GAME_DIRECTX10)
-		d3d10SwapChain = nullptr;
-		d3d10RenderTargetView = nullptr;
+		d3d10SwapChain.Reset();
+		d3d10Device.Reset();
+		d3d10RenderTargetView.Reset();
 		d3d10DepthStencilView = nullptr;
-		d3d10Device = nullptr;
 #endif
 #if defined(GAME_DIRECTX11)
 #endif
