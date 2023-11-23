@@ -4,8 +4,8 @@
 #if defined(__linux__)
 #include <unistd.h>
 #endif
-#define WIN32_LEAN_AND_MEAN
-#include <windowsx.h>
+//#define WIN32_LEAN_AND_MEAN
+//#include <windowsx.h>
 
 #include "GameAttributes.h"
 #include "GameHelpers.h"
@@ -759,6 +759,8 @@ namespace game
 	}
 
 #if defined(_WIN32)
+#define GET_X_LPARAM(lp)                        ((int)(short)LOWORD(lp))
+#define GET_Y_LPARAM(lp)                        ((int)(short)HIWORD(lp))
 	inline LRESULT CALLBACK Window::_WindowEventProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	{
 		switch (uMsg)
@@ -826,6 +828,8 @@ namespace game
 		}
 		return DefWindowProc(hWnd, uMsg, wParam, lParam);
 	}
+#undef GET_X_LPARAM
+#undef GET_Y_LPARAM 
 	#elif defined(__linux__)
 	
 	#endif
