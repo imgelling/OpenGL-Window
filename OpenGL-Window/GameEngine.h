@@ -4,6 +4,8 @@
 #if defined(__linux__)
 #include <unistd.h>
 #endif
+#define WIN32_LEAN_AND_MEAN
+#include <windowsx.h>
 
 #include "GameAttributes.h"
 #include "GameHelpers.h"
@@ -761,7 +763,7 @@ namespace game
 	{
 		switch (uMsg)
 		{
-		case WM_MOUSEMOVE: 	enginePointer->geMouse.HandleMouseMove(lParam & 0xFFFF, (lParam >> 16) & 0xFFFF); return 0;
+		case WM_MOUSEMOVE: 	enginePointer->geMouse.HandleMouseMove(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam)); return 0;
 		case WM_MOUSEWHEEL:	enginePointer->geMouse.HandleMouseWheel(GET_WHEEL_DELTA_WPARAM(wParam)); return 0;
 			//case WM_MOUSELEAVE: ptrPGE->olc_UpdateMouseFocus(false);                                    return 0;
 			//case WM_SETFOCUS:	ptrPGE->olc_UpdateKeyFocus(true);                                       return 0;
@@ -774,7 +776,7 @@ namespace game
 		case WM_MBUTTONUP:	enginePointer->geMouse.SetMouseState(geMOUSE_MIDDLE, false); return 0;
 		case WM_XBUTTONDOWN: enginePointer->geMouse.SetMouseState(GET_XBUTTON_WPARAM(wParam) + geMOUSE_RIGHT, true); return true;
 		case WM_XBUTTONUP: enginePointer->geMouse.SetMouseState(GET_XBUTTON_WPARAM(wParam) + geMOUSE_RIGHT, false); return true;
-		case WM_SIZING: break;
+		//case WM_SIZING: break;
 		case WM_SIZE: 
 		{
 			switch (wParam)
