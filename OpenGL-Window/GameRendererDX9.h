@@ -40,6 +40,7 @@ namespace game
 			lastError = { GameErrors::GameDirectX9Specific, "Geometry shaders are not supported." };
 			return false;
 		}
+		bool LoadTextShader(const std::string shaderText, const std::string vertexEntryPoint, const std::string fragmentEntryPoint, Shader& shader) { return false; }
 		void UnLoadShader(Shader& shader);
 		void GetDevice(LPDIRECT3DDEVICE9& device);
 		void Clear(const uint32_t bufferFlags, const Color color);

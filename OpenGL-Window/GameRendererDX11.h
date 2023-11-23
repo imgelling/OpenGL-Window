@@ -32,6 +32,7 @@ namespace game
 			lastError = { GameErrors::GameDirectX11Specific, "Geometry shaders not implemented yet." };
 			return false;
 		}
+		bool LoadTextShader(const std::string shaderText, const std::string vertexEntryPoint, const std::string fragmentEntryPoint, Shader& shader) { return false; }
 		void UnLoadShader(Shader& shader);
 		void GetDevice(Microsoft::WRL::ComPtr<ID3D11Device>&device, Microsoft::WRL::ComPtr <ID3D11DeviceContext>& context, Microsoft::WRL::ComPtr<ID3D11RenderTargetView>& target, Microsoft::WRL::ComPtr<ID3D11DepthStencilView>& depth);
 		void Clear(const uint32_t bufferFlags, const Color color);

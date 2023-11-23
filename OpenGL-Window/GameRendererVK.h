@@ -30,6 +30,7 @@ namespace game
 			lastError = { GameErrors::GameVulkanSpecific, "Geometry shaders not implemented yet." };
 			return false;
 		}
+		bool LoadTextShader(const std::string shaderText, const std::string vertexEntryPoint, const std::string fragmentEntryPoint, Shader& shader) { return false; }
 		void UnLoadShader(Shader& shader);
 		void Clear(const uint32_t bufferFlags, const Color color) {}
 	protected:

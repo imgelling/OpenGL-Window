@@ -69,6 +69,7 @@ namespace game
 			lastError = { GameErrors::GameDirectX12Specific, "Geometry shaders not implemented yet." };
 			return false;
 		}
+		bool LoadTextShader(const std::string shaderText, const std::string vertexEntryPoint, const std::string fragmentEntryPoint, Shader& shader) { return false; }
 		void UnLoadShader(Shader& shader);
 		void StartFrame(); // can go away after clear implemented
 		//void EndFrame();

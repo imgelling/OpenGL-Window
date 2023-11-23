@@ -27,6 +27,7 @@ namespace game
 		virtual void UnLoadTexture(Texture2D& texture) = 0;
 		virtual bool LoadShader(const std::string vertex, const std::string fragment, Shader& shader) = 0;
 		virtual bool LoadShader(const std::string vertex, const std::string fragment, const std::string geometry, Shader& shader) = 0;
+		virtual bool LoadTextShader(const std::string shaderText, const std::string vertexEntryPoint, const std::string fragmentEntryPoint, Shader& shader) = 0;
 		virtual void UnLoadShader(Shader& shader) = 0;
 		virtual void Clear(const uint32_t bufferFlags, const Color color) = 0;
 	protected:
