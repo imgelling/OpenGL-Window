@@ -138,7 +138,6 @@ namespace game
 	{
 		_oldButtonState[button] = _currentButtonState[button];
 		_currentButtonState[button] = pressed;
-		std::cout << "Mouse button " << button << " pressed\n";
 	}
 
 	inline void Mouse::ResetMouseValues() noexcept

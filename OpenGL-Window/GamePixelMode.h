@@ -1888,7 +1888,7 @@ namespace game
 			for (int32_t i = 0; i < 8; i++)
 				for (int32_t j = 0; j < 8; j++)
 					if (_fontROM[(j + oy * 8) * 128 + (i + ox * 8)] > 0)
-						PixelClip(px + i, py + j, game::Colors::Black);
+						PixelClip(px + i, py + j, color);
 			px += 8;
 			//py = scaledMousePos.y;
 		}
@@ -1935,7 +1935,7 @@ namespace game
 			for (int32_t i = 0; i < 8; i++)
 				for (int32_t j = 0; j < 8; j++)
 					if (_fontROM[(j + oy * 8) * 128 + (i + ox * 8)] > 0)
-						Pixel(px + i, py + j, game::Colors::Black);
+						Pixel(px + i, py + j, color);
 			px += 8;
 			//py = scaledMousePos.y;
 		}

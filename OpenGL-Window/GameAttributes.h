@@ -57,7 +57,7 @@ namespace game
 		FrameLock = 0.0f;
 		UpdateLock = 0.0f;
 		RenderingAPI = RenderAPI::OpenGL; // Defaults to OpenGL
-		VsyncOn = true;
+		VsyncOn = false;
 		GameVersion = "0";
 	}
 }
