@@ -54,8 +54,8 @@ namespace game
 		void RectFilledClip(const Recti& rectangle, const Color& color) noexcept;
 		void HPillClip(const int32_t x, const int32_t y, const int32_t length, const int32_t radius, const game::Color& color) noexcept;
 		void VPillClip(const int32_t x, const int32_t y, const int32_t height, const int32_t radius, const game::Color& color) noexcept;
-		void Text(const std::string& text, const int32_t x, const int32_t y, const game::Color& color);
-		void TextClip(const std::string& text, const int32_t x, const int32_t y, const game::Color& color);
+		void Text(const std::string& text, const int32_t x, const int32_t y, const game::Color& color, const uint32_t scale = 1);
+		void TextClip(const std::string& text, const int32_t x, const int32_t y, const game::Color& color, const uint32_t scale = 1);
 		Pointi GetScaledMousePosition() const noexcept;
 		Pointi GetPixelFrameBufferSize() const noexcept;
 	private:
@@ -1874,24 +1874,55 @@ namespace game
 		}
 	}
 
-	inline void PixelMode::TextClip(const std::string& text, const int32_t x, const int32_t y, const game::Color& color)
+	inline void PixelMode::TextClip(const std::string& text, const int32_t x, const int32_t y, const game::Color& color, const uint32_t scale)
 	{
 		int32_t px = x;
 		int32_t py = y;
 		int32_t ox = 0;
 		int32_t oy = 0;
-		for (uint8_t letter : text)
+
+		if (scale > 1)
 		{
-			//px += count;
-			//py = scaledMousePos.y;
-			ox = (letter - 32) % 16;
-			oy = (letter - 32) / 16;
-			for (int32_t i = 0; i < 8; i++)
-				for (int32_t j = 0; j < 8; j++)
-					if (_fontROM[(j + oy * 8) * 128 + (i + ox * 8)] > 0)
-						PixelClip(px + i, py + j, color);
-			px += 8;
-			//py = scaledMousePos.y;
+			for (uint8_t letter : text)
+			{
+				ox = (letter - 32) % 16;
+				oy = (letter - 32) / 16;
+				for (uint32_t i = 0; i < 8; i++)
+				{
+					for (uint32_t j = 0; j < 8; j++)
+					{
+						if (_fontROM[(j + oy * 8) * 128 + (i + ox * 8)] > 0)
+						{
+							for (uint32_t sy = 0; sy < scale; sy++)
+							{
+								for (uint32_t sx = 0; sx < scale; sx++)
+								{
+									PixelClip(px + (i * scale) + sx, py + (j * scale) + sy, color);
+								}
+							}
+						}
+					}
+				}
+				px += 8 * scale;
+			}
+			return;
+		}
+		else
+		{
+			for (uint8_t letter : text)
+			{
+				ox = (letter - 32) % 16;
+				oy = (letter - 32) / 16;
+				for (int32_t i = 0; i < 8; i++)
+				{
+					for (int32_t j = 0; j < 8; j++)
+					{
+						if (_fontROM[(j + oy * 8) * 128 + (i + ox * 8)] > 0)
+							PixelClip(px + i, py + j, color);
+					}
+				}
+				px += 8;
+			}
 		}
 
 		//// then draw
@@ -1921,24 +1952,55 @@ namespace game
 //		}
 	}
 
-	inline void PixelMode::Text(const std::string& text, const int32_t x, const int32_t y, const game::Color& color)
+	inline void PixelMode::Text(const std::string& text, const int32_t x, const int32_t y, const game::Color& color, const uint32_t scale)
 	{
 		int32_t px = x;
 		int32_t py = y;
 		int32_t ox = 0;
 		int32_t oy = 0;
-		for (uint8_t letter : text)
+
+		if (scale > 1)
 		{
-			//px += count;
-			//py = scaledMousePos.y;
-			ox = (letter - 32) % 16;
-			oy = (letter - 32) / 16;
-			for (int32_t i = 0; i < 8; i++)
-				for (int32_t j = 0; j < 8; j++)
-					if (_fontROM[(j + oy * 8) * 128 + (i + ox * 8)] > 0)
-						Pixel(px + i, py + j, color);
-			px += 8;
-			//py = scaledMousePos.y;
+			for (uint8_t letter : text)
+			{
+				ox = (letter - 32) % 16;
+				oy = (letter - 32) / 16;
+				for (uint32_t i = 0; i < 8; i++)
+				{
+					for (uint32_t j = 0; j < 8; j++)
+					{
+						if (_fontROM[(j + oy * 8) * 128 + (i + ox * 8)] > 0)
+						{
+							for (uint32_t sy = 0; sy < scale; sy++)
+							{
+								for (uint32_t sx = 0; sx < scale; sx++)
+								{
+									Pixel(px + (i * scale) + sx, py + (j * scale) + sy, color);
+								}
+							}
+						}
+					}
+				}
+				px += 8 * scale;
+			}
+			return;
+		}
+		else
+		{
+			for (uint8_t letter : text)
+			{
+				ox = (letter - 32) % 16;
+				oy = (letter - 32) / 16;
+				for (int32_t i = 0; i < 8; i++)
+				{
+					for (int32_t j = 0; j < 8; j++)
+					{
+						if (_fontROM[(j + oy * 8) * 128 + (i + ox * 8)] > 0)
+							Pixel(px + i, py + j, color);
+					}
+				}
+				px += 8;
+			}
 		}
 	}
 
