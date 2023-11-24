@@ -18,6 +18,7 @@
 #include "GameShader.h"
 #include "GameSystemInfo.h"
 #include "GameTexture2D.h"
+#include "GameTextShaders.h"
 
 namespace game
 {

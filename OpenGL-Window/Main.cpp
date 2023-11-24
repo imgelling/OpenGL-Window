@@ -2,8 +2,8 @@
 //#define GAME_USE_DEDICATED_GPU
 //#define GAME_ENABLE_NETWORKING
 //#define GAME_ENABLE_SHADERS
-//#define GAME_SUPPORT_DIRECTX9
-#define GAME_SUPPORT_DIRECTX10
+#define GAME_SUPPORT_DIRECTX9
+//#define GAME_SUPPORT_DIRECTX10
 //#define GAME_SUPPORT_DIRECTX11
 //#define GAME_SUPPORT_DIRECTX12
 //#define GAME_SUPPORT_OPENGL
@@ -29,7 +29,7 @@ public:
 
 	Game() : game::Engine()
 	{
-
+		game::Recti test = { 1,1,20,20 };
 	}
 
 	void HandleWindowSizeChange() override
@@ -62,7 +62,7 @@ public:
 		attributes.DebugMode = true;
 		//attributes.MultiSamples = 8; // Not implemented in most of DX, if any
 		attributes.RenderingAPI = game::RenderAPI::DirectX9; 
-		attributes.RenderingAPI = game::RenderAPI::DirectX10;
+		//attributes.RenderingAPI = game::RenderAPI::DirectX10;
 		//attributes.RenderingAPI = game::RenderAPI::DirectX11;
 		//attributes.RenderingAPI = game::RenderAPI::DirectX12;
 		//attributes.RenderingAPI = game::RenderAPI::OpenGL;
@@ -124,9 +124,7 @@ public:
 	
 	void Render(const float_t msElapsed)
 	{
-		game::Pointi scaledMousePos;
-
-		scaledMousePos = pixelMode.GetScaledMousePosition();
+		game::Pointi scaledMousePos = pixelMode.GetScaledMousePosition();
 
 		// Clears and starts new scene
 		geClear(GAME_FRAME_BUFFER_BIT | GAME_DEPTH_STENCIL_BUFFER_BIT, game::Colors::DarkGray);
@@ -166,12 +164,7 @@ public:
 		pixelMode.LineClip(-20, -10, scaledMousePos.x, scaledMousePos.y, game::Colors::Pink);
 
 		// Rectangle
-		game::Recti rect;
-		rect.left = 1;
-		rect.top = 1;
-		rect.right = 318;
-		rect.bottom = 178;
-		pixelMode.RectClip(rect, game::Colors::White);
+		pixelMode.RectClip({ 1,1,318,178 }, game::Colors::White);
 
 		// Draw some text
 		pixelMode.TextClip("FPS : " + std::to_string(geGetFramesPerSecond()), scaledMousePos.x + 8, scaledMousePos.y, game::Colors::Black);
