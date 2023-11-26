@@ -56,6 +56,7 @@ namespace game
 			float_t u, v;
 		};
 		_spriteVertexGL* _spriteVertices;
+		uint32_t _oldTextureBound;
 #endif
 #if defined(GAME_DIRECTX9)
 		struct _spriteVertex9
@@ -178,10 +179,12 @@ namespace game
 		_maxSprites = 0;
 		_spritesDrawnLastFrame = 0;
 		_currentSpritesDrawn = 0;
+
 #if defined(GAME_OPENGL)
 		//if (enginePointer->geIsUsing(GAME_OPENGL))
 		{
 			_spriteVertices = nullptr;
+			_oldTextureBound = 0;
 		}
 #endif
 #if defined(GAME_DIRECTX9)  
@@ -1081,8 +1084,15 @@ namespace game
 #if defined (GAME_OPENGL)
 		if (enginePointer->geIsUsing(GAME_OPENGL))
 		{
-			// Save states? thist
+			// Save current texture
+			glGetIntegerv(GL_TEXTURE_BINDING_2D, (GLint*)&_oldTextureBound);
+
+			glPushAttrib(GL_TEXTURE_2D);
 			glEnable(GL_TEXTURE_2D);
+
+			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+			glPushAttrib(GL_BLEND);
+			glEnable(GL_BLEND);	
 			
 			// and texture bound to it
 		}
@@ -1096,7 +1106,6 @@ namespace game
 		{
 			Render();
 		}
-
 
 #if defined (GAME_DIRECTX9)
 		if (enginePointer->geIsUsing(GAME_DIRECTX9))
@@ -1160,8 +1169,9 @@ namespace game
 		if (enginePointer->geIsUsing(GAME_OPENGL))
 		{
 			// restore saved this stuff
-			glBindTexture(GL_TEXTURE_2D, 0);
-			glDisable(GL_TEXTURE_2D);
+			glBindTexture(GL_TEXTURE_2D, _oldTextureBound);
+			glPopAttrib(); // GL_BLEND
+			glPopAttrib(); // GL_TEXTURE_2D
 		}
 #endif
 #if defined (GAME_DIRECTX12)
@@ -1276,7 +1286,7 @@ namespace game
 			float_t r, g, b, a = 0.0f;
 			Vector2i windowSize = enginePointer->geGetWindowSize();
 
-			glBindTexture(GL_TEXTURE_2D, _currentTexture.bind);
+			/*glBindTexture(GL_TEXTURE_2D, _currentTexture.bind);*/
 
 			_spriteVertexGL* access = &_spriteVertices[0];
 
@@ -1332,8 +1342,6 @@ namespace game
 
 
 			glEnd();
-			//glBindTexture(GL_TEXTURE_2D, 0);
-
 		}
 #endif
 		_numberOfSpritesUsed = 0;
@@ -1358,6 +1366,7 @@ namespace game
 			{
 				Render();
 				_currentTexture = texture;
+				glBindTexture(GL_TEXTURE_2D, _currentTexture.bind);
 			}
 			_spriteVertexGL* access = &_spriteVertices[_numberOfSpritesUsed * 4];
 
@@ -1678,6 +1687,7 @@ namespace game
 			{
 				Render();
 				_currentTexture = texture;
+				glBindTexture(GL_TEXTURE_2D, _currentTexture.bind);
 			}
 			_spriteVertexGL* access = &_spriteVertices[_numberOfSpritesUsed * 4];
 
@@ -1714,8 +1724,6 @@ namespace game
 			//access++;
 		}
 #endif
-
-
 #if defined(GAME_DIRECTX9)
 		if (enginePointer->geIsUsing(GAME_DIRECTX9))
 		{

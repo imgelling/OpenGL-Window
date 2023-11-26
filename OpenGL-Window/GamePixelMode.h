@@ -1126,18 +1126,26 @@ namespace game
 #if defined(GAME_OPENGL) & !defined(GAME_ENABLE_SHADERS)
 		if (enginePointer->geIsUsing(GAME_OPENGL))
 		{
+			glPushAttrib(GL_TEXTURE_2D);
 			glEnable(GL_TEXTURE_2D);
+			uint32_t boundTexture = 0;
+			glGetIntegerv(GL_TEXTURE_BINDING_2D, (GLint*)&boundTexture);
 			glBindTexture(GL_TEXTURE_2D, _frameBuffer.bind);
-			if (enginePointer->_attributes.MultiSamples > 1)
-			{
-				glDisable(0x809D); // 0x809D is GL_MULTISAMPLE
-			}
+			glPushAttrib(0x809D); // GL_MULTISAMPLE
+			//if (enginePointer->_attributes.MultiSamples > 1)
+			//{
+			//	glDisable(0x809D); // 0x809D is GL_MULTISAMPLE
+			//}
 			glCallList(_compiledQuad);
-			if (enginePointer->_attributes.MultiSamples > 1)
-			{
-				glEnable(0x809D);
-			}
-			glDisable(GL_TEXTURE_2D);
+			//if (enginePointer->_attributes.MultiSamples > 1)
+			//{
+			//	glEnable(0x809D);
+			//}
+			//glDisable(GL_TEXTURE_2D);
+			glGetIntegerv(GL_TEXTURE_2D, (GLint*)&boundTexture);
+			glPopAttrib(); // GL_MULTISAMPLE
+			glPopAttrib(); // GL_TEXTURE_2D
+			
 		}
 #endif
 #if defined(GAME_DIRECTX9)
