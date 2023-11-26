@@ -1084,9 +1084,9 @@ namespace game
 #if defined (GAME_OPENGL)
 		if (enginePointer->geIsUsing(GAME_OPENGL))
 		{
+
 			// Save current texture
 			glGetIntegerv(GL_TEXTURE_BINDING_2D, (GLint*)&_oldTextureBound);
-
 			glPushAttrib(GL_TEXTURE_2D);
 			glEnable(GL_TEXTURE_2D);
 
@@ -1286,7 +1286,7 @@ namespace game
 			float_t r, g, b, a = 0.0f;
 			Vector2i windowSize = enginePointer->geGetWindowSize();
 
-			/*glBindTexture(GL_TEXTURE_2D, _currentTexture.bind);*/
+			glBindTexture(GL_TEXTURE_2D, _currentTexture.bind);
 
 			_spriteVertexGL* access = &_spriteVertices[0];
 
@@ -1366,7 +1366,6 @@ namespace game
 			{
 				Render();
 				_currentTexture = texture;
-				glBindTexture(GL_TEXTURE_2D, _currentTexture.bind);
 			}
 			_spriteVertexGL* access = &_spriteVertices[_numberOfSpritesUsed * 4];
 
@@ -1687,7 +1686,6 @@ namespace game
 			{
 				Render();
 				_currentTexture = texture;
-				glBindTexture(GL_TEXTURE_2D, _currentTexture.bind);
 			}
 			_spriteVertexGL* access = &_spriteVertices[_numberOfSpritesUsed * 4];
 

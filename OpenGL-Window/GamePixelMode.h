@@ -1142,7 +1142,7 @@ namespace game
 			//	glEnable(0x809D);
 			//}
 			//glDisable(GL_TEXTURE_2D);
-			glGetIntegerv(GL_TEXTURE_2D, (GLint*)&boundTexture);
+			glBindTexture(GL_TEXTURE_2D, boundTexture);
 			glPopAttrib(); // GL_MULTISAMPLE
 			glPopAttrib(); // GL_TEXTURE_2D
 			
