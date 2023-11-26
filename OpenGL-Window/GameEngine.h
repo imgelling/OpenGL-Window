@@ -762,6 +762,7 @@ namespace game
 	{
 		switch (uMsg)
 		{
+		case WM_SYSCOMMAND: return false;
 		case WM_MOUSEMOVE: 	enginePointer->geMouse.HandleMouseMove(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam)); return 0;
 		case WM_MOUSEWHEEL:	enginePointer->geMouse.HandleMouseWheel(GET_WHEEL_DELTA_WPARAM(wParam)); return 0;
 			//case WM_MOUSELEAVE: ptrPGE->olc_UpdateMouseFocus(false);                                    return 0;
