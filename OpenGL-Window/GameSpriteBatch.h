@@ -597,7 +597,8 @@ namespace game
 			D3D11_SAMPLER_DESC samplerDesc = { };
 
 			// Load shaders for spriteBatch
-			if (!enginePointer->geLoadShader("Content/VertexShader.hlsl", "Content/PixelShader.hlsl", _spriteBatchShader11))
+			//if (!enginePointer->geLoadShader("Content/VertexShader.hlsl", "Content/PixelShader.hlsl", _spriteBatchShader11))
+			if (!enginePointer->geLoadTextShader(gameTextShaders, "mainVS", "mainPS", _spriteBatchShader11))
 			{
 				return false;
 			}
