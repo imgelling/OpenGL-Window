@@ -17,6 +17,7 @@
 #include "GameSystemInfo.h"
 #include "GameTexture2D.h"
 
+
 #if !defined(SAFE_RELEASE)
 #define SAFE_RELEASE(p) { if ( (p) ) { (p)->Release(); (p) = nullptr; } }
 #endif
@@ -69,7 +70,7 @@ namespace game
 			lastError = { GameErrors::GameDirectX12Specific, "Geometry shaders not implemented yet." };
 			return false;
 		}
-		bool LoadTextShader(const std::string shaderText, const std::string vertexEntryPoint, const std::string fragmentEntryPoint, Shader& shader) { return false; }
+		bool LoadTextShader(const std::string shaderText, const std::string vertexEntryPoint, const std::string fragmentEntryPoint, Shader& shader);
 		void UnLoadShader(Shader& shader);
 		void StartFrame(); // can go away after clear implemented
 		//void EndFrame();
@@ -649,6 +650,86 @@ namespace game
 			// Cache the compiled code
 			shader.compiledVertexShader12 = compiledVertexShader;
 			shader.compiledPixelShader12 = compiledPixelShader;
+
+		}
+		return true;
+	}
+
+	inline bool RendererDX12::LoadTextShader(const std::string shaderText, const std::string vertexEntryPoint, const std::string fragmentEntryPoint, Shader& shader)
+	{
+		if (!shader.isPrecompiled)
+		{
+			DWORD flags = D3DCOMPILE_ENABLE_STRICTNESS;
+			if (_attributes.DebugMode)
+			{
+				flags |= D3DCOMPILE_DEBUG;
+				flags |= D3DCOMPILE_SKIP_OPTIMIZATION;
+			}
+			else
+			{
+				//flags |= D3DCOMPILE_OPTIMIZATION_LEVEL3;
+				flags = 0;
+			}
+			Microsoft::WRL::ComPtr<ID3DBlob> compiledVertexShader;// = nullptr;
+			Microsoft::WRL::ComPtr<ID3DBlob> compiledPixelShader;// = nullptr;
+			Microsoft::WRL::ComPtr<ID3DBlob> compilationMsgs;// = nullptr;
+
+			// Compile the vertex shader
+			if (FAILED(D3DCompile2(shaderText.c_str(), shaderText.length(), NULL, NULL, NULL, vertexEntryPoint.c_str(), "vs_5_0", flags, NULL, NULL, NULL, NULL, compiledVertexShader.GetAddressOf(), compilationMsgs.GetAddressOf())))
+			{
+				SIZE_T size = compilationMsgs->GetBufferSize();
+				uint8_t* p = reinterpret_cast<unsigned char*>(compilationMsgs->GetBufferPointer());
+				lastError = { GameErrors::GameDirectX12Specific,"Could not compile vertex shader from \"" + shaderText + "\".\n" };
+				for (uint32_t bytes = 0; bytes < size; bytes++)
+				{
+					lastError.lastErrorString += p[bytes];
+				}
+				return false;
+			}
+
+			// Compile the pixel shader
+			if (FAILED(D3DCompile2(shaderText.c_str(), shaderText.length(), NULL, NULL, NULL, fragmentEntryPoint.c_str(), "ps_5_0", flags, NULL, NULL, NULL, NULL, compiledPixelShader.GetAddressOf(), compilationMsgs.GetAddressOf())))
+			{
+				SIZE_T size = compilationMsgs->GetBufferSize();
+				uint8_t* p = reinterpret_cast<unsigned char*>(compilationMsgs->GetBufferPointer());
+				lastError = { GameErrors::GameDirectX12Specific,"Could not compile pixel shader from \"" + shaderText + "\".\n" };
+				for (uint32_t bytes = 0; bytes < size; bytes++)
+				{
+					lastError.lastErrorString += p[bytes];
+				}
+				return false;
+			}
+
+			// Cache the compiled code
+			shader.compiledVertexShader12 = compiledVertexShader;
+			shader.compiledPixelShader12 = compiledPixelShader;
+
+
+			return true;
+		}
+		else
+		{
+			//// Load compiled vertex shader
+			//Microsoft::WRL::ComPtr<ID3DBlob> compiledPixelShader;// = nullptr;
+			//Microsoft::WRL::ComPtr<ID3DBlob> compiledVertexShader;// = nullptr;
+
+			//// Load vertex shader
+			//if (FAILED(D3DReadFileToBlob((ConvertToWide(vertex).c_str()), &compiledVertexShader)))
+			//{
+			//	lastError = { GameErrors::GameDirectX11Specific,"Could not read vertex file \"" + vertex + "\"." };
+			//	return false;
+			//}
+
+			//// Load pixel shader
+			//if (FAILED(D3DReadFileToBlob((ConvertToWide(fragment).c_str()), &compiledPixelShader)))
+			//{
+			//	lastError = { GameErrors::GameDirectX11Specific,"Could not read pixel file \"" + fragment + "\"." };
+			//	return false;
+			//}
+
+			//// Cache the compiled code
+			//shader.compiledVertexShader12 = compiledVertexShader;
+			//shader.compiledPixelShader12 = compiledPixelShader;
 
 		}
 		return true;

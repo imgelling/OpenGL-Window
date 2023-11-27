@@ -750,7 +750,8 @@ namespace game
 
 
 			// Load shaders for sprite mode
-			if (!enginePointer->geLoadShader("Content/VertexShader.hlsl", "Content/PixelShader.hlsl", _spriteBatchShader12))
+			//if (!enginePointer->geLoadShader("Content/VertexShader.hlsl", "Content/PixelShader.hlsl", _spriteBatchShader12))
+			if (!enginePointer->geLoadTextShader(gameTextShaders, "mainVS", "mainPS", _spriteBatchShader12))
 			{
 				return false;
 			}
