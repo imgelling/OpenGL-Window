@@ -484,7 +484,8 @@ namespace game
 			D3D10_SAMPLER_DESC samplerDesc = { };
 
 			// Load shaders for spriteBatch
-			if (!enginePointer->geLoadShader("Content/VertexShader.hlsl", "Content/PixelShader.hlsl", _spriteBatchShader10))
+			//if (!enginePointer->geLoadShader("Content/VertexShader.hlsl", "Content/PixelShader.hlsl", _spriteBatchShader10))
+			if (!enginePointer->geLoadTextShader(gameTextShaders, "mainVS", "mainPS", _spriteBatchShader10))
 			{
 				return false;
 			}

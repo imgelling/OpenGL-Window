@@ -582,7 +582,82 @@ namespace game
 		//}
 
 		//if (FAILED(D3DCompile2(shaderText.c_str(), shaderText.length(), NULL, NULL, NULL, fragmentEntryPoint.c_str(), "ps_4_0", flags, NULL, NULL, NULL, NULL, compiledPixelShader.GetAddressOf(), compilationMsgs.GetAddressOf())))
-		return false;
+		DWORD flags = D3DCOMPILE_ENABLE_STRICTNESS;
+		if (_attributes.DebugMode)
+		{
+			flags |= D3DCOMPILE_DEBUG;
+		}
+		ID3DBlob* compiledVertexShader = nullptr;
+		ID3DBlob* compiledPixelShader = nullptr;
+		ID3DBlob* compilationMsgs = nullptr;
+
+		// Compile the vertex shader
+		//if (FAILED(D3DCompileFromFile(ConvertToWide(vertex).c_str(), NULL, NULL, "main", "vs_4_0", flags, NULL, &compiledVertexShader, &compilationMsgs)))
+		if (FAILED(D3DCompile2(shaderText.c_str(), shaderText.length(), NULL, NULL, NULL, vertexEntryPoint.c_str(), "vs_4_0", flags, NULL, NULL, NULL, NULL, &compiledVertexShader, &compilationMsgs)))
+		{
+			SIZE_T size = compilationMsgs->GetBufferSize();
+			uint8_t* p = reinterpret_cast<unsigned char*>(compilationMsgs->GetBufferPointer());
+			lastError = { GameErrors::GameDirectX10Specific,"Could not compile vertex shader from \"" + shaderText + "\".\n" };
+			for (uint32_t bytes = 0; bytes < size; bytes++)
+			{
+				lastError.lastErrorString += p[bytes];
+			}
+			SAFE_RELEASE(compilationMsgs);
+			SAFE_RELEASE(compiledVertexShader);
+			return false;
+		}
+
+		// Compile the pixel shader
+		//if (FAILED(D3DCompileFromFile(ConvertToWide(fragment).c_str(), NULL, NULL, "main", "ps_4_0", flags, NULL, &compiledPixelShader, &compilationMsgs)))
+		if (FAILED(D3DCompile2(shaderText.c_str(), shaderText.length(), NULL, NULL, NULL, fragmentEntryPoint.c_str(), "ps_4_0", flags, NULL, NULL, NULL, NULL, &compiledPixelShader, &compilationMsgs)))
+		{
+			SIZE_T size = compilationMsgs->GetBufferSize();
+			auto* p = reinterpret_cast<unsigned char*>(compilationMsgs->GetBufferPointer());
+			lastError = { GameErrors::GameDirectX10Specific,"Could not compile pixel shader from \"" + shaderText + "\".\n" };
+			for (uint32_t bytes = 0; bytes < size; bytes++)
+			{
+				lastError.lastErrorString += p[bytes];
+			}
+			SAFE_RELEASE(compilationMsgs);
+			SAFE_RELEASE(compiledVertexShader);
+			SAFE_RELEASE(compiledPixelShader);
+			return false;
+		}
+
+		// Free up any messages from compilation if any
+		SAFE_RELEASE(compilationMsgs);
+
+		// Create vertex shader
+		if (FAILED(_d3d10Device->CreateVertexShader(compiledVertexShader->GetBufferPointer(), compiledVertexShader->GetBufferSize(), &shader.vertexShader10)))
+		{
+			lastError = { GameErrors::GameDirectX9Specific,"Could not create vertex shader from \"" + shaderText + "\"." };
+			SAFE_RELEASE(compiledVertexShader);
+			SAFE_RELEASE(compiledPixelShader);
+			SAFE_RELEASE(shader.pixelShader10);
+
+			return false;
+		}
+
+		// Create pixel shader
+		if (FAILED(_d3d10Device->CreatePixelShader((DWORD*)(compiledPixelShader->GetBufferPointer()), compiledPixelShader->GetBufferSize(), &shader.pixelShader10)))
+		{
+			lastError = { GameErrors::GameDirectX9Specific,"Could not create pixel shader from \"" + shaderText + "\"." };
+			SAFE_RELEASE(compiledVertexShader);
+			SAFE_RELEASE(compiledPixelShader);
+			SAFE_RELEASE(shader.vertexShader10);
+			return false;
+		}
+
+		// Shaders created, save a reference and release this one
+		compiledVertexShader->AddRef();
+		shader.compiledVertexShader10 = compiledVertexShader;
+		SAFE_RELEASE(compiledVertexShader);
+
+		compiledPixelShader->AddRef();
+		shader.compiledPixelShader10 = compiledPixelShader;
+		SAFE_RELEASE(compiledPixelShader);
+
+		return true;
 	}
 
 	inline void RendererDX10::UnLoadShader(Shader& shader)

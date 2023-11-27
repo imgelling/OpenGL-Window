@@ -106,7 +106,7 @@ History:
 #include <d3d9.h>
 #include <d3dcompiler.h>
 #pragma comment (lib, "d3d9.lib")
-#pragma comment(lib, "d3dcompiler.lib")
+#pragma comment (lib, "d3dcompiler.lib")
 #include "GameRendererDX9.h"
 #endif
 #pragma endregion
