@@ -8,7 +8,7 @@
 //#define GAME_SUPPORT_DIRECTX12
 //#define GAME_SUPPORT_OPENGL
 //#define GAME_SUPPORT_VULKAN 
-//#define GAME_SUPPORT_ALL
+#define GAME_SUPPORT_ALL
 #include "Game.h"
 
 constexpr uint32_t MAX_UPDATES = 0;
@@ -29,7 +29,6 @@ public:
 
 	Game() : game::Engine()
 	{
-		game::Recti test = { 1,1,20,20 };
 	}
 
 	void HandleWindowSizeChange() override
