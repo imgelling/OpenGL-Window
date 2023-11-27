@@ -1,6 +1,14 @@
 #if !defined(GAME_H)
 #define GAME_H
 
+/*
+History:
+	- November 23, 2023 : Released Game Engine to public on GitHub
+	- 
+
+
+*/
+
 #define GAME_FRAME_BUFFER_BIT (1)
 #define GAME_DEPTH_STENCIL_BUFFER_BIT (1 << 1)
 
