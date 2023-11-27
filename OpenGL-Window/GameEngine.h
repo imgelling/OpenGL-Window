@@ -738,6 +738,9 @@ namespace game
 		{
 			if (_renderer)
 			{
+				d3d10Device.Reset();
+				d3d10SwapChain.Reset();
+				d3d10RenderTargetView.Reset();
 				_renderer->HandleWindowResize(width, height);
 				dynamic_cast<RendererDX10*>(_renderer)->GetDevice(d3d10Device, d3d10SwapChain, d3d10RenderTargetView, d3d10DepthStencilView);
 			}

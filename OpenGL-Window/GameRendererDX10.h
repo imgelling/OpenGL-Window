@@ -580,6 +580,8 @@ namespace game
 			//if (FAILED(D3DCompile2(shaderText.c_str(), shaderText.length(), NULL, NULL, NULL, vertexEntryPoint.c_str(), "vs_5_0", flags, NULL, NULL, NULL, NULL, compiledVertexShader.GetAddressOf(), compilationMsgs.GetAddressOf())))
 			//return false;
 		//}
+
+		//if (FAILED(D3DCompile2(shaderText.c_str(), shaderText.length(), NULL, NULL, NULL, fragmentEntryPoint.c_str(), "ps_4_0", flags, NULL, NULL, NULL, NULL, compiledPixelShader.GetAddressOf(), compilationMsgs.GetAddressOf())))
 		return false;
 	}
 
