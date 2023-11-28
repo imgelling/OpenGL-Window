@@ -8,6 +8,7 @@
 #if defined(GAME_DIRECTX9)
 #include <d3d9.h>
 #endif
+#include <wrl.h>
 
 namespace game
 {
@@ -26,12 +27,12 @@ namespace game
 		IDirect3DPixelShader9* pixelShader9;
 #endif
 #if defined(GAME_DIRECTX10)
-		ID3D10VertexShader* vertexShader10;
-		ID3D10PixelShader* pixelShader10;
-		ID3D10GeometryShader* geometryShader10;
-		ID3DBlob* compiledPixelShader10;
-		ID3DBlob* compiledVertexShader10;
-		ID3DBlob* compiledGeometryShader10;
+		Microsoft::WRL::ComPtr<ID3D10VertexShader> vertexShader10;
+		Microsoft::WRL::ComPtr<ID3D10PixelShader> pixelShader10;
+		Microsoft::WRL::ComPtr<ID3D10GeometryShader> geometryShader10;
+		Microsoft::WRL::ComPtr<ID3DBlob> compiledPixelShader10;
+		Microsoft::WRL::ComPtr<ID3DBlob> compiledVertexShader10;
+		Microsoft::WRL::ComPtr<ID3DBlob> compiledGeometryShader10;
 #endif
 #if defined(GAME_DIRECTX11)
 		Microsoft::WRL::ComPtr<ID3D11VertexShader> vertexShader11;

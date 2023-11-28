@@ -1017,8 +1017,8 @@ namespace game
 			enginePointer->d3d10Device->IASetIndexBuffer(_indexBuffer10, DXGI_FORMAT_R32_UINT, 0);
 			enginePointer->d3d10Device->IASetVertexBuffers(0, 1, &_vertexBuffer10, &stride, &offset);
 			enginePointer->d3d10Device->IASetInputLayout(_vertexLayout10);
-			enginePointer->d3d10Device->VSSetShader(_spriteBatchShader10.vertexShader10);
-			enginePointer->d3d10Device->PSSetShader(_spriteBatchShader10.pixelShader10);
+			enginePointer->d3d10Device->VSSetShader(_spriteBatchShader10.vertexShader10.Get());
+			enginePointer->d3d10Device->PSSetShader(_spriteBatchShader10.pixelShader10.Get());
 			enginePointer->d3d10Device->PSSetSamplers(0, 1, &_textureSamplerState10);
 			enginePointer->d3d10Device->IASetPrimitiveTopology(D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 			enginePointer->d3d10Device->OMSetBlendState(_spriteBatchBlendState10, sampleMask, 0xffffffff);
