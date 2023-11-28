@@ -496,32 +496,29 @@ namespace game
 			return false;
 		}
 
-		ID3D10Blob* pCompiledShader = nullptr;
-		ID3D10Blob* pErrors = nullptr;
+		Microsoft::WRL::ComPtr<ID3D10Blob> pCompiledShader;
+		Microsoft::WRL::ComPtr<ID3D10Blob> pErrors;
 
-		HRESULT hr = D3DCompileFromFile(ConvertToWide(geometry).c_str(), nullptr, nullptr, "main", "gs_4_0", 0, 0, &shader.compiledGeometryShader10, &pErrors);
+		HRESULT hr = D3DCompileFromFile(ConvertToWide(geometry).c_str(), nullptr, nullptr, "main", "gs_4_0", 0, 0, shader.compiledGeometryShader10.GetAddressOf(), pErrors.GetAddressOf());
 
 		if (FAILED(hr))
 		{
 			if (pErrors)
 			{
 				std::cout << (char*)pErrors->GetBufferPointer() << "\n";
-				pErrors->Release();
 			}
 			lastError = { GameErrors::GameDirectX10Specific, "Could not compile geometry shader." };
 			return false;
 		}
 
-		hr = _d3d10Device->CreateGeometryShader(shader.compiledGeometryShader10->GetBufferPointer(), shader.compiledGeometryShader10->GetBufferSize(), &shader.geometryShader10);
+		hr = _d3d10Device->CreateGeometryShader(shader.compiledGeometryShader10->GetBufferPointer(), shader.compiledGeometryShader10->GetBufferSize(), shader.geometryShader10.GetAddressOf());
 
 		if (FAILED(hr))
 		{
-			SAFE_RELEASE(shader.compiledGeometryShader10);// pCompiledShader->Release();
 			lastError = { GameErrors::GameDirectX10Specific, "Could not create geometry shader." };
 			return false;
 		}
 
-		//pCompiledShader->Release();
 		return true;
 	}
 
