@@ -87,7 +87,7 @@ namespace game
 		Microsoft::WRL::ComPtr<ID3D10Device> d3d10Device;
 		Microsoft::WRL::ComPtr<IDXGISwapChain> d3d10SwapChain;
 		Microsoft::WRL::ComPtr<ID3D10RenderTargetView> d3d10RenderTargetView;
-		ID3D10DepthStencilView* d3d10DepthStencilView;
+		Microsoft::WRL::ComPtr<ID3D10DepthStencilView> d3d10DepthStencilView;
 #endif
 #if defined(GAME_DIRECTX11)
 		Microsoft::WRL::ComPtr<ID3D11DeviceContext> d3d11DeviceContext;
@@ -195,7 +195,6 @@ namespace game
 		d3d9Device = nullptr;
 #endif
 #if defined(GAME_DIRECTX10)
-		d3d10DepthStencilView = nullptr;
 #endif
 #if defined(GAME_DIRECTX11)
 #endif
@@ -217,7 +216,7 @@ namespace game
 		d3d10SwapChain.Reset();
 		d3d10Device.Reset();
 		d3d10RenderTargetView.Reset();
-		d3d10DepthStencilView = nullptr;
+		d3d10DepthStencilView.Reset();
 #endif
 #if defined(GAME_DIRECTX11)
 #endif

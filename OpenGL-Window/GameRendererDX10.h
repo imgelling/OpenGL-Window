@@ -36,7 +36,7 @@ namespace game
 		bool LoadShader(const std::string vertex, const std::string fragment, const std::string geometry, Shader& shader);
 		bool LoadTextShader(const std::string shaderText, const std::string vertexEntryPoint, const std::string fragmentEntryPoint, Shader& shader);
 		void UnLoadShader(Shader& shader);
-		void GetDevice(Microsoft::WRL::ComPtr<ID3D10Device>& device, Microsoft::WRL::ComPtr<IDXGISwapChain>& swapChain, Microsoft::WRL::ComPtr<ID3D10RenderTargetView>& renderTargetView, ID3D10DepthStencilView*& depthStencilView);
+		void GetDevice(Microsoft::WRL::ComPtr<ID3D10Device>& device, Microsoft::WRL::ComPtr<IDXGISwapChain>& swapChain, Microsoft::WRL::ComPtr<ID3D10RenderTargetView>& renderTargetView, Microsoft::WRL::ComPtr<ID3D10DepthStencilView>& depthStencilView);
 		void Clear(const uint32_t bufferFlags, const Color color);
 	protected:
 		void _ReadExtensions() {};
@@ -44,7 +44,7 @@ namespace game
 		Microsoft::WRL::ComPtr<ID3D10Device> _d3d10Device;
 		Microsoft::WRL::ComPtr<IDXGISwapChain> _d3d10SwapChain;
 		Microsoft::WRL::ComPtr<ID3D10RenderTargetView> _d3d10RenderTargetView;
-		ID3D10DepthStencilView* _d3d10DepthStencilView;
+		Microsoft::WRL::ComPtr<ID3D10DepthStencilView> _d3d10DepthStencilView;
 		Microsoft::WRL::ComPtr<ID3D10Texture2D> _d3d10DepthStencilBuffer;
 	};
 
@@ -66,7 +66,7 @@ namespace game
 		_d3d10Device->OMSetRenderTargets(NULL, NULL, NULL);
 		//SAFE_RELEASE(_d3d10RenderTargetView);
 		_d3d10RenderTargetView.Reset();
-		SAFE_RELEASE(_d3d10DepthStencilView);
+		_d3d10DepthStencilView.Reset();
 		_d3d10DepthStencilBuffer.Reset();
 		_d3d10Device->Flush();
 
@@ -96,7 +96,7 @@ namespace game
 
 		// Second param is states for depth stencil
 
-		if (FAILED(_d3d10Device->CreateDepthStencilView(_d3d10DepthStencilBuffer.Get(), NULL, &_d3d10DepthStencilView)))
+		if (FAILED(_d3d10Device->CreateDepthStencilView(_d3d10DepthStencilBuffer.Get(), NULL, _d3d10DepthStencilView.GetAddressOf())))
 		{
 			lastError = { GameErrors::GameDirectX10Specific, "Could not create depth stencil view on resize." };
 			DestroyDevice();
@@ -123,7 +123,7 @@ namespace game
 		SAFE_RELEASE(backBuffer);
 
 		// Set the render target
-		_d3d10Device->OMSetRenderTargets(1, _d3d10RenderTargetView.GetAddressOf(), _d3d10DepthStencilView);
+		_d3d10Device->OMSetRenderTargets(1, _d3d10RenderTargetView.GetAddressOf(), _d3d10DepthStencilView.Get());
 
 		// Set the viewport
 		viewPort.TopLeftX = 0;
@@ -137,10 +137,9 @@ namespace game
 
 	inline RendererDX10::RendererDX10()
 	{
-		_d3d10DepthStencilView = nullptr;
 	}
 
-	inline void RendererDX10::GetDevice(Microsoft::WRL::ComPtr<ID3D10Device>&device, Microsoft::WRL::ComPtr<IDXGISwapChain>& swapChain, Microsoft::WRL::ComPtr<ID3D10RenderTargetView>& renderTargetView, ID3D10DepthStencilView*& depthStencilView)
+	inline void RendererDX10::GetDevice(Microsoft::WRL::ComPtr<ID3D10Device>&device, Microsoft::WRL::ComPtr<IDXGISwapChain>& swapChain, Microsoft::WRL::ComPtr<ID3D10RenderTargetView>& renderTargetView, Microsoft::WRL::ComPtr<ID3D10DepthStencilView>& depthStencilView)
 	{
 		device = _d3d10Device;
 		swapChain = _d3d10SwapChain;
@@ -219,7 +218,7 @@ namespace game
 
 
 		// Second param is states for depth stencil
-		if (FAILED(_d3d10Device->CreateDepthStencilView(_d3d10DepthStencilBuffer.Get(), NULL, &_d3d10DepthStencilView)))
+		if (FAILED(_d3d10Device->CreateDepthStencilView(_d3d10DepthStencilBuffer.Get(), NULL, _d3d10DepthStencilView.GetAddressOf())))
 		{
 			lastError = { GameErrors::GameDirectX10Specific, "Could not create depth stencil view." };
 			DestroyDevice();
@@ -246,7 +245,7 @@ namespace game
 		SAFE_RELEASE(backBuffer);
 
 		// Set the render target
-		_d3d10Device->OMSetRenderTargets(1, _d3d10RenderTargetView.GetAddressOf(), _d3d10DepthStencilView);
+		_d3d10Device->OMSetRenderTargets(1, _d3d10RenderTargetView.GetAddressOf(), _d3d10DepthStencilView.Get());
 
 
 		// Set the viewport
@@ -268,13 +267,13 @@ namespace game
 		_d3d10SwapChain.Reset();
 		_d3d10RenderTargetView.Reset();
 		_d3d10DepthStencilBuffer.Reset();
-		SAFE_RELEASE(_d3d10DepthStencilView);
+		_d3d10DepthStencilView.Reset();
 	}
 
 	inline void RendererDX10::Clear(const uint32_t bufferFlags, const Color color)
 	{
 		_d3d10Device->ClearRenderTargetView(_d3d10RenderTargetView.Get(), color.rgba);
-		_d3d10Device->ClearDepthStencilView(_d3d10DepthStencilView, bufferFlags, 1.0f, 0);
+		_d3d10Device->ClearDepthStencilView(_d3d10DepthStencilView.Get(), bufferFlags, 1.0f, 0);
 	}
 
 	inline bool RendererDX10::CreateTexture(Texture2D& texture)
