@@ -2,10 +2,16 @@
 #define GAME_H
 
 /*
-History:
+Change Log:
 	- November 23, 2023 : Released Game Engine to public on GitHub
-	- 
-
+	- November 29, 2023 : 
+		Features:
+			* Shaders are now hard coded in the code. Real small. External files removed
+		Misc:
+			* DirectX10 uses ComPtrs now.
+			* DirectX10 and 11 use ComPtrs for saving/restoring the states now.
+		Bug Fixes:
+			* F10 window resize bug fixed.
 
 */
 
