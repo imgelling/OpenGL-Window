@@ -80,10 +80,10 @@ namespace game
 			float_t u, v;
 		};
 		_spriteVertex10* _spriteVertices10;
-		ID3D10Buffer* _vertexBuffer10;
 		Shader _spriteBatchShader10;
-		ID3D10InputLayout* _vertexLayout10;
-		ID3D10SamplerState* _textureSamplerState10;
+		Microsoft::WRL::ComPtr<ID3D10Buffer> _vertexBuffer10;
+		Microsoft::WRL::ComPtr<ID3D10InputLayout> _vertexLayout10;
+		Microsoft::WRL::ComPtr<ID3D10SamplerState> _textureSamplerState10;
 		ID3D10Buffer* _indexBuffer10;
 		ID3D10BlendState* _spriteBatchBlendState10;
 		ID3D10DepthStencilState* _depthStencilState10;
@@ -204,9 +204,6 @@ namespace game
 			
 			_spriteVertices10 = nullptr;
 			_indexBuffer10 = nullptr;
-			_vertexBuffer10 = nullptr;
-			_vertexLayout10 = nullptr;
-			_textureSamplerState10 = nullptr;
 			_spriteBatchBlendState10 = nullptr;
 			_oldStencilRef10 = 0;
 			_oldStride10 = 0;
@@ -292,9 +289,6 @@ namespace game
 				delete[] _spriteVertices10;
 				_spriteVertices10 = nullptr;
 			}
-			SAFE_RELEASE(_vertexBuffer10);
-			SAFE_RELEASE(_vertexLayout10);
-			SAFE_RELEASE(_textureSamplerState10);
 			SAFE_RELEASE(_indexBuffer10);
 			SAFE_RELEASE(_spriteBatchBlendState10);
 			SAFE_RELEASE(_depthStencilState10);
@@ -496,7 +490,7 @@ namespace game
 			vertexBufferDescription.BindFlags = D3D10_BIND_VERTEX_BUFFER;
 			vertexBufferDescription.CPUAccessFlags = D3D10_CPU_ACCESS_WRITE;
 			vertexBufferDescription.MiscFlags = 0;
-			if (FAILED(enginePointer->d3d10Device->CreateBuffer(&vertexBufferDescription, NULL, &_vertexBuffer10)))
+			if (FAILED(enginePointer->d3d10Device->CreateBuffer(&vertexBufferDescription, NULL, _vertexBuffer10.GetAddressOf())))
 			{
 				lastError = { GameErrors::GameDirectX10Specific, "Could not create vertex buffer for SpriteBatch." };
 				return false;
@@ -522,14 +516,13 @@ namespace game
 			if (FAILED(enginePointer->d3d10Device->CreateBuffer(&indexBufferDescription, &indexInitialData, &_indexBuffer10)))
 			{
 				lastError = { GameErrors::GameDirectX10Specific,"Could not create index buffer for SpriteBatch." };
-				SAFE_RELEASE(_vertexBuffer10);
 				enginePointer->geUnLoadShader(_spriteBatchShader10);
 				return false;
 			}
 
 
 			// Create input layout for shaders
-			if (FAILED(enginePointer->d3d10Device->CreateInputLayout(inputLayout, 3, _spriteBatchShader10.compiledVertexShader10->GetBufferPointer(), _spriteBatchShader10.compiledVertexShader10->GetBufferSize(), &_vertexLayout10)))
+			if (FAILED(enginePointer->d3d10Device->CreateInputLayout(inputLayout, 3, _spriteBatchShader10.compiledVertexShader10->GetBufferPointer(), _spriteBatchShader10.compiledVertexShader10->GetBufferSize(), _vertexLayout10.GetAddressOf())))
 			{
 				lastError = { GameErrors::GameDirectX10Specific, "Could not create input layout for SpriteBatch." };
 				return false;
@@ -543,7 +536,7 @@ namespace game
 			samplerDesc.ComparisonFunc = D3D10_COMPARISON_ALWAYS;
 			samplerDesc.MinLOD = 0;
 			samplerDesc.MaxLOD = D3D10_FLOAT32_MAX;
-			if (FAILED(enginePointer->d3d10Device->CreateSamplerState(&samplerDesc, &_textureSamplerState10)))
+			if (FAILED(enginePointer->d3d10Device->CreateSamplerState(&samplerDesc, _textureSamplerState10.GetAddressOf())))
 			{
 				lastError = { GameErrors::GameDirectX10Specific,"Could not create sampler state for SpriteBatch." };
 				return false;
@@ -1015,11 +1008,11 @@ namespace game
 
 			// Change what we need
 			enginePointer->d3d10Device->IASetIndexBuffer(_indexBuffer10, DXGI_FORMAT_R32_UINT, 0);
-			enginePointer->d3d10Device->IASetVertexBuffers(0, 1, &_vertexBuffer10, &stride, &offset);
-			enginePointer->d3d10Device->IASetInputLayout(_vertexLayout10);
+			enginePointer->d3d10Device->IASetVertexBuffers(0, 1, _vertexBuffer10.GetAddressOf(), &stride, &offset);
+			enginePointer->d3d10Device->IASetInputLayout(_vertexLayout10.Get());
 			enginePointer->d3d10Device->VSSetShader(_spriteBatchShader10.vertexShader10.Get());
 			enginePointer->d3d10Device->PSSetShader(_spriteBatchShader10.pixelShader10.Get());
-			enginePointer->d3d10Device->PSSetSamplers(0, 1, &_textureSamplerState10);
+			enginePointer->d3d10Device->PSSetSamplers(0, 1, _textureSamplerState10.GetAddressOf());
 			enginePointer->d3d10Device->IASetPrimitiveTopology(D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 			enginePointer->d3d10Device->OMSetBlendState(_spriteBatchBlendState10, sampleMask, 0xffffffff);
 			enginePointer->d3d10Device->OMSetDepthStencilState(_depthStencilState10, 1);
