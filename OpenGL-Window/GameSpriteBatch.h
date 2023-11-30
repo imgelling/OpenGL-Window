@@ -84,26 +84,26 @@ namespace game
 		Microsoft::WRL::ComPtr<ID3D10Buffer> _vertexBuffer10;
 		Microsoft::WRL::ComPtr<ID3D10InputLayout> _vertexLayout10;
 		Microsoft::WRL::ComPtr<ID3D10SamplerState> _textureSamplerState10;
-		ID3D10Buffer* _indexBuffer10;
-		ID3D10BlendState* _spriteBatchBlendState10;
-		ID3D10DepthStencilState* _depthStencilState10;
+		Microsoft::WRL::ComPtr<ID3D10Buffer> _indexBuffer10;
+		Microsoft::WRL::ComPtr<ID3D10BlendState> _spriteBatchBlendState10;
+		Microsoft::WRL::ComPtr<ID3D10DepthStencilState> _depthStencilState10;
 
 
 		// saves state of dx10 states we change to restore
 		uint32_t _oldStride10;
 		uint32_t _oldOffset10;
 		uint32_t _oldStencilRef10;
-		ID3D10Buffer* _oldVertexBuffer10;
-		ID3D10Buffer* _oldIndexBuffer10;
+		Microsoft::WRL::ComPtr<ID3D10Buffer> _oldVertexBuffer10;
+		Microsoft::WRL::ComPtr<ID3D10Buffer> _oldIndexBuffer10;
 		DXGI_FORMAT _oldIndexFormat10;
 		uint32_t _oldIndexOffset10;
-		ID3D10InputLayout* _oldInputLayout10;
-		ID3D10VertexShader* _oldVertexShader10;
-		ID3D10PixelShader* _oldPixelShader10;
-		ID3D10SamplerState* _oldTextureSamplerState10;
+		Microsoft::WRL::ComPtr<ID3D10InputLayout> _oldInputLayout10;
+		Microsoft::WRL::ComPtr<ID3D10VertexShader> _oldVertexShader10;
+		Microsoft::WRL::ComPtr<ID3D10PixelShader> _oldPixelShader10;
+		Microsoft::WRL::ComPtr<ID3D10SamplerState> _oldTextureSamplerState10;
 		D3D10_PRIMITIVE_TOPOLOGY _oldPrimitiveTopology10;
-		ID3D10BlendState* _oldBlendState10;
-		ID3D10DepthStencilState* _oldDepthStencilState10;
+		Microsoft::WRL::ComPtr<ID3D10BlendState> _oldBlendState10;
+		Microsoft::WRL::ComPtr<ID3D10DepthStencilState> _oldDepthStencilState10;
 		float_t _oldBlendFactor10[4];
 		uint32_t _oldSampleMask10;
 #endif
@@ -203,25 +203,14 @@ namespace game
 		{
 			
 			_spriteVertices10 = nullptr;
-			_indexBuffer10 = nullptr;
-			_spriteBatchBlendState10 = nullptr;
 			_oldStencilRef10 = 0;
 			_oldStride10 = 0;
 			_oldOffset10 = 0;
-			_oldVertexBuffer10 = nullptr;
-			_oldIndexBuffer10 = nullptr;
 			_oldIndexFormat10 = {};
 			_oldIndexOffset10 = 0;
-			_oldInputLayout10 = nullptr;
-			_oldVertexShader10 = nullptr;
-			_oldPixelShader10 = nullptr;
-			_oldTextureSamplerState10 = nullptr;
 			_oldPrimitiveTopology10 = {};
-			_oldBlendState10 = nullptr;
 			ZeroMemory(_oldBlendFactor10, 4 * sizeof(float_t));
 			_oldSampleMask10 = 0;
-			_depthStencilState10 = nullptr;
-			_oldDepthStencilState10 = nullptr;
 		}
 #endif
 #if defined (GAME_DIRECTX11)
@@ -289,9 +278,6 @@ namespace game
 				delete[] _spriteVertices10;
 				_spriteVertices10 = nullptr;
 			}
-			SAFE_RELEASE(_indexBuffer10);
-			SAFE_RELEASE(_spriteBatchBlendState10);
-			SAFE_RELEASE(_depthStencilState10);
 			enginePointer->geUnLoadShader(_spriteBatchShader10);
 
 		}
@@ -513,7 +499,7 @@ namespace game
 			indexBufferDescription.CPUAccessFlags = 0;
 			indexBufferDescription.MiscFlags = 0;
 			indexInitialData.pSysMem = indices.data();
-			if (FAILED(enginePointer->d3d10Device->CreateBuffer(&indexBufferDescription, &indexInitialData, &_indexBuffer10)))
+			if (FAILED(enginePointer->d3d10Device->CreateBuffer(&indexBufferDescription, &indexInitialData, _indexBuffer10.GetAddressOf())))
 			{
 				lastError = { GameErrors::GameDirectX10Specific,"Could not create index buffer for SpriteBatch." };
 				enginePointer->geUnLoadShader(_spriteBatchShader10);
@@ -553,7 +539,7 @@ namespace game
 			blendStateDesc.DestBlendAlpha = D3D10_BLEND_INV_SRC_ALPHA;
 			blendStateDesc.BlendOpAlpha = D3D10_BLEND_OP_ADD;
 			blendStateDesc.RenderTargetWriteMask[0] = D3D10_COLOR_WRITE_ENABLE_ALL;
-			if (FAILED(enginePointer->d3d10Device->CreateBlendState(&blendStateDesc, &_spriteBatchBlendState10)))
+			if (FAILED(enginePointer->d3d10Device->CreateBlendState(&blendStateDesc, _spriteBatchBlendState10.GetAddressOf())))
 			{
 				lastError = { GameErrors::GameDirectX10Specific, "Could not create blend state for SpriteBatch." };
 				return false;
@@ -566,7 +552,7 @@ namespace game
 			dsDesc.DepthFunc = D3D10_COMPARISON_FUNC::D3D10_COMPARISON_LESS_EQUAL;
 
 			// Create depth stencil state
-			if (FAILED(enginePointer->d3d10Device->CreateDepthStencilState(&dsDesc, &_depthStencilState10)))
+			if (FAILED(enginePointer->d3d10Device->CreateDepthStencilState(&dsDesc, _depthStencilState10.GetAddressOf())))
 			{
 				lastError = { GameErrors::GameDirectX10Specific, "Could not create Depth Stencil State. " };
 				return false;
@@ -996,26 +982,26 @@ namespace game
 			// need to save blend state check Render
 
 			// Save everything we modify
-			enginePointer->d3d10Device->IAGetIndexBuffer(&_oldIndexBuffer10, &_oldIndexFormat10, &_oldIndexOffset10);
-			enginePointer->d3d10Device->IAGetVertexBuffers(0, 1, &_oldVertexBuffer10, &_oldStride10, &_oldOffset10);
-			enginePointer->d3d10Device->IAGetInputLayout(&_oldInputLayout10);
-			enginePointer->d3d10Device->VSGetShader(&_oldVertexShader10);
-			enginePointer->d3d10Device->PSGetShader(&_oldPixelShader10);
-			enginePointer->d3d10Device->PSGetSamplers(0, 1, &_oldTextureSamplerState10);
+			enginePointer->d3d10Device->IAGetIndexBuffer(_oldIndexBuffer10.GetAddressOf(), &_oldIndexFormat10, &_oldIndexOffset10);
+			enginePointer->d3d10Device->IAGetVertexBuffers(0, 1, _oldVertexBuffer10.GetAddressOf(), &_oldStride10, &_oldOffset10);
+			enginePointer->d3d10Device->IAGetInputLayout(_oldInputLayout10.GetAddressOf());
+			enginePointer->d3d10Device->VSGetShader(_oldVertexShader10.GetAddressOf());
+			enginePointer->d3d10Device->PSGetShader(_oldPixelShader10.GetAddressOf());
+			enginePointer->d3d10Device->PSGetSamplers(0, 1, _oldTextureSamplerState10.GetAddressOf());
 			enginePointer->d3d10Device->IAGetPrimitiveTopology(&_oldPrimitiveTopology10);
-			enginePointer->d3d10Device->OMGetBlendState(&_oldBlendState10, _oldBlendFactor10, &_oldSampleMask10);
-			enginePointer->d3d10Device->OMGetDepthStencilState(&_oldDepthStencilState10, &_oldStencilRef10);
+			enginePointer->d3d10Device->OMGetBlendState(_oldBlendState10.GetAddressOf(), _oldBlendFactor10, &_oldSampleMask10);
+			enginePointer->d3d10Device->OMGetDepthStencilState(_oldDepthStencilState10.GetAddressOf(), &_oldStencilRef10);
 
 			// Change what we need
-			enginePointer->d3d10Device->IASetIndexBuffer(_indexBuffer10, DXGI_FORMAT_R32_UINT, 0);
+			enginePointer->d3d10Device->IASetIndexBuffer(_indexBuffer10.Get(), DXGI_FORMAT_R32_UINT, 0);
 			enginePointer->d3d10Device->IASetVertexBuffers(0, 1, _vertexBuffer10.GetAddressOf(), &stride, &offset);
 			enginePointer->d3d10Device->IASetInputLayout(_vertexLayout10.Get());
 			enginePointer->d3d10Device->VSSetShader(_spriteBatchShader10.vertexShader10.Get());
 			enginePointer->d3d10Device->PSSetShader(_spriteBatchShader10.pixelShader10.Get());
 			enginePointer->d3d10Device->PSSetSamplers(0, 1, _textureSamplerState10.GetAddressOf());
 			enginePointer->d3d10Device->IASetPrimitiveTopology(D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-			enginePointer->d3d10Device->OMSetBlendState(_spriteBatchBlendState10, sampleMask, 0xffffffff);
-			enginePointer->d3d10Device->OMSetDepthStencilState(_depthStencilState10, 1);
+			enginePointer->d3d10Device->OMSetBlendState(_spriteBatchBlendState10.Get(), sampleMask, 0xffffffff);
+			enginePointer->d3d10Device->OMSetDepthStencilState(_depthStencilState10.Get(), 1);
 			
 
 			// Reset current texture
@@ -1129,18 +1115,18 @@ namespace game
 		if (enginePointer->geIsUsing(GAME_DIRECTX10))
 		{
 			// restore everything
-			enginePointer->d3d10Device->OMSetDepthStencilState(_oldDepthStencilState10, _oldStencilRef10 );
-			enginePointer->d3d10Device->IASetIndexBuffer(_oldIndexBuffer10, _oldIndexFormat10, _oldIndexOffset10);
-			enginePointer->d3d10Device->IASetVertexBuffers(0, 1, &_oldVertexBuffer10, &_oldStride10, &_oldOffset10);
-			enginePointer->d3d10Device->IASetInputLayout(_oldInputLayout10);
-			enginePointer->d3d10Device->VSSetShader(_oldVertexShader10);
-			enginePointer->d3d10Device->PSSetShader(_oldPixelShader10);
-			enginePointer->d3d10Device->PSSetSamplers(0, 1, &_oldTextureSamplerState10);
+			enginePointer->d3d10Device->OMSetDepthStencilState(_oldDepthStencilState10.Get(), _oldStencilRef10);
+			enginePointer->d3d10Device->IASetIndexBuffer(_oldIndexBuffer10.Get(), _oldIndexFormat10, _oldIndexOffset10);
+			enginePointer->d3d10Device->IASetVertexBuffers(0, 1, _oldVertexBuffer10.GetAddressOf(), &_oldStride10, &_oldOffset10);
+			enginePointer->d3d10Device->IASetInputLayout(_oldInputLayout10.Get());
+			enginePointer->d3d10Device->VSSetShader(_oldVertexShader10.Get());
+			enginePointer->d3d10Device->PSSetShader(_oldPixelShader10.Get());
+			enginePointer->d3d10Device->PSSetSamplers(0, 1, _oldTextureSamplerState10.GetAddressOf());
 			if (_oldPrimitiveTopology10 != D3D10_PRIMITIVE_TOPOLOGY_UNDEFINED)
 			{
 				enginePointer->d3d10Device->IASetPrimitiveTopology(_oldPrimitiveTopology10);
 			}
-			enginePointer->d3d10Device->OMSetBlendState(_oldBlendState10, _oldBlendFactor10, _oldSampleMask10);
+			enginePointer->d3d10Device->OMSetBlendState(_oldBlendState10.Get(), _oldBlendFactor10, _oldSampleMask10);
 		}
 #endif
 #if defined (GAME_DIRECTX11)
