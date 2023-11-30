@@ -111,12 +111,12 @@ namespace game
 			// br
 			{0.5f, 0.5f, 0.1f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f},
 		};
-		ID3D10Buffer* _vertexBuffer10;
-		ID3D10Buffer* _indexBuffer10;
+		Microsoft::WRL::ComPtr<ID3D10Buffer> _vertexBuffer10;
+		Microsoft::WRL::ComPtr<ID3D10Buffer> _indexBuffer10;
 		Shader _pixelModeShader10;
-		ID3D10InputLayout* _vertexLayout10;
+		Microsoft::WRL::ComPtr<ID3D10InputLayout> _vertexLayout10;
 		Microsoft::WRL::ComPtr<ID3D10ShaderResourceView> _textureShaderResourceView_10;
-		ID3D10SamplerState* _textureSamplerState10;
+		Microsoft::WRL::ComPtr<ID3D10SamplerState> _textureSamplerState10;
 #endif
 #if defined(GAME_DIRECTX11)
 		struct _vertex11
@@ -185,10 +185,6 @@ namespace game
 		_vertexBuffer9 = nullptr;
 #endif
 #if defined(GAME_DIRECTX10)
-		_vertexBuffer10 = nullptr;
-		_vertexLayout10 = nullptr;
-		_indexBuffer10 = nullptr;
-		_textureSamplerState10 = nullptr;
 #endif
 #if defined(GAME_DIRECTX11)
 #endif
@@ -215,11 +211,7 @@ namespace game
 #if defined(GAME_DIRECTX10)
 		if (enginePointer->geIsUsing(GAME_DIRECTX10))
 		{
-			SAFE_RELEASE(_vertexBuffer10);
-			SAFE_RELEASE(_vertexLayout10);
-			SAFE_RELEASE(_indexBuffer10);
 			enginePointer->geUnLoadShader(_pixelModeShader10);
-			SAFE_RELEASE(_textureSamplerState10);
 		}
 #endif
 #if defined(GAME_DIRECTX11)
@@ -353,7 +345,7 @@ namespace game
 			vertexBufferDescription.CPUAccessFlags = D3D10_CPU_ACCESS_WRITE; //0;
 			vertexBufferDescription.MiscFlags = 0;
 			vertexInitialData.pSysMem = _quadVertices10;
-			if (FAILED(enginePointer->d3d10Device->CreateBuffer(&vertexBufferDescription, &vertexInitialData, &_vertexBuffer10)))
+			if (FAILED(enginePointer->d3d10Device->CreateBuffer(&vertexBufferDescription, &vertexInitialData, _vertexBuffer10.GetAddressOf())))
 			{
 				lastError = { GameErrors::GameDirectX10Specific,"Could not create vertex buffer for PixelMode." };
 				enginePointer->geUnLoadShader(_pixelModeShader10);
@@ -367,23 +359,17 @@ namespace game
 			indexBufferDescription.CPUAccessFlags = 0;
 			indexBufferDescription.MiscFlags = 0;
 			indexInitialData.pSysMem = indices;
-			if (FAILED(enginePointer->d3d10Device->CreateBuffer(&indexBufferDescription, &indexInitialData, &_indexBuffer10)))
+			if (FAILED(enginePointer->d3d10Device->CreateBuffer(&indexBufferDescription, &indexInitialData, _indexBuffer10.GetAddressOf())))
 			{
 				lastError = { GameErrors::GameDirectX10Specific,"Could not create index buffer for PixelMode." };
-				_vertexBuffer10->Release();
-				_vertexBuffer10 = nullptr;
 				enginePointer->geUnLoadShader(_pixelModeShader10);
 				return false;
 			}
 
 			// Create input layout for shaders
-			if (FAILED(enginePointer->d3d10Device->CreateInputLayout(inputLayout, 3, _pixelModeShader10.compiledVertexShader10->GetBufferPointer(), _pixelModeShader10.compiledVertexShader10->GetBufferSize(), &_vertexLayout10)))
+			if (FAILED(enginePointer->d3d10Device->CreateInputLayout(inputLayout, 3, _pixelModeShader10.compiledVertexShader10->GetBufferPointer(), _pixelModeShader10.compiledVertexShader10->GetBufferSize(), _vertexLayout10.GetAddressOf())))
 			{
 				lastError = { GameErrors::GameDirectX10Specific,"Could not create input layout for PixelMode." };
-				_indexBuffer10->Release();
-				_indexBuffer10 = nullptr;
-				_vertexBuffer10->Release();
-				_vertexBuffer10 = nullptr;
 				enginePointer->geUnLoadShader(_pixelModeShader10);
 				return false;
 			}
@@ -398,7 +384,7 @@ namespace game
 			samplerDesc.MinLOD = 0;
 			samplerDesc.MaxLOD = D3D10_FLOAT32_MAX;
 
-			if (FAILED(enginePointer->d3d10Device->CreateSamplerState(&samplerDesc, &_textureSamplerState10)))
+			if (FAILED(enginePointer->d3d10Device->CreateSamplerState(&samplerDesc, _textureSamplerState10.GetAddressOf())))
 			{
 				std::cout << "Create sampler failed!\n";
 			}
@@ -1220,12 +1206,12 @@ namespace game
 
 
 			// Change what we need
-			enginePointer->d3d10Device->IASetIndexBuffer(_indexBuffer10, DXGI_FORMAT_R32_UINT, 0);
-			enginePointer->d3d10Device->IASetVertexBuffers(0, 1, &_vertexBuffer10, &stride, &offset);
-			enginePointer->d3d10Device->IASetInputLayout(_vertexLayout10);
+			enginePointer->d3d10Device->IASetIndexBuffer(_indexBuffer10.Get(), DXGI_FORMAT_R32_UINT, 0);
+			enginePointer->d3d10Device->IASetVertexBuffers(0, 1, _vertexBuffer10.GetAddressOf(), &stride, &offset);
+			enginePointer->d3d10Device->IASetInputLayout(_vertexLayout10.Get());
 			enginePointer->d3d10Device->VSSetShader(_pixelModeShader10.vertexShader10.Get());
 			enginePointer->d3d10Device->PSSetShader(_pixelModeShader10.pixelShader10.Get());
-			enginePointer->d3d10Device->PSSetSamplers(0, 1, &_textureSamplerState10);
+			enginePointer->d3d10Device->PSSetSamplers(0, 1, _textureSamplerState10.GetAddressOf());
 			enginePointer->d3d10Device->IASetPrimitiveTopology(D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 			enginePointer->d3d10Device->PSSetShaderResources(0, 1, _textureShaderResourceView_10.GetAddressOf());
