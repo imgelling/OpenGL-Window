@@ -17,6 +17,7 @@ History:
 #include <Windows.h>
 
 // If user has not chosen a renderer, default to OpenGL
+// This is horrible looking, better way?
 #if !defined(GAME_SUPPORT_DIRECTX12)
 #if !defined(GAME_SUPPORT_DIRECTX11)
 #if !defined(GAME_SUPPORT_DIRECTX10)
@@ -71,13 +72,9 @@ History:
 #pragma region DirectX12
 #if defined(GAME_DIRECTX12)
 #include <d3d12.h>
-#include <dxgi1_6.h>
 #include <d3dcompiler.h>
-#include <DirectXMath.h>
-#include <initguid.h>
-#include <wrl.h>
-#pragma comment(lib,"d3dcompiler.lib")
-#pragma comment(lib, "D3D12.lib")
+#pragma comment(lib, "d3d12.lib")
+#pragma comment(lib, "d3dcompiler.lib")
 #pragma comment(lib, "dxgi.lib")
 #pragma comment(lib, "dxguid.lib")
 #include "GameRendererDX12.h"
@@ -109,7 +106,7 @@ History:
 #include <d3d9.h>
 #include <d3dcompiler.h>
 #pragma comment (lib, "d3d9.lib")
-#pragma comment(lib, "d3dcompiler.lib")
+#pragma comment (lib, "d3dcompiler.lib")
 #include "GameRendererDX9.h"
 #endif
 #pragma endregion

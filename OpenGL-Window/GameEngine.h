@@ -87,7 +87,7 @@ namespace game
 		Microsoft::WRL::ComPtr<ID3D10Device> d3d10Device;
 		Microsoft::WRL::ComPtr<IDXGISwapChain> d3d10SwapChain;
 		Microsoft::WRL::ComPtr<ID3D10RenderTargetView> d3d10RenderTargetView;
-		ID3D10DepthStencilView* d3d10DepthStencilView;
+		Microsoft::WRL::ComPtr<ID3D10DepthStencilView> d3d10DepthStencilView;
 #endif
 #if defined(GAME_DIRECTX11)
 		Microsoft::WRL::ComPtr<ID3D11DeviceContext> d3d11DeviceContext;
@@ -195,7 +195,6 @@ namespace game
 		d3d9Device = nullptr;
 #endif
 #if defined(GAME_DIRECTX10)
-		d3d10DepthStencilView = nullptr;
 #endif
 #if defined(GAME_DIRECTX11)
 #endif
@@ -217,7 +216,7 @@ namespace game
 		d3d10SwapChain.Reset();
 		d3d10Device.Reset();
 		d3d10RenderTargetView.Reset();
-		d3d10DepthStencilView = nullptr;
+		d3d10DepthStencilView.Reset();
 #endif
 #if defined(GAME_DIRECTX11)
 #endif
@@ -738,6 +737,9 @@ namespace game
 		{
 			if (_renderer)
 			{
+				d3d10Device.Reset();
+				d3d10SwapChain.Reset();
+				d3d10RenderTargetView.Reset();
 				_renderer->HandleWindowResize(width, height);
 				dynamic_cast<RendererDX10*>(_renderer)->GetDevice(d3d10Device, d3d10SwapChain, d3d10RenderTargetView, d3d10DepthStencilView);
 			}
@@ -773,7 +775,6 @@ namespace game
 	{
 		switch (uMsg)
 		{
-		case WM_SYSCOMMAND: return false;
 		case WM_MOUSEMOVE: 	enginePointer->geMouse.HandleMouseMove(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam)); return 0;
 		case WM_MOUSEWHEEL:	enginePointer->geMouse.HandleMouseWheel(GET_WHEEL_DELTA_WPARAM(wParam)); return 0;
 			//case WM_MOUSELEAVE: ptrPGE->olc_UpdateMouseFocus(false);                                    return 0;
@@ -834,6 +835,8 @@ namespace game
 			//case WM_SYSKEYUP:	ptrPGE->olc_UpdateKeyState(mapKeys[wParam], false);
 		case WM_CLOSE:		if (enginePointer) enginePointer->geIsRunning = false; return 0;
 		case WM_DESTROY:	PostQuitMessage(0); DestroyWindow(hWnd); return 0;
+		// Stops F10 from bringing up the window menu
+		case WM_SYSCOMMAND: if ((wParam & 0xFFF0) == SC_KEYMENU) return 0;
 		}
 		return DefWindowProc(hWnd, uMsg, wParam, lParam);
 	}

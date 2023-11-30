@@ -2,13 +2,13 @@
 //#define GAME_USE_DEDICATED_GPU
 //#define GAME_ENABLE_NETWORKING
 //#define GAME_ENABLE_SHADERS
-//#define GAME_SUPPORT_DIRECTX9
+#define GAME_SUPPORT_DIRECTX9
 //#define GAME_SUPPORT_DIRECTX10
-#define GAME_SUPPORT_DIRECTX11
+//#define GAME_SUPPORT_DIRECTX11
 //#define GAME_SUPPORT_DIRECTX12
 //#define GAME_SUPPORT_OPENGL
 //#define GAME_SUPPORT_VULKAN 
-//#define GAME_SUPPORT_ALL
+#define GAME_SUPPORT_ALL
 #include "Game.h"
 
 constexpr uint32_t MAX_UPDATES = 0;
@@ -29,7 +29,6 @@ public:
 
 	Game() : game::Engine()
 	{
-		game::Recti test = { 1,1,20,20 };
 	}
 
 	void HandleWindowSizeChange() override
@@ -62,9 +61,9 @@ public:
 		attributes.DebugMode = true;
 		//attributes.MultiSamples = 8; // Not implemented in most of DX, if any
 		attributes.RenderingAPI = game::RenderAPI::DirectX9; 
-		//attributes.RenderingAPI = game::RenderAPI::DirectX10;
+		attributes.RenderingAPI = game::RenderAPI::DirectX10;
 		attributes.RenderingAPI = game::RenderAPI::DirectX11;
-		//attributes.RenderingAPI = game::RenderAPI::DirectX12;
+		attributes.RenderingAPI = game::RenderAPI::DirectX12;
 		//attributes.RenderingAPI = game::RenderAPI::OpenGL;
 		//attributes.RenderingAPI = game::RenderAPI::Vulkan;
 		

@@ -111,12 +111,12 @@ namespace game
 			// br
 			{0.5f, 0.5f, 0.1f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f},
 		};
-		ID3D10Buffer* _vertexBuffer10;
-		ID3D10Buffer* _indexBuffer10;
+		Microsoft::WRL::ComPtr<ID3D10Buffer> _vertexBuffer10;
+		Microsoft::WRL::ComPtr<ID3D10Buffer> _indexBuffer10;
 		Shader _pixelModeShader10;
-		ID3D10InputLayout* _vertexLayout10;
+		Microsoft::WRL::ComPtr<ID3D10InputLayout> _vertexLayout10;
 		Microsoft::WRL::ComPtr<ID3D10ShaderResourceView> _textureShaderResourceView_10;
-		ID3D10SamplerState* _textureSamplerState10;
+		Microsoft::WRL::ComPtr<ID3D10SamplerState> _textureSamplerState10;
 #endif
 #if defined(GAME_DIRECTX11)
 		struct _vertex11
@@ -185,10 +185,6 @@ namespace game
 		_vertexBuffer9 = nullptr;
 #endif
 #if defined(GAME_DIRECTX10)
-		_vertexBuffer10 = nullptr;
-		_vertexLayout10 = nullptr;
-		_indexBuffer10 = nullptr;
-		_textureSamplerState10 = nullptr;
 #endif
 #if defined(GAME_DIRECTX11)
 #endif
@@ -215,11 +211,7 @@ namespace game
 #if defined(GAME_DIRECTX10)
 		if (enginePointer->geIsUsing(GAME_DIRECTX10))
 		{
-			SAFE_RELEASE(_vertexBuffer10);
-			SAFE_RELEASE(_vertexLayout10);
-			SAFE_RELEASE(_indexBuffer10);
 			enginePointer->geUnLoadShader(_pixelModeShader10);
-			SAFE_RELEASE(_textureSamplerState10);
 		}
 #endif
 #if defined(GAME_DIRECTX11)
@@ -340,7 +332,8 @@ namespace game
 			};
 			
 			// Load shaders for sprite mode
-			if (!enginePointer->geLoadShader("Content/VertexShader.hlsl", "Content/PixelShader.hlsl", _pixelModeShader10))
+			//if (!enginePointer->geLoadShader("Content/VertexShader.hlsl", "Content/PixelShader.hlsl", _pixelModeShader10))
+			if (!enginePointer->geLoadTextShader(gameTextShaders, "mainVS", "mainPS", _pixelModeShader10))
 			{
 				return false;
 			}
@@ -352,7 +345,7 @@ namespace game
 			vertexBufferDescription.CPUAccessFlags = D3D10_CPU_ACCESS_WRITE; //0;
 			vertexBufferDescription.MiscFlags = 0;
 			vertexInitialData.pSysMem = _quadVertices10;
-			if (FAILED(enginePointer->d3d10Device->CreateBuffer(&vertexBufferDescription, &vertexInitialData, &_vertexBuffer10)))
+			if (FAILED(enginePointer->d3d10Device->CreateBuffer(&vertexBufferDescription, &vertexInitialData, _vertexBuffer10.GetAddressOf())))
 			{
 				lastError = { GameErrors::GameDirectX10Specific,"Could not create vertex buffer for PixelMode." };
 				enginePointer->geUnLoadShader(_pixelModeShader10);
@@ -366,23 +359,17 @@ namespace game
 			indexBufferDescription.CPUAccessFlags = 0;
 			indexBufferDescription.MiscFlags = 0;
 			indexInitialData.pSysMem = indices;
-			if (FAILED(enginePointer->d3d10Device->CreateBuffer(&indexBufferDescription, &indexInitialData, &_indexBuffer10)))
+			if (FAILED(enginePointer->d3d10Device->CreateBuffer(&indexBufferDescription, &indexInitialData, _indexBuffer10.GetAddressOf())))
 			{
 				lastError = { GameErrors::GameDirectX10Specific,"Could not create index buffer for PixelMode." };
-				_vertexBuffer10->Release();
-				_vertexBuffer10 = nullptr;
 				enginePointer->geUnLoadShader(_pixelModeShader10);
 				return false;
 			}
 
 			// Create input layout for shaders
-			if (FAILED(enginePointer->d3d10Device->CreateInputLayout(inputLayout, 3, _pixelModeShader10.compiledVertexShader10->GetBufferPointer(), _pixelModeShader10.compiledVertexShader10->GetBufferSize(), &_vertexLayout10)))
+			if (FAILED(enginePointer->d3d10Device->CreateInputLayout(inputLayout, 3, _pixelModeShader10.compiledVertexShader10->GetBufferPointer(), _pixelModeShader10.compiledVertexShader10->GetBufferSize(), _vertexLayout10.GetAddressOf())))
 			{
 				lastError = { GameErrors::GameDirectX10Specific,"Could not create input layout for PixelMode." };
-				_indexBuffer10->Release();
-				_indexBuffer10 = nullptr;
-				_vertexBuffer10->Release();
-				_vertexBuffer10 = nullptr;
 				enginePointer->geUnLoadShader(_pixelModeShader10);
 				return false;
 			}
@@ -397,7 +384,7 @@ namespace game
 			samplerDesc.MinLOD = 0;
 			samplerDesc.MaxLOD = D3D10_FLOAT32_MAX;
 
-			if (FAILED(enginePointer->d3d10Device->CreateSamplerState(&samplerDesc, &_textureSamplerState10)))
+			if (FAILED(enginePointer->d3d10Device->CreateSamplerState(&samplerDesc, _textureSamplerState10.GetAddressOf())))
 			{
 				std::cout << "Create sampler failed!\n";
 			}
@@ -429,7 +416,8 @@ namespace game
 			};
 
 			// Load shaders for sprite mode
-			if (!enginePointer->geLoadShader("Content/VertexShader.hlsl", "Content/PixelShader.hlsl", _pixelModeShader11))
+			//if (!enginePointer->geLoadShader("Content/VertexShader.hlsl", "Content/PixelShader.hlsl", _pixelModeShader11))
+			if (!enginePointer->geLoadTextShader(gameTextShaders, "mainVS", "mainPS", _pixelModeShader11))
 			{
 				return false;
 			}
@@ -1196,34 +1184,34 @@ namespace game
 			uint32_t oldStride = 0;
 			uint32_t offset = 0;
 			uint32_t oldOffset = 0;
-			ID3D10Buffer* oldVertexBuffer = nullptr;
-			ID3D10Buffer* oldIndexBuffer = nullptr;
+			Microsoft::WRL::ComPtr<ID3D10Buffer> oldVertexBuffer;
+			Microsoft::WRL::ComPtr<ID3D10Buffer> oldIndexBuffer;
 			DXGI_FORMAT oldIndexFormat = {};
 			uint32_t oldIndexOffset = 0;
-			ID3D10InputLayout* oldInputLayout = nullptr;
-			ID3D10VertexShader* oldVertexShader = nullptr;
-			ID3D10PixelShader* oldPixelShader = nullptr;
-			ID3D10SamplerState* oldTextureSamplerState = nullptr;
+			Microsoft::WRL::ComPtr<ID3D10InputLayout> oldInputLayout = nullptr;
+			Microsoft::WRL::ComPtr<ID3D10VertexShader> oldVertexShader = nullptr;
+			Microsoft::WRL::ComPtr<ID3D10PixelShader> oldPixelShader = nullptr;
+			Microsoft::WRL::ComPtr<ID3D10SamplerState> oldTextureSamplerState = nullptr;
 			D3D10_PRIMITIVE_TOPOLOGY oldPrimitiveTopology = {};
 
 
 			// Save everything we modify
-			enginePointer->d3d10Device->IAGetIndexBuffer(&oldIndexBuffer, &oldIndexFormat, &oldIndexOffset);
-			enginePointer->d3d10Device->IAGetVertexBuffers(0, 1, &oldVertexBuffer, &oldStride, &oldOffset);
-			enginePointer->d3d10Device->IAGetInputLayout(&oldInputLayout);
-			enginePointer->d3d10Device->VSGetShader(&oldVertexShader);
-			enginePointer->d3d10Device->PSGetShader(&oldPixelShader);
-			enginePointer->d3d10Device->PSGetSamplers(0, 1, &oldTextureSamplerState);
+			enginePointer->d3d10Device->IAGetIndexBuffer(oldIndexBuffer.GetAddressOf(), &oldIndexFormat, &oldIndexOffset);
+			enginePointer->d3d10Device->IAGetVertexBuffers(0, 1, oldVertexBuffer.GetAddressOf(), &oldStride, &oldOffset);
+			enginePointer->d3d10Device->IAGetInputLayout(oldInputLayout.GetAddressOf());
+			enginePointer->d3d10Device->VSGetShader(oldVertexShader.GetAddressOf());
+			enginePointer->d3d10Device->PSGetShader(oldPixelShader.GetAddressOf());
+			enginePointer->d3d10Device->PSGetSamplers(0, 1, oldTextureSamplerState.GetAddressOf());
 			enginePointer->d3d10Device->IAGetPrimitiveTopology(&oldPrimitiveTopology);
 
 
 			// Change what we need
-			enginePointer->d3d10Device->IASetIndexBuffer(_indexBuffer10, DXGI_FORMAT_R32_UINT, 0);
-			enginePointer->d3d10Device->IASetVertexBuffers(0, 1, &_vertexBuffer10, &stride, &offset);
-			enginePointer->d3d10Device->IASetInputLayout(_vertexLayout10);
-			enginePointer->d3d10Device->VSSetShader(_pixelModeShader10.vertexShader10);
-			enginePointer->d3d10Device->PSSetShader(_pixelModeShader10.pixelShader10);
-			enginePointer->d3d10Device->PSSetSamplers(0, 1, &_textureSamplerState10);
+			enginePointer->d3d10Device->IASetIndexBuffer(_indexBuffer10.Get(), DXGI_FORMAT_R32_UINT, 0);
+			enginePointer->d3d10Device->IASetVertexBuffers(0, 1, _vertexBuffer10.GetAddressOf(), &stride, &offset);
+			enginePointer->d3d10Device->IASetInputLayout(_vertexLayout10.Get());
+			enginePointer->d3d10Device->VSSetShader(_pixelModeShader10.vertexShader10.Get());
+			enginePointer->d3d10Device->PSSetShader(_pixelModeShader10.pixelShader10.Get());
+			enginePointer->d3d10Device->PSSetSamplers(0, 1, _textureSamplerState10.GetAddressOf());
 			enginePointer->d3d10Device->IASetPrimitiveTopology(D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 			enginePointer->d3d10Device->PSSetShaderResources(0, 1, _textureShaderResourceView_10.GetAddressOf());
@@ -1232,11 +1220,11 @@ namespace game
 			enginePointer->d3d10Device->DrawIndexed(6, 0, 0);
 			
 			// Restore old states
-			enginePointer->d3d10Device->IASetIndexBuffer(oldIndexBuffer, oldIndexFormat, oldIndexOffset);
-			enginePointer->d3d10Device->IASetVertexBuffers(0, 1, &oldVertexBuffer, &oldStride, &oldOffset);
-			enginePointer->d3d10Device->IASetInputLayout(oldInputLayout);
-			enginePointer->d3d10Device->VSSetShader(oldVertexShader);
-			enginePointer->d3d10Device->PSSetShader(oldPixelShader);
+			enginePointer->d3d10Device->IASetIndexBuffer(oldIndexBuffer.Get(), oldIndexFormat, oldIndexOffset);
+			enginePointer->d3d10Device->IASetVertexBuffers(0, 1, oldVertexBuffer.GetAddressOf(), &oldStride, &oldOffset);
+			enginePointer->d3d10Device->IASetInputLayout(oldInputLayout.Get());
+			enginePointer->d3d10Device->VSSetShader(oldVertexShader.Get());
+			enginePointer->d3d10Device->PSSetShader(oldPixelShader.Get());
 			enginePointer->d3d10Device->PSSetSamplers(0, 1, &oldTextureSamplerState);
 			if (oldPrimitiveTopology != D3D10_PRIMITIVE_TOPOLOGY_UNDEFINED)
 			{
@@ -1251,24 +1239,24 @@ namespace game
 			uint32_t oldStride = 0;
 			uint32_t offset = 0;
 			uint32_t oldOffset = 0;
-			ID3D11Buffer* oldVertexBuffer = nullptr;
-			ID3D11Buffer* oldIndexBuffer = nullptr;
+			Microsoft::WRL::ComPtr<ID3D11Buffer> oldVertexBuffer;
+			Microsoft::WRL::ComPtr<ID3D11Buffer> oldIndexBuffer;
 			DXGI_FORMAT oldIndexFormat = {};
 			uint32_t oldIndexOffset = 0;
-			ID3D11InputLayout* oldInputLayout = nullptr;
-			ID3D11VertexShader* oldVertexShader = nullptr;
-			ID3D11PixelShader* oldPixelShader = nullptr;
-			ID3D11SamplerState* oldTextureSamplerState = nullptr;
+			Microsoft::WRL::ComPtr<ID3D11InputLayout> oldInputLayout;
+			Microsoft::WRL::ComPtr<ID3D11VertexShader> oldVertexShader;
+			Microsoft::WRL::ComPtr<ID3D11PixelShader> oldPixelShader;
+			Microsoft::WRL::ComPtr<ID3D11SamplerState> oldTextureSamplerState;
 			D3D11_PRIMITIVE_TOPOLOGY oldPrimitiveTopology = {};
 
 
 			// Save everything we modify
-			enginePointer->d3d11DeviceContext->IAGetIndexBuffer(&oldIndexBuffer, &oldIndexFormat, &oldIndexOffset);
-			enginePointer->d3d11DeviceContext->IAGetVertexBuffers(0, 1, &oldVertexBuffer, &oldStride, &oldOffset);
-			enginePointer->d3d11DeviceContext->IAGetInputLayout(&oldInputLayout);
-			enginePointer->d3d11DeviceContext->VSGetShader(&oldVertexShader,NULL,NULL);
-			enginePointer->d3d11DeviceContext->PSGetShader(&oldPixelShader,NULL,NULL);
-			enginePointer->d3d11DeviceContext->PSGetSamplers(0, 1, &oldTextureSamplerState);
+			enginePointer->d3d11DeviceContext->IAGetIndexBuffer(oldIndexBuffer.GetAddressOf(), &oldIndexFormat, &oldIndexOffset);
+			enginePointer->d3d11DeviceContext->IAGetVertexBuffers(0, 1, oldVertexBuffer.GetAddressOf(), &oldStride, &oldOffset);
+			enginePointer->d3d11DeviceContext->IAGetInputLayout(oldInputLayout.GetAddressOf());
+			enginePointer->d3d11DeviceContext->VSGetShader(oldVertexShader.GetAddressOf(),NULL,NULL);
+			enginePointer->d3d11DeviceContext->PSGetShader(oldPixelShader.GetAddressOf(),NULL,NULL);
+			enginePointer->d3d11DeviceContext->PSGetSamplers(0, 1, oldTextureSamplerState.GetAddressOf());
 			enginePointer->d3d11DeviceContext->IAGetPrimitiveTopology(&oldPrimitiveTopology);
 
 
@@ -1287,12 +1275,12 @@ namespace game
 			enginePointer->d3d11DeviceContext->DrawIndexed(6, 0, 0);
 
 			// Restore old states
-			enginePointer->d3d11DeviceContext->IASetIndexBuffer(oldIndexBuffer, oldIndexFormat, oldIndexOffset);
-			enginePointer->d3d11DeviceContext->IASetVertexBuffers(0, 1, &oldVertexBuffer, &oldStride, &oldOffset);
-			enginePointer->d3d11DeviceContext->IASetInputLayout(oldInputLayout);
-			enginePointer->d3d11DeviceContext->VSSetShader(oldVertexShader,NULL,NULL);
-			enginePointer->d3d11DeviceContext->PSSetShader(oldPixelShader,NULL,NULL);
-			enginePointer->d3d11DeviceContext->PSSetSamplers(0, 1, &oldTextureSamplerState);
+			enginePointer->d3d11DeviceContext->IASetIndexBuffer(oldIndexBuffer.Get(), oldIndexFormat, oldIndexOffset);
+			enginePointer->d3d11DeviceContext->IASetVertexBuffers(0, 1, oldVertexBuffer.GetAddressOf(), &oldStride, &oldOffset);
+			enginePointer->d3d11DeviceContext->IASetInputLayout(oldInputLayout.Get());
+			enginePointer->d3d11DeviceContext->VSSetShader(oldVertexShader.Get(),NULL,NULL);
+			enginePointer->d3d11DeviceContext->PSSetShader(oldPixelShader.Get(),NULL,NULL);
+			enginePointer->d3d11DeviceContext->PSSetSamplers(0, 1, oldTextureSamplerState.GetAddressOf());
 			if (oldPrimitiveTopology != D3D11_PRIMITIVE_TOPOLOGY_UNDEFINED)
 			{
 				enginePointer->d3d11DeviceContext->IASetPrimitiveTopology(oldPrimitiveTopology);

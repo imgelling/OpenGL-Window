@@ -32,11 +32,7 @@ namespace game
 			lastError = { GameErrors::GameDirectX11Specific, "Geometry shaders not implemented yet." };
 			return false;
 		}
-		bool LoadTextShader(const std::string shaderText, const std::string vertexEntryPoint, const std::string fragmentEntryPoint, Shader& shader) 
-		{
-			//if (FAILED(D3DCompile2(shaderText.c_str(), shaderText.length(), NULL, NULL, NULL, vertexEntryPoint.c_str(), "vs_5_0", flags, NULL, NULL, NULL, NULL, compiledVertexShader.GetAddressOf(), compilationMsgs.GetAddressOf())))
-			return false;
-		}
+		bool LoadTextShader(const std::string shaderText, const std::string vertexEntryPoint, const std::string fragmentEntryPoint, Shader& shader);
 		void UnLoadShader(Shader& shader);
 		void GetDevice(Microsoft::WRL::ComPtr<ID3D11Device>&device, Microsoft::WRL::ComPtr <ID3D11DeviceContext>& context, Microsoft::WRL::ComPtr<ID3D11RenderTargetView>& target, Microsoft::WRL::ComPtr<ID3D11DepthStencilView>& depth);
 		void Clear(const uint32_t bufferFlags, const Color color);
@@ -483,6 +479,69 @@ namespace game
 			shader.compiledPixelShader11 = compiledPixelShader;
 
 		}
+		return true;
+	}
+
+	inline bool RendererDX11::LoadTextShader(const std::string shaderText, const std::string vertexEntryPoint, const std::string fragmentEntryPoint, Shader& shader)
+	{
+		//if (FAILED(D3DCompile2(shaderText.c_str(), shaderText.length(), NULL, NULL, NULL, vertexEntryPoint.c_str(), "vs_5_0", flags, NULL, NULL, NULL, NULL, compiledVertexShader.GetAddressOf(), compilationMsgs.GetAddressOf())))
+
+
+		DWORD flags = D3DCOMPILE_ENABLE_STRICTNESS;
+		if (_attributes.DebugMode)
+		{
+			flags |= D3DCOMPILE_DEBUG;
+		}
+		Microsoft::WRL::ComPtr<ID3DBlob> compiledVertexShader;
+		Microsoft::WRL::ComPtr<ID3DBlob> compiledPixelShader;
+		Microsoft::WRL::ComPtr<ID3DBlob> compilationMsgs;
+
+		// Compile the vertex shader
+		//if (FAILED(D3DCompileFromFile(ConvertToWide(vertex).c_str(), NULL, NULL, "main", "vs_4_0", flags, NULL, &compiledVertexShader, &compilationMsgs)))
+		if (FAILED(D3DCompile2(shaderText.c_str(), shaderText.length(), NULL, NULL, NULL, vertexEntryPoint.c_str(), "vs_4_0", flags, NULL, NULL, NULL, NULL, compiledVertexShader.GetAddressOf(), compilationMsgs.GetAddressOf())))
+		{
+			SIZE_T size = compilationMsgs->GetBufferSize();
+			uint8_t* p = reinterpret_cast<unsigned char*>(compilationMsgs->GetBufferPointer());
+			lastError = { GameErrors::GameDirectX11Specific,"Could not compile vertex shader from \"" + shaderText + "\".\n" };
+			for (uint32_t bytes = 0; bytes < size; bytes++)
+			{
+				lastError.lastErrorString += p[bytes];
+			}
+			return false;
+		}
+
+		// Compile the pixel shader
+		//if (FAILED(D3DCompileFromFile(ConvertToWide(fragment).c_str(), NULL, NULL, "main", "ps_4_0", flags, NULL, &compiledPixelShader, &compilationMsgs)))
+		if (FAILED(D3DCompile2(shaderText.c_str(), shaderText.length(), NULL, NULL, NULL, fragmentEntryPoint.c_str(), "ps_4_0", flags, NULL, NULL, NULL, NULL, compiledPixelShader.GetAddressOf(), compilationMsgs.GetAddressOf())))
+		{
+			SIZE_T size = compilationMsgs->GetBufferSize();
+			auto* p = reinterpret_cast<unsigned char*>(compilationMsgs->GetBufferPointer());
+			lastError = { GameErrors::GameDirectX11Specific,"Could not compile pixel shader from \"" + shaderText + "\".\n" };
+			for (uint32_t bytes = 0; bytes < size; bytes++)
+			{
+				lastError.lastErrorString += p[bytes];
+			}
+			return false;
+		}
+
+		// Create vertex shader
+		if (FAILED(_d3d11Device->CreateVertexShader(compiledVertexShader->GetBufferPointer(), compiledVertexShader->GetBufferSize(), NULL, &shader.vertexShader11)))
+		{
+			lastError = { GameErrors::GameDirectX11Specific,"Could not create vertex shader from \"" + shaderText + "\"." };
+			return false;
+		}
+
+		// Create pixel shader
+		if (FAILED(_d3d11Device->CreatePixelShader((DWORD*)(compiledPixelShader->GetBufferPointer()), compiledPixelShader->GetBufferSize(), NULL, &shader.pixelShader11)))
+		{
+			lastError = { GameErrors::GameDirectX11Specific,"Could not create pixel shader from \"" + shaderText + "\"." };
+			return false;
+		}
+
+		// Shaders created, save a reference and release this one
+		shader.compiledVertexShader11 = compiledVertexShader;
+		shader.compiledPixelShader11 = compiledPixelShader;
+
 		return true;
 	}
 
