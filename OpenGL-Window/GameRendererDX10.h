@@ -45,7 +45,7 @@ namespace game
 		Microsoft::WRL::ComPtr<IDXGISwapChain> _d3d10SwapChain;
 		Microsoft::WRL::ComPtr<ID3D10RenderTargetView> _d3d10RenderTargetView;
 		ID3D10DepthStencilView* _d3d10DepthStencilView;
-		ID3D10Texture2D* _d3d10DepthStencilBuffer;
+		Microsoft::WRL::ComPtr<ID3D10Texture2D> _d3d10DepthStencilBuffer;
 	};
 
 	inline void RendererDX10::HandleWindowResize(const uint32_t width, const uint32_t height)
@@ -67,7 +67,7 @@ namespace game
 		//SAFE_RELEASE(_d3d10RenderTargetView);
 		_d3d10RenderTargetView.Reset();
 		SAFE_RELEASE(_d3d10DepthStencilView);
-		SAFE_RELEASE(_d3d10DepthStencilBuffer);
+		_d3d10DepthStencilBuffer.Reset();
 		_d3d10Device->Flush();
 
 		// Resize the new buffers
@@ -87,7 +87,7 @@ namespace game
 		depthStencilDesc.MiscFlags = 0;
 
 		// Create depth stencil buffer texture
-		if (FAILED(_d3d10Device->CreateTexture2D(&depthStencilDesc, NULL, &_d3d10DepthStencilBuffer)))
+		if (FAILED(_d3d10Device->CreateTexture2D(&depthStencilDesc, NULL, _d3d10DepthStencilBuffer.GetAddressOf())))
 		{
 			lastError = { GameErrors::GameDirectX10Specific, "Could not create depth stencil buffer texture on resize." };
 			DestroyDevice();
@@ -96,7 +96,7 @@ namespace game
 
 		// Second param is states for depth stencil
 
-		if (FAILED(_d3d10Device->CreateDepthStencilView(_d3d10DepthStencilBuffer, NULL, &_d3d10DepthStencilView)))
+		if (FAILED(_d3d10Device->CreateDepthStencilView(_d3d10DepthStencilBuffer.Get(), NULL, &_d3d10DepthStencilView)))
 		{
 			lastError = { GameErrors::GameDirectX10Specific, "Could not create depth stencil view on resize." };
 			DestroyDevice();
@@ -138,7 +138,6 @@ namespace game
 	inline RendererDX10::RendererDX10()
 	{
 		_d3d10DepthStencilView = nullptr;
-		_d3d10DepthStencilBuffer = nullptr;
 	}
 
 	inline void RendererDX10::GetDevice(Microsoft::WRL::ComPtr<ID3D10Device>&device, Microsoft::WRL::ComPtr<IDXGISwapChain>& swapChain, Microsoft::WRL::ComPtr<ID3D10RenderTargetView>& renderTargetView, ID3D10DepthStencilView*& depthStencilView)
@@ -211,7 +210,7 @@ namespace game
 		depthStencilDesc.MiscFlags = 0;
 
 		// Create depth stencil buffer texture
-		if (FAILED(_d3d10Device->CreateTexture2D(&depthStencilDesc, NULL, &_d3d10DepthStencilBuffer)))
+		if (FAILED(_d3d10Device->CreateTexture2D(&depthStencilDesc, NULL, _d3d10DepthStencilBuffer.GetAddressOf())))
 		{
 			lastError = { GameErrors::GameDirectX10Specific, "Could not create depth stencil buffer texture." };
 			DestroyDevice();
@@ -220,7 +219,7 @@ namespace game
 
 
 		// Second param is states for depth stencil
-		if (FAILED(_d3d10Device->CreateDepthStencilView(_d3d10DepthStencilBuffer, NULL, &_d3d10DepthStencilView)))
+		if (FAILED(_d3d10Device->CreateDepthStencilView(_d3d10DepthStencilBuffer.Get(), NULL, &_d3d10DepthStencilView)))
 		{
 			lastError = { GameErrors::GameDirectX10Specific, "Could not create depth stencil view." };
 			DestroyDevice();
@@ -268,7 +267,7 @@ namespace game
 		_d3d10Device.Reset();
 		_d3d10SwapChain.Reset();
 		_d3d10RenderTargetView.Reset();
-		SAFE_RELEASE(_d3d10DepthStencilBuffer);
+		_d3d10DepthStencilBuffer.Reset();
 		SAFE_RELEASE(_d3d10DepthStencilView);
 	}
 
