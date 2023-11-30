@@ -5,6 +5,65 @@
 #define STBI_ONLY_PNG
 #include "stb_image.h"
 
+/*
+#include <windows.h>
+#include <wincodec.h>
+
+int main(int argc, char* argv[]) {
+    IWICImagingFactory* factory = nullptr;
+    HRESULT hr = CoCreateInstance(CLSID_WICImagingFactory, nullptr, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&factory));
+    if (FAILED(hr)) {
+        // Handle error
+    }
+
+    IWICBitmapDecoder* decoder = nullptr;
+    hr = factory->CreateDecoderFromFilename(L"image.png", nullptr, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &decoder);
+    if (FAILED(hr)) {
+        factory->Release();
+        // Handle error
+    }
+
+    IWICBitmapFrameDecode* frame = nullptr;
+    hr = decoder->GetFrame(0, &frame);
+    if (FAILED(hr)) {
+        decoder->Release();
+        factory->Release();
+        // Handle error
+    }
+
+    UINT width, height;
+    hr = frame->GetSize(&width, &height);
+    if (FAILED(hr)) {
+        frame->Release();
+        decoder->Release();
+        factory->Release();
+        // Handle error
+    }
+
+    UINT stride = width * 4;
+    UINT bufferSize = stride * height;
+    BYTE* buffer = new BYTE[bufferSize];
+
+    hr = frame->CopyPixels(nullptr, stride, bufferSize, buffer);
+    if (FAILED(hr)) {
+        delete[] buffer;
+        frame->Release();
+        decoder->Release();
+        factory->Release();
+        // Handle error
+    }
+
+    // Use the image data
+
+    delete[] buffer;
+    frame->Release();
+    decoder->Release();
+    factory->Release();
+
+    return 0;
+}
+*/
+
 namespace game
 {
 	class ImageLoader
