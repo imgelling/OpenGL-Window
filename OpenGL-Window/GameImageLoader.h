@@ -33,32 +33,26 @@ namespace game
 
         HRESULT hr = CoInitialize(NULL);
 
-        IWICImagingFactory* factory = nullptr;
-        hr = CoCreateInstance(CLSID_WICImagingFactory, nullptr, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&factory));
+        Microsoft::WRL::ComPtr<IWICImagingFactory> factory;
+        hr = CoCreateInstance(CLSID_WICImagingFactory, nullptr, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(factory.GetAddressOf()));
         if (FAILED(hr)) {
             return nullptr;
         }
 
-        IWICBitmapDecoder* decoder = nullptr;
-        hr = factory->CreateDecoderFromFilename(ConvertToWide(fileName).c_str(), nullptr, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &decoder);
+        Microsoft::WRL::ComPtr<IWICBitmapDecoder> decoder;
+        hr = factory->CreateDecoderFromFilename(ConvertToWide(fileName).c_str(), nullptr, GENERIC_READ, WICDecodeMetadataCacheOnDemand, decoder.GetAddressOf());
         if (FAILED(hr)) {
-            factory->Release();
             return nullptr;
         }
 
-        IWICBitmapFrameDecode* frame = nullptr;
-        hr = decoder->GetFrame(0, &frame);
+        Microsoft::WRL::ComPtr<IWICBitmapFrameDecode> frame;
+        hr = decoder->GetFrame(0, frame.GetAddressOf());
         if (FAILED(hr)) {
-            decoder->Release();
-            factory->Release();
             return nullptr;
         }
 
         hr = frame->GetSize(&width, &height);
         if (FAILED(hr)) {
-            frame->Release();
-            decoder->Release();
-            factory->Release();
             return nullptr;
         }
         componentsPerPixel = 4;
@@ -69,17 +63,10 @@ namespace game
         if (FAILED(hr)) {
             delete[] _data;
             _data = nullptr;
-            frame->Release();
-            decoder->Release();
-            factory->Release();
             return nullptr;
         }
 
-        frame->Release();
-        decoder->Release();
-        factory->Release();
-
-        CoUninitialize();
+        //CoUninitialize();
 
 		return _data;
 	}

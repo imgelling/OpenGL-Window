@@ -904,13 +904,7 @@ namespace game
 		{
 			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, texture.width, texture.height, 0, GL_RGBA, systemInfo.gpuInfo.internalPixelType, 0);
 		}
-		if (glGetError())
-		{
-			lastError = { GameErrors::GameOpenGLSpecific, "Error with glTexImage2D." };
-			glBindTexture(GL_TEXTURE_2D, 0);
-			glDeleteTextures(1, &texture.bind);
-			return false;
-		}
+
 		if (texture.isMipMapped)
 			_glGenerateMipmap(GL_TEXTURE_2D);
 
