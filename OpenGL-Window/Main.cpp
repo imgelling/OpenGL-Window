@@ -8,7 +8,7 @@
 #define GAME_SUPPORT_DIRECTX12
 #define GAME_SUPPORT_OPENGL
 //#define GAME_SUPPORT_VULKAN 
-//#define GAME_SUPPORT_ALL
+#define GAME_SUPPORT_ALL
 #include "Game.h"
 
 constexpr uint32_t MAX_UPDATES = 0;
@@ -58,7 +58,7 @@ public:
 		attributes.FrameLock = MAX_FRAMES;
 		attributes.UpdateLock = MAX_UPDATES;
 		attributes.VsyncOn = false;
-		attributes.DebugMode = true;
+		attributes.DebugMode = false;
 		//attributes.MultiSamples = 8; // Not implemented in most of DX, if any
 		attributes.RenderingAPI = game::RenderAPI::DirectX9; 
 		//attributes.RenderingAPI = game::RenderAPI::DirectX10;

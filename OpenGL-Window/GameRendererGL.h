@@ -904,13 +904,7 @@ namespace game
 		{
 			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, texture.width, texture.height, 0, GL_RGBA, systemInfo.gpuInfo.internalPixelType, 0);
 		}
-		if (glGetError())
-		{
-			lastError = { GameErrors::GameOpenGLSpecific, "Error with glTexImage2D." };
-			glBindTexture(GL_TEXTURE_2D, 0);
-			glDeleteTextures(1, &texture.bind);
-			return false;
-		}
+
 		if (texture.isMipMapped)
 			_glGenerateMipmap(GL_TEXTURE_2D);
 
@@ -920,15 +914,14 @@ namespace game
 
 	inline bool RendererGL::LoadTexture(std::string fileName, Texture2D &texture)
 	{
-		//Content content;
 		void* data = nullptr;
-		int32_t width = 0;
-		int32_t height = 0;
-		int32_t componentsPerPixel = 0;
+		uint32_t width = 0;
+		uint32_t height = 0;
+		uint32_t componentsPerPixel = 0;
 		ImageLoader imageLoader;
 
 		// Read data
-		data = imageLoader.Load(fileName.c_str(), width, height, componentsPerPixel, true);
+		data = imageLoader.Load(fileName.c_str(), width, height, componentsPerPixel);
 		if (data == nullptr)
 		{
 			lastError = { GameErrors::GameContent, "Failed to load texture : " + fileName };
@@ -943,7 +936,6 @@ namespace game
 
 		glGenTextures(1, &texture.bind);
 		glBindTexture(GL_TEXTURE_2D, texture.bind);
-		texture.name = fileName;
 		// GL_Nearest is point filtering
 		//GL_LINEAR will give you bilinear filtering.GL_LINEAR_MIPMAP_LINEAR should be trilinear.
 		//GL_NEAREST_MIPMAP_NEAREST: takes the nearest mipmap to match the pixel sizeand uses nearest neighbor interpolation for texture sampling.
@@ -988,7 +980,9 @@ namespace game
 		}
 
 		if (texture.isMipMapped)
+		{
 			_glGenerateMipmap(GL_TEXTURE_2D);
+		}
 		glBindTexture(GL_TEXTURE_2D, 0);
 
 		return true;

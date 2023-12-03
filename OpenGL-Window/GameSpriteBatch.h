@@ -1151,7 +1151,10 @@ namespace game
 		if (enginePointer->geIsUsing(GAME_OPENGL))
 		{
 			// restore saved this stuff
-			glBindTexture(GL_TEXTURE_2D, _oldTextureBound);
+			if (_oldTextureBound)
+			{
+				glBindTexture(GL_TEXTURE_2D, _oldTextureBound);
+			}
 			glPopAttrib(); // GL_BLEND
 			glPopAttrib(); // GL_TEXTURE_2D
 		}
@@ -1286,7 +1289,7 @@ namespace game
 				a = (access->color >> 24 & 0xff) / 255.0f;
 
 				// Bottom left
-				glTexCoord2f(access->u, 1.0f - access->v);
+				glTexCoord2f(access->u, access->v);
 				glColor4f(r, g, b, a);
 				access->x = (access->x * 2.0f / (float_t)windowSize.width) - pixelOffsetFixX;
 				access->y = (access->y * 2.0f / (float_t)windowSize.height) - pixelOffsetFixY;
@@ -1295,7 +1298,7 @@ namespace game
 				access++;
 
 				// Bottom right
-				glTexCoord2f(access->u, 1.0f - access->v);
+				glTexCoord2f(access->u, access->v);
 				glColor4f(r, g, b, a);
 				access->x = (access->x * 2.0f / (float_t)windowSize.width) - pixelOffsetFixX;
 				access->y = (access->y * 2.0f / (float_t)windowSize.height) - pixelOffsetFixY;
@@ -1304,7 +1307,7 @@ namespace game
 				access++;
 
 				// Top right
-				glTexCoord2f(access->u, 1.0f - access->v);
+				glTexCoord2f(access->u, access->v);
 				glColor4f(r, g, b, a);
 				access->x = (access->x * 2.0f / (float_t)windowSize.width) - pixelOffsetFixX;
 				access->y = (access->y * 2.0f / (float_t)windowSize.height) - pixelOffsetFixY;
@@ -1313,7 +1316,7 @@ namespace game
 				access++;
 
 				// Bottom left
-				glTexCoord2f(access->u, 1.0f - access->v);
+				glTexCoord2f(access->u, access->v);
 				glColor4f(r, g, b, a);
 				access->x = (access->x * 2.0f / (float_t)windowSize.width) - pixelOffsetFixX;
 				access->y = (access->y * 2.0f / (float_t)windowSize.height) - pixelOffsetFixY;
@@ -2006,10 +2009,10 @@ namespace game
 			source.right = source.left + widthOfLetter;
 			source.bottom = source.top + heightOfLetter;
 
-			destination.left = (uint32_t)(currentX + font._characterSet.letters[letter].xOffset * scale);
-			destination.top = (uint32_t)(currentY + font._characterSet.letters[letter].yOffset * scale);
-			destination.right = (uint32_t)(widthOfLetter * scale + destination.left);
-			destination.bottom = (uint32_t)(heightOfLetter * scale + destination.top);
+			destination.left = (int32_t)(currentX + font._characterSet.letters[letter].xOffset * scale);
+			destination.top = (int32_t)(currentY + font._characterSet.letters[letter].yOffset * scale);
+			destination.right = (int32_t)(widthOfLetter * scale + destination.left);
+			destination.bottom = (int32_t)(heightOfLetter * scale + destination.top);
 
 			Draw(font.Texture(), destination, source, color);
 

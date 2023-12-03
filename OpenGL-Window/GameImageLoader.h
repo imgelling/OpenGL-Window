@@ -1,9 +1,8 @@
 #if !defined(GAMEIMAGELOADER_H)
 #define GAMEIMAGELOADER_H
+#include <wincodec.h>
 
-#define STB_IMAGE_IMPLEMENTATION
-#define STBI_ONLY_PNG
-#include "stb_image.h"
+#include "GameHelpers.h"
 
 namespace game
 {
@@ -11,11 +10,11 @@ namespace game
 	{
 	public :
 		ImageLoader();
-		void* Load(const char* filename, int32_t& width, int32_t& height, int32_t& componentsPerPixel, bool flip);
+		void* Load(const char* filename, uint32_t& width, uint32_t& height, uint32_t& componentsPerPixel);
 		void UnLoad();
 		~ImageLoader();
 	private:
-		void* _data = nullptr;
+		void* _data;
 	};
 
 	inline ImageLoader::ImageLoader()
@@ -23,18 +22,52 @@ namespace game
 		_data = nullptr;
 	}
 
-	inline void* ImageLoader::Load(const char* fileName, int32_t& width, int32_t& height, int32_t& componentsPerPixel, bool flip)
+	inline void* ImageLoader::Load(const char* fileName, uint32_t& width, uint32_t& height, uint32_t& componentsPerPixel)
 	{
 		// Clears data if multiple loads happen
 		if (_data != nullptr)
 		{
-			stbi_image_free(_data);
+            delete[] _data;
 			_data = nullptr;
 		}
 
-		// Invert for OpenGL
-		stbi_set_flip_vertically_on_load(flip); 
-		_data = stbi_load(fileName, &width, &height, &componentsPerPixel, 4);
+        HRESULT hr = CoInitialize(NULL);
+
+        Microsoft::WRL::ComPtr<IWICImagingFactory> factory;
+        hr = CoCreateInstance(CLSID_WICImagingFactory, nullptr, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(factory.GetAddressOf()));
+        if (FAILED(hr)) {
+            return nullptr;
+        }
+
+        Microsoft::WRL::ComPtr<IWICBitmapDecoder> decoder;
+        hr = factory->CreateDecoderFromFilename(ConvertToWide(fileName).c_str(), nullptr, GENERIC_READ, WICDecodeMetadataCacheOnDemand, decoder.GetAddressOf());
+        if (FAILED(hr)) {
+            return nullptr;
+        }
+
+        Microsoft::WRL::ComPtr<IWICBitmapFrameDecode> frame;
+        hr = decoder->GetFrame(0, frame.GetAddressOf());
+        if (FAILED(hr)) {
+            return nullptr;
+        }
+
+        hr = frame->GetSize(&width, &height);
+        if (FAILED(hr)) {
+            return nullptr;
+        }
+        componentsPerPixel = 4;
+
+        _data = new uint8_t[width * 4 * height];
+
+        hr = frame->CopyPixels(nullptr, width * 4, width * 4 * height , static_cast<uint8_t*>(_data));
+        if (FAILED(hr)) {
+            delete[] _data;
+            _data = nullptr;
+            return nullptr;
+        }
+
+        //CoUninitialize();
+
 		return _data;
 	}
 
@@ -42,7 +75,7 @@ namespace game
 	{
 		if (_data != nullptr)
 		{
-			stbi_image_free(_data);
+            delete[] _data;// stbi_image_free(_data);
 			_data = nullptr;
 		}
 	}
@@ -51,7 +84,7 @@ namespace game
 	{
 		if (_data != nullptr)
 		{
-			stbi_image_free(_data);
+            delete[] _data;// stbi_image_free(_data);
 		}
 	}
 }
