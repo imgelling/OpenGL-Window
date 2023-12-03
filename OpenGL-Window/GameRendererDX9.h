@@ -306,9 +306,9 @@ namespace game
 	{
 		ImageLoader loader;
 		void* data = nullptr;
-		int32_t width = 0;
-		int32_t height = 0;
-		int32_t componentsPerPixel = 0;
+		uint32_t width = 0;
+		uint32_t height = 0;
+		uint32_t componentsPerPixel = 0;
 		D3DLOCKED_RECT lockedRectangle = { 0 };
 		HRESULT hResult;
 		

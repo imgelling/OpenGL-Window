@@ -70,7 +70,7 @@ namespace game
 	{
 	public :
 		ImageLoader();
-		void* Load(const char* filename, int32_t& width, int32_t& height, int32_t& componentsPerPixel, bool flip);
+		void* Load(const char* filename, uint32_t& width, uint32_t& height, uint32_t& componentsPerPixel, bool flip);
 		void UnLoad();
 		~ImageLoader();
 	private:
@@ -82,7 +82,7 @@ namespace game
 		_data = nullptr;
 	}
 
-	inline void* ImageLoader::Load(const char* fileName, int32_t& width, int32_t& height, int32_t& componentsPerPixel, bool flip)
+	inline void* ImageLoader::Load(const char* fileName, uint32_t& width, uint32_t& height, uint32_t& componentsPerPixel, bool flip)
 	{
 		// Clears data if multiple loads happen
 		if (_data != nullptr)
@@ -93,7 +93,11 @@ namespace game
 
 		// Invert for OpenGL
 		stbi_set_flip_vertically_on_load(flip); 
-		_data = stbi_load(fileName, &width, &height, &componentsPerPixel, 4);
+        int w, h, c;
+		_data = stbi_load(fileName, &w, &h, &c, 4);
+        width = (uint32_t)w;
+        height = (uint32_t)h;
+        componentsPerPixel = (uint32_t)c;
 		return _data;
 	}
 

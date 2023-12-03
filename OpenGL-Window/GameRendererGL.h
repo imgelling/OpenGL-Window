@@ -922,9 +922,9 @@ namespace game
 	{
 		//Content content;
 		void* data = nullptr;
-		int32_t width = 0;
-		int32_t height = 0;
-		int32_t componentsPerPixel = 0;
+		uint32_t width = 0;
+		uint32_t height = 0;
+		uint32_t componentsPerPixel = 0;
 		ImageLoader imageLoader;
 
 		// Read data
@@ -943,7 +943,6 @@ namespace game
 
 		glGenTextures(1, &texture.bind);
 		glBindTexture(GL_TEXTURE_2D, texture.bind);
-		texture.name = fileName;
 		// GL_Nearest is point filtering
 		//GL_LINEAR will give you bilinear filtering.GL_LINEAR_MIPMAP_LINEAR should be trilinear.
 		//GL_NEAREST_MIPMAP_NEAREST: takes the nearest mipmap to match the pixel sizeand uses nearest neighbor interpolation for texture sampling.
@@ -988,7 +987,9 @@ namespace game
 		}
 
 		if (texture.isMipMapped)
+		{
 			_glGenerateMipmap(GL_TEXTURE_2D);
+		}
 		glBindTexture(GL_TEXTURE_2D, 0);
 
 		return true;

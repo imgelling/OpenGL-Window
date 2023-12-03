@@ -1151,7 +1151,10 @@ namespace game
 		if (enginePointer->geIsUsing(GAME_OPENGL))
 		{
 			// restore saved this stuff
-			glBindTexture(GL_TEXTURE_2D, _oldTextureBound);
+			if (_oldTextureBound)
+			{
+				glBindTexture(GL_TEXTURE_2D, _oldTextureBound);
+			}
 			glPopAttrib(); // GL_BLEND
 			glPopAttrib(); // GL_TEXTURE_2D
 		}

@@ -817,9 +817,9 @@ namespace game
 	{
 		ImageLoader loader;
 		void* data = nullptr;
-		int32_t width = 0;
-		int32_t height = 0;
-		int32_t componentsPerPixel = 0;
+		uint32_t width = 0;
+		uint32_t height = 0;
+		uint32_t componentsPerPixel = 0;
 
 		data = loader.Load(fileName.c_str(), width, height, componentsPerPixel, false);
 		if (data == nullptr)

@@ -198,6 +198,12 @@ namespace game
 	{
 		if (_video != nullptr) delete[] _video;
 		if (_fontROM != nullptr) delete[] _fontROM;
+#if defined (GAME_OPENGL)
+		if (enginePointer->geIsUsing(GAME_OPENGL))
+		{
+			glDeleteLists(_compiledQuad, 1);
+		}
+#endif
 #if defined (GAME_DIRECTX9)
 		if (enginePointer->geIsUsing(GAME_DIRECTX9))
 		{
@@ -930,6 +936,7 @@ namespace game
 			_sizeOfScaledTexture.width = ((float_t)_sizeOfScaledTexture.width * 2.0f / (float_t)_windowSize.width) - 1.0f;
 			_sizeOfScaledTexture.height = 1.0f - ((float_t)_sizeOfScaledTexture.height * 2.0f / (float_t)_windowSize.height);// -1.0f;
 
+			glDeleteLists(_compiledQuad,1);
 			glNewList(_compiledQuad, GL_COMPILE);
 			{
 				glBegin(GL_QUADS);
@@ -1131,7 +1138,10 @@ namespace game
 			//	glEnable(0x809D);
 			//}
 			//glDisable(GL_TEXTURE_2D);
-			glBindTexture(GL_TEXTURE_2D, boundTexture);
+			if (boundTexture)
+			{
+				glBindTexture(GL_TEXTURE_2D, boundTexture);
+			}
 			glPopAttrib(); // GL_MULTISAMPLE
 			glPopAttrib(); // GL_TEXTURE_2D
 			
