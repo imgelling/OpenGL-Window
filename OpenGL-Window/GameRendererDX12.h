@@ -54,12 +54,8 @@ namespace game
 		bool CreateDevice(Window& window);
 		void DestroyDevice();
 		void Swap();
-		void HandleWindowResize(const uint32_t width, const uint32_t height) 
-		{
-			// Save new size
-			//_attributes.WindowWidth = width;
-			//_attributes.WindowHeight = height;
-		};
+		void HandleWindowResize(const uint32_t width, const uint32_t height);
+
 		void FillOutRendererInfo() {};
 		bool CreateTexture(Texture2D& texture);
 		bool LoadTexture(std::string fileName, Texture2D& texture);
@@ -72,11 +68,8 @@ namespace game
 		}
 		bool LoadTextShader(const std::string shaderText, const std::string vertexEntryPoint, const std::string fragmentEntryPoint, Shader& shader);
 		void UnLoadShader(Shader& shader);
-		void StartFrame(); // can go away after clear implemented
-		//void EndFrame();
 		void GetDevice(Microsoft::WRL::ComPtr<ID3D12Device2> &d3d12Device, Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> &commandList, Microsoft::WRL::ComPtr <ID3D12CommandQueue> &commandQueue);
 		void Clear(const uint32_t bufferFlags, const Color color);
-		CD3DX12_CPU_DESCRIPTOR_HANDLE currentFrameBuffer; // can go away after clear implemented
 
 		// Below can go away if implement reset and execute
 		Microsoft::WRL::ComPtr<ID3D12Fence> _fence[frameBufferCount];    // an object that is locked while our command list is being executed by the gpu. We need as many 
@@ -90,6 +83,8 @@ namespace game
 	protected:
 		void _ReadExtensions() {};
 	private:
+		CD3DX12_CPU_DESCRIPTOR_HANDLE _currentFrameBuffer; // can go away after clear implemented
+		void _StartFrame(); 
 		bool _midFrame; // Are we in the middle of a frame? If so end the frame before closing (dx12 does not like that)
 		int32_t _allowTearing;
 		D3D12_VIEWPORT _viewPort = {}; // area that output from rasterizer will be stretched to.
@@ -170,6 +165,13 @@ namespace game
 		CloseHandle(_fenceEvent);
 		_fenceEvent = nullptr;
 	}
+
+	inline void RendererDX12::HandleWindowResize(const uint32_t width, const uint32_t height)
+	{
+		// Save new size
+		//_attributes.WindowWidth = width;
+		//_attributes.WindowHeight = height;
+	};
 
 	inline bool RendererDX12::CreateDevice(Window& window)
 	{
@@ -469,11 +471,11 @@ namespace game
 
 	inline void RendererDX12::Clear(const uint32_t bufferFlags, const Color color)
 	{
-		StartFrame();
-		_commandList->ClearRenderTargetView(currentFrameBuffer, color.rgba, 0, nullptr);
+		_StartFrame();
+		_commandList->ClearRenderTargetView(_currentFrameBuffer, color.rgba, 0, nullptr);
 	}
 
-	inline void RendererDX12::StartFrame()
+	inline void RendererDX12::_StartFrame()
 	{
 		// We have to wait for the gpu to finish with the command allocator before we reset it
 		_WaitForPreviousFrame(true);
@@ -496,9 +498,9 @@ namespace game
 		_commandList->ResourceBarrier(1, &barrier);
 
 		// Set the current render target
-		currentFrameBuffer = _rtvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
-		currentFrameBuffer.Offset(_frameIndex, _rtvDescriptorSize);
-		_commandList->OMSetRenderTargets(1, &currentFrameBuffer, FALSE, nullptr);
+		_currentFrameBuffer = _rtvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
+		_currentFrameBuffer.Offset(_frameIndex, _rtvDescriptorSize);
+		_commandList->OMSetRenderTargets(1, &_currentFrameBuffer, FALSE, nullptr);
 
 
 		// Fill out the Viewport
