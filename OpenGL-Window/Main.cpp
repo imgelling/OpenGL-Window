@@ -5,8 +5,8 @@
 //#define GAME_SUPPORT_DIRECTX9
 //#define GAME_SUPPORT_DIRECTX10
 //#define GAME_SUPPORT_DIRECTX11
-#define GAME_SUPPORT_DIRECTX12
-//#define GAME_SUPPORT_OPENGL
+//#define GAME_SUPPORT_DIRECTX12
+#define GAME_SUPPORT_OPENGL
 //#define GAME_SUPPORT_VULKAN 
 //#define GAME_SUPPORT_ALL
 #include "Game.h"
@@ -64,7 +64,7 @@ public:
 		//attributes.RenderingAPI = game::RenderAPI::DirectX10;
 		//attributes.RenderingAPI = game::RenderAPI::DirectX11;
 		attributes.RenderingAPI = game::RenderAPI::DirectX12;
-		//attributes.RenderingAPI = game::RenderAPI::OpenGL;
+		attributes.RenderingAPI = game::RenderAPI::OpenGL;
 		//attributes.RenderingAPI = game::RenderAPI::Vulkan;
 		
 		geSetAttributes(attributes);
