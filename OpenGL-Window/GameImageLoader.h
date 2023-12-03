@@ -1,9 +1,11 @@
 #if !defined(GAMEIMAGELOADER_H)
 #define GAMEIMAGELOADER_H
 
-#define STB_IMAGE_IMPLEMENTATION
-#define STBI_ONLY_PNG
-#include "stb_image.h"
+//#define STB_IMAGE_IMPLEMENTATION
+//#define STBI_ONLY_PNG
+//#include "stb_image.h"
+#include <wincodec.h>
+#include "GameHelpers.h"
 
 /*
 #include <windows.h>
@@ -87,17 +89,75 @@ namespace game
 		// Clears data if multiple loads happen
 		if (_data != nullptr)
 		{
-			stbi_image_free(_data);
+            delete[] _data;// stbi_image_free(_data);
 			_data = nullptr;
 		}
 
+        CoInitialize(NULL);
+        IWICImagingFactory* factory = nullptr;
+        HRESULT hr = CoCreateInstance(CLSID_WICImagingFactory, nullptr, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&factory));
+        if (FAILED(hr)) {
+            // Handle error
+            return nullptr;
+        }
+
+        IWICBitmapDecoder* decoder = nullptr;
+        hr = factory->CreateDecoderFromFilename(ConvertToWide(fileName).c_str(), nullptr, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &decoder);
+        if (FAILED(hr)) {
+            factory->Release();
+            // Handle error
+            return nullptr;
+        }
+
+        IWICBitmapFrameDecode* frame = nullptr;
+        hr = decoder->GetFrame(0, &frame);
+        if (FAILED(hr)) {
+            decoder->Release();
+            factory->Release();
+            // Handle error
+            return nullptr;
+        }
+
+        UINT w2, h2;
+        hr = frame->GetSize(&w2, &h2);
+        if (FAILED(hr)) {
+            frame->Release();
+            decoder->Release();
+            factory->Release();
+            // Handle error
+            return nullptr;
+        }
+        width = w2;
+        height = h2;
+        componentsPerPixel = 4;
+
+        UINT stride = width * 4;
+        UINT bufferSize = stride * height;
+        //BYTE* buffer = new BYTE[bufferSize];
+        _data = new uint8_t[bufferSize];
+
+        hr = frame->CopyPixels(nullptr, stride, bufferSize, static_cast<uint8_t*>(_data));
+        if (FAILED(hr)) {
+            //delete[] buffer;
+            frame->Release();
+            decoder->Release();
+            factory->Release();
+            return nullptr;
+            // Handle error
+        }
+
+        // Use the image data
+
+        //delete[] buffer;
+        frame->Release();
+        decoder->Release();
+        factory->Release();
+
+        CoUninitialize();
+
 		// Invert for OpenGL
-		stbi_set_flip_vertically_on_load(flip); 
-        int w, h, c;
-		_data = stbi_load(fileName, &w, &h, &c, 4);
-        width = (uint32_t)w;
-        height = (uint32_t)h;
-        componentsPerPixel = (uint32_t)c;
+//		stbi_set_flip_vertically_on_load(flip); 
+
 		return _data;
 	}
 
@@ -105,7 +165,7 @@ namespace game
 	{
 		if (_data != nullptr)
 		{
-			stbi_image_free(_data);
+            delete[] _data;// stbi_image_free(_data);
 			_data = nullptr;
 		}
 	}
@@ -114,7 +174,7 @@ namespace game
 	{
 		if (_data != nullptr)
 		{
-			stbi_image_free(_data);
+            delete[] _data;// stbi_image_free(_data);
 		}
 	}
 }
