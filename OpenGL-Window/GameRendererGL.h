@@ -638,6 +638,9 @@ namespace game
 		// Read all available extensions
 		_ReadExtensions();
 
+		// Initialize COM
+		HRESULT hr = CoInitialize(NULL);
+
 
 		return true;
 	}
@@ -663,6 +666,8 @@ namespace game
 
 	inline void RendererGL::DestroyDevice()
 	{
+		// Shut down COM stuff
+		CoUninitialize();
 		// Clean up OpenGL stuff
 		wglMakeCurrent(NULL, NULL);
 		if (_glRenderContext) wglDeleteContext(_glRenderContext);

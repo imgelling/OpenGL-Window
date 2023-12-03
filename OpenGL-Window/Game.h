@@ -11,7 +11,12 @@ Change Log:
 			* DirectX10 uses ComPtrs now.
 			* DirectX10 and 11 use ComPtrs for saving/restoring the states now.
 		Bug Fixes:
-			* F10 window resize bug fixed.
+			* F10 window resize.
+	- December 3, 2023:
+		Features:
+			* No external image loader needed now
+		Bug Fixes:
+			* OpenGL, with debug mode on, would spam about a bad texture on Nvidia cards.
 
 */
 

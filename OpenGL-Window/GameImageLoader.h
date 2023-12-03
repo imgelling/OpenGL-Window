@@ -1,5 +1,6 @@
 #if !defined(GAMEIMAGELOADER_H)
 #define GAMEIMAGELOADER_H
+#include <wrl.h>
 #include <wincodec.h>
 
 #include "GameHelpers.h"
@@ -31,10 +32,8 @@ namespace game
 			_data = nullptr;
 		}
 
-        HRESULT hr = CoInitialize(NULL);
-
         Microsoft::WRL::ComPtr<IWICImagingFactory> factory;
-        hr = CoCreateInstance(CLSID_WICImagingFactory, nullptr, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(factory.GetAddressOf()));
+        HRESULT hr = CoCreateInstance(CLSID_WICImagingFactory, nullptr, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(factory.GetAddressOf()));
         if (FAILED(hr)) {
             return nullptr;
         }
@@ -65,9 +64,6 @@ namespace game
             _data = nullptr;
             return nullptr;
         }
-
-        //CoUninitialize();
-
 		return _data;
 	}
 
@@ -75,7 +71,7 @@ namespace game
 	{
 		if (_data != nullptr)
 		{
-            delete[] _data;// stbi_image_free(_data);
+            delete[] _data;
 			_data = nullptr;
 		}
 	}
@@ -84,7 +80,7 @@ namespace game
 	{
 		if (_data != nullptr)
 		{
-            delete[] _data;// stbi_image_free(_data);
+            delete[] _data;
 		}
 	}
 }

@@ -139,6 +139,8 @@
       <AdditionalIncludeDirectories>D:\Programming\Libraries\Vulkan\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <EnableEnhancedInstructionSet>AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
+      <FloatingPointModel>Precise</FloatingPointModel>
+      <FavorSizeOrSpeed>Neither</FavorSizeOrSpeed>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
