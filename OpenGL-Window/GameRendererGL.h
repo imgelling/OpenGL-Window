@@ -920,7 +920,6 @@ namespace game
 
 	inline bool RendererGL::LoadTexture(std::string fileName, Texture2D &texture)
 	{
-		//Content content;
 		void* data = nullptr;
 		uint32_t width = 0;
 		uint32_t height = 0;
@@ -928,7 +927,7 @@ namespace game
 		ImageLoader imageLoader;
 
 		// Read data
-		data = imageLoader.Load(fileName.c_str(), width, height, componentsPerPixel, true);
+		data = imageLoader.Load(fileName.c_str(), width, height, componentsPerPixel);
 		if (data == nullptr)
 		{
 			lastError = { GameErrors::GameContent, "Failed to load texture : " + fileName };

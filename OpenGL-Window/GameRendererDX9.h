@@ -312,7 +312,7 @@ namespace game
 		D3DLOCKED_RECT lockedRectangle = { 0 };
 		HRESULT hResult;
 		
-		data = loader.Load(fileName.c_str(), width, height, componentsPerPixel, false);
+		data = loader.Load(fileName.c_str(), width, height, componentsPerPixel);
 		if (data == nullptr)
 		{
 			lastError = { GameErrors::GameContent, "Failed to load texture : " + fileName };

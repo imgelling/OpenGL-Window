@@ -282,7 +282,7 @@ namespace game
 		uint32_t componentsPerPixel = 0;
 		//D3D11_MAPPED_TEXTURE2D  lockedRectangle = { 0 };
 
-		data = loader.Load(fileName.c_str(), width, height, componentsPerPixel, false);
+		data = loader.Load(fileName.c_str(), width, height, componentsPerPixel);
 		if (data == nullptr)
 		{
 			lastError = { GameErrors::GameContent, "Failed to load texture : " + fileName };
