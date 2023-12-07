@@ -78,7 +78,6 @@ namespace game
 		HANDLE _fenceEvent; // a handle to an event when our fence is unlocked by the gpu
 		uint64_t _fenceValue[frameBufferCount]; // this value is incremented each frame. each fence will have its own value
 		uint32_t _frameIndex; // current rtv we are on
-		// not sure if can go away after reset and execute
 		void flushGPU();
 	protected:
 		void _ReadExtensions() {};
@@ -86,7 +85,7 @@ namespace game
 		void _WaitForPreviousFrame();
 		void _StartFrame(); 
 		bool _windowResized;
-		CD3DX12_CPU_DESCRIPTOR_HANDLE _currentFrameBuffer; // can go away after clear implemented
+		CD3DX12_CPU_DESCRIPTOR_HANDLE _currentFrameBuffer;
 		bool _midFrame; // Are we in the middle of a frame? If so end the frame before closing (dx12 does not like that)
 		int32_t _allowTearing;
 		D3D12_VIEWPORT _viewPort = {}; // area that output from rasterizer will be stretched to.
@@ -198,7 +197,7 @@ namespace game
 		flushGPU();
 
 		// Release the previous resources we will be recreating.
-		for (int i = 0; i < frameBufferCount; ++i)
+		for (int i = 0; i < frameBufferCount; i++)
 		{
 			_renderTargets[i].Reset();
 		}
@@ -269,9 +268,7 @@ namespace game
 			// execute the array of command lists
 			_commandQueue->ExecuteCommandLists(_countof(ppCommandLists), ppCommandLists);
 
-			// this command goes in at the end of our command queue. we will know when our command queue 
-			// has finished because the fence value will be set to "fenceValue" from the GPU since the command
-			// queue is being executed on the GPU
+			// this command goes in at the end of our command queue. This actually sets the fence value
 			_commandQueue->Signal(_fence[_frameIndex].Get(), _fenceValue[_frameIndex]);
 		}
 		flushGPU();
@@ -674,7 +671,7 @@ namespace game
 			_commandQueue->Signal(_fence[_frameIndex].Get(), _fenceValue[_frameIndex]);
 		}
 
-		// present the current backbuffer
+		// Present the current rtv
 		if (_attributes.VsyncOn)
 		{
 			_swapChain->Present(1, 0);
