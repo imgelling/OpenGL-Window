@@ -201,12 +201,7 @@ namespace game
 		for (int i = 0; i < frameBufferCount; ++i)
 		{
 			_renderTargets[i].Reset();
-			//_commandAllocator[i].Reset();
-
-			std::cout << "r" << i << " = " << _renderTargets[i].GetAddressOf();
 		}
-		//_commandList.Reset();
-		//_commandQueue.Reset();
 
 		//_DepthStencilBuffer.Reset();
 
@@ -261,17 +256,14 @@ namespace game
 		_scissorRect.top = 0;
 		_scissorRect.right = _attributes.WindowWidth;
 		_scissorRect.bottom = _attributes.WindowHeight;
+
+
 		_commandList->Reset(_commandAllocator[_frameIndex].Get(), NULL);
+
 		_commandList->RSSetViewports(1, &_viewPort);
 		_commandList->RSSetScissorRects(1, &_scissorRect);
 
-
-
-
-
 		_commandList->Close();
-
-
 
 		// EXECUTE
 		{
@@ -285,7 +277,7 @@ namespace game
 			// queue is being executed on the GPU
 			_commandQueue->Signal(_fence[_frameIndex].Get(), _fenceValue[_frameIndex]);
 		}
-
+		flushGpu();
 	}
 
 	inline bool RendererDX12::CreateDevice(Window& window)
