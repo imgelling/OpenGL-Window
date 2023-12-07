@@ -940,7 +940,7 @@ namespace game
 
 			_descriptorSize = enginePointer->d3d12Device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 
-			enginePointer->geGetRenderer()->flushGpu();
+			enginePointer->geGetRenderer()->flushGPU();
 		}
 #endif
 		return true;

@@ -799,7 +799,7 @@ namespace game
 				AppendHR12(hr);
 				return false;
 			}
-			enginePointer->geGetRenderer()->flushGpu();
+			enginePointer->geGetRenderer()->flushGPU();
 		}
 #endif
 

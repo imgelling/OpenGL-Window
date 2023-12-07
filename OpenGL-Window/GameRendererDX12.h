@@ -79,21 +79,21 @@ namespace game
 		uint64_t _fenceValue[frameBufferCount]; // this value is incremented each frame. each fence will have its own value
 		uint32_t _frameIndex; // current rtv we are on
 		// not sure if can go away after reset and execute
-		void flushGpu();
+		void flushGPU();
 	protected:
 		void _ReadExtensions() {};
 	private:
 		void _WaitForPreviousFrame();
+		void _StartFrame(); 
 		bool _windowResized;
 		CD3DX12_CPU_DESCRIPTOR_HANDLE _currentFrameBuffer; // can go away after clear implemented
-		void _StartFrame(); 
 		bool _midFrame; // Are we in the middle of a frame? If so end the frame before closing (dx12 does not like that)
 		int32_t _allowTearing;
 		D3D12_VIEWPORT _viewPort = {}; // area that output from rasterizer will be stretched to.
 		D3D12_RECT _scissorRect = {}; // the area to draw in. pixels outside that area will not be drawn onto
 		void _DoWindowResize();
 
-		Microsoft::WRL::ComPtr<ID3D12Debug> debugInterface;
+		Microsoft::WRL::ComPtr<ID3D12Debug> _debugInterface;
 		Microsoft::WRL::ComPtr<ID3D12Device2> _d3d12Device; // direct3d device
 		Microsoft::WRL::ComPtr <ID3D12CommandQueue> _commandQueue; // container for command lists
 		Microsoft::WRL::ComPtr <IDXGISwapChain3> _swapChain; // swapchain used to switch between render targets
@@ -151,7 +151,7 @@ namespace game
 				_swapChain->SetFullscreenState(false, NULL);
 
 			// wait for the gpu to finish all frames
-			flushGpu();
+			flushGPU();
 		}
 
 		// memory check stuff
@@ -175,7 +175,7 @@ namespace game
 		//_DoWindowResize();
 	};
 
-	inline void RendererDX12::flushGpu()
+	inline void RendererDX12::flushGPU()
 	{
 		for (int i = 0; i < frameBufferCount; i++)
 		{
@@ -195,7 +195,7 @@ namespace game
 	{
 		_windowResized = false;
 
-		flushGpu();
+		flushGPU();
 
 		// Release the previous resources we will be recreating.
 		for (int i = 0; i < frameBufferCount; ++i)
@@ -240,9 +240,6 @@ namespace game
 			rtvHandle.Offset(1, _rtvDescriptorSize);
 		}
 
-		//_frameIndex = 0;
-
-
 		// Fill out the Viewport
 		_viewPort.TopLeftX = 0;
 		_viewPort.TopLeftY = 0;
@@ -277,7 +274,7 @@ namespace game
 			// queue is being executed on the GPU
 			_commandQueue->Signal(_fence[_frameIndex].Get(), _fenceValue[_frameIndex]);
 		}
-		flushGpu();
+		flushGPU();
 	}
 
 	inline bool RendererDX12::CreateDevice(Window& window)
@@ -296,12 +293,12 @@ namespace game
 		// Enable debug mode if needed
 		if (_attributes.DebugMode)
 		{
-			if (FAILED(D3D12GetDebugInterface(IID_PPV_ARGS(&debugInterface))))
+			if (FAILED(D3D12GetDebugInterface(IID_PPV_ARGS(&_debugInterface))))
 			{
 				lastError = { GameErrors::GameDirectX12Specific, "Could not get debug layer." };
 				return false;
 			}
-			debugInterface->EnableDebugLayer();
+			_debugInterface->EnableDebugLayer();
 		}
 
 
@@ -682,7 +679,7 @@ namespace game
 		{
 			_swapChain->Present(1, 0);
 			// Below is needed for VSYNC to work for some reason
-			flushGpu();
+			flushGPU();
 		}
 		else
 		{
@@ -1043,7 +1040,7 @@ namespace game
 			AppendHR12(hr);
 			return false;
 		}
-		flushGpu();
+		flushGPU();
 
 		//lastError = { GameErrors::GameDirectX12Specific,"Texture not implemented " }; 
 		return true;
