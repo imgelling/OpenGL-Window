@@ -79,16 +79,19 @@ namespace game
 		uint64_t _fenceValue[frameBufferCount]; // this value is incremented each frame. each fence will have its own value
 		uint32_t _frameIndex; // current rtv we are on
 		// not sure if can go away after reset and execute
-		void _WaitForPreviousFrame(bool nextFrame);
+		void flushGpu();
 	protected:
 		void _ReadExtensions() {};
 	private:
+		void _WaitForPreviousFrame();
+		bool _windowResized;
 		CD3DX12_CPU_DESCRIPTOR_HANDLE _currentFrameBuffer; // can go away after clear implemented
 		void _StartFrame(); 
 		bool _midFrame; // Are we in the middle of a frame? If so end the frame before closing (dx12 does not like that)
 		int32_t _allowTearing;
 		D3D12_VIEWPORT _viewPort = {}; // area that output from rasterizer will be stretched to.
 		D3D12_RECT _scissorRect = {}; // the area to draw in. pixels outside that area will not be drawn onto
+		void _DoWindowResize();
 
 		Microsoft::WRL::ComPtr<ID3D12Debug> debugInterface;
 		Microsoft::WRL::ComPtr<ID3D12Device2> _d3d12Device; // direct3d device
@@ -127,6 +130,7 @@ namespace game
 		_fenceEvent = nullptr;
 		_midFrame = false;
 		_allowTearing = 0;
+		_windowResized = false;
 	}
 
 	inline void RendererDX12::DestroyDevice()
@@ -147,11 +151,7 @@ namespace game
 				_swapChain->SetFullscreenState(false, NULL);
 
 			// wait for the gpu to finish all frames
-			for (int i = 0; i < frameBufferCount; ++i)
-			{
-				_frameIndex = i;
-				_WaitForPreviousFrame(false);
-			}
+			flushGpu();
 		}
 
 		// memory check stuff
@@ -169,9 +169,124 @@ namespace game
 	inline void RendererDX12::HandleWindowResize(const uint32_t width, const uint32_t height)
 	{
 		// Save new size
-		//_attributes.WindowWidth = width;
-		//_attributes.WindowHeight = height;
+		_attributes.WindowWidth = width;
+		_attributes.WindowHeight = height;
+		_windowResized = true;
+		//_DoWindowResize();
 	};
+
+	inline void RendererDX12::flushGpu()
+	{
+		for (int i = 0; i < frameBufferCount; i++)
+		{
+			uint64_t fenceValueForSignal = ++ _fenceValue[i];
+			_commandQueue->Signal(_fence[i].Get(), fenceValueForSignal);
+			if (_fence[i]->GetCompletedValue() < _fenceValue[i])
+			{
+				_fence[i]->SetEventOnCompletion(fenceValueForSignal, _fenceEvent);
+				WaitForSingleObject(_fenceEvent, INFINITE);
+			}
+		}
+		_frameIndex = 0;
+		// Thank you gamedev
+	}
+
+	inline void RendererDX12::_DoWindowResize()
+	{
+		_windowResized = false;
+
+		flushGpu();
+
+		// Release the previous resources we will be recreating.
+		for (int i = 0; i < frameBufferCount; ++i)
+		{
+			_renderTargets[i].Reset();
+			//_commandAllocator[i].Reset();
+
+			std::cout << "r" << i << " = " << _renderTargets[i].GetAddressOf();
+		}
+		//_commandList.Reset();
+		//_commandQueue.Reset();
+
+		//_DepthStencilBuffer.Reset();
+
+		uint32_t flags = DXGI_SWAP_EFFECT_FLIP_DISCARD;
+		if (!_attributes.VsyncOn || _allowTearing)
+		{
+			flags |= DXGI_SWAP_CHAIN_FLAG_ALLOW_TEARING;
+		}
+
+
+		if (FAILED(_swapChain->ResizeBuffers(frameBufferCount, _attributes.WindowWidth, _attributes.WindowHeight,
+			DXGI_FORMAT_UNKNOWN,
+			flags)))
+		{
+			std::cout << "Resize buffers failed\n";
+			throw;
+		}	
+
+		// Handle to start of RTV heap
+		CD3DX12_CPU_DESCRIPTOR_HANDLE  rtvHandle(_rtvDescriptorHeap->GetCPUDescriptorHandleForHeapStart());
+
+		// Create a RTV for each buffer
+		for (int i = 0; i < frameBufferCount; i++)
+		{
+			if (FAILED(_swapChain->GetBuffer(i, IID_PPV_ARGS(_renderTargets[i].GetAddressOf()))))
+			{
+				lastError = { GameErrors::GameDirectX12Specific, "Could not get buffer for RTV " + std::to_string(i) };
+				return;
+			}
+			_renderTargets[i]->SetName(L"FrameBuffer");
+
+			// Create RTV
+			_d3d12Device->CreateRenderTargetView(_renderTargets[i].Get(), nullptr, rtvHandle);
+
+			// Increment the rtv handle by the rtv descriptor size
+			rtvHandle.Offset(1, _rtvDescriptorSize);
+		}
+
+		//_frameIndex = 0;
+
+
+		// Fill out the Viewport
+		_viewPort.TopLeftX = 0;
+		_viewPort.TopLeftY = 0;
+		_viewPort.Width = (float_t)_attributes.WindowWidth;
+		_viewPort.Height = (float_t)_attributes.WindowHeight;
+		_viewPort.MinDepth = 0.0f;
+		_viewPort.MaxDepth = 1.0f;
+
+		// Fill out a scissor rect
+		_scissorRect.left = 0;
+		_scissorRect.top = 0;
+		_scissorRect.right = _attributes.WindowWidth;
+		_scissorRect.bottom = _attributes.WindowHeight;
+		_commandList->Reset(_commandAllocator[_frameIndex].Get(), NULL);
+		_commandList->RSSetViewports(1, &_viewPort);
+		_commandList->RSSetScissorRects(1, &_scissorRect);
+
+
+
+
+
+		_commandList->Close();
+
+
+
+		// EXECUTE
+		{
+			ID3D12CommandList* ppCommandLists[] = { _commandList.Get() };
+
+			// execute the array of command lists
+			_commandQueue->ExecuteCommandLists(_countof(ppCommandLists), ppCommandLists);
+
+			// this command goes in at the end of our command queue. we will know when our command queue 
+			// has finished because the fence value will be set to "fenceValue" from the GPU since the command
+			// queue is being executed on the GPU
+			_commandQueue->Signal(_fence[_frameIndex].Get(), _fenceValue[_frameIndex]);
+		}
+
+	}
 
 	inline bool RendererDX12::CreateDevice(Window& window)
 	{
@@ -329,6 +444,7 @@ namespace game
 		{
 			swapChainDesc.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_TEARING;
 		}
+		//swapChainDesc.Flags |= DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
 
 
 		Microsoft::WRL::ComPtr<IDXGISwapChain1> tempSwapChain;
@@ -375,7 +491,7 @@ namespace game
 		// Create a RTV for each buffer
 		for (int i = 0; i < frameBufferCount; i++)
 		{
-			if (FAILED(_swapChain->GetBuffer(i, IID_PPV_ARGS(&_renderTargets[i]))))
+			if (FAILED(_swapChain->GetBuffer(i, IID_PPV_ARGS(_renderTargets[i].GetAddressOf()))))
 			{
 				lastError = { GameErrors::GameDirectX12Specific, "Could not get buffer for RTV " + std::to_string(i) };
 				return false;
@@ -431,10 +547,24 @@ namespace game
 			return false;
 		}
 
+		// Fill out the Viewport
+		_viewPort.TopLeftX = 0;
+		_viewPort.TopLeftY = 0;
+		_viewPort.Width = (float_t)_attributes.WindowWidth;
+		_viewPort.Height = (float_t)_attributes.WindowHeight;
+		_viewPort.MinDepth = 0.0f;
+		_viewPort.MaxDepth = 1.0f;
+
+		// Fill out a scissor rect
+		_scissorRect.left = 0;
+		_scissorRect.top = 0;
+		_scissorRect.right = _attributes.WindowWidth;
+		_scissorRect.bottom = _attributes.WindowHeight;
+
 		return true;
 	};
 
-	inline void RendererDX12::_WaitForPreviousFrame(bool nextFrame)
+	inline void RendererDX12::_WaitForPreviousFrame()
 	{
 		HRESULT hr;
 // WAITING FOR THE FRAME TO COMPLETE BEFORE CONTINUING IS NOT BEST PRACTICE.
@@ -443,7 +573,7 @@ namespace game
 // maximize GPU utilization.
 
 		// Make sure we have the current back buffer being drawn to
-		if (nextFrame)
+		//if (nextFrame)
 			_frameIndex = _swapChain->GetCurrentBackBufferIndex();
 
 		if (_fence[_frameIndex]->GetCompletedValue() < _fenceValue[_frameIndex])
@@ -462,7 +592,7 @@ namespace game
 
 		// Increment the fence for next frame
 		// and get the current back buffer again incase there was a swap
-		if (nextFrame)
+		//if (nextFrame)
 		{
 			_fenceValue[_frameIndex]++;
 			_frameIndex = _swapChain->GetCurrentBackBufferIndex();
@@ -477,8 +607,14 @@ namespace game
 
 	inline void RendererDX12::_StartFrame()
 	{
+
+		if (_windowResized)
+		{
+			_DoWindowResize();
+		}
 		// We have to wait for the gpu to finish with the command allocator before we reset it
-		_WaitForPreviousFrame(true);
+		_WaitForPreviousFrame();
+
 
 		// Starting a frame, want to make sure we end it before closing application, dx12 can throw and error if
 		// a command list is not used
@@ -502,20 +638,6 @@ namespace game
 		_currentFrameBuffer.Offset(_frameIndex, _rtvDescriptorSize);
 		_commandList->OMSetRenderTargets(1, &_currentFrameBuffer, FALSE, nullptr);
 
-
-		// Fill out the Viewport
-		_viewPort.TopLeftX = 0;
-		_viewPort.TopLeftY = 0;
-		_viewPort.Width = (float_t)_attributes.WindowWidth;
-		_viewPort.Height = (float_t)_attributes.WindowHeight;
-		_viewPort.MinDepth = 0.0f;
-		_viewPort.MaxDepth = 1.0f;
-
-		// Fill out a scissor rect
-		_scissorRect.left = 0;
-		_scissorRect.top = 0;
-		_scissorRect.right = _attributes.WindowWidth;
-		_scissorRect.bottom = _attributes.WindowHeight;
 		_commandList->RSSetViewports(1, &_viewPort);
 		_commandList->RSSetScissorRects(1, &_scissorRect);
 	}
@@ -567,13 +689,13 @@ namespace game
 		if (_attributes.VsyncOn)
 		{
 			_swapChain->Present(1, 0);
+			// Below is needed for VSYNC to work for some reason
+			flushGpu();
 		}
 		else
 		{
 			_swapChain->Present(0, DXGI_PRESENT_ALLOW_TEARING);
 		}
-		// Below is needed for VSYNC to work for some reason
-		_WaitForPreviousFrame(false);
 		_midFrame = false;
 	}
 
@@ -929,7 +1051,7 @@ namespace game
 			AppendHR12(hr);
 			return false;
 		}
-		_WaitForPreviousFrame(false);
+		flushGpu();
 
 		//lastError = { GameErrors::GameDirectX12Specific,"Texture not implemented " }; 
 		return true;
