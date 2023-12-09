@@ -903,8 +903,7 @@ namespace game
 				ID3D12CommandList* ppCommandLists[] = { enginePointer->commandList.Get() };
 				enginePointer->commandQueue->ExecuteCommandLists(_countof(ppCommandLists), ppCommandLists);
 
-				// ??
-				// increment the fence value now, otherwise the buffer might not be uploaded by the time we start drawing
+				// Set fence for this section
 				temp->_fenceValue[temp->_frameIndex]++;
 				hr = enginePointer->commandQueue->Signal(temp->_fence[temp->_frameIndex].Get(), temp->_fenceValue[temp->_frameIndex]);
 				if (FAILED(hr))

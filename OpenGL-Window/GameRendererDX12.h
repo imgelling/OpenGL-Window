@@ -202,6 +202,7 @@ namespace game
 			_renderTargets[i].Reset();
 		}
 
+		// Here we would reset the depthstencil... if we HAD one!
 		//_DepthStencilBuffer.Reset();
 
 		uint32_t flags = DXGI_SWAP_EFFECT_FLIP_DISCARD;
@@ -253,7 +254,7 @@ namespace game
 		_scissorRect.right = _attributes.WindowWidth;
 		_scissorRect.bottom = _attributes.WindowHeight;
 
-
+		// Set the command list to record, don't need a pipeline state
 		_commandList->Reset(_commandAllocator[_frameIndex].Get(), NULL);
 
 		_commandList->RSSetViewports(1, &_viewPort);
