@@ -757,6 +757,20 @@ namespace game
 			}
 		}
 #endif
+#if defined(GAME_DIRECTX12)
+		if (geIsUsing(GAME_DIRECTX12))
+		{
+			if (_renderer)
+			{
+				// These resets may not need resetting as I don't think they change
+				d3d12Device.Reset();
+				commandList.Reset();
+				commandQueue.Reset();
+				_renderer->HandleWindowResize(width, height);
+				dynamic_cast<RendererDX12*>(_renderer)->GetDevice(d3d12Device, commandList, commandQueue);
+			}
+		}
+#endif
 		HandleWindowSizeChange();
 	}
 

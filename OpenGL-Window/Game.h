@@ -17,6 +17,10 @@ Change Log:
 			* No external image loader needed now
 		Bug Fixes:
 			* OpenGL, with debug mode on, would spam about a bad texture on Nvidia cards.
+	- Branch 12/7/23
+		* flushGpu added and bool removed from waitfornext frame
+		* possible still a bug, crashed once, can't repro
+		* 
 
 */
 

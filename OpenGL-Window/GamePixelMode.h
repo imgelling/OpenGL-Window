@@ -799,7 +799,7 @@ namespace game
 				AppendHR12(hr);
 				return false;
 			}
-			enginePointer->geGetRenderer()->_WaitForPreviousFrame(false);
+			enginePointer->geGetRenderer()->flushGPU();
 		}
 #endif
 
@@ -836,7 +836,7 @@ namespace game
 			D3D10_MAPPED_TEXTURE2D mappedTex = { 0 };
 			if (FAILED(_frameBuffer.textureInterface10->Map(D3D10CalcSubresource(0, 0, 1), D3D10_MAP_WRITE_DISCARD, 0, &mappedTex)))
 			{
-				std::cout << "Could not map texture\n";
+				std::cout << "Could not map framebuffer in PixelMode.\n";
 				return;
 			}
 			unsigned char* dest = (unsigned char*)mappedTex.pData;
@@ -851,7 +851,7 @@ namespace game
 			D3D11_MAPPED_SUBRESOURCE data;
 			if (FAILED(enginePointer->d3d11DeviceContext->Map(_frameBuffer.textureInterface11.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &data)))
 			{
-				std::cout << "Could not map framebuffer in spritebatch\n.";
+				std::cout << "Could not map framebuffer in PixelMode.\n.";
 			}
 			memcpy(data.pData, (unsigned char*)_video, sizeof(unsigned char) * _frameBuffer.width * _frameBuffer.height * 4);
 			enginePointer->d3d11DeviceContext->Unmap(_frameBuffer.textureInterface11.Get(), 0);
@@ -998,11 +998,9 @@ namespace game
 		{
 			// Homoginize the scaled rect to -1 to 1 range using
 			_positionOfScaledTexture.x = (_positionOfScaledTexture.x * 2.0f / (float_t)_windowSize.width) - 1.0f;
-			_positionOfScaledTexture.y = 1.0f - (_positionOfScaledTexture.y * 2.0f / (float_t)_windowSize.height);// -1.0f;
+			_positionOfScaledTexture.y = 1.0f - (_positionOfScaledTexture.y * 2.0f / (float_t)_windowSize.height);
 			_sizeOfScaledTexture.width = ((float_t)_sizeOfScaledTexture.width * 2.0f / (float_t)_windowSize.width) - 1.0f;
-			_sizeOfScaledTexture.height = 1.0f - ((float_t)_sizeOfScaledTexture.height * 2.0f / (float_t)_windowSize.height);// -1.0f;
-			//_positionOfScaledTexture.y = -_positionOfScaledTexture.y;
-			//_sizeOfScaledTexture.height = -_sizeOfScaledTexture.height;
+			_sizeOfScaledTexture.height = 1.0f - ((float_t)_sizeOfScaledTexture.height * 2.0f / (float_t)_windowSize.height);
 
 			// tl
 			_quadVertices10[0].x = _positionOfScaledTexture.x;
