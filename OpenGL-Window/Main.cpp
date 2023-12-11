@@ -101,7 +101,7 @@ public:
 		}	
 
 		//geMouse.UseMouseAcceleration(false);
-		geKeyboard.TextInput(true);
+		geKeyboard.TextInputMode(true);
 	}
 
 	void Shutdown()

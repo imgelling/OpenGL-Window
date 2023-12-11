@@ -16,12 +16,12 @@ namespace game
 		bool IsKeyHeld(const uint8_t key);
 
 
-		void TextInput(const bool textInputMode);
+		void TextInputMode(const bool textInputMode);
 		std::string GetTextInput();
 		bool IsTextInput() const;
 		uint32_t GetTabSize() const;
 		void SetTabSize(const uint32_t tabSize);
-		uint32_t GetCursorPosition();
+		uint32_t GetCursorPosition() const;
 	private:
 		void _UpdateText(uint8_t key, uint8_t shiftedKey);
 		bool* _keyCurrentState;
@@ -35,14 +35,10 @@ namespace game
 
 	inline Keyboard::Keyboard()
 	{
-
 		_keyCurrentState = new bool[256];
 		_keyOldState = new bool[256];
-		for (uint16_t key = 0; key < 256; key++)
-		{
-			_keyCurrentState[key] = false;
-			_keyOldState[key] = false;
-		}
+		ZeroMemory(_keyCurrentState, 256);
+		ZeroMemory(_keyOldState, 256);
 		_isTextInputMode = false;
 		_tabSize = 5;
 		_cursorPosition = 0;
@@ -62,16 +58,15 @@ namespace game
 	inline std::string Keyboard::GetTextInput()
 	{
 		std::string temp = _textInput;
-		//_textInput = "";
 		return temp;
 	}
 
-	inline uint32_t Keyboard::GetCursorPosition()
+	inline uint32_t Keyboard::GetCursorPosition() const
 	{
 		return _cursorPosition;
 	}
 
-	inline void Keyboard::TextInput(const bool textInputMode)
+	inline void Keyboard::TextInputMode(const bool textInputMode)
 	{
 		_isTextInputMode = textInputMode;
 	}
@@ -164,7 +159,6 @@ namespace game
 					return;
 				}
 				_UpdateText(key + 32, key);
-				std::cout << key << "\n";
 				return;
 			}
 
