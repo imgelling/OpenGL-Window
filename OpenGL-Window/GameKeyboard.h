@@ -1,6 +1,7 @@
 #if !defined(GAMEKEYBOARD_H)
 #define GAMEKEYBOARD_H
 #include <iostream>
+#include <vector>
 
 namespace game
 {
@@ -20,12 +21,16 @@ namespace game
 		bool IsTextInput() const;
 		uint32_t GetTabSize() const;
 		void SetTabSize(const uint32_t tabSize);
+		uint32_t GetCursorPosition();
 	private:
+		void _UpdateText(uint8_t key, uint8_t shiftedKey);
 		bool* _keyCurrentState;
 		bool* _keyOldState;
 		bool _isTextInputMode;
 		std::string _textInput;
 		uint32_t _tabSize;
+		std::vector<std::string> _oldText;
+		uint32_t _cursorPosition;
 	};
 
 	inline Keyboard::Keyboard()
@@ -40,6 +45,7 @@ namespace game
 		}
 		_isTextInputMode = false;
 		_tabSize = 5;
+		_cursorPosition = 0;
 	}
 
 	inline Keyboard::~Keyboard()
@@ -60,6 +66,11 @@ namespace game
 		return temp;
 	}
 
+	inline uint32_t Keyboard::GetCursorPosition()
+	{
+		return _cursorPosition;
+	}
+
 	inline void Keyboard::TextInput(const bool textInputMode)
 	{
 		_isTextInputMode = textInputMode;
@@ -73,6 +84,33 @@ namespace game
 	inline void Keyboard::SetTabSize(const uint32_t tabSize)
 	{
 		_tabSize = tabSize;
+	}
+
+	inline void Keyboard::_UpdateText(uint8_t key, uint8_t shiftedKey)
+	{
+		if (_keyCurrentState[VK_SHIFT])
+		{
+			if (_cursorPosition < _textInput.length())
+			{
+				_textInput[_cursorPosition] = shiftedKey;
+			}
+			else
+			{
+				_textInput += shiftedKey;
+			}
+		}
+		else
+		{
+			if (_cursorPosition < _textInput.length())
+			{
+				_textInput[_cursorPosition] = key;
+			}
+			else
+			{
+				_textInput += key;
+			}
+		}
+		_cursorPosition++;
 	}
 
 	inline void Keyboard::SetKeyState(const uint8_t key, const bool state)
@@ -95,77 +133,83 @@ namespace game
 				return;
 			}
 
+
+			if (key == geK_LEFT)
+			{
+				if (_cursorPosition)
+				{
+					_cursorPosition--;
+				}
+				return;
+			}
+
+			if (key == geK_RIGHT)
+			{
+				if (_cursorPosition < _textInput.length())
+				{
+					_cursorPosition++;
+				}
+				return;
+			}
+
+
+
 			// Is the key a letter?
 			if (std::isalpha(key))
 			{
-				if (_keyCurrentState[VK_SHIFT])
+				// These are scan codes and pass std::isalpha()
+				// Ignore them.
+				if ((key >= geK_F1) && (key <= geK_F12))
 				{
-					_textInput += key;
+					return;
 				}
-				else
-				{
-					_textInput += key + 32;
-				}
+				_UpdateText(key + 32, key);
+				std::cout << key << "\n";
 				return;
 			}
 
 			// Is the key a digit?
 			if (std::isdigit(key))
 			{
-				if (_keyCurrentState[VK_SHIFT])
+				uint8_t shiftedKey = 0;
+
+				switch (key)
 				{
-					switch (key)
-					{
-					case geK_1: _textInput += '!'; break;
-					case geK_2: _textInput += '@'; break;
-					case geK_3: _textInput += '#'; break;
-					case geK_4: _textInput += '$'; break;
-					case geK_5: _textInput += '%'; break;
-					case geK_6: _textInput += '^'; break;
-					case geK_7: _textInput += '&'; break;
-					case geK_8: _textInput += '*'; break;
-					case geK_9: _textInput += '('; break;
-					case geK_0: _textInput += ')'; break;
-					default: break;
-					}
-					return;
+				case geK_1: shiftedKey = '!'; break;
+				case geK_2: shiftedKey = '@'; break;
+				case geK_3: shiftedKey = '#'; break;
+				case geK_4: shiftedKey = '$'; break;
+				case geK_5: shiftedKey = '%'; break;
+				case geK_6: shiftedKey = '^'; break;
+				case geK_7: shiftedKey = '&'; break;
+				case geK_8: shiftedKey = '*'; break;
+				case geK_9: shiftedKey = '('; break;
+				case geK_0: shiftedKey = ')'; break;
+				default: break;
 				}
-				_textInput += key;
+
+				_UpdateText(key, shiftedKey);
 				return;
 			}
 
 			// Space key
 			if (key == geK_SPACE)
 			{
-				_textInput += " ";
+				_UpdateText(' ', ' ');
 				return;
 			}
 
 			// Minus and underscore key
 			if (key == geK_MINUS)
 			{
-				if (_keyCurrentState[geK_SHIFT])
-				{
-					_textInput += '_';
-				}
-				else
-				{
-					_textInput += '-';
-				}
+				_UpdateText('-', '_');
 				return;
 			}
 
 			// Equal and plus key
 			if (key == geK_PLUS)
 			{
-				if (_keyCurrentState[geK_SHIFT])
-				{
-					_textInput += '+';
-				}
-				else
-				{
-					_textInput += '=';
-				}
+				_UpdateText('=', '+');
 				return;
 			}
 
@@ -174,8 +218,9 @@ namespace game
 			{
 				if (_textInput.length())
 				{
-					_textInput.erase(_textInput.length() - 1, 1);
+					_textInput.erase((size_t)_cursorPosition-1, 1);
 				}
+				_cursorPosition--;
 				return;
 			}
 
@@ -184,7 +229,7 @@ namespace game
 			{
 				for (uint32_t count = 0; count < _tabSize; count++)
 				{
-					_textInput+= " ";
+					_UpdateText(' ', ' ');
 				}
 				return;
 			}
@@ -192,28 +237,71 @@ namespace game
 			// Comma and less than key
 			if (key == geK_COMMA)
 			{
-				if (_keyCurrentState[geK_SHIFT])
-				{
-					_textInput += '<';
-				}
-				else
-				{
-					_textInput += ',';
-				}
+				_UpdateText(',', '<');
 				return;
 			}
 
 			// Period and greater than key
 			if (key == geK_PERIOD)
 			{
-				if (_keyCurrentState[geK_SHIFT])
-				{
-					_textInput += '>';
-				}
-				else
-				{
-					_textInput += '.';
-				}
+				_UpdateText('.', '>');
+				return;
+			}
+
+			// Forward slash and question mark key
+			if (key == geK_QUESTION)
+			{
+				_UpdateText('/', '?');
+				return;
+			}
+
+			// Accent and tilde key
+			if (key == geK_TILDE)
+			{
+				_UpdateText('`', '~');
+				return;
+			}
+
+			// Left bracket and curley brace
+			if (key == geK_LBRACKET)
+			{
+				_UpdateText('[', '{');
+				return;
+			}
+
+			// Right bracket and curly brace
+			if (key == geK_RBRACKET)
+			{
+				_UpdateText(']', '}');
+				return;
+			}
+
+			// Back slash and pipe
+			if (key == geK_BACKSLASH)
+			{
+				_UpdateText('\\', '|');
+				return;
+			}
+
+			// Semi colon and colon
+			if (key == geK_SEMICOLON)
+			{
+				_UpdateText(';', ':');
+				return;
+			}
+
+			// Apostrophe and quote
+			if (key == geK_APOSTROPHE)
+			{
+				_UpdateText('"', '\'');
+				return;
+			}
+
+
+			// Delete
+			if (key == geK_DELETE)
+			{
+				_textInput.erase(_cursorPosition, 1);
 				return;
 			}
 		}

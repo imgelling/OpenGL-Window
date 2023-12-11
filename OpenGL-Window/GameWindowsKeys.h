@@ -1,5 +1,7 @@
 #pragma once
 
+// Digits
+
 #define geK_1 0x31
 #define geK_2 0x32
 #define geK_3 0x33
@@ -57,7 +59,7 @@
 #define geK_F12	0x7B
 
 
-// Others
+// Other text keys
 
 #define geK_ESCAPE 0x1B
 #define geK_SPACE 0x20
@@ -66,8 +68,23 @@
 #define geK_MINUS 0xBD
 #define geK_PLUS 0xBB
 #define geK_BACK 0x08
+#define geK_DELETE 0x2E
+#define geK_QUESTION 0xBF
+#define geK_TILDE 0xC0
+#define geK_LBRACKET 0xDB
+#define geK_RBRACKET 0xDD
+#define geK_BACKSLASH 0xDC
+#define geK_SEMICOLON 0xBA
+#define geK_APOSTROPHE 0xDE
 
-// Modifier keys
+// Key modifier keys
 
 #define geK_SHIFT 0x10
+
+// Arrow keys
+
+#define geK_LEFT 0x25
+#define geK_UP 0x26
+#define geK_RIGHT 0x27
+#define geK_DOWN 0x28
 
