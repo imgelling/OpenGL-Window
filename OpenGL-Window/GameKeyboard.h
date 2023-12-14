@@ -153,7 +153,7 @@ namespace game
 			// Move back in text entered history/buffer
 			if (key == geK_UP)
 			{
-				if (_textBuffer.size() > 0)
+				if ((_textBuffer.size() > 0) && (_textBufferPosition > 0))
 				{
 					_textBufferPosition--;
 					_textInput = _textBuffer[_textBufferPosition];
@@ -191,6 +191,10 @@ namespace game
 			// in the history/buffer and give a new line
 			if (key == geK_RETURN)
 			{
+				if (_textInput.size() == 0)
+				{
+					return;
+				}
 				_textBuffer.emplace_back(_textInput);
 				_textInput = "";
 				_cursorPosition = 0;
