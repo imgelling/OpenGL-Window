@@ -7,7 +7,6 @@
 #endif
 #if defined(GAME_DIRECTX10)
 #include <d3d10.h>
-#include <unordered_map>
 #endif
 
 #include "GameEngine.h"

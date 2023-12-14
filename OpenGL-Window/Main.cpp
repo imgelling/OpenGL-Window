@@ -5,8 +5,8 @@
 //#define GAME_SUPPORT_DIRECTX9
 //#define GAME_SUPPORT_DIRECTX10
 //#define GAME_SUPPORT_DIRECTX11
-#define GAME_SUPPORT_DIRECTX12
-//#define GAME_SUPPORT_OPENGL
+//#define GAME_SUPPORT_DIRECTX12
+#define GAME_SUPPORT_OPENGL
 //#define GAME_SUPPORT_VULKAN 
 //#define GAME_SUPPORT_ALL
 #include "Game.h"
@@ -61,10 +61,10 @@ public:
 		attributes.DebugMode = true;
 		//attributes.MultiSamples = 8; // Not implemented in most of DX, if any
 		//attributes.RenderingAPI = game::RenderAPI::DirectX9; 
-		//attributes.RenderingAPI = game::RenderAPI::DirectX10;
+		attributes.RenderingAPI = game::RenderAPI::DirectX10;
 		//attributes.RenderingAPI = game::RenderAPI::DirectX11;
-		attributes.RenderingAPI = game::RenderAPI::DirectX12;
-		//attributes.RenderingAPI = game::RenderAPI::OpenGL;
+		//attributes.RenderingAPI = game::RenderAPI::DirectX12;
+		attributes.RenderingAPI = game::RenderAPI::OpenGL;
 		//attributes.RenderingAPI = game::RenderAPI::Vulkan;
 		
 		geSetAttributes(attributes);
@@ -101,6 +101,7 @@ public:
 		}	
 
 		//geMouse.UseMouseAcceleration(false);
+		geKeyboard.TextInputMode(true);
 	}
 
 	void Shutdown()
@@ -166,7 +167,9 @@ public:
 		pixelMode.RectClip({ 1,1,318,178 }, game::Colors::White);
 
 		// Draw some text
-		pixelMode.TextClip("FPS : " + std::to_string(geGetFramesPerSecond()), scaledMousePos.x + 8, scaledMousePos.y, game::Colors::Black);
+		pixelMode.TextClip(geKeyboard.GetTextInput()/*"FPS : " + std::to_string(geGetFramesPerSecond())*/, scaledMousePos.x + 16, scaledMousePos.y, game::Colors::Black);
+
+		pixelMode.VLineClip(scaledMousePos.x + 16 + geKeyboard.GetCursorPosition() * 8, scaledMousePos.y, scaledMousePos.y + 8, game::Colors::White);
 
 		// Send it to the screen
 		pixelMode.Render();
