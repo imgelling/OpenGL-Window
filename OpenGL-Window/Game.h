@@ -29,6 +29,8 @@ Change Log:
 				- Stores old text input and allows navigating through it with the 
 				  up and down arrows
 				- Allows for cursor movement with left and right arrows.
+				- Does not do insertion for text, only overwrite.  Maybe added
+				  later, but my dev machine doesn not have an insert key.
 
 */
 
