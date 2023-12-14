@@ -88,3 +88,7 @@
 #define geK_RIGHT 0x27
 #define geK_DOWN 0x28
 
+// Text modifier keys
+
+#define geK_RETURN 0x0D
+

@@ -6,7 +6,7 @@ Change Log:
 	- November 23, 2023 : Released Game Engine to public on GitHub
 	- November 29, 2023 : 
 		Features:
-			* Shaders are now hard coded in the code. Real small. External files removed
+			* Shaders are now hard coded in the code. Real small. External files removed.
 		Misc:
 			* DirectX10 uses ComPtrs now.
 			* DirectX10 and 11 use ComPtrs for saving/restoring the states now.
@@ -14,13 +14,21 @@ Change Log:
 			* F10 window resize.
 	- December 3, 2023:
 		Features:
-			* No external image loader needed now
+			* No external image loader needed now.
 		Bug Fixes:
 			* OpenGL, with debug mode on, would spam about a bad texture on Nvidia cards.
-	- Branch 12/7/23
-		* flushGpu added and bool removed from waitfornext frame
-		* possible still a bug, crashed once, can't repro
-		* 
+	- December 9, 2023:
+		Features:
+			* DirectX 12 properly resizes on window resize.
+		Misc:
+			* flushGPU added and bool removed from _WaitForPreviousFrame
+	- December 13, 2023:
+		Features:
+			* Keyboard now supports text input (like a console window)
+				- All visual stuff must be handles by you.
+				- Stores old text input and allows navigating through it with the 
+				  up and down arrows
+				- Allows for cursor movement with left and right arrows.
 
 */
 

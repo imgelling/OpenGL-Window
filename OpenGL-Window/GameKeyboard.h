@@ -29,8 +29,10 @@ namespace game
 		bool _isTextInputMode;
 		std::string _textInput;
 		uint32_t _tabSize;
-		std::vector<std::string> _oldText;
 		uint32_t _cursorPosition;
+		std::vector<std::string> _textBuffer;
+		uint32_t _textBufferPosition;
+		
 	};
 
 	inline Keyboard::Keyboard()
@@ -42,6 +44,7 @@ namespace game
 		_isTextInputMode = false;
 		_tabSize = 5;
 		_cursorPosition = 0;
+		_textBufferPosition = 0;
 	}
 
 	inline Keyboard::~Keyboard()
@@ -57,8 +60,7 @@ namespace game
 
 	inline std::string Keyboard::GetTextInput()
 	{
-		std::string temp = _textInput;
-		return temp;
+		return _textInput;
 	}
 
 	inline uint32_t Keyboard::GetCursorPosition() const
@@ -128,7 +130,7 @@ namespace game
 				return;
 			}
 
-
+			// Cursor left
 			if (key == geK_LEFT)
 			{
 				if (_cursorPosition)
@@ -138,6 +140,7 @@ namespace game
 				return;
 			}
 
+			// Cursor right
 			if (key == geK_RIGHT)
 			{
 				if (_cursorPosition < _textInput.length())
@@ -147,6 +150,53 @@ namespace game
 				return;
 			}
 
+			// Move back in text entered history/buffer
+			if (key == geK_UP)
+			{
+				if (_textBuffer.size() > 0)
+				{
+					_textBufferPosition--;
+					_textInput = _textBuffer[_textBufferPosition];
+					_cursorPosition = (uint32_t)_textInput.length();
+				}
+				return;
+			}
+
+			// Move forward in text entered history/buffer
+			if (key == geK_DOWN)
+			{
+				if (_textBuffer.size() > 0)
+				{
+					// If we are not at the end, move forward in history/buffer
+					if (_textBufferPosition < _textBuffer.size() - 1)
+					{
+						_textBufferPosition++;
+						_textInput = _textBuffer[_textBufferPosition];
+						_cursorPosition = (uint32_t)_textInput.length();
+						return;
+					}
+					// If we are at the end, just give a blank line
+					if (_textBufferPosition == _textBuffer.size() - 1)
+					{
+						_textInput = "";
+						_textBufferPosition++;
+						_cursorPosition = 0;
+						return;
+					}
+				}
+				return;
+			}
+
+			// If return is pressed, we need to store the current text
+			// in the history/buffer and give a new line
+			if (key == geK_RETURN)
+			{
+				_textBuffer.emplace_back(_textInput);
+				_textInput = "";
+				_cursorPosition = 0;
+				_textBufferPosition = (uint32_t)_textBuffer.size();
+				return;
+			}
 
 
 			// Is the key a letter?
