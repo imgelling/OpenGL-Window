@@ -138,6 +138,14 @@ Change Log:
 #endif
 #pragma endregion
 
+#pragma region XInput
+#if !defined(GAME_NO_GAMEPAD)
+#pragma comment(lib,"Xinput9_1_0.lib")
+// older version just us XInput.lib
+#include "GameController.h"
+#endif
+#pragma endregion
+
 #endif // _WIN32
 
 #pragma region Vulkan
