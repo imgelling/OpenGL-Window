@@ -31,6 +31,11 @@ Change Log:
 				- Allows for cursor movement with left and right arrows.
 				- Does not do insertion for text, only overwrite.  Maybe added
 				  later, but my dev machine doesn not have an insert key.
+	- December 16, 2023:
+		Features:
+			* Up to 4 XInput compatible controllers supported
+				- Inputs from thumbsticks are 0-1 and thumbsticks are -1 to -1
+				- Battery level can be checked
 
 */
 
@@ -140,7 +145,7 @@ Change Log:
 
 #pragma region XInput
 #if !defined(GAME_NO_GAMEPAD)
-#pragma comment(lib,"Xinput9_1_0.lib")
+#pragma comment(lib,"Xinput.lib")
 // older version just us XInput.lib
 #include "GameGamePad.h"
 #endif

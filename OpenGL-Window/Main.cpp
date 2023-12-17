@@ -26,6 +26,7 @@ public:
 	game::SpriteFont spriteFont;
 	game::Random random;
 	game::PerformanceTimer perftimer;
+	game::GamePad gamePad;
 
 	Game() : game::Engine()
 	{
@@ -111,6 +112,8 @@ public:
 
 	void Update(const float_t msElapsed)
 	{
+		gamePad.Update();
+
 		// Handle Input
 		if (geKeyboard.WasKeyReleased(geK_F11))
 		{
@@ -171,7 +174,17 @@ public:
 
 		pixelMode.VLineClip(scaledMousePos.x + 16 + geKeyboard.GetCursorPosition() * 8, scaledMousePos.y, scaledMousePos.y + 8, game::Colors::White);
 
-		// Send it to the screen
+
+		// Reporting game pad stuff
+		pixelMode.TextClip("(1st pad) Left Thumb : " + std::to_string(gamePad.PositionOf(geG_L_THUMBSTICK,0).x) +
+			"," + std::to_string(gamePad.PositionOf(geG_L_THUMBSTICK,0).y), 0, 200, game::Colors::Red);
+
+		pixelMode.TextClip("(2nd pad) Left Thumb : " + std::to_string(gamePad.PositionOf(geG_L_THUMBSTICK, 1).x) +
+			"," + std::to_string(gamePad.PositionOf(geG_L_THUMBSTICK, 1).y), 0, 230, game::Colors::Red);
+
+
+
+		// Send it to the screen 
 		pixelMode.Render();
 
 		spriteBatch.Begin();
