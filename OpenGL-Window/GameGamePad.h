@@ -53,6 +53,8 @@ namespace game
 		uint32_t BatteryLevel(const uint32_t pad) const;
 		void Update();
 		int32_t Id(const uint32_t pad) const;
+		// negative dead zone set default
+		void SetDeadZone(const int32_t left, const int32_t right, const uint32_t pad);
 
 
 		//XINPUT_GAMEPAD_TRIGGER_THRESHOLD 
@@ -100,6 +102,27 @@ namespace game
 
 	inline GamePad::GamePad()
 	{
+	}
+
+	inline void GamePad::SetDeadZone(const int32_t left, const int32_t right, const uint32_t pad)
+	{
+		if (left < 0)
+		{
+			_padState[pad].lThumbstickDeadZone = XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE;
+		}
+		else
+		{
+			_padState[pad].lThumbstickDeadZone = left;
+		}
+
+		if (right < 0)
+		{
+			_padState[pad].rThumbstickDeadZone = XINPUT_GAMEPAD_RIGHT_THUMB_DEADZONE;
+		}
+		else
+		{
+			_padState[pad].rThumbstickDeadZone = right;
+		}
 	}
 
 	inline void GamePad::Update()
@@ -162,7 +185,6 @@ namespace game
 
 	inline int32_t GamePad::Id(const uint32_t pad) const
 	{
-		int y = XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE;
 		return _padState[pad].id;
 	}
 

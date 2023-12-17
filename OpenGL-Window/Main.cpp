@@ -176,11 +176,11 @@ public:
 
 
 		// Reporting game pad stuff
-		pixelMode.TextClip("(1st pad) Left Thumb : " + std::to_string(gamePad.PositionOf(geG_R_THUMBSTICK,0).x) +
-			"," + std::to_string(gamePad.PositionOf(geG_R_THUMBSTICK,0).y), 0, 200, game::Colors::Red);
+		pixelMode.TextClip("(1st pad) Left Thumb : " + std::to_string(gamePad.PositionOf(geG_L_THUMBSTICK,0).x) +
+			"," + std::to_string(gamePad.PositionOf(geG_L_THUMBSTICK,0).y), 0, 200, game::Colors::Red);
 
-		pixelMode.TextClip("(2nd pad) Left Thumb : " + std::to_string(gamePad.PositionOf(geG_R_THUMBSTICK, 1).x) +
-			"," + std::to_string(gamePad.PositionOf(geG_R_THUMBSTICK, 1).y), 0, 230, game::Colors::Red);
+		pixelMode.TextClip("(2nd pad) Left Thumb : " + std::to_string(gamePad.PositionOf(geG_L_THUMBSTICK, 1).x) +
+			"," + std::to_string(gamePad.PositionOf(geG_L_THUMBSTICK, 1).y), 0, 230, game::Colors::Red);
 
 		if (gamePad.wasButtonPressed(geG_L_THUMBSTICK, 0))
 		{
