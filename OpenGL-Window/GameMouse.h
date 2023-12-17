@@ -1,11 +1,11 @@
 #pragma once
 #include "GameMath.h"
 
-#define geMOUSE_LEFT   0
-#define geMOUSE_MIDDLE 1
-#define geMOUSE_RIGHT  2
-#define geMOUSE_X1 geMOUSE_RIGHT + 1
-#define geMOUSE_X2 geMOUSE_X1 + 1
+#define geM_LEFT   0
+#define geM_MIDDLE 1
+#define geM_RIGHT  2
+#define geM_X1 geMOUSE_RIGHT + 1
+#define geM_X2 geMOUSE_X1 + 1
 
 namespace game
 {

@@ -159,7 +159,7 @@
     <ClInclude Include="GameColor.h" />
     <ClInclude Include="GameEngine.h" />
     <ClInclude Include="GameErrors.h" />
-    <ClInclude Include="GameController.h" />
+    <ClInclude Include="GameGamePad.h" />
     <ClInclude Include="GameHelpers.h" />
     <ClInclude Include="GameImageLoader.h" />
     <ClInclude Include="GameKeyboard.h" />

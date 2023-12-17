@@ -191,13 +191,13 @@ public:
 	void Setup() const
 	{
 #if defined (GAME_OPENGL)
-		if (geIsUsing(GAME_OPENGL))
-		{
-			//glClearColor(0.25f, 0.25f, 0.25f, 1.0f);
-			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-			glEnable(GL_BLEND);
-			glEnable(GL_CULL_FACE);
-		}
+		//if (geIsUsing(GAME_OPENGL))
+		//{
+		//	//glClearColor(0.25f, 0.25f, 0.25f, 1.0f);
+		//	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		//	glEnable(GL_BLEND);
+		//	glEnable(GL_CULL_FACE);
+		//}
 #endif
 	}
 };
