@@ -15,22 +15,8 @@ constexpr auto GAME_GAME_PAD_4 = 3;
 
 namespace game
 {
-	struct Controller
-	{
 
-	};
-
-
-	typedef struct _XINPUT_GAMEPAD {
-		WORD  wButtons;
-		BYTE  bLeftTrigger;
-		BYTE  bRightTrigger;
-		SHORT sThumbLX;
-		SHORT sThumbLY;
-		SHORT sThumbRX;
-		SHORT sThumbRY;
-	} XINPUT_GAMEPAD, * PXINPUT_GAMEPAD;
-
+// Gamepad stuff
 #define geG_A XINPUT_GAMEPAD_A
 #define geG_B XINPUT_GAMEPAD_B
 #define geG_X XINPUT_GAMEPAD_X
@@ -48,27 +34,29 @@ namespace game
 #define geG_DPAD_DOWN XINPUT_GAMEPAD_DPAD_DOWN
 #define geG_DPAD_LEFT XINPUT_GAMEPAD_DPAD_LEFT
 
-#define GAME_GAMEPAD_BATTERY_LOW BATTERY_LEVEL_FULL
-
+// Battery stuff
+#define GAME_GAMEPAD_BATTERY_LOW BATTERY_LEVEL_LOW
+#define GAME_GAMEPAD_BATTERY_MEDIUM BATTERY_LEVEL_MEDIUM
+#define GAME_GAMEPAD_BATTERY_FULL BATTERY_LEVEL_FULL
+#define GAME_GAMEPAD_BATTERY_EMPTY BATTERY_LEVEL_EMPTY
+#define GAME_GAMEPAD_WIRED BATTERY_TYPE_WIRED
 
 	class GamePad
 	{
 	public:
 		GamePad();
-		bool wasButtonPressed(const uint32_t button, const uint32_t pad);
-		bool wasButtonReleased(const uint32_t button, const uint32_t pad);
-		bool isButtonHeld(const uint32_t button, const uint32_t pad);
-		Vector2f PositionOf(const uint32_t analog, const uint32_t pad);
+		bool wasButtonPressed(const uint32_t button, const uint32_t pad) const;
+		bool wasButtonReleased(const uint32_t button, const uint32_t pad) const;
+		bool isButtonHeld(const uint32_t button, const uint32_t pad) const;
+		Vector2f PositionOf(const uint32_t analog, const uint32_t pad) const;
 		void SetRumble(const Vector2f amount, const uint32_t pad);
-		uint32_t BatteryLevel(const uint32_t pad);
+		uint32_t BatteryLevel(const uint32_t pad) const;
 		void Update();
 		int32_t Id(const uint32_t pad) const;
 
 
 		//XINPUT_GAMEPAD_TRIGGER_THRESHOLD 
-		//Left thumbstick x-axis value. Each of the thumbstick axis members 
-		// is a signed value between -32768 and 32767 describing the position of the thumbstick. 
-		// A value of 0 is centered. Negative values signify down or to the left. Positive values 
+
 		// signify up or to the right. The constants XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE or 
 		// XINPUT_GAMEPAD_RIGHT_THUMB_DEADZONE can be used as a positive and negative value to filter a thumbstick input.
 		//
@@ -84,10 +72,18 @@ namespace game
 			bool isConnected;
 			bool wasConnected;
 			int32_t id;
+			uint32_t batteryLevel;
+			bool isWired;
+			int32_t lThumbstickDeadZone;
+			int32_t rThumbstickDeadZone;
 			_PadState()
 			{
 				isConnected = false;
 				wasConnected = false;
+				batteryLevel = GAME_GAMEPAD_BATTERY_EMPTY;
+				isWired = false;
+				lThumbstickDeadZone = XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE;
+				rThumbstickDeadZone = XINPUT_GAMEPAD_RIGHT_THUMB_DEADZONE;
 				id = -1;
 				ZeroMemory(&currentState, sizeof(XINPUT_STATE));
 				ZeroMemory(&oldState, sizeof(XINPUT_STATE));
@@ -97,11 +93,9 @@ namespace game
 		_PadState _padState[XUSER_MAX_COUNT];
 	};
 
-	inline uint32_t GamePad::BatteryLevel(const uint32_t pad)
+	inline uint32_t GamePad::BatteryLevel(const uint32_t pad) const
 	{
-		XINPUT_BATTERY_INFORMATION info = {};
-		XInputGetBatteryInformation(pad, BATTERY_DEVTYPE_GAMEPAD, &info);
-		return info.BatteryLevel;
+		return _padState[pad].batteryLevel;
 	}
 
 	inline GamePad::GamePad()
@@ -110,13 +104,13 @@ namespace game
 
 	inline void GamePad::Update()
 	{
-		XINPUT_STATE test;
+		XINPUT_STATE state;
 
 		for (uint32_t pad = 0; pad < XUSER_MAX_COUNT; pad++)
 		{
-			ZeroMemory(&test, sizeof(XINPUT_STATE));
+			ZeroMemory(&state, sizeof(XINPUT_STATE));
 
-			if (XInputGetState(pad, &test) == ERROR_SUCCESS)
+			if (XInputGetState(pad, &state) == ERROR_SUCCESS)
 			{
 				// check for pre connected controllers here ??
 
@@ -130,6 +124,13 @@ namespace game
 					_padState[pad].wasConnected = false;
 				}
 				_padState[pad].isConnected = true;
+				XINPUT_BATTERY_INFORMATION info = {};
+				XInputGetBatteryInformation(pad, BATTERY_DEVTYPE_GAMEPAD, &info);
+				_padState[pad].batteryLevel = info.BatteryLevel;
+				if (info.BatteryType == GAME_GAMEPAD_WIRED)
+				{
+					_padState[pad].isWired = true;
+				}
 			}
 			else
 			{
@@ -145,43 +146,83 @@ namespace game
 					_padState[pad].wasConnected = false;
 				}
 				_padState[pad].isConnected = false;
+				_padState[pad].batteryLevel = GAME_GAMEPAD_BATTERY_EMPTY;
+				_padState[pad].isWired = false;
 
 			}		
 
 			if (_padState[pad].isConnected)
 			{
 				_padState[pad].oldState = _padState[pad].currentState;
-				_padState[pad].currentState = test;
+				_padState[pad].currentState = state;
 			}
-
 
 		}
 	}
 
 	inline int32_t GamePad::Id(const uint32_t pad) const
 	{
+		int y = XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE;
 		return _padState[pad].id;
 	}
 
-	inline bool GamePad::wasButtonPressed(const uint32_t button, const uint32_t pad)
+	inline bool GamePad::wasButtonPressed(const uint32_t button, const uint32_t pad) const
 	{
+		if (!_padState[pad].isConnected) return false;
 
+		if (button == geG_L_TRIGGER) return false;
+		if (button == geG_R_TRIGGER) return false;
+
+		bool currentState = _padState[pad].currentState.Gamepad.wButtons & button;
+		bool oldState = _padState[pad].oldState.Gamepad.wButtons & button;
+
+		//_padState[pad].oldState.Gamepad.wButtons = _padState[pad].currentState.Gamepad.wButtons & ~button;
+
+		return (!oldState && currentState);
+	}
+
+	inline bool GamePad::wasButtonReleased(const uint32_t button, const uint32_t pad) const
+	{
+		if (!_padState[pad].isConnected) return false;
+
+		if (button == geG_L_TRIGGER) return false;
+		if (button == geG_R_TRIGGER) return false;
+
+		bool currentState = _padState[pad].currentState.Gamepad.wButtons & button;
+		bool oldState = _padState[pad].oldState.Gamepad.wButtons & button;
+
+		//_padState[pad].oldState.Gamepad.wButtons = _padState[pad].currentState.Gamepad.wButtons & ~button;
+
+		return (oldState && !currentState);
+
+	}
+
+	inline bool GamePad::isButtonHeld(const uint32_t button, const uint32_t pad) const
+	{
+		if (!_padState[pad].isConnected) return false;
+
+		if (button == geG_L_TRIGGER) return false;
+		if (button == geG_R_TRIGGER) return false;
+
+		bool currentState = _padState[pad].currentState.Gamepad.wButtons & button;
+		bool oldState = _padState[pad].oldState.Gamepad.wButtons & button;
+
+		//_padState[pad].oldState.Gamepad.wButtons = _padState[pad].currentState.Gamepad.wButtons & ~button;
+		
+		if (currentState && oldState)
+		{
+			// Current state and old state are true, so the button is held
+			return true;
+		}
+		else if (!oldState && currentState)
+		{
+			// Still consider button held if this is the first time pressed
+			return true;
+		}
 		return false;
 	}
 
-	inline bool GamePad::wasButtonReleased(const uint32_t button, const uint32_t pad)
-	{
-
-		return false;
-	}
-
-	inline bool GamePad::isButtonHeld(const uint32_t button, const uint32_t pad)
-	{
-
-		return false;
-	}
-
-	inline Vector2f GamePad::PositionOf(const uint32_t analog, const uint32_t pad)
+	inline Vector2f GamePad::PositionOf(const uint32_t analog, const uint32_t pad) const
 	{
 		Vector2f normalizedPosition(0, 0);
 
@@ -196,13 +237,46 @@ namespace game
 		case geG_R_TRIGGER:
 			normalizedPosition.x = _padState[pad].currentState.Gamepad.bRightTrigger / 255.0f;
 			normalizedPosition.y = normalizedPosition.x;
+			break;
 		case geG_L_THUMBSTICK:
-			normalizedPosition.x = _padState[pad].currentState.Gamepad.sThumbLX / 32767.0f;
-			normalizedPosition.y = _padState[pad].currentState.Gamepad.sThumbLY / 32767.0f;
+			if (_padState[pad].currentState.Gamepad.sThumbLX < -_padState[pad].lThumbstickDeadZone)
+			{
+				normalizedPosition.x = _padState[pad].currentState.Gamepad.sThumbLX / 32768.0f;
+			}
+			else if(_padState[pad].currentState.Gamepad.sThumbLX > _padState[pad].lThumbstickDeadZone)
+			{
+				normalizedPosition.x = _padState[pad].currentState.Gamepad.sThumbLX / 32767.0f;
+			}
+			if (_padState[pad].currentState.Gamepad.sThumbLY < -_padState[pad].lThumbstickDeadZone)
+			{
+				normalizedPosition.y = _padState[pad].currentState.Gamepad.sThumbLY / 32768.0f;
+			}
+			else if (_padState[pad].currentState.Gamepad.sThumbLY > _padState[pad].lThumbstickDeadZone)
+			{
+				normalizedPosition.y = _padState[pad].currentState.Gamepad.sThumbLY / 32767.0f;
+			}
+			break;
+		case geG_R_THUMBSTICK:
+			if (_padState[pad].currentState.Gamepad.sThumbRX < -_padState[pad].rThumbstickDeadZone)
+			{
+				normalizedPosition.x = _padState[pad].currentState.Gamepad.sThumbRX / 32768.0f;
+			}
+			else if (_padState[pad].currentState.Gamepad.sThumbRX > _padState[pad].rThumbstickDeadZone)
+			{
+				normalizedPosition.x = _padState[pad].currentState.Gamepad.sThumbRX / 32767.0f;
+			}
+			if (_padState[pad].currentState.Gamepad.sThumbRY < -_padState[pad].rThumbstickDeadZone)
+			{
+				normalizedPosition.y = _padState[pad].currentState.Gamepad.sThumbRY / 32768.0f;
+			}
+			else if (_padState[pad].currentState.Gamepad.sThumbRY > _padState[pad].rThumbstickDeadZone)
+			{
+				normalizedPosition.y = _padState[pad].currentState.Gamepad.sThumbRY / 32767.0f;
+			}
+			break;
 		default:
 			break;
 		}
-
 
 		return normalizedPosition;
 	}
