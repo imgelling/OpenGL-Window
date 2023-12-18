@@ -44,7 +44,6 @@ namespace game
 	class GamePad
 	{
 	public:
-		GamePad();
 		bool wasButtonPressed(const uint32_t button, const uint32_t pad) const;
 		bool wasButtonReleased(const uint32_t button, const uint32_t pad) const;
 		bool isButtonHeld(const uint32_t button, const uint32_t pad) const;
@@ -60,9 +59,6 @@ namespace game
 		void SetDeadZone(const int32_t left, const int32_t right, const uint32_t pad);
 		// negative values will set default, otherwise 0-255 valid
 		void SetTriggerThreshold(const int32_t threshold, const uint32_t pad);
-
-		//XINPUT_GAMEPAD_TRIGGER_THRESHOLD 
-
 		 
 	private:
 		struct _PadState
@@ -99,10 +95,6 @@ namespace game
 	inline uint32_t GamePad::BatteryLevel(const uint32_t pad) const
 	{
 		return _padState[pad].batteryLevel;
-	}
-
-	inline GamePad::GamePad()
-	{
 	}
 
 	inline void GamePad::SetTriggerThreshold(const int32_t threshold, const uint32_t pad)
