@@ -56,9 +56,10 @@ namespace game
 
 		void SetRumble(const Vector2f amount, const uint32_t pad);
 		void Update();
-		// negative dead zone will set default
+		// negative dead zone will set default, otherwise 0-32767 valid
 		void SetDeadZone(const int32_t left, const int32_t right, const uint32_t pad);
-
+		// negative values will set default, otherwise 0-255 valid
+		void SetTriggerThreshold(const int32_t threshold, const uint32_t pad);
 
 		//XINPUT_GAMEPAD_TRIGGER_THRESHOLD 
 
@@ -76,6 +77,7 @@ namespace game
 			bool isWired;
 			int32_t lThumbstickDeadZone;
 			int32_t rThumbstickDeadZone;
+			int32_t triggerThreshold;
 			_PadState()
 			{
 				isConnected = false;
@@ -84,6 +86,7 @@ namespace game
 				isWired = false;
 				lThumbstickDeadZone = XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE;
 				rThumbstickDeadZone = XINPUT_GAMEPAD_RIGHT_THUMB_DEADZONE;
+				triggerThreshold = XINPUT_GAMEPAD_TRIGGER_THRESHOLD;
 				id = -1;
 				ZeroMemory(&currentState, sizeof(XINPUT_STATE));
 				ZeroMemory(&oldState, sizeof(XINPUT_STATE));
@@ -100,6 +103,18 @@ namespace game
 
 	inline GamePad::GamePad()
 	{
+	}
+
+	inline void GamePad::SetTriggerThreshold(const int32_t threshold, const uint32_t pad)
+	{
+		if (threshold < 0)
+		{
+			_padState[pad].triggerThreshold = XINPUT_GAMEPAD_TRIGGER_THRESHOLD;
+		}
+		else
+		{
+			_padState[pad].triggerThreshold = threshold;
+		}
 	}
 
 	inline void GamePad::SetDeadZone(const int32_t left, const int32_t right, const uint32_t pad)
@@ -243,45 +258,51 @@ namespace game
 		switch (analog)
 		{
 		case geG_L_TRIGGER:
-			normalizedPosition.x = _padState[pad].currentState.Gamepad.bLeftTrigger / 255.0f;
-			normalizedPosition.y = normalizedPosition.x;
+			if (_padState[pad].currentState.Gamepad.bLeftTrigger >= _padState[pad].triggerThreshold)
+			{
+				normalizedPosition.x = _padState[pad].currentState.Gamepad.bLeftTrigger / 255.0f;
+				normalizedPosition.y = normalizedPosition.x;
+			}
 			break;
 		case geG_R_TRIGGER:
-			normalizedPosition.x = _padState[pad].currentState.Gamepad.bRightTrigger / 255.0f;
-			normalizedPosition.y = normalizedPosition.x;
+			if (_padState[pad].currentState.Gamepad.bRightTrigger >= _padState[pad].triggerThreshold)
+			{
+				normalizedPosition.x = _padState[pad].currentState.Gamepad.bRightTrigger / 255.0f;
+				normalizedPosition.y = normalizedPosition.x;
+			}
 			break;
 		case geG_L_THUMBSTICK:
-			if (_padState[pad].currentState.Gamepad.sThumbLX < -_padState[pad].lThumbstickDeadZone)
+			if (_padState[pad].currentState.Gamepad.sThumbLX <= -_padState[pad].lThumbstickDeadZone)
 			{
 				normalizedPosition.x = _padState[pad].currentState.Gamepad.sThumbLX / 32768.0f;
 			}
-			else if(_padState[pad].currentState.Gamepad.sThumbLX > _padState[pad].lThumbstickDeadZone)
+			else if(_padState[pad].currentState.Gamepad.sThumbLX >= _padState[pad].lThumbstickDeadZone)
 			{
 				normalizedPosition.x = _padState[pad].currentState.Gamepad.sThumbLX / 32767.0f;
 			}
-			if (_padState[pad].currentState.Gamepad.sThumbLY < -_padState[pad].lThumbstickDeadZone)
+			if (_padState[pad].currentState.Gamepad.sThumbLY <= -_padState[pad].lThumbstickDeadZone)
 			{
 				normalizedPosition.y = _padState[pad].currentState.Gamepad.sThumbLY / 32768.0f;
 			}
-			else if (_padState[pad].currentState.Gamepad.sThumbLY > _padState[pad].lThumbstickDeadZone)
+			else if (_padState[pad].currentState.Gamepad.sThumbLY >= _padState[pad].lThumbstickDeadZone)
 			{
 				normalizedPosition.y = _padState[pad].currentState.Gamepad.sThumbLY / 32767.0f;
 			}
 			break;
 		case geG_R_THUMBSTICK:
-			if (_padState[pad].currentState.Gamepad.sThumbRX < -_padState[pad].rThumbstickDeadZone)
+			if (_padState[pad].currentState.Gamepad.sThumbRX <= -_padState[pad].rThumbstickDeadZone)
 			{
 				normalizedPosition.x = _padState[pad].currentState.Gamepad.sThumbRX / 32768.0f;
 			}
-			else if (_padState[pad].currentState.Gamepad.sThumbRX > _padState[pad].rThumbstickDeadZone)
+			else if (_padState[pad].currentState.Gamepad.sThumbRX >= _padState[pad].rThumbstickDeadZone)
 			{
 				normalizedPosition.x = _padState[pad].currentState.Gamepad.sThumbRX / 32767.0f;
 			}
-			if (_padState[pad].currentState.Gamepad.sThumbRY < -_padState[pad].rThumbstickDeadZone)
+			if (_padState[pad].currentState.Gamepad.sThumbRY <= -_padState[pad].rThumbstickDeadZone)
 			{
 				normalizedPosition.y = _padState[pad].currentState.Gamepad.sThumbRY / 32768.0f;
 			}
-			else if (_padState[pad].currentState.Gamepad.sThumbRY > _padState[pad].rThumbstickDeadZone)
+			else if (_padState[pad].currentState.Gamepad.sThumbRY >= _padState[pad].rThumbstickDeadZone)
 			{
 				normalizedPosition.y = _padState[pad].currentState.Gamepad.sThumbRY / 32767.0f;
 			}
