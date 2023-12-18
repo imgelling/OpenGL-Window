@@ -26,8 +26,8 @@ Change Log:
 		Features:
 			* Keyboard now supports text input (like a console window)
 				- All visual stuff must be handles by you.
-				- Stores old text input and allows navigating through it with the 
-				  up and down arrows
+				- REMOVED - Stores old text input in a buffer and allows navigating through it with the 
+				  up and down arrows  - REMOVED December 18, 2023
 				- Allows for cursor movement with left and right arrows.
 				- Does not do insertion for text, only overwrite.  Maybe added
 				  later, but my dev machine doesn not have an insert key.
@@ -41,6 +41,17 @@ Change Log:
 				- Individual deadzones for the thumbsticks can be set (0-32767)
 				- Threshold (for considering presses) for triggers can be set (0-255)
 				- Connection, disconnection, and if a controller was never connected has detection
+	- December 18, 2023:
+		Features:
+			* Keyboard text input can now set restrictions on input
+				- GAME_TEXT_INPUT_ALL allows all (default)
+				- GAME_TEXT_INPUT_DIGIT allows only numbers '1' key to '0' key, no symbols/letters/spaces/etc
+				- GAME_TEXT_INPUT_ALPHA allows only letters 'a' key to 'z' key and 'A' key to 'Z' keys.
+				  no symbols/numbers/spaces/etc
+				- All modes allow for cursor movement and delete and backspace
+		Misc:
+			* Removed text buffer in keyboard text input mode.  This needs to be somewhere else to allow
+			  for user to make multiple or define how they work.  The code is still there, just commented out
 
 */
 

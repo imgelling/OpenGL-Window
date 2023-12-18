@@ -225,9 +225,27 @@ namespace game
 				return;
 			}
 
+			// Backspace key
+			if (key == geK_BACK)
+			{
+				if (_textInput.length())
+				{
+					_textInput.erase((size_t)_cursorPosition - 1, 1);
+				}
+				_cursorPosition--;
+				return;
+			}
+
+			// Delete
+			if (key == geK_DELETE)
+			{
+				_textInput.erase(_cursorPosition, 1);
+				return;
+			}
+
 
 			// Is the key a letter?
-			if (std::isalpha(key))
+			if ((std::isalpha(key)) && (_restrictedInput != GAME_TEXT_INPUT_DIGIT))
 			{
 				// These are scan codes and pass std::isalpha()
 				// Ignore them.
@@ -238,28 +256,56 @@ namespace game
 				_UpdateText(key + 32, key);
 				return;
 			}
+			if (_restrictedInput == GAME_TEXT_INPUT_ALPHA)
+			{
+				return;
+			}
 
 			// Is the key a digit?
 			if (std::isdigit(key))
 			{
-				uint8_t shiftedKey = 0;
-
-				switch (key)
+				if (_restrictedInput != GAME_TEXT_INPUT_DIGIT)
 				{
-				case geK_1: shiftedKey = '!'; break;
-				case geK_2: shiftedKey = '@'; break;
-				case geK_3: shiftedKey = '#'; break;
-				case geK_4: shiftedKey = '$'; break;
-				case geK_5: shiftedKey = '%'; break;
-				case geK_6: shiftedKey = '^'; break;
-				case geK_7: shiftedKey = '&'; break;
-				case geK_8: shiftedKey = '*'; break;
-				case geK_9: shiftedKey = '('; break;
-				case geK_0: shiftedKey = ')'; break;
-				default: break;
+					uint8_t shiftedKey = 0;
+
+					switch (key)
+					{
+					case geK_1: shiftedKey = '!'; break;
+					case geK_2: shiftedKey = '@'; break;
+					case geK_3: shiftedKey = '#'; break;
+					case geK_4: shiftedKey = '$'; break;
+					case geK_5: shiftedKey = '%'; break;
+					case geK_6: shiftedKey = '^'; break;
+					case geK_7: shiftedKey = '&'; break;
+					case geK_8: shiftedKey = '*'; break;
+					case geK_9: shiftedKey = '('; break;
+					case geK_0: shiftedKey = ')'; break;
+					default: break;
+					}
+
+					_UpdateText(key, shiftedKey);
+					return;
+				}
+				else
+				{
+					if (_keyCurrentState[VK_SHIFT])
+					{
+						return;
+					}
+					if (_cursorPosition < _textInput.length())
+					{
+						_textInput[_cursorPosition] = key;
+					}
+					else
+					{
+						_textInput += key;
+					}
+					_cursorPosition++;
 				}
 
-				_UpdateText(key, shiftedKey);
+			}
+			if (_restrictedInput == GAME_TEXT_INPUT_DIGIT)
+			{
 				return;
 			}
 
@@ -284,16 +330,7 @@ namespace game
 				return;
 			}
 
-			// Backspace key
-			if (key == geK_BACK)
-			{
-				if (_textInput.length())
-				{
-					_textInput.erase((size_t)_cursorPosition-1, 1);
-				}
-				_cursorPosition--;
-				return;
-			}
+
 
 			// Tab key
 			if (key == VK_TAB)
@@ -365,14 +402,6 @@ namespace game
 			if (key == geK_APOSTROPHE)
 			{
 				_UpdateText('"', '\'');
-				return;
-			}
-
-
-			// Delete
-			if (key == geK_DELETE)
-			{
-				_textInput.erase(_cursorPosition, 1);
 				return;
 			}
 		}
