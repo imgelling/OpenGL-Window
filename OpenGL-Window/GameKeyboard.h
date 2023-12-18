@@ -3,6 +3,10 @@
 #include <iostream>
 #include <vector>
 
+#define GAME_TEXT_INPUT_ALL 0
+#define GAME_TEXT_INPUT_ALPHA 1
+#define GAME_TEXT_INPUT_DIGIT 2
+
 namespace game
 {
 	class Keyboard
@@ -16,7 +20,7 @@ namespace game
 		bool IsKeyHeld(const uint8_t key);
 
 
-		void TextInputMode(const bool textInputMode);
+		void TextInputMode(const bool textInputMode, const uint32_t restrictions = GAME_TEXT_INPUT_ALL);
 		std::string GetTextInput();
 		std::string GetCompletedTextInput();
 		bool IsTextInput() const;
@@ -32,6 +36,7 @@ namespace game
 		std::string _completedText;
 		uint32_t _tabSize;
 		uint32_t _cursorPosition;
+		uint32_t _restrictedInput;
 		//std::vector<std::string> _textBuffer;
 		//uint32_t _textBufferPosition;
 		
@@ -46,6 +51,7 @@ namespace game
 		_isTextInputMode = false;
 		_tabSize = 5;
 		_cursorPosition = 0;
+
 		//_textBufferPosition = 0;
 	}
 
@@ -75,9 +81,17 @@ namespace game
 		return _cursorPosition;
 	}
 
-	inline void Keyboard::TextInputMode(const bool textInputMode)
+	inline void Keyboard::TextInputMode(const bool textInputMode, const uint32_t restrictions)
 	{
 		_isTextInputMode = textInputMode;
+		if ((restrictions < GAME_TEXT_INPUT_ALL) || (restrictions > GAME_TEXT_INPUT_DIGIT))
+		{
+			_restrictedInput = GAME_TEXT_INPUT_ALL;
+		}
+		else
+		{
+			_restrictedInput = restrictions;
+		}
 	}
 
 	inline uint32_t Keyboard::GetTabSize() const
