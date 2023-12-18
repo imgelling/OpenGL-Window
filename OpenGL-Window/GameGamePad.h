@@ -49,25 +49,23 @@ namespace game
 		bool wasButtonReleased(const uint32_t button, const uint32_t pad) const;
 		bool isButtonHeld(const uint32_t button, const uint32_t pad) const;
 		Vector2f PositionOf(const uint32_t analog, const uint32_t pad) const;
-		void SetRumble(const Vector2f amount, const uint32_t pad);
+
 		uint32_t BatteryLevel(const uint32_t pad) const;
-		void Update();
 		int32_t Id(const uint32_t pad) const;
-		// negative dead zone set default
+		void Connection(bool& isConnected, bool& wasConnected, const uint32_t pad) const;
+
+		void SetRumble(const Vector2f amount, const uint32_t pad);
+		void Update();
+		// negative dead zone will set default
 		void SetDeadZone(const int32_t left, const int32_t right, const uint32_t pad);
 
 
 		//XINPUT_GAMEPAD_TRIGGER_THRESHOLD 
 
-		// signify up or to the right. The constants XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE or 
-		// XINPUT_GAMEPAD_RIGHT_THUMB_DEADZONE can be used as a positive and negative value to filter a thumbstick input.
-		//
-		// triggers The value is between 0 and 255.
 		 
 	private:
 		struct _PadState
 		{
-			// this needs to be all one structure
 			XINPUT_STATE currentState;
 			XINPUT_STATE oldState;
 
@@ -127,65 +125,57 @@ namespace game
 
 	inline void GamePad::Update()
 	{
-		XINPUT_STATE state;
+		XINPUT_STATE currentState;
+		XINPUT_BATTERY_INFORMATION batteryInfo;
 
 		for (uint32_t pad = 0; pad < XUSER_MAX_COUNT; pad++)
 		{
-			ZeroMemory(&state, sizeof(XINPUT_STATE));
+			ZeroMemory(&currentState, sizeof(XINPUT_STATE));
+			ZeroMemory(&batteryInfo, sizeof(XINPUT_BATTERY_INFORMATION));
 
-			if (XInputGetState(pad, &state) == ERROR_SUCCESS)
+			if (XInputGetState(pad, &currentState) == ERROR_SUCCESS)
 			{
-				// check for pre connected controllers here ??
-
+				// GamePad is connected at port "pad"
+				// so save the state information
 				_padState[pad].id = pad;
-				if (_padState[pad].isConnected)
-				{
-					_padState[pad].wasConnected = true;
-				}
-				else
-				{
-					_padState[pad].wasConnected = false;
-				}
 				_padState[pad].isConnected = true;
-				XINPUT_BATTERY_INFORMATION info = {};
-				XInputGetBatteryInformation(pad, BATTERY_DEVTYPE_GAMEPAD, &info);
-				_padState[pad].batteryLevel = info.BatteryLevel;
-				if (info.BatteryType == GAME_GAMEPAD_WIRED)
+				_padState[pad].wasConnected = true;
+				_padState[pad].oldState = _padState[pad].currentState;
+				_padState[pad].currentState = currentState;
+
+				// Save the battery information or
+				// and if the gamepad is wired
+				XInputGetBatteryInformation(pad, BATTERY_DEVTYPE_GAMEPAD, &batteryInfo);
+				_padState[pad].batteryLevel = batteryInfo.BatteryLevel;
+				if (batteryInfo.BatteryType == GAME_GAMEPAD_WIRED)
 				{
 					_padState[pad].isWired = true;
 				}
 			}
 			else
 			{
+				// Controller is not connected
+				// or disconnected, so set all 
+				// saved info to defaults.
 				_padState[pad].id = -1;
 				ZeroMemory(&_padState[pad].currentState, sizeof(XINPUT_STATE));
 				ZeroMemory(&_padState[pad].oldState, sizeof(XINPUT_STATE));
-				if (_padState[pad].isConnected)
-				{
-					_padState[pad].wasConnected = true;
-				}
-				else
-				{
-					_padState[pad].wasConnected = false;
-				}
 				_padState[pad].isConnected = false;
 				_padState[pad].batteryLevel = GAME_GAMEPAD_BATTERY_EMPTY;
 				_padState[pad].isWired = false;
-
 			}		
-
-			if (_padState[pad].isConnected)
-			{
-				_padState[pad].oldState = _padState[pad].currentState;
-				_padState[pad].currentState = state;
-			}
-
 		}
 	}
 
 	inline int32_t GamePad::Id(const uint32_t pad) const
 	{
 		return _padState[pad].id;
+	}
+
+	inline void GamePad::Connection(bool& isConnected, bool& wasConnected, const uint32_t pad) const
+	{
+		isConnected = _padState[pad].isConnected;
+		wasConnected = _padState[pad].wasConnected;
 	}
 
 	inline bool GamePad::wasButtonPressed(const uint32_t button, const uint32_t pad) const

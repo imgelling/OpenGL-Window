@@ -180,7 +180,7 @@ public:
 			"," + std::to_string(gamePad.PositionOf(geG_L_THUMBSTICK,0).y), 0, 200, game::Colors::Red);
 
 		pixelMode.TextClip("(2nd pad) Left Thumb : " + std::to_string(gamePad.PositionOf(geG_L_THUMBSTICK, 1).x) +
-			"," + std::to_string(gamePad.PositionOf(geG_L_THUMBSTICK, 1).y), 0, 230, game::Colors::Red);
+			"," + std::to_string(gamePad.PositionOf(geG_L_THUMBSTICK, 1).y), 0, 220, game::Colors::Red);
 
 		if (gamePad.wasButtonPressed(geG_L_THUMBSTICK, 0))
 		{
@@ -194,8 +194,25 @@ public:
 
 		if (gamePad.isButtonHeld(geG_L_THUMBSTICK, 0))
 		{
-			pixelMode.TextClip("Left thumbstick held.", 0, 250, game::Colors::Red);
+			pixelMode.TextClip("Left thumbstick held.", 0, 240, game::Colors::Red);
 		}
+
+		bool is_connected = false;
+		bool was_connected = false;
+		gamePad.Connection(is_connected, was_connected, 0);
+		if (is_connected)
+		{
+			pixelMode.TextClip("Pad 0 connected.", 0, 260, game::Colors::Red);
+		}
+		else
+			if (was_connected)
+			{
+				pixelMode.TextClip("Pad 0 disconnected.", 0, 260, game::Colors::Red);
+			}
+			else
+			{
+				pixelMode.TextClip("Pad 0 not connected.", 0, 260, game::Colors::Red);
+			}
 
 
 		// Send it to the screen 
