@@ -39,7 +39,7 @@ Change Log:
 				- Battery level can be checked
 				- Rumble can be set
 				- Individual deadzones for the thumbsticks can be set (0-32767)
-				- Threshold (for considering presses) for triggers can be set
+				- Threshold (for considering presses) for triggers can be set (0-255)
 				- Connection, disconnection, and if a controller was never connected has detection
 
 */

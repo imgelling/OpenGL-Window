@@ -18,6 +18,7 @@ namespace game
 
 		void TextInputMode(const bool textInputMode);
 		std::string GetTextInput();
+		std::string GetCompletedTextInput();
 		bool IsTextInput() const;
 		uint32_t GetTabSize() const;
 		void SetTabSize(const uint32_t tabSize);
@@ -28,10 +29,11 @@ namespace game
 		bool* _keyOldState;
 		bool _isTextInputMode;
 		std::string _textInput;
+		std::string _completedText;
 		uint32_t _tabSize;
 		uint32_t _cursorPosition;
-		std::vector<std::string> _textBuffer;
-		uint32_t _textBufferPosition;
+		//std::vector<std::string> _textBuffer;
+		//uint32_t _textBufferPosition;
 		
 	};
 
@@ -44,7 +46,7 @@ namespace game
 		_isTextInputMode = false;
 		_tabSize = 5;
 		_cursorPosition = 0;
-		_textBufferPosition = 0;
+		//_textBufferPosition = 0;
 	}
 
 	inline Keyboard::~Keyboard()
@@ -61,6 +63,11 @@ namespace game
 	inline std::string Keyboard::GetTextInput()
 	{
 		return _textInput;
+	}
+
+	inline std::string Keyboard::GetCompletedTextInput()
+	{
+		return _completedText;
 	}
 
 	inline uint32_t Keyboard::GetCursorPosition() const
@@ -122,6 +129,7 @@ namespace game
 		_keyOldState[key] = _keyCurrentState[key];
 		_keyCurrentState[key] = state;
 
+		// If we are in text input mode, process that data
 		if (_isTextInputMode)
 		{
 			// Was a release captured? Ignore it
@@ -150,42 +158,42 @@ namespace game
 				return;
 			}
 
-			// Move back in text entered history/buffer
-			if (key == geK_UP)
-			{
-				if ((_textBuffer.size() > 0) && (_textBufferPosition > 0))
-				{
-					_textBufferPosition--;
-					_textInput = _textBuffer[_textBufferPosition];
-					_cursorPosition = (uint32_t)_textInput.length();
-				}
-				return;
-			}
+			//// Move back in text entered history/buffer
+			//if (key == geK_UP)
+			//{
+			//	if ((_textBuffer.size() > 0) && (_textBufferPosition > 0))
+			//	{
+			//		_textBufferPosition--;
+			//		_textInput = _textBuffer[_textBufferPosition];
+			//		_cursorPosition = (uint32_t)_textInput.length();
+			//	}
+			//	return;
+			//}
 
-			// Move forward in text entered history/buffer
-			if (key == geK_DOWN)
-			{
-				if (_textBuffer.size() > 0)
-				{
-					// If we are not at the end, move forward in history/buffer
-					if (_textBufferPosition < _textBuffer.size() - 1)
-					{
-						_textBufferPosition++;
-						_textInput = _textBuffer[_textBufferPosition];
-						_cursorPosition = (uint32_t)_textInput.length();
-						return;
-					}
-					// If we are at the end, just give a blank line
-					if (_textBufferPosition == _textBuffer.size() - 1)
-					{
-						_textInput = "";
-						_textBufferPosition++;
-						_cursorPosition = 0;
-						return;
-					}
-				}
-				return;
-			}
+			//// Move forward in text entered history/buffer
+			//if (key == geK_DOWN)
+			//{
+			//	if (_textBuffer.size() > 0)
+			//	{
+			//		// If we are not at the end, move forward in history/buffer
+			//		if (_textBufferPosition < _textBuffer.size() - 1)
+			//		{
+			//			_textBufferPosition++;
+			//			_textInput = _textBuffer[_textBufferPosition];
+			//			_cursorPosition = (uint32_t)_textInput.length();
+			//			return;
+			//		}
+			//		// If we are at the end, just give a blank line
+			//		if (_textBufferPosition == _textBuffer.size() - 1)
+			//		{
+			//			_textInput = "";
+			//			_textBufferPosition++;
+			//			_cursorPosition = 0;
+			//			return;
+			//		}
+			//	}
+			//	return;
+			//}
 
 			// If return is pressed, we need to store the current text
 			// in the history/buffer and give a new line
@@ -195,10 +203,11 @@ namespace game
 				{
 					return;
 				}
-				_textBuffer.emplace_back(_textInput);
+				_completedText = _textInput;
+				//_textBuffer.emplace_back(_textInput);
 				_textInput = "";
 				_cursorPosition = 0;
-				_textBufferPosition = (uint32_t)_textBuffer.size();
+				//_textBufferPosition = (uint32_t)_textBuffer.size();
 				return;
 			}
 
