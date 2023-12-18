@@ -119,5 +119,8 @@
     <ClInclude Include="GameTextShaders.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="GameGamePad.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

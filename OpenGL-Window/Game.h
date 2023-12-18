@@ -31,6 +31,16 @@ Change Log:
 				- Allows for cursor movement with left and right arrows.
 				- Does not do insertion for text, only overwrite.  Maybe added
 				  later, but my dev machine doesn not have an insert key.
+	- December 17, 2023:
+		Features:
+			* Up to 4 XInput compatible controllers supported
+				- Inputs from buttons are true/false and thumbsticks are -1.0 to 1.0 and
+				  triggers are 0.0f to 1.0f
+				- Battery level can be checked
+				- Rumble can be set
+				- Individual deadzones for the thumbsticks can be set (0-32767)
+				- Threshold (for considering presses) for triggers can be set
+				- Connection, disconnection, and if a controller was never connected has detection
 
 */
 
@@ -135,6 +145,14 @@ Change Log:
 #pragma comment (lib, "d3d9.lib")
 #pragma comment (lib, "d3dcompiler.lib")
 #include "GameRendererDX9.h"
+#endif
+#pragma endregion
+
+#pragma region XInput
+#if !defined(GAME_NO_GAMEPAD)
+#pragma comment(lib,"Xinput.lib")
+// older version just us XInput.lib
+#include "GameGamePad.h"
 #endif
 #pragma endregion
 

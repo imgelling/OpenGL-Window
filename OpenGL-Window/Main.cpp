@@ -26,6 +26,7 @@ public:
 	game::SpriteFont spriteFont;
 	game::Random random;
 	game::PerformanceTimer perftimer;
+	game::GamePad gamePad;
 
 	Game() : game::Engine()
 	{
@@ -111,6 +112,8 @@ public:
 
 	void Update(const float_t msElapsed)
 	{
+		gamePad.Update();
+
 		// Handle Input
 		if (geKeyboard.WasKeyReleased(geK_F11))
 		{
@@ -171,7 +174,48 @@ public:
 
 		pixelMode.VLineClip(scaledMousePos.x + 16 + geKeyboard.GetCursorPosition() * 8, scaledMousePos.y, scaledMousePos.y + 8, game::Colors::White);
 
-		// Send it to the screen
+
+		// Reporting game pad stuff
+		pixelMode.TextClip("(1st pad) Left Thumb : " + std::to_string(gamePad.PositionOf(geG_L_TRIGGER,0).x) +
+			"," + std::to_string(gamePad.PositionOf(geG_L_THUMBSTICK,0).y), 0, 200, game::Colors::Red);
+
+		pixelMode.TextClip("(2nd pad) Left Thumb : " + std::to_string(gamePad.PositionOf(geG_L_THUMBSTICK, 1).x) +
+			"," + std::to_string(gamePad.PositionOf(geG_L_THUMBSTICK, 1).y), 0, 220, game::Colors::Red);
+
+		if (gamePad.wasButtonPressed(geG_L_THUMBSTICK, 0))
+		{
+			std::cout << "Left thumbstick Pressed\n";
+		}
+
+		if (gamePad.wasButtonReleased(geG_L_THUMBSTICK, 0))
+		{
+			std::cout << "Left thumbstick Released\n";
+		}
+
+		if (gamePad.isButtonHeld(geG_L_THUMBSTICK, 0))
+		{
+			pixelMode.TextClip("Left thumbstick held.", 0, 240, game::Colors::Red);
+		}
+
+		bool is_connected = false;
+		bool was_connected = false;
+		gamePad.Connection(is_connected, was_connected, 0);
+		if (is_connected)
+		{
+			pixelMode.TextClip("Pad 0 connected.", 0, 260, game::Colors::Red);
+		}
+		else
+			if (was_connected)
+			{
+				pixelMode.TextClip("Pad 0 disconnected.", 0, 260, game::Colors::Red);
+			}
+			else
+			{
+				pixelMode.TextClip("Pad 0 not connected.", 0, 260, game::Colors::Red);
+			}
+
+
+		// Send it to the screen 
 		pixelMode.Render();
 
 		spriteBatch.Begin();
@@ -191,13 +235,13 @@ public:
 	void Setup() const
 	{
 #if defined (GAME_OPENGL)
-		if (geIsUsing(GAME_OPENGL))
-		{
-			//glClearColor(0.25f, 0.25f, 0.25f, 1.0f);
-			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-			glEnable(GL_BLEND);
-			glEnable(GL_CULL_FACE);
-		}
+		//if (geIsUsing(GAME_OPENGL))
+		//{
+		//	//glClearColor(0.25f, 0.25f, 0.25f, 1.0f);
+		//	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		//	glEnable(GL_BLEND);
+		//	glEnable(GL_CULL_FACE);
+		//}
 #endif
 	}
 };
