@@ -162,7 +162,6 @@ Change Log:
 #pragma region XInput
 #if !defined(GAME_NO_GAMEPAD)
 #pragma comment(lib,"Xinput.lib")
-// older version just us XInput.lib
 #include "GameGamePad.h"
 #endif
 #pragma endregion
