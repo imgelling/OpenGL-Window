@@ -71,10 +71,10 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>D:\Programming\Libraries\asio-1.18.1\include;$(IncludePath)</IncludePath>
+    <IncludePath>D:\Programming\GameLib2;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>D:\Programming\Libraries\asio-1.18.1\include;$(IncludePath)</IncludePath>
+    <IncludePath>D:\Programming\GameLib2;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -152,42 +152,6 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="Game.h" />
-    <ClInclude Include="GameAttributes.h" />
-    <ClInclude Include="GameColor.h" />
-    <ClInclude Include="GameEngine.h" />
-    <ClInclude Include="GameErrors.h" />
-    <ClInclude Include="GameGamePad.h" />
-    <ClInclude Include="GameHelpers.h" />
-    <ClInclude Include="GameImageLoader.h" />
-    <ClInclude Include="GameKeyboard.h" />
-    <ClInclude Include="GameLogger.h" />
-    <ClInclude Include="GameMouse.h" />
-    <ClInclude Include="GameNetwork.h" />
-    <ClInclude Include="GamePerformanceTimer.h" />
-    <ClInclude Include="GamePixelMode.h" />
-    <ClInclude Include="GameRandom.h" />
-    <ClInclude Include="GameRendererBase.h" />
-    <ClInclude Include="GameRendererDX12.h" />
-    <ClInclude Include="GameRendererDX9.h" />
-    <ClInclude Include="GameRendererGL.h" />
-    <ClInclude Include="GameRendererVK.h" />
-    <ClInclude Include="GameSpriteBatch.h" />
-    <ClInclude Include="GameSpriteFont.h" />
-    <ClInclude Include="GameSpriteSheet.h" />
-    <ClInclude Include="GameSystemInfo.h" />
-    <ClInclude Include="GameTerminal.h" />
-    <ClInclude Include="GameTextShaders.h" />
-    <ClInclude Include="GameTexture2D.h" />
-    <ClInclude Include="GameTimer.h" />
-    <ClInclude Include="GameMath.h" />
-    <ClInclude Include="GameWindow.h" />
-    <ClInclude Include="GameShader.h" />
-    <ClInclude Include="GameRendererDX11.h" />
-    <ClInclude Include="GameRendererDX10.h" />
-    <ClInclude Include="GameWindowsKeys.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
