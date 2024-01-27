@@ -135,12 +135,12 @@ public:
 		pixelMode.Clear(game::Colors::Blue);
 
 		// Top and bottom
-		pixelMode.HLineClip(340, -1, 0, game::Colors::Pink);
-		pixelMode.HLineClip(-10, 409, 179, game::Colors::Pink);
+		pixelMode.HLineClip(340, -1, 0, game::Colors::Magenta);
+		pixelMode.HLineClip(-10, 409, 179, game::Colors::Magenta);
 
 		// Left and right
-		pixelMode.VLineClip(0, -10, 300, game::Colors::Pink);
-		pixelMode.VLineClip(319, 500, -10, game::Colors::Pink);
+		pixelMode.VLineClip(0, -10, 300, game::Colors::Magenta);
+		pixelMode.VLineClip(319, 500, -10, game::Colors::Magenta);
 
 		//int32_t rx1 = random.RndRange(0, 340);
 		//int32_t ry1 = random.RndRange(0, 340);
@@ -164,7 +164,7 @@ public:
 		//pixelMode.VPillClip(scaledMousePos.x, scaledMousePos.y, 38, 4, game::Colors::White);
 		
 		// Weird diagonal
-		pixelMode.LineClip(-20, -10, scaledMousePos.x, scaledMousePos.y, game::Colors::Pink);
+		pixelMode.LineClip(-20, -10, scaledMousePos.x, scaledMousePos.y, game::Colors::Magenta);
 
 		// Rectangle
 		pixelMode.RectClip({ 1,1,318,178 }, game::Colors::White);
